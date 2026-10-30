@@ -1,0 +1,3113 @@
+{
+ "geradoDe": "operational-note-model.ts e staff-note-compose-model.ts do front",
+ "contas": {
+  "adm": {
+   "id": "adm",
+   "name": "Conta adm",
+   "email": "adm@x.test",
+   "role": "administradora",
+   "commission": "",
+   "access": "Acesso ativo",
+   "active": true
+  },
+  "ass": {
+   "id": "ass",
+   "name": "Conta ass",
+   "email": "ass@x.test",
+   "role": "assistente",
+   "commission": "",
+   "access": "Acesso ativo",
+   "active": true
+  },
+  "sup": {
+   "id": "sup",
+   "name": "Conta sup",
+   "email": "sup@x.test",
+   "role": "supervisora",
+   "commission": "",
+   "access": "Acesso ativo",
+   "active": true
+  },
+  "ate": {
+   "id": "ate",
+   "name": "Conta ate",
+   "email": "ate@x.test",
+   "role": "atendente",
+   "commission": "",
+   "access": "Acesso ativo",
+   "active": true
+  },
+  "osi": {
+   "id": "osi",
+   "name": "Conta osi",
+   "email": "osi@x.test",
+   "role": "tarologa",
+   "commission": "",
+   "access": "Acesso ativo",
+   "active": true,
+   "tarotId": "osiris"
+  },
+  "nyx": {
+   "id": "nyx",
+   "name": "Conta nyx",
+   "email": "nyx@x.test",
+   "role": "tarologa",
+   "commission": "",
+   "access": "Acesso ativo",
+   "active": true,
+   "tarotId": "nyx"
+  }
+ },
+ "casos": [
+  {
+   "nome": "criar-equipe-0-adm",
+   "perfil": "adm",
+   "antes": [],
+   "depois": {
+    "id": "n1",
+    "tarotId": "osiris",
+    "tarot": "Osíris",
+    "text": "Osíris chega mais tarde",
+    "at": "2026-10-12T10:00:00.000Z",
+    "by": "Conta adm",
+    "actorId": "adm",
+    "source": "staff",
+    "date": "2026-10-12",
+    "subject": "Mudança de horário",
+    "startDate": "2026-10-12",
+    "endDate": "2026-10-12",
+    "subjectTarotId": "osiris",
+    "originalQuote": "Vou chegar às 15h",
+    "delivery": {
+     "kind": "board",
+     "audience": "staff",
+     "senderId": "adm",
+     "recipientIds": [
+      "adm",
+      "ass",
+      "sup",
+      "ate"
+     ],
+     "excludedIds": [],
+     "label": "Toda a equipe de atendimento"
+    }
+   },
+   "erro": null,
+   "tipo": "criar"
+  },
+  {
+   "nome": "criar-equipe-0-ate",
+   "perfil": "ate",
+   "antes": [],
+   "depois": {
+    "id": "n2",
+    "tarotId": "osiris",
+    "tarot": "Osíris",
+    "text": "Osíris chega mais tarde",
+    "at": "2026-10-12T10:00:00.000Z",
+    "by": "Conta ate",
+    "actorId": "ate",
+    "source": "staff",
+    "date": "2026-10-12",
+    "subject": "Mudança de horário",
+    "startDate": "2026-10-12",
+    "endDate": "2026-10-12",
+    "subjectTarotId": "osiris",
+    "originalQuote": "Vou chegar às 15h",
+    "delivery": {
+     "kind": "board",
+     "audience": "staff",
+     "senderId": "ate",
+     "recipientIds": [
+      "adm",
+      "ass",
+      "sup",
+      "ate"
+     ],
+     "excludedIds": [],
+     "label": "Toda a equipe de atendimento"
+    }
+   },
+   "erro": null,
+   "tipo": "criar"
+  },
+  {
+   "nome": "criar-equipe-0-sup",
+   "perfil": "sup",
+   "antes": [],
+   "depois": {
+    "id": "n3",
+    "tarotId": "osiris",
+    "tarot": "Osíris",
+    "text": "Osíris chega mais tarde",
+    "at": "2026-10-12T10:00:00.000Z",
+    "by": "Conta sup",
+    "actorId": "sup",
+    "source": "staff",
+    "date": "2026-10-12",
+    "subject": "Mudança de horário",
+    "startDate": "2026-10-12",
+    "endDate": "2026-10-12",
+    "subjectTarotId": "osiris",
+    "originalQuote": "Vou chegar às 15h",
+    "delivery": {
+     "kind": "board",
+     "audience": "staff",
+     "senderId": "sup",
+     "recipientIds": [
+      "adm",
+      "ass",
+      "sup",
+      "ate"
+     ],
+     "excludedIds": [],
+     "label": "Toda a equipe de atendimento"
+    }
+   },
+   "erro": null,
+   "tipo": "criar"
+  },
+  {
+   "nome": "criar-equipe-1-adm",
+   "perfil": "adm",
+   "antes": [],
+   "depois": {
+    "id": "n4",
+    "tarotId": "osiris",
+    "tarot": "Osíris",
+    "text": "Osíris chega mais tarde",
+    "at": "2026-10-12T10:01:00.000Z",
+    "by": "Conta adm",
+    "actorId": "adm",
+    "source": "staff",
+    "date": "2026-10-12",
+    "subject": "Mudança de horário",
+    "startDate": "2026-10-12",
+    "endDate": "2026-10-12",
+    "importance": {
+     "byId": "adm",
+     "at": "2026-10-12T10:01:00.000Z"
+    },
+    "subjectTarotId": "osiris",
+    "originalQuote": "Vou chegar às 15h",
+    "delivery": {
+     "kind": "board",
+     "audience": "staff",
+     "senderId": "adm",
+     "recipientIds": [
+      "adm",
+      "ass",
+      "sup",
+      "ate"
+     ],
+     "excludedIds": [],
+     "label": "Toda a equipe de atendimento"
+    }
+   },
+   "erro": null,
+   "tipo": "criar"
+  },
+  {
+   "nome": "criar-equipe-1-ate",
+   "perfil": "ate",
+   "antes": [],
+   "depois": {
+    "id": "n5",
+    "tarotId": "osiris",
+    "tarot": "Osíris",
+    "text": "Osíris chega mais tarde",
+    "at": "2026-10-12T10:01:00.000Z",
+    "by": "Conta ate",
+    "actorId": "ate",
+    "source": "staff",
+    "date": "2026-10-12",
+    "subject": "Mudança de horário",
+    "startDate": "2026-10-12",
+    "endDate": "2026-10-12",
+    "importance": {
+     "byId": "ate",
+     "at": "2026-10-12T10:01:00.000Z"
+    },
+    "subjectTarotId": "osiris",
+    "originalQuote": "Vou chegar às 15h",
+    "delivery": {
+     "kind": "board",
+     "audience": "staff",
+     "senderId": "ate",
+     "recipientIds": [
+      "adm",
+      "ass",
+      "sup",
+      "ate"
+     ],
+     "excludedIds": [],
+     "label": "Toda a equipe de atendimento"
+    }
+   },
+   "erro": null,
+   "tipo": "criar"
+  },
+  {
+   "nome": "criar-equipe-1-sup",
+   "perfil": "sup",
+   "antes": [],
+   "depois": {
+    "id": "n6",
+    "tarotId": "osiris",
+    "tarot": "Osíris",
+    "text": "Osíris chega mais tarde",
+    "at": "2026-10-12T10:01:00.000Z",
+    "by": "Conta sup",
+    "actorId": "sup",
+    "source": "staff",
+    "date": "2026-10-12",
+    "subject": "Mudança de horário",
+    "startDate": "2026-10-12",
+    "endDate": "2026-10-12",
+    "importance": {
+     "byId": "sup",
+     "at": "2026-10-12T10:01:00.000Z"
+    },
+    "subjectTarotId": "osiris",
+    "originalQuote": "Vou chegar às 15h",
+    "delivery": {
+     "kind": "board",
+     "audience": "staff",
+     "senderId": "sup",
+     "recipientIds": [
+      "adm",
+      "ass",
+      "sup",
+      "ate"
+     ],
+     "excludedIds": [],
+     "label": "Toda a equipe de atendimento"
+    }
+   },
+   "erro": null,
+   "tipo": "criar"
+  },
+  {
+   "nome": "criar-equipe-2-adm",
+   "perfil": "adm",
+   "antes": [],
+   "depois": {
+    "id": "n7",
+    "tarotId": "account:ate",
+    "tarot": "Conta ate",
+    "text": "Osíris chega mais tarde",
+    "at": "2026-10-12T10:02:00.000Z",
+    "by": "Conta adm",
+    "actorId": "adm",
+    "source": "staff",
+    "date": "2026-10-12",
+    "subject": "Diversos",
+    "startDate": "2026-10-12",
+    "endDate": "2026-10-12",
+    "delivery": {
+     "kind": "message",
+     "audience": "person",
+     "senderId": "adm",
+     "recipientIds": [
+      "ate"
+     ],
+     "excludedIds": [],
+     "label": "Conta ate"
+    }
+   },
+   "erro": null,
+   "tipo": "criar"
+  },
+  {
+   "nome": "criar-equipe-2-ate",
+   "perfil": "ate",
+   "antes": [],
+   "depois": {
+    "id": "n8",
+    "tarotId": "account:ate",
+    "tarot": "Conta ate",
+    "text": "Osíris chega mais tarde",
+    "at": "2026-10-12T10:02:00.000Z",
+    "by": "Conta ate",
+    "actorId": "ate",
+    "source": "staff",
+    "date": "2026-10-12",
+    "subject": "Diversos",
+    "startDate": "2026-10-12",
+    "endDate": "2026-10-12",
+    "delivery": {
+     "kind": "message",
+     "audience": "person",
+     "senderId": "ate",
+     "recipientIds": [
+      "ate"
+     ],
+     "excludedIds": [],
+     "label": "Conta ate"
+    }
+   },
+   "erro": null,
+   "tipo": "criar"
+  },
+  {
+   "nome": "criar-equipe-2-sup",
+   "perfil": "sup",
+   "antes": [],
+   "depois": {
+    "id": "n9",
+    "tarotId": "account:ate",
+    "tarot": "Conta ate",
+    "text": "Osíris chega mais tarde",
+    "at": "2026-10-12T10:02:00.000Z",
+    "by": "Conta sup",
+    "actorId": "sup",
+    "source": "staff",
+    "date": "2026-10-12",
+    "subject": "Diversos",
+    "startDate": "2026-10-12",
+    "endDate": "2026-10-12",
+    "delivery": {
+     "kind": "message",
+     "audience": "person",
+     "senderId": "sup",
+     "recipientIds": [
+      "ate"
+     ],
+     "excludedIds": [],
+     "label": "Conta ate"
+    }
+   },
+   "erro": null,
+   "tipo": "criar"
+  },
+  {
+   "nome": "criar-equipe-3-adm",
+   "perfil": "adm",
+   "antes": [],
+   "depois": {
+    "id": "n10",
+    "tarotId": "nyx",
+    "tarot": "Nyx",
+    "text": "Osíris chega mais tarde",
+    "at": "2026-10-12T10:03:00.000Z",
+    "by": "Conta adm",
+    "actorId": "adm",
+    "source": "staff",
+    "date": "2026-10-12",
+    "subject": "Diversos",
+    "startDate": "2026-10-12",
+    "endDate": "2026-10-12",
+    "delivery": {
+     "kind": "message",
+     "audience": "tarologist",
+     "senderId": "adm",
+     "recipientIds": [
+      "nyx"
+     ],
+     "excludedIds": [],
+     "label": "Nyx"
+    }
+   },
+   "erro": null,
+   "tipo": "criar"
+  },
+  {
+   "nome": "criar-equipe-3-ate",
+   "perfil": "ate",
+   "antes": [],
+   "depois": {
+    "id": "n11",
+    "tarotId": "nyx",
+    "tarot": "Nyx",
+    "text": "Osíris chega mais tarde",
+    "at": "2026-10-12T10:03:00.000Z",
+    "by": "Conta ate",
+    "actorId": "ate",
+    "source": "staff",
+    "date": "2026-10-12",
+    "subject": "Diversos",
+    "startDate": "2026-10-12",
+    "endDate": "2026-10-12",
+    "delivery": {
+     "kind": "message",
+     "audience": "tarologist",
+     "senderId": "ate",
+     "recipientIds": [
+      "nyx"
+     ],
+     "excludedIds": [],
+     "label": "Nyx"
+    }
+   },
+   "erro": null,
+   "tipo": "criar"
+  },
+  {
+   "nome": "criar-equipe-3-sup",
+   "perfil": "sup",
+   "antes": [],
+   "depois": {
+    "id": "n12",
+    "tarotId": "nyx",
+    "tarot": "Nyx",
+    "text": "Osíris chega mais tarde",
+    "at": "2026-10-12T10:03:00.000Z",
+    "by": "Conta sup",
+    "actorId": "sup",
+    "source": "staff",
+    "date": "2026-10-12",
+    "subject": "Diversos",
+    "startDate": "2026-10-12",
+    "endDate": "2026-10-12",
+    "delivery": {
+     "kind": "message",
+     "audience": "tarologist",
+     "senderId": "sup",
+     "recipientIds": [
+      "nyx"
+     ],
+     "excludedIds": [],
+     "label": "Nyx"
+    }
+   },
+   "erro": null,
+   "tipo": "criar"
+  },
+  {
+   "nome": "criar-equipe-4-adm",
+   "perfil": "adm",
+   "antes": [],
+   "depois": {
+    "id": "n13",
+    "tarotId": "group:staff",
+    "tarot": "Todos do atendimento",
+    "text": "Osíris chega mais tarde",
+    "at": "2026-10-12T10:04:00.000Z",
+    "by": "Conta adm",
+    "actorId": "adm",
+    "source": "staff",
+    "date": "2026-10-12",
+    "subject": "Diversos",
+    "startDate": "2026-10-12",
+    "endDate": "2026-10-12",
+    "delivery": {
+     "kind": "message",
+     "audience": "staff",
+     "senderId": "adm",
+     "recipientIds": [
+      "adm",
+      "ass",
+      "ate"
+     ],
+     "excludedIds": [
+      "sup"
+     ],
+     "label": "Todos do atendimento"
+    }
+   },
+   "erro": null,
+   "tipo": "criar"
+  },
+  {
+   "nome": "criar-equipe-4-ate",
+   "perfil": "ate",
+   "antes": [],
+   "depois": {
+    "id": "n14",
+    "tarotId": "group:staff",
+    "tarot": "Todos do atendimento",
+    "text": "Osíris chega mais tarde",
+    "at": "2026-10-12T10:04:00.000Z",
+    "by": "Conta ate",
+    "actorId": "ate",
+    "source": "staff",
+    "date": "2026-10-12",
+    "subject": "Diversos",
+    "startDate": "2026-10-12",
+    "endDate": "2026-10-12",
+    "delivery": {
+     "kind": "message",
+     "audience": "staff",
+     "senderId": "ate",
+     "recipientIds": [
+      "adm",
+      "ass",
+      "ate"
+     ],
+     "excludedIds": [
+      "sup"
+     ],
+     "label": "Todos do atendimento"
+    }
+   },
+   "erro": null,
+   "tipo": "criar"
+  },
+  {
+   "nome": "criar-equipe-4-sup",
+   "perfil": "sup",
+   "antes": [],
+   "depois": {
+    "id": "n15",
+    "tarotId": "group:staff",
+    "tarot": "Todos do atendimento",
+    "text": "Osíris chega mais tarde",
+    "at": "2026-10-12T10:04:00.000Z",
+    "by": "Conta sup",
+    "actorId": "sup",
+    "source": "staff",
+    "date": "2026-10-12",
+    "subject": "Diversos",
+    "startDate": "2026-10-12",
+    "endDate": "2026-10-12",
+    "delivery": {
+     "kind": "message",
+     "audience": "staff",
+     "senderId": "sup",
+     "recipientIds": [
+      "adm",
+      "ass",
+      "ate"
+     ],
+     "excludedIds": [
+      "sup"
+     ],
+     "label": "Todos do atendimento"
+    }
+   },
+   "erro": null,
+   "tipo": "criar"
+  },
+  {
+   "nome": "criar-equipe-5-adm",
+   "perfil": "adm",
+   "antes": [],
+   "depois": {
+    "id": "n16",
+    "tarotId": "group:tarologists",
+    "tarot": "Todos os tarólogos",
+    "text": "Osíris chega mais tarde",
+    "at": "2026-10-12T10:05:00.000Z",
+    "by": "Conta adm",
+    "actorId": "adm",
+    "source": "staff",
+    "date": "2026-10-12",
+    "subject": "Diversos",
+    "startDate": "2026-10-12",
+    "endDate": "2026-10-12",
+    "delivery": {
+     "kind": "message",
+     "audience": "tarologists",
+     "senderId": "adm",
+     "recipientIds": [
+      "osi",
+      "nyx"
+     ],
+     "excludedIds": [],
+     "label": "Todos os tarólogos"
+    }
+   },
+   "erro": null,
+   "tipo": "criar"
+  },
+  {
+   "nome": "criar-equipe-5-ate",
+   "perfil": "ate",
+   "antes": [],
+   "depois": null,
+   "erro": "O envio para todos os tarólogos é reservado ao administrativo.",
+   "tipo": "criar"
+  },
+  {
+   "nome": "criar-equipe-5-sup",
+   "perfil": "sup",
+   "antes": [],
+   "depois": null,
+   "erro": "O envio para todos os tarólogos é reservado ao administrativo.",
+   "tipo": "criar"
+  },
+  {
+   "nome": "criar-equipe-6-adm",
+   "perfil": "adm",
+   "antes": [],
+   "depois": null,
+   "erro": "Escreva sua mensagem.",
+   "tipo": "criar"
+  },
+  {
+   "nome": "criar-equipe-6-ate",
+   "perfil": "ate",
+   "antes": [],
+   "depois": null,
+   "erro": "Escreva sua mensagem.",
+   "tipo": "criar"
+  },
+  {
+   "nome": "criar-equipe-6-sup",
+   "perfil": "sup",
+   "antes": [],
+   "depois": null,
+   "erro": "Escreva sua mensagem.",
+   "tipo": "criar"
+  },
+  {
+   "nome": "criar-equipe-7-adm",
+   "perfil": "adm",
+   "antes": [],
+   "depois": null,
+   "erro": "Escolha a que se refere o recado.",
+   "tipo": "criar"
+  },
+  {
+   "nome": "criar-equipe-7-ate",
+   "perfil": "ate",
+   "antes": [],
+   "depois": null,
+   "erro": "Escolha a que se refere o recado.",
+   "tipo": "criar"
+  },
+  {
+   "nome": "criar-equipe-7-sup",
+   "perfil": "sup",
+   "antes": [],
+   "depois": null,
+   "erro": "Escolha a que se refere o recado.",
+   "tipo": "criar"
+  },
+  {
+   "nome": "criar-equipe-8-adm",
+   "perfil": "adm",
+   "antes": [],
+   "depois": null,
+   "erro": "Escolha a pessoa do atendimento.",
+   "tipo": "criar"
+  },
+  {
+   "nome": "criar-equipe-8-ate",
+   "perfil": "ate",
+   "antes": [],
+   "depois": null,
+   "erro": "Escolha a pessoa do atendimento.",
+   "tipo": "criar"
+  },
+  {
+   "nome": "criar-equipe-8-sup",
+   "perfil": "sup",
+   "antes": [],
+   "depois": null,
+   "erro": "Escolha a pessoa do atendimento.",
+   "tipo": "criar"
+  },
+  {
+   "nome": "taro-cria",
+   "perfil": "osi",
+   "antes": [],
+   "depois": {
+    "id": "n28",
+    "tarotId": "osiris",
+    "tarot": "Osíris",
+    "text": "Chego às 14h",
+    "at": "2026-10-12T10:20:00.000Z",
+    "by": "Conta osi",
+    "actorId": "osi",
+    "source": "tarologist",
+    "date": "2026-10-12",
+    "subject": "Escala",
+    "startDate": "2026-10-12",
+    "endDate": "2026-10-12"
+   },
+   "tipo": "criar"
+  },
+  {
+   "nome": "taro-cria-vazio",
+   "perfil": "osi",
+   "antes": [],
+   "depois": null,
+   "erro": "Escreva o recado antes de enviar.",
+   "tipo": "criar",
+   "pedidoRuim": {
+    "id": "n28",
+    "tarotId": "osiris",
+    "tarot": "Osíris",
+    "text": " ",
+    "at": "2026-10-12T10:20:00.000Z",
+    "by": "Conta osi",
+    "actorId": "osi",
+    "source": "tarologist",
+    "date": "2026-10-12",
+    "subject": "Escala",
+    "startDate": "2026-10-12",
+    "endDate": "2026-10-12"
+   }
+  },
+  {
+   "nome": "taro-edita",
+   "perfil": "osi",
+   "antes": [
+    {
+     "id": "n28",
+     "tarotId": "osiris",
+     "tarot": "Osíris",
+     "text": "Chego às 14h",
+     "at": "2026-10-12T10:20:00.000Z",
+     "by": "Conta osi",
+     "actorId": "osi",
+     "source": "tarologist",
+     "date": "2026-10-12",
+     "subject": "Escala",
+     "startDate": "2026-10-12",
+     "endDate": "2026-10-12"
+    }
+   ],
+   "depois": {
+    "id": "n28",
+    "tarotId": "osiris",
+    "tarot": "Osíris",
+    "text": "Chego às 15h",
+    "at": "2026-10-12T10:20:00.000Z",
+    "by": "Conta osi",
+    "actorId": "osi",
+    "source": "tarologist",
+    "date": "2026-10-12",
+    "subject": "Escala",
+    "startDate": "2026-10-12",
+    "endDate": "2026-10-12",
+    "updatedAt": "2026-10-12T10:21:00.000Z",
+    "revisions": [
+     {
+      "version": "2026-10-12T10:20:00.000Z",
+      "reads": [],
+      "text": "Chego às 14h",
+      "at": "2026-10-12T10:21:00.000Z",
+      "by": "Conta osi",
+      "subject": "Escala",
+      "startDate": "2026-10-12",
+      "endDate": "2026-10-12"
+     }
+    ]
+   },
+   "tipo": "editar"
+  },
+  {
+   "nome": "taro-apaga",
+   "perfil": "osi",
+   "antes": [
+    {
+     "id": "n28",
+     "tarotId": "osiris",
+     "tarot": "Osíris",
+     "text": "Chego às 15h",
+     "at": "2026-10-12T10:20:00.000Z",
+     "by": "Conta osi",
+     "actorId": "osi",
+     "source": "tarologist",
+     "date": "2026-10-12",
+     "subject": "Escala",
+     "startDate": "2026-10-12",
+     "endDate": "2026-10-12",
+     "updatedAt": "2026-10-12T10:21:00.000Z",
+     "revisions": [
+      {
+       "version": "2026-10-12T10:20:00.000Z",
+       "reads": [],
+       "text": "Chego às 14h",
+       "at": "2026-10-12T10:21:00.000Z",
+       "by": "Conta osi",
+       "subject": "Escala",
+       "startDate": "2026-10-12",
+       "endDate": "2026-10-12"
+      }
+     ]
+    }
+   ],
+   "depois": {
+    "id": "n28",
+    "tarotId": "osiris",
+    "tarot": "Osíris",
+    "text": "Chego às 15h",
+    "at": "2026-10-12T10:20:00.000Z",
+    "by": "Conta osi",
+    "actorId": "osi",
+    "source": "tarologist",
+    "date": "2026-10-12",
+    "subject": "Escala",
+    "startDate": "2026-10-12",
+    "endDate": "2026-10-12",
+    "updatedAt": "2026-10-12T10:22:00.000Z",
+    "revisions": [
+     {
+      "version": "2026-10-12T10:20:00.000Z",
+      "reads": [],
+      "text": "Chego às 14h",
+      "at": "2026-10-12T10:21:00.000Z",
+      "by": "Conta osi",
+      "subject": "Escala",
+      "startDate": "2026-10-12",
+      "endDate": "2026-10-12"
+     },
+     {
+      "version": "2026-10-12T10:21:00.000Z",
+      "reads": [],
+      "text": "Chego às 15h",
+      "at": "2026-10-12T10:22:00.000Z",
+      "by": "Conta osi",
+      "subject": "Escala",
+      "startDate": "2026-10-12",
+      "endDate": "2026-10-12"
+     }
+    ],
+    "deletedAt": "2026-10-12T10:22:00.000Z"
+   },
+   "tipo": "editar"
+  },
+  {
+   "nome": "equipe-edita",
+   "perfil": "ate",
+   "antes": [
+    {
+     "id": "base-msg",
+     "tarotId": "osiris",
+     "tarot": "Osíris",
+     "text": "Osíris chega mais tarde",
+     "at": "2026-10-12T10:11:00.000Z",
+     "by": "Conta ate",
+     "actorId": "ate",
+     "source": "staff",
+     "date": "2026-10-12",
+     "subject": "Diversos",
+     "startDate": "2026-10-12",
+     "endDate": "2026-10-12",
+     "delivery": {
+      "kind": "message",
+      "audience": "tarologist",
+      "senderId": "ate",
+      "recipientIds": [
+       "osi"
+      ],
+      "excludedIds": [],
+      "label": "Osíris"
+     }
+    },
+    {
+     "id": "base-quadro",
+     "tarotId": "osiris",
+     "tarot": "Osíris",
+     "text": "Osíris chega mais tarde",
+     "at": "2026-10-12T10:10:00.000Z",
+     "by": "Conta ate",
+     "actorId": "ate",
+     "source": "staff",
+     "date": "2026-10-12",
+     "subject": "Mudança de horário",
+     "startDate": "2026-10-12",
+     "endDate": "2026-10-12",
+     "subjectTarotId": "osiris",
+     "originalQuote": "Vou chegar às 15h",
+     "delivery": {
+      "kind": "board",
+      "audience": "staff",
+      "senderId": "ate",
+      "recipientIds": [
+       "adm",
+       "ass",
+       "sup",
+       "ate"
+      ],
+      "excludedIds": [],
+      "label": "Toda a equipe de atendimento"
+     }
+    }
+   ],
+   "depois": {
+    "id": "base-quadro",
+    "tarotId": "osiris",
+    "tarot": "Osíris",
+    "text": "Texto novo",
+    "at": "2026-10-12T10:10:00.000Z",
+    "by": "Conta ate",
+    "actorId": "ate",
+    "source": "staff",
+    "date": "2026-10-12",
+    "subject": "Folga",
+    "startDate": "2026-10-12",
+    "endDate": "2026-10-12",
+    "subjectTarotId": "osiris",
+    "originalQuote": "Citação nova",
+    "delivery": {
+     "kind": "board",
+     "audience": "staff",
+     "senderId": "ate",
+     "recipientIds": [
+      "adm",
+      "ass",
+      "sup",
+      "ate"
+     ],
+     "excludedIds": [],
+     "label": "Toda a equipe de atendimento"
+    },
+    "updatedAt": "2026-10-12T10:30:00.000Z",
+    "revisions": [
+     {
+      "version": "2026-10-12T10:10:00.000Z",
+      "reads": [],
+      "text": "Osíris chega mais tarde",
+      "originalQuote": "Vou chegar às 15h",
+      "at": "2026-10-12T10:30:00.000Z",
+      "by": "Conta ate",
+      "subject": "Mudança de horário",
+      "startDate": "2026-10-12",
+      "endDate": "2026-10-12"
+     }
+    ]
+   },
+   "tipo": "editar"
+  },
+  {
+   "nome": "equipe-edita-de-outro",
+   "perfil": "sup",
+   "antes": [
+    {
+     "id": "base-msg",
+     "tarotId": "osiris",
+     "tarot": "Osíris",
+     "text": "Osíris chega mais tarde",
+     "at": "2026-10-12T10:11:00.000Z",
+     "by": "Conta ate",
+     "actorId": "ate",
+     "source": "staff",
+     "date": "2026-10-12",
+     "subject": "Diversos",
+     "startDate": "2026-10-12",
+     "endDate": "2026-10-12",
+     "delivery": {
+      "kind": "message",
+      "audience": "tarologist",
+      "senderId": "ate",
+      "recipientIds": [
+       "osi"
+      ],
+      "excludedIds": [],
+      "label": "Osíris"
+     }
+    },
+    {
+     "id": "base-quadro",
+     "tarotId": "osiris",
+     "tarot": "Osíris",
+     "text": "Osíris chega mais tarde",
+     "at": "2026-10-12T10:10:00.000Z",
+     "by": "Conta ate",
+     "actorId": "ate",
+     "source": "staff",
+     "date": "2026-10-12",
+     "subject": "Mudança de horário",
+     "startDate": "2026-10-12",
+     "endDate": "2026-10-12",
+     "subjectTarotId": "osiris",
+     "originalQuote": "Vou chegar às 15h",
+     "delivery": {
+      "kind": "board",
+      "audience": "staff",
+      "senderId": "ate",
+      "recipientIds": [
+       "adm",
+       "ass",
+       "sup",
+       "ate"
+      ],
+      "excludedIds": [],
+      "label": "Toda a equipe de atendimento"
+     }
+    }
+   ],
+   "depois": null,
+   "erro": "Esta mensagem não pode ser editada por esta conta.",
+   "tipo": "editar",
+   "pedidoRuim": {
+    "id": "base-quadro",
+    "tarotId": "osiris",
+    "tarot": "Osíris",
+    "text": "X",
+    "at": "2026-10-12T10:10:00.000Z",
+    "by": "Conta ate",
+    "actorId": "ate",
+    "source": "staff",
+    "date": "2026-10-12",
+    "subject": "Mudança de horário",
+    "startDate": "2026-10-12",
+    "endDate": "2026-10-12",
+    "subjectTarotId": "osiris",
+    "originalQuote": "Vou chegar às 15h",
+    "delivery": {
+     "kind": "board",
+     "audience": "staff",
+     "senderId": "ate",
+     "recipientIds": [
+      "adm",
+      "ass",
+      "sup",
+      "ate"
+     ],
+     "excludedIds": [],
+     "label": "Toda a equipe de atendimento"
+    },
+    "updatedAt": "2026-10-12T10:31:00.000Z",
+    "revisions": [
+     {
+      "version": "2026-10-12T10:10:00.000Z",
+      "text": "Osíris chega mais tarde",
+      "at": "2026-10-12T10:31:00.000Z",
+      "by": "x"
+     }
+    ]
+   }
+  },
+  {
+   "nome": "taro-responde",
+   "perfil": "osi",
+   "antes": [
+    {
+     "id": "base-msg",
+     "tarotId": "osiris",
+     "tarot": "Osíris",
+     "text": "Osíris chega mais tarde",
+     "at": "2026-10-12T10:11:00.000Z",
+     "by": "Conta ate",
+     "actorId": "ate",
+     "source": "staff",
+     "date": "2026-10-12",
+     "subject": "Diversos",
+     "startDate": "2026-10-12",
+     "endDate": "2026-10-12",
+     "delivery": {
+      "kind": "message",
+      "audience": "tarologist",
+      "senderId": "ate",
+      "recipientIds": [
+       "osi"
+      ],
+      "excludedIds": [],
+      "label": "Osíris"
+     }
+    },
+    {
+     "id": "base-quadro",
+     "tarotId": "osiris",
+     "tarot": "Osíris",
+     "text": "Osíris chega mais tarde",
+     "at": "2026-10-12T10:10:00.000Z",
+     "by": "Conta ate",
+     "actorId": "ate",
+     "source": "staff",
+     "date": "2026-10-12",
+     "subject": "Mudança de horário",
+     "startDate": "2026-10-12",
+     "endDate": "2026-10-12",
+     "subjectTarotId": "osiris",
+     "originalQuote": "Vou chegar às 15h",
+     "delivery": {
+      "kind": "board",
+      "audience": "staff",
+      "senderId": "ate",
+      "recipientIds": [
+       "adm",
+       "ass",
+       "sup",
+       "ate"
+      ],
+      "excludedIds": [],
+      "label": "Toda a equipe de atendimento"
+     }
+    }
+   ],
+   "depois": {
+    "id": "n29",
+    "replyToId": "base-msg",
+    "replySequence": 1,
+    "delivery": {
+     "kind": "message",
+     "audience": "tarologist",
+     "senderId": "ate",
+     "recipientIds": [
+      "osi"
+     ],
+     "excludedIds": [],
+     "label": "Osíris"
+    },
+    "tarotId": "osiris",
+    "tarot": "Osíris",
+    "text": "Combinado",
+    "at": "2026-10-12T10:40:00.000Z",
+    "by": "Conta osi",
+    "actorId": "osi",
+    "source": "tarologist",
+    "date": "2026-10-12",
+    "subject": "Diversos",
+    "startDate": "2026-10-12",
+    "endDate": "2026-10-12"
+   },
+   "tipo": "criar"
+  },
+  {
+   "nome": "equipe-responde",
+   "perfil": "sup",
+   "antes": [
+    {
+     "id": "base-msg",
+     "tarotId": "osiris",
+     "tarot": "Osíris",
+     "text": "Osíris chega mais tarde",
+     "at": "2026-10-12T10:11:00.000Z",
+     "by": "Conta ate",
+     "actorId": "ate",
+     "source": "staff",
+     "date": "2026-10-12",
+     "subject": "Diversos",
+     "startDate": "2026-10-12",
+     "endDate": "2026-10-12",
+     "delivery": {
+      "kind": "message",
+      "audience": "tarologist",
+      "senderId": "ate",
+      "recipientIds": [
+       "osi"
+      ],
+      "excludedIds": [],
+      "label": "Osíris"
+     }
+    },
+    {
+     "id": "base-quadro",
+     "tarotId": "osiris",
+     "tarot": "Osíris",
+     "text": "Osíris chega mais tarde",
+     "at": "2026-10-12T10:10:00.000Z",
+     "by": "Conta ate",
+     "actorId": "ate",
+     "source": "staff",
+     "date": "2026-10-12",
+     "subject": "Mudança de horário",
+     "startDate": "2026-10-12",
+     "endDate": "2026-10-12",
+     "subjectTarotId": "osiris",
+     "originalQuote": "Vou chegar às 15h",
+     "delivery": {
+      "kind": "board",
+      "audience": "staff",
+      "senderId": "ate",
+      "recipientIds": [
+       "adm",
+       "ass",
+       "sup",
+       "ate"
+      ],
+      "excludedIds": [],
+      "label": "Toda a equipe de atendimento"
+     }
+    }
+   ],
+   "depois": {
+    "id": "n30",
+    "replyToId": "base-quadro",
+    "replySequence": 1,
+    "delivery": {
+     "kind": "board",
+     "audience": "staff",
+     "senderId": "ate",
+     "recipientIds": [
+      "adm",
+      "ass",
+      "sup",
+      "ate"
+     ],
+     "excludedIds": [],
+     "label": "Toda a equipe de atendimento"
+    },
+    "subjectTarotId": "osiris",
+    "tarotId": "osiris",
+    "tarot": "Osíris",
+    "text": "Combinado",
+    "at": "2026-10-12T10:40:00.000Z",
+    "by": "Conta sup",
+    "actorId": "sup",
+    "source": "staff",
+    "date": "2026-10-12",
+    "subject": "Mudança de horário",
+    "startDate": "2026-10-12",
+    "endDate": "2026-10-12"
+   },
+   "tipo": "criar"
+  },
+  {
+   "nome": "outra-taro-responde",
+   "perfil": "nyx",
+   "antes": [
+    {
+     "id": "base-msg",
+     "tarotId": "osiris",
+     "tarot": "Osíris",
+     "text": "Osíris chega mais tarde",
+     "at": "2026-10-12T10:11:00.000Z",
+     "by": "Conta ate",
+     "actorId": "ate",
+     "source": "staff",
+     "date": "2026-10-12",
+     "subject": "Diversos",
+     "startDate": "2026-10-12",
+     "endDate": "2026-10-12",
+     "delivery": {
+      "kind": "message",
+      "audience": "tarologist",
+      "senderId": "ate",
+      "recipientIds": [
+       "osi"
+      ],
+      "excludedIds": [],
+      "label": "Osíris"
+     }
+    },
+    {
+     "id": "base-quadro",
+     "tarotId": "osiris",
+     "tarot": "Osíris",
+     "text": "Osíris chega mais tarde",
+     "at": "2026-10-12T10:10:00.000Z",
+     "by": "Conta ate",
+     "actorId": "ate",
+     "source": "staff",
+     "date": "2026-10-12",
+     "subject": "Mudança de horário",
+     "startDate": "2026-10-12",
+     "endDate": "2026-10-12",
+     "subjectTarotId": "osiris",
+     "originalQuote": "Vou chegar às 15h",
+     "delivery": {
+      "kind": "board",
+      "audience": "staff",
+      "senderId": "ate",
+      "recipientIds": [
+       "adm",
+       "ass",
+       "sup",
+       "ate"
+      ],
+      "excludedIds": [],
+      "label": "Toda a equipe de atendimento"
+     }
+    }
+   ],
+   "depois": null,
+   "erro": "Esta conversa não pertence ao seu perfil.",
+   "tipo": "criar",
+   "pedidoRuim": {
+    "id": "x1",
+    "replyToId": "base-msg",
+    "replySequence": 1,
+    "delivery": {
+     "kind": "message",
+     "audience": "tarologist",
+     "senderId": "ate",
+     "recipientIds": [
+      "osi"
+     ],
+     "excludedIds": [],
+     "label": "Osíris"
+    },
+    "tarotId": "osiris",
+    "tarot": "Osíris",
+    "text": "Combinado",
+    "at": "2026-10-12T10:40:00.000Z",
+    "by": "Conta nyx",
+    "actorId": "nyx",
+    "source": "tarologist",
+    "date": "2026-10-12",
+    "subject": "Diversos",
+    "startDate": "2026-10-12",
+    "endDate": "2026-10-12"
+   }
+  },
+  {
+   "nome": "equipe-ok",
+   "perfil": "ate",
+   "antes": [
+    {
+     "id": "n28",
+     "tarotId": "osiris",
+     "tarot": "Osíris",
+     "text": "Chego às 14h",
+     "at": "2026-10-12T10:20:00.000Z",
+     "by": "Conta osi",
+     "actorId": "osi",
+     "source": "tarologist",
+     "date": "2026-10-12",
+     "subject": "Escala",
+     "startDate": "2026-10-12",
+     "endDate": "2026-10-12"
+    }
+   ],
+   "depois": {
+    "id": "n31",
+    "replyToId": "n28",
+    "replySequence": 1,
+    "tarotId": "osiris",
+    "tarot": "Osíris",
+    "text": "OK",
+    "at": "2026-10-12T10:41:00.000Z",
+    "by": "Conta ate",
+    "actorId": "ate",
+    "source": "staff",
+    "date": "2026-10-12",
+    "subject": "Escala",
+    "startDate": "2026-10-12",
+    "endDate": "2026-10-12",
+    "okForId": "n28",
+    "okForVersion": "2026-10-12T10:20:00.000Z"
+   },
+   "tipo": "criar"
+  },
+  {
+   "nome": "fixar",
+   "perfil": "sup",
+   "antes": [
+    {
+     "id": "base-msg",
+     "tarotId": "osiris",
+     "tarot": "Osíris",
+     "text": "Osíris chega mais tarde",
+     "at": "2026-10-12T10:11:00.000Z",
+     "by": "Conta ate",
+     "actorId": "ate",
+     "source": "staff",
+     "date": "2026-10-12",
+     "subject": "Diversos",
+     "startDate": "2026-10-12",
+     "endDate": "2026-10-12",
+     "delivery": {
+      "kind": "message",
+      "audience": "tarologist",
+      "senderId": "ate",
+      "recipientIds": [
+       "osi"
+      ],
+      "excludedIds": [],
+      "label": "Osíris"
+     }
+    },
+    {
+     "id": "base-quadro",
+     "tarotId": "osiris",
+     "tarot": "Osíris",
+     "text": "Osíris chega mais tarde",
+     "at": "2026-10-12T10:10:00.000Z",
+     "by": "Conta ate",
+     "actorId": "ate",
+     "source": "staff",
+     "date": "2026-10-12",
+     "subject": "Mudança de horário",
+     "startDate": "2026-10-12",
+     "endDate": "2026-10-12",
+     "subjectTarotId": "osiris",
+     "originalQuote": "Vou chegar às 15h",
+     "delivery": {
+      "kind": "board",
+      "audience": "staff",
+      "senderId": "ate",
+      "recipientIds": [
+       "adm",
+       "ass",
+       "sup",
+       "ate"
+      ],
+      "excludedIds": [],
+      "label": "Toda a equipe de atendimento"
+     }
+    }
+   ],
+   "depois": {
+    "id": "base-quadro",
+    "tarotId": "osiris",
+    "tarot": "Osíris",
+    "text": "Osíris chega mais tarde",
+    "at": "2026-10-12T10:10:00.000Z",
+    "by": "Conta ate",
+    "actorId": "ate",
+    "source": "staff",
+    "date": "2026-10-12",
+    "subject": "Mudança de horário",
+    "startDate": "2026-10-12",
+    "endDate": "2026-10-12",
+    "subjectTarotId": "osiris",
+    "originalQuote": "Vou chegar às 15h",
+    "delivery": {
+     "kind": "board",
+     "audience": "staff",
+     "senderId": "ate",
+     "recipientIds": [
+      "adm",
+      "ass",
+      "sup",
+      "ate"
+     ],
+     "excludedIds": [],
+     "label": "Toda a equipe de atendimento"
+    },
+    "pinnedByAccount": {
+     "sup": {
+      "at": "2026-10-12T10:50:00.000Z"
+     }
+    }
+   },
+   "tipo": "pessoal"
+  },
+  {
+   "nome": "prioridade",
+   "perfil": "sup",
+   "antes": [
+    {
+     "id": "base-msg",
+     "tarotId": "osiris",
+     "tarot": "Osíris",
+     "text": "Osíris chega mais tarde",
+     "at": "2026-10-12T10:11:00.000Z",
+     "by": "Conta ate",
+     "actorId": "ate",
+     "source": "staff",
+     "date": "2026-10-12",
+     "subject": "Diversos",
+     "startDate": "2026-10-12",
+     "endDate": "2026-10-12",
+     "delivery": {
+      "kind": "message",
+      "audience": "tarologist",
+      "senderId": "ate",
+      "recipientIds": [
+       "osi"
+      ],
+      "excludedIds": [],
+      "label": "Osíris"
+     }
+    },
+    {
+     "id": "base-quadro",
+     "tarotId": "osiris",
+     "tarot": "Osíris",
+     "text": "Osíris chega mais tarde",
+     "at": "2026-10-12T10:10:00.000Z",
+     "by": "Conta ate",
+     "actorId": "ate",
+     "source": "staff",
+     "date": "2026-10-12",
+     "subject": "Mudança de horário",
+     "startDate": "2026-10-12",
+     "endDate": "2026-10-12",
+     "subjectTarotId": "osiris",
+     "originalQuote": "Vou chegar às 15h",
+     "delivery": {
+      "kind": "board",
+      "audience": "staff",
+      "senderId": "ate",
+      "recipientIds": [
+       "adm",
+       "ass",
+       "sup",
+       "ate"
+      ],
+      "excludedIds": [],
+      "label": "Toda a equipe de atendimento"
+     }
+    }
+   ],
+   "depois": {
+    "id": "base-quadro",
+    "tarotId": "osiris",
+    "tarot": "Osíris",
+    "text": "Osíris chega mais tarde",
+    "at": "2026-10-12T10:10:00.000Z",
+    "by": "Conta ate",
+    "actorId": "ate",
+    "source": "staff",
+    "date": "2026-10-12",
+    "subject": "Mudança de horário",
+    "startDate": "2026-10-12",
+    "endDate": "2026-10-12",
+    "subjectTarotId": "osiris",
+    "originalQuote": "Vou chegar às 15h",
+    "delivery": {
+     "kind": "board",
+     "audience": "staff",
+     "senderId": "ate",
+     "recipientIds": [
+      "adm",
+      "ass",
+      "sup",
+      "ate"
+     ],
+     "excludedIds": [],
+     "label": "Toda a equipe de atendimento"
+    },
+    "prioritizedByAccount": {
+     "sup": {
+      "at": "2026-10-12T10:51:00.000Z"
+     }
+    }
+   },
+   "tipo": "pessoal"
+  },
+  {
+   "nome": "arquivar-equipe",
+   "perfil": "sup",
+   "antes": [
+    {
+     "id": "base-msg",
+     "tarotId": "osiris",
+     "tarot": "Osíris",
+     "text": "Osíris chega mais tarde",
+     "at": "2026-10-12T10:11:00.000Z",
+     "by": "Conta ate",
+     "actorId": "ate",
+     "source": "staff",
+     "date": "2026-10-12",
+     "subject": "Diversos",
+     "startDate": "2026-10-12",
+     "endDate": "2026-10-12",
+     "delivery": {
+      "kind": "message",
+      "audience": "tarologist",
+      "senderId": "ate",
+      "recipientIds": [
+       "osi"
+      ],
+      "excludedIds": [],
+      "label": "Osíris"
+     }
+    },
+    {
+     "id": "base-quadro",
+     "tarotId": "osiris",
+     "tarot": "Osíris",
+     "text": "Osíris chega mais tarde",
+     "at": "2026-10-12T10:10:00.000Z",
+     "by": "Conta ate",
+     "actorId": "ate",
+     "source": "staff",
+     "date": "2026-10-12",
+     "subject": "Mudança de horário",
+     "startDate": "2026-10-12",
+     "endDate": "2026-10-12",
+     "subjectTarotId": "osiris",
+     "originalQuote": "Vou chegar às 15h",
+     "delivery": {
+      "kind": "board",
+      "audience": "staff",
+      "senderId": "ate",
+      "recipientIds": [
+       "adm",
+       "ass",
+       "sup",
+       "ate"
+      ],
+      "excludedIds": [],
+      "label": "Toda a equipe de atendimento"
+     }
+    }
+   ],
+   "depois": {
+    "id": "base-quadro",
+    "tarotId": "osiris",
+    "tarot": "Osíris",
+    "text": "Osíris chega mais tarde",
+    "at": "2026-10-12T10:10:00.000Z",
+    "by": "Conta ate",
+    "actorId": "ate",
+    "source": "staff",
+    "date": "2026-10-12",
+    "subject": "Mudança de horário",
+    "startDate": "2026-10-12",
+    "endDate": "2026-10-12",
+    "subjectTarotId": "osiris",
+    "originalQuote": "Vou chegar às 15h",
+    "delivery": {
+     "kind": "board",
+     "audience": "staff",
+     "senderId": "ate",
+     "recipientIds": [
+      "adm",
+      "ass",
+      "sup",
+      "ate"
+     ],
+     "excludedIds": [],
+     "label": "Toda a equipe de atendimento"
+    },
+    "archivedByAccount": {
+     "sup": {
+      "at": "2026-10-12T10:52:00.000Z",
+      "incomingVersions": {
+       "base-quadro": "2026-10-12T10:10:00.000Z"
+      }
+     }
+    }
+   },
+   "tipo": "pessoal"
+  },
+  {
+   "nome": "arquivar-taro",
+   "perfil": "osi",
+   "antes": [
+    {
+     "id": "base-msg",
+     "tarotId": "osiris",
+     "tarot": "Osíris",
+     "text": "Osíris chega mais tarde",
+     "at": "2026-10-12T10:11:00.000Z",
+     "by": "Conta ate",
+     "actorId": "ate",
+     "source": "staff",
+     "date": "2026-10-12",
+     "subject": "Diversos",
+     "startDate": "2026-10-12",
+     "endDate": "2026-10-12",
+     "delivery": {
+      "kind": "message",
+      "audience": "tarologist",
+      "senderId": "ate",
+      "recipientIds": [
+       "osi"
+      ],
+      "excludedIds": [],
+      "label": "Osíris"
+     }
+    },
+    {
+     "id": "base-quadro",
+     "tarotId": "osiris",
+     "tarot": "Osíris",
+     "text": "Osíris chega mais tarde",
+     "at": "2026-10-12T10:10:00.000Z",
+     "by": "Conta ate",
+     "actorId": "ate",
+     "source": "staff",
+     "date": "2026-10-12",
+     "subject": "Mudança de horário",
+     "startDate": "2026-10-12",
+     "endDate": "2026-10-12",
+     "subjectTarotId": "osiris",
+     "originalQuote": "Vou chegar às 15h",
+     "delivery": {
+      "kind": "board",
+      "audience": "staff",
+      "senderId": "ate",
+      "recipientIds": [
+       "adm",
+       "ass",
+       "sup",
+       "ate"
+      ],
+      "excludedIds": [],
+      "label": "Toda a equipe de atendimento"
+     }
+    }
+   ],
+   "depois": {
+    "id": "base-msg",
+    "tarotId": "osiris",
+    "tarot": "Osíris",
+    "text": "Osíris chega mais tarde",
+    "at": "2026-10-12T10:11:00.000Z",
+    "by": "Conta ate",
+    "actorId": "ate",
+    "source": "staff",
+    "date": "2026-10-12",
+    "subject": "Diversos",
+    "startDate": "2026-10-12",
+    "endDate": "2026-10-12",
+    "delivery": {
+     "kind": "message",
+     "audience": "tarologist",
+     "senderId": "ate",
+     "recipientIds": [
+      "osi"
+     ],
+     "excludedIds": [],
+     "label": "Osíris"
+    },
+    "archivedByAccount": {
+     "osi": {
+      "at": "2026-10-12T10:53:00.000Z",
+      "incomingVersions": {
+       "base-msg": "2026-10-12T10:11:00.000Z"
+      }
+     }
+    }
+   },
+   "tipo": "pessoal"
+  },
+  {
+   "nome": "importancia",
+   "perfil": "ate",
+   "antes": [
+    {
+     "id": "base-msg",
+     "tarotId": "osiris",
+     "tarot": "Osíris",
+     "text": "Osíris chega mais tarde",
+     "at": "2026-10-12T10:11:00.000Z",
+     "by": "Conta ate",
+     "actorId": "ate",
+     "source": "staff",
+     "date": "2026-10-12",
+     "subject": "Diversos",
+     "startDate": "2026-10-12",
+     "endDate": "2026-10-12",
+     "delivery": {
+      "kind": "message",
+      "audience": "tarologist",
+      "senderId": "ate",
+      "recipientIds": [
+       "osi"
+      ],
+      "excludedIds": [],
+      "label": "Osíris"
+     }
+    },
+    {
+     "id": "base-quadro",
+     "tarotId": "osiris",
+     "tarot": "Osíris",
+     "text": "Osíris chega mais tarde",
+     "at": "2026-10-12T10:10:00.000Z",
+     "by": "Conta ate",
+     "actorId": "ate",
+     "source": "staff",
+     "date": "2026-10-12",
+     "subject": "Mudança de horário",
+     "startDate": "2026-10-12",
+     "endDate": "2026-10-12",
+     "subjectTarotId": "osiris",
+     "originalQuote": "Vou chegar às 15h",
+     "delivery": {
+      "kind": "board",
+      "audience": "staff",
+      "senderId": "ate",
+      "recipientIds": [
+       "adm",
+       "ass",
+       "sup",
+       "ate"
+      ],
+      "excludedIds": [],
+      "label": "Toda a equipe de atendimento"
+     }
+    }
+   ],
+   "depois": {
+    "id": "base-quadro",
+    "tarotId": "osiris",
+    "tarot": "Osíris",
+    "text": "Osíris chega mais tarde",
+    "at": "2026-10-12T10:10:00.000Z",
+    "by": "Conta ate",
+    "actorId": "ate",
+    "source": "staff",
+    "date": "2026-10-12",
+    "subject": "Mudança de horário",
+    "startDate": "2026-10-12",
+    "endDate": "2026-10-12",
+    "importance": {
+     "byId": "ate",
+     "at": "2026-10-12T10:54:00.000Z"
+    },
+    "subjectTarotId": "osiris",
+    "originalQuote": "Vou chegar às 15h",
+    "delivery": {
+     "kind": "board",
+     "audience": "staff",
+     "senderId": "ate",
+     "recipientIds": [
+      "adm",
+      "ass",
+      "sup",
+      "ate"
+     ],
+     "excludedIds": [],
+     "label": "Toda a equipe de atendimento"
+    }
+   },
+   "tipo": "especial"
+  },
+  {
+   "nome": "importancia-de-outro",
+   "perfil": "sup",
+   "antes": [
+    {
+     "id": "base-msg",
+     "tarotId": "osiris",
+     "tarot": "Osíris",
+     "text": "Osíris chega mais tarde",
+     "at": "2026-10-12T10:11:00.000Z",
+     "by": "Conta ate",
+     "actorId": "ate",
+     "source": "staff",
+     "date": "2026-10-12",
+     "subject": "Diversos",
+     "startDate": "2026-10-12",
+     "endDate": "2026-10-12",
+     "delivery": {
+      "kind": "message",
+      "audience": "tarologist",
+      "senderId": "ate",
+      "recipientIds": [
+       "osi"
+      ],
+      "excludedIds": [],
+      "label": "Osíris"
+     }
+    },
+    {
+     "id": "base-quadro",
+     "tarotId": "osiris",
+     "tarot": "Osíris",
+     "text": "Osíris chega mais tarde",
+     "at": "2026-10-12T10:10:00.000Z",
+     "by": "Conta ate",
+     "actorId": "ate",
+     "source": "staff",
+     "date": "2026-10-12",
+     "subject": "Mudança de horário",
+     "startDate": "2026-10-12",
+     "endDate": "2026-10-12",
+     "subjectTarotId": "osiris",
+     "originalQuote": "Vou chegar às 15h",
+     "delivery": {
+      "kind": "board",
+      "audience": "staff",
+      "senderId": "ate",
+      "recipientIds": [
+       "adm",
+       "ass",
+       "sup",
+       "ate"
+      ],
+      "excludedIds": [],
+      "label": "Toda a equipe de atendimento"
+     }
+    }
+   ],
+   "depois": null,
+   "erro": "Somente quem enviou pode alterar a importância deste recado.",
+   "tipo": "especial",
+   "pedidoRuim": {
+    "id": "base-quadro",
+    "tarotId": "osiris",
+    "tarot": "Osíris",
+    "text": "Osíris chega mais tarde",
+    "at": "2026-10-12T10:10:00.000Z",
+    "by": "Conta ate",
+    "actorId": "ate",
+    "source": "staff",
+    "date": "2026-10-12",
+    "subject": "Mudança de horário",
+    "startDate": "2026-10-12",
+    "endDate": "2026-10-12",
+    "importance": {
+     "byId": "sup",
+     "at": "2026-10-12T10:54:00.000Z"
+    },
+    "subjectTarotId": "osiris",
+    "originalQuote": "Vou chegar às 15h",
+    "delivery": {
+     "kind": "board",
+     "audience": "staff",
+     "senderId": "ate",
+     "recipientIds": [
+      "adm",
+      "ass",
+      "sup",
+      "ate"
+     ],
+     "excludedIds": [],
+     "label": "Toda a equipe de atendimento"
+    }
+   }
+  },
+  {
+   "nome": "leitura-taro",
+   "perfil": "osi",
+   "antes": [
+    {
+     "id": "base-msg",
+     "tarotId": "osiris",
+     "tarot": "Osíris",
+     "text": "Osíris chega mais tarde",
+     "at": "2026-10-12T10:11:00.000Z",
+     "by": "Conta ate",
+     "actorId": "ate",
+     "source": "staff",
+     "date": "2026-10-12",
+     "subject": "Diversos",
+     "startDate": "2026-10-12",
+     "endDate": "2026-10-12",
+     "delivery": {
+      "kind": "message",
+      "audience": "tarologist",
+      "senderId": "ate",
+      "recipientIds": [
+       "osi"
+      ],
+      "excludedIds": [],
+      "label": "Osíris"
+     }
+    },
+    {
+     "id": "base-quadro",
+     "tarotId": "osiris",
+     "tarot": "Osíris",
+     "text": "Osíris chega mais tarde",
+     "at": "2026-10-12T10:10:00.000Z",
+     "by": "Conta ate",
+     "actorId": "ate",
+     "source": "staff",
+     "date": "2026-10-12",
+     "subject": "Mudança de horário",
+     "startDate": "2026-10-12",
+     "endDate": "2026-10-12",
+     "subjectTarotId": "osiris",
+     "originalQuote": "Vou chegar às 15h",
+     "delivery": {
+      "kind": "board",
+      "audience": "staff",
+      "senderId": "ate",
+      "recipientIds": [
+       "adm",
+       "ass",
+       "sup",
+       "ate"
+      ],
+      "excludedIds": [],
+      "label": "Toda a equipe de atendimento"
+     }
+    }
+   ],
+   "depois": {
+    "id": "base-msg",
+    "tarotId": "osiris",
+    "tarot": "Osíris",
+    "text": "Osíris chega mais tarde",
+    "at": "2026-10-12T10:11:00.000Z",
+    "by": "Conta ate",
+    "actorId": "ate",
+    "source": "staff",
+    "date": "2026-10-12",
+    "subject": "Diversos",
+    "startDate": "2026-10-12",
+    "endDate": "2026-10-12",
+    "delivery": {
+     "kind": "message",
+     "audience": "tarologist",
+     "senderId": "ate",
+     "recipientIds": [
+      "osi"
+     ],
+     "excludedIds": [],
+     "label": "Osíris"
+    },
+    "readAt": "2026-10-12T10:55:00.000Z",
+    "readBy": "Conta osi",
+    "readById": "osi",
+    "readsByAccount": {
+     "osi": {
+      "at": "2026-10-12T10:55:00.000Z",
+      "by": "Conta osi",
+      "version": "2026-10-12T10:11:00.000Z"
+     }
+    }
+   },
+   "tipo": "pessoal"
+  },
+  {
+   "nome": "leitura-equipe",
+   "perfil": "sup",
+   "antes": [
+    {
+     "id": "base-msg",
+     "tarotId": "osiris",
+     "tarot": "Osíris",
+     "text": "Osíris chega mais tarde",
+     "at": "2026-10-12T10:11:00.000Z",
+     "by": "Conta ate",
+     "actorId": "ate",
+     "source": "staff",
+     "date": "2026-10-12",
+     "subject": "Diversos",
+     "startDate": "2026-10-12",
+     "endDate": "2026-10-12",
+     "delivery": {
+      "kind": "message",
+      "audience": "tarologist",
+      "senderId": "ate",
+      "recipientIds": [
+       "osi"
+      ],
+      "excludedIds": [],
+      "label": "Osíris"
+     }
+    },
+    {
+     "id": "base-quadro",
+     "tarotId": "osiris",
+     "tarot": "Osíris",
+     "text": "Osíris chega mais tarde",
+     "at": "2026-10-12T10:10:00.000Z",
+     "by": "Conta ate",
+     "actorId": "ate",
+     "source": "staff",
+     "date": "2026-10-12",
+     "subject": "Mudança de horário",
+     "startDate": "2026-10-12",
+     "endDate": "2026-10-12",
+     "subjectTarotId": "osiris",
+     "originalQuote": "Vou chegar às 15h",
+     "delivery": {
+      "kind": "board",
+      "audience": "staff",
+      "senderId": "ate",
+      "recipientIds": [
+       "adm",
+       "ass",
+       "sup",
+       "ate"
+      ],
+      "excludedIds": [],
+      "label": "Toda a equipe de atendimento"
+     }
+    }
+   ],
+   "depois": {
+    "id": "base-quadro",
+    "tarotId": "osiris",
+    "tarot": "Osíris",
+    "text": "Osíris chega mais tarde",
+    "at": "2026-10-12T10:10:00.000Z",
+    "by": "Conta ate",
+    "actorId": "ate",
+    "source": "staff",
+    "date": "2026-10-12",
+    "subject": "Mudança de horário",
+    "startDate": "2026-10-12",
+    "endDate": "2026-10-12",
+    "subjectTarotId": "osiris",
+    "originalQuote": "Vou chegar às 15h",
+    "delivery": {
+     "kind": "board",
+     "audience": "staff",
+     "senderId": "ate",
+     "recipientIds": [
+      "adm",
+      "ass",
+      "sup",
+      "ate"
+     ],
+     "excludedIds": [],
+     "label": "Toda a equipe de atendimento"
+    },
+    "readAt": "2026-10-12T10:56:00.000Z",
+    "readBy": "Conta sup",
+    "readById": "sup",
+    "readsByAccount": {
+     "sup": {
+      "at": "2026-10-12T10:56:00.000Z",
+      "by": "Conta sup",
+      "version": "2026-10-12T10:10:00.000Z"
+     }
+    }
+   },
+   "tipo": "pessoal"
+  }
+ ],
+ "notas": [
+  {
+   "id": "base-msg",
+   "tarotId": "osiris",
+   "tarot": "Osíris",
+   "text": "Osíris chega mais tarde",
+   "at": "2026-10-12T10:11:00.000Z",
+   "by": "Conta ate",
+   "actorId": "ate",
+   "source": "staff",
+   "date": "2026-10-12",
+   "subject": "Diversos",
+   "startDate": "2026-10-12",
+   "endDate": "2026-10-12",
+   "delivery": {
+    "kind": "message",
+    "audience": "tarologist",
+    "senderId": "ate",
+    "recipientIds": [
+     "osi"
+    ],
+    "excludedIds": [],
+    "label": "Osíris"
+   }
+  },
+  {
+   "id": "base-quadro",
+   "tarotId": "osiris",
+   "tarot": "Osíris",
+   "text": "Osíris chega mais tarde",
+   "at": "2026-10-12T10:10:00.000Z",
+   "by": "Conta ate",
+   "actorId": "ate",
+   "source": "staff",
+   "date": "2026-10-12",
+   "subject": "Mudança de horário",
+   "startDate": "2026-10-12",
+   "endDate": "2026-10-12",
+   "subjectTarotId": "osiris",
+   "originalQuote": "Vou chegar às 15h",
+   "delivery": {
+    "kind": "board",
+    "audience": "staff",
+    "senderId": "ate",
+    "recipientIds": [
+     "adm",
+     "ass",
+     "sup",
+     "ate"
+    ],
+    "excludedIds": [],
+    "label": "Toda a equipe de atendimento"
+   }
+  },
+  {
+   "id": "n29",
+   "replyToId": "base-msg",
+   "replySequence": 1,
+   "delivery": {
+    "kind": "message",
+    "audience": "tarologist",
+    "senderId": "ate",
+    "recipientIds": [
+     "osi"
+    ],
+    "excludedIds": [],
+    "label": "Osíris"
+   },
+   "tarotId": "osiris",
+   "tarot": "Osíris",
+   "text": "Combinado",
+   "at": "2026-10-12T10:40:00.000Z",
+   "by": "Conta osi",
+   "actorId": "osi",
+   "source": "tarologist",
+   "date": "2026-10-12",
+   "subject": "Diversos",
+   "startDate": "2026-10-12",
+   "endDate": "2026-10-12"
+  },
+  {
+   "id": "n28",
+   "tarotId": "osiris",
+   "tarot": "Osíris",
+   "text": "Chego às 14h",
+   "at": "2026-10-12T10:20:00.000Z",
+   "by": "Conta osi",
+   "actorId": "osi",
+   "source": "tarologist",
+   "date": "2026-10-12",
+   "subject": "Escala",
+   "startDate": "2026-10-12",
+   "endDate": "2026-10-12"
+  },
+  {
+   "id": "n32",
+   "replyToId": "base-quadro",
+   "replySequence": 1,
+   "delivery": {
+    "kind": "board",
+    "audience": "staff",
+    "senderId": "ate",
+    "recipientIds": [
+     "adm",
+     "ass",
+     "sup",
+     "ate"
+    ],
+    "excludedIds": [],
+    "label": "Toda a equipe de atendimento"
+   },
+   "subjectTarotId": "osiris",
+   "tarotId": "osiris",
+   "tarot": "Osíris",
+   "text": "Combinado",
+   "at": "2026-10-12T10:40:00.000Z",
+   "by": "Conta ate",
+   "actorId": "ate",
+   "source": "staff",
+   "date": "2026-10-12",
+   "subject": "Mudança de horário",
+   "startDate": "2026-10-12",
+   "endDate": "2026-10-12"
+  }
+ ],
+ "visibilidade": [
+  {
+   "nota": {
+    "id": "base-msg",
+    "tarotId": "osiris",
+    "tarot": "Osíris",
+    "text": "Osíris chega mais tarde",
+    "at": "2026-10-12T10:11:00.000Z",
+    "by": "Conta ate",
+    "actorId": "ate",
+    "source": "staff",
+    "date": "2026-10-12",
+    "subject": "Diversos",
+    "startDate": "2026-10-12",
+    "endDate": "2026-10-12",
+    "delivery": {
+     "kind": "message",
+     "audience": "tarologist",
+     "senderId": "ate",
+     "recipientIds": [
+      "osi"
+     ],
+     "excludedIds": [],
+     "label": "Osíris"
+    }
+   },
+   "conta": "adm",
+   "ok": false
+  },
+  {
+   "nota": {
+    "id": "base-msg",
+    "tarotId": "osiris",
+    "tarot": "Osíris",
+    "text": "Osíris chega mais tarde",
+    "at": "2026-10-12T10:11:00.000Z",
+    "by": "Conta ate",
+    "actorId": "ate",
+    "source": "staff",
+    "date": "2026-10-12",
+    "subject": "Diversos",
+    "startDate": "2026-10-12",
+    "endDate": "2026-10-12",
+    "delivery": {
+     "kind": "message",
+     "audience": "tarologist",
+     "senderId": "ate",
+     "recipientIds": [
+      "osi"
+     ],
+     "excludedIds": [],
+     "label": "Osíris"
+    }
+   },
+   "conta": "ass",
+   "ok": false
+  },
+  {
+   "nota": {
+    "id": "base-msg",
+    "tarotId": "osiris",
+    "tarot": "Osíris",
+    "text": "Osíris chega mais tarde",
+    "at": "2026-10-12T10:11:00.000Z",
+    "by": "Conta ate",
+    "actorId": "ate",
+    "source": "staff",
+    "date": "2026-10-12",
+    "subject": "Diversos",
+    "startDate": "2026-10-12",
+    "endDate": "2026-10-12",
+    "delivery": {
+     "kind": "message",
+     "audience": "tarologist",
+     "senderId": "ate",
+     "recipientIds": [
+      "osi"
+     ],
+     "excludedIds": [],
+     "label": "Osíris"
+    }
+   },
+   "conta": "sup",
+   "ok": false
+  },
+  {
+   "nota": {
+    "id": "base-msg",
+    "tarotId": "osiris",
+    "tarot": "Osíris",
+    "text": "Osíris chega mais tarde",
+    "at": "2026-10-12T10:11:00.000Z",
+    "by": "Conta ate",
+    "actorId": "ate",
+    "source": "staff",
+    "date": "2026-10-12",
+    "subject": "Diversos",
+    "startDate": "2026-10-12",
+    "endDate": "2026-10-12",
+    "delivery": {
+     "kind": "message",
+     "audience": "tarologist",
+     "senderId": "ate",
+     "recipientIds": [
+      "osi"
+     ],
+     "excludedIds": [],
+     "label": "Osíris"
+    }
+   },
+   "conta": "ate",
+   "ok": true
+  },
+  {
+   "nota": {
+    "id": "base-msg",
+    "tarotId": "osiris",
+    "tarot": "Osíris",
+    "text": "Osíris chega mais tarde",
+    "at": "2026-10-12T10:11:00.000Z",
+    "by": "Conta ate",
+    "actorId": "ate",
+    "source": "staff",
+    "date": "2026-10-12",
+    "subject": "Diversos",
+    "startDate": "2026-10-12",
+    "endDate": "2026-10-12",
+    "delivery": {
+     "kind": "message",
+     "audience": "tarologist",
+     "senderId": "ate",
+     "recipientIds": [
+      "osi"
+     ],
+     "excludedIds": [],
+     "label": "Osíris"
+    }
+   },
+   "conta": "osi",
+   "ok": true
+  },
+  {
+   "nota": {
+    "id": "base-msg",
+    "tarotId": "osiris",
+    "tarot": "Osíris",
+    "text": "Osíris chega mais tarde",
+    "at": "2026-10-12T10:11:00.000Z",
+    "by": "Conta ate",
+    "actorId": "ate",
+    "source": "staff",
+    "date": "2026-10-12",
+    "subject": "Diversos",
+    "startDate": "2026-10-12",
+    "endDate": "2026-10-12",
+    "delivery": {
+     "kind": "message",
+     "audience": "tarologist",
+     "senderId": "ate",
+     "recipientIds": [
+      "osi"
+     ],
+     "excludedIds": [],
+     "label": "Osíris"
+    }
+   },
+   "conta": "nyx",
+   "ok": false
+  },
+  {
+   "nota": {
+    "id": "base-quadro",
+    "tarotId": "osiris",
+    "tarot": "Osíris",
+    "text": "Osíris chega mais tarde",
+    "at": "2026-10-12T10:10:00.000Z",
+    "by": "Conta ate",
+    "actorId": "ate",
+    "source": "staff",
+    "date": "2026-10-12",
+    "subject": "Mudança de horário",
+    "startDate": "2026-10-12",
+    "endDate": "2026-10-12",
+    "subjectTarotId": "osiris",
+    "originalQuote": "Vou chegar às 15h",
+    "delivery": {
+     "kind": "board",
+     "audience": "staff",
+     "senderId": "ate",
+     "recipientIds": [
+      "adm",
+      "ass",
+      "sup",
+      "ate"
+     ],
+     "excludedIds": [],
+     "label": "Toda a equipe de atendimento"
+    }
+   },
+   "conta": "adm",
+   "ok": true
+  },
+  {
+   "nota": {
+    "id": "base-quadro",
+    "tarotId": "osiris",
+    "tarot": "Osíris",
+    "text": "Osíris chega mais tarde",
+    "at": "2026-10-12T10:10:00.000Z",
+    "by": "Conta ate",
+    "actorId": "ate",
+    "source": "staff",
+    "date": "2026-10-12",
+    "subject": "Mudança de horário",
+    "startDate": "2026-10-12",
+    "endDate": "2026-10-12",
+    "subjectTarotId": "osiris",
+    "originalQuote": "Vou chegar às 15h",
+    "delivery": {
+     "kind": "board",
+     "audience": "staff",
+     "senderId": "ate",
+     "recipientIds": [
+      "adm",
+      "ass",
+      "sup",
+      "ate"
+     ],
+     "excludedIds": [],
+     "label": "Toda a equipe de atendimento"
+    }
+   },
+   "conta": "ass",
+   "ok": true
+  },
+  {
+   "nota": {
+    "id": "base-quadro",
+    "tarotId": "osiris",
+    "tarot": "Osíris",
+    "text": "Osíris chega mais tarde",
+    "at": "2026-10-12T10:10:00.000Z",
+    "by": "Conta ate",
+    "actorId": "ate",
+    "source": "staff",
+    "date": "2026-10-12",
+    "subject": "Mudança de horário",
+    "startDate": "2026-10-12",
+    "endDate": "2026-10-12",
+    "subjectTarotId": "osiris",
+    "originalQuote": "Vou chegar às 15h",
+    "delivery": {
+     "kind": "board",
+     "audience": "staff",
+     "senderId": "ate",
+     "recipientIds": [
+      "adm",
+      "ass",
+      "sup",
+      "ate"
+     ],
+     "excludedIds": [],
+     "label": "Toda a equipe de atendimento"
+    }
+   },
+   "conta": "sup",
+   "ok": true
+  },
+  {
+   "nota": {
+    "id": "base-quadro",
+    "tarotId": "osiris",
+    "tarot": "Osíris",
+    "text": "Osíris chega mais tarde",
+    "at": "2026-10-12T10:10:00.000Z",
+    "by": "Conta ate",
+    "actorId": "ate",
+    "source": "staff",
+    "date": "2026-10-12",
+    "subject": "Mudança de horário",
+    "startDate": "2026-10-12",
+    "endDate": "2026-10-12",
+    "subjectTarotId": "osiris",
+    "originalQuote": "Vou chegar às 15h",
+    "delivery": {
+     "kind": "board",
+     "audience": "staff",
+     "senderId": "ate",
+     "recipientIds": [
+      "adm",
+      "ass",
+      "sup",
+      "ate"
+     ],
+     "excludedIds": [],
+     "label": "Toda a equipe de atendimento"
+    }
+   },
+   "conta": "ate",
+   "ok": true
+  },
+  {
+   "nota": {
+    "id": "base-quadro",
+    "tarotId": "osiris",
+    "tarot": "Osíris",
+    "text": "Osíris chega mais tarde",
+    "at": "2026-10-12T10:10:00.000Z",
+    "by": "Conta ate",
+    "actorId": "ate",
+    "source": "staff",
+    "date": "2026-10-12",
+    "subject": "Mudança de horário",
+    "startDate": "2026-10-12",
+    "endDate": "2026-10-12",
+    "subjectTarotId": "osiris",
+    "originalQuote": "Vou chegar às 15h",
+    "delivery": {
+     "kind": "board",
+     "audience": "staff",
+     "senderId": "ate",
+     "recipientIds": [
+      "adm",
+      "ass",
+      "sup",
+      "ate"
+     ],
+     "excludedIds": [],
+     "label": "Toda a equipe de atendimento"
+    }
+   },
+   "conta": "osi",
+   "ok": false
+  },
+  {
+   "nota": {
+    "id": "base-quadro",
+    "tarotId": "osiris",
+    "tarot": "Osíris",
+    "text": "Osíris chega mais tarde",
+    "at": "2026-10-12T10:10:00.000Z",
+    "by": "Conta ate",
+    "actorId": "ate",
+    "source": "staff",
+    "date": "2026-10-12",
+    "subject": "Mudança de horário",
+    "startDate": "2026-10-12",
+    "endDate": "2026-10-12",
+    "subjectTarotId": "osiris",
+    "originalQuote": "Vou chegar às 15h",
+    "delivery": {
+     "kind": "board",
+     "audience": "staff",
+     "senderId": "ate",
+     "recipientIds": [
+      "adm",
+      "ass",
+      "sup",
+      "ate"
+     ],
+     "excludedIds": [],
+     "label": "Toda a equipe de atendimento"
+    }
+   },
+   "conta": "nyx",
+   "ok": false
+  },
+  {
+   "nota": {
+    "id": "n29",
+    "replyToId": "base-msg",
+    "replySequence": 1,
+    "delivery": {
+     "kind": "message",
+     "audience": "tarologist",
+     "senderId": "ate",
+     "recipientIds": [
+      "osi"
+     ],
+     "excludedIds": [],
+     "label": "Osíris"
+    },
+    "tarotId": "osiris",
+    "tarot": "Osíris",
+    "text": "Combinado",
+    "at": "2026-10-12T10:40:00.000Z",
+    "by": "Conta osi",
+    "actorId": "osi",
+    "source": "tarologist",
+    "date": "2026-10-12",
+    "subject": "Diversos",
+    "startDate": "2026-10-12",
+    "endDate": "2026-10-12"
+   },
+   "conta": "adm",
+   "ok": false
+  },
+  {
+   "nota": {
+    "id": "n29",
+    "replyToId": "base-msg",
+    "replySequence": 1,
+    "delivery": {
+     "kind": "message",
+     "audience": "tarologist",
+     "senderId": "ate",
+     "recipientIds": [
+      "osi"
+     ],
+     "excludedIds": [],
+     "label": "Osíris"
+    },
+    "tarotId": "osiris",
+    "tarot": "Osíris",
+    "text": "Combinado",
+    "at": "2026-10-12T10:40:00.000Z",
+    "by": "Conta osi",
+    "actorId": "osi",
+    "source": "tarologist",
+    "date": "2026-10-12",
+    "subject": "Diversos",
+    "startDate": "2026-10-12",
+    "endDate": "2026-10-12"
+   },
+   "conta": "ass",
+   "ok": false
+  },
+  {
+   "nota": {
+    "id": "n29",
+    "replyToId": "base-msg",
+    "replySequence": 1,
+    "delivery": {
+     "kind": "message",
+     "audience": "tarologist",
+     "senderId": "ate",
+     "recipientIds": [
+      "osi"
+     ],
+     "excludedIds": [],
+     "label": "Osíris"
+    },
+    "tarotId": "osiris",
+    "tarot": "Osíris",
+    "text": "Combinado",
+    "at": "2026-10-12T10:40:00.000Z",
+    "by": "Conta osi",
+    "actorId": "osi",
+    "source": "tarologist",
+    "date": "2026-10-12",
+    "subject": "Diversos",
+    "startDate": "2026-10-12",
+    "endDate": "2026-10-12"
+   },
+   "conta": "sup",
+   "ok": false
+  },
+  {
+   "nota": {
+    "id": "n29",
+    "replyToId": "base-msg",
+    "replySequence": 1,
+    "delivery": {
+     "kind": "message",
+     "audience": "tarologist",
+     "senderId": "ate",
+     "recipientIds": [
+      "osi"
+     ],
+     "excludedIds": [],
+     "label": "Osíris"
+    },
+    "tarotId": "osiris",
+    "tarot": "Osíris",
+    "text": "Combinado",
+    "at": "2026-10-12T10:40:00.000Z",
+    "by": "Conta osi",
+    "actorId": "osi",
+    "source": "tarologist",
+    "date": "2026-10-12",
+    "subject": "Diversos",
+    "startDate": "2026-10-12",
+    "endDate": "2026-10-12"
+   },
+   "conta": "ate",
+   "ok": true
+  },
+  {
+   "nota": {
+    "id": "n29",
+    "replyToId": "base-msg",
+    "replySequence": 1,
+    "delivery": {
+     "kind": "message",
+     "audience": "tarologist",
+     "senderId": "ate",
+     "recipientIds": [
+      "osi"
+     ],
+     "excludedIds": [],
+     "label": "Osíris"
+    },
+    "tarotId": "osiris",
+    "tarot": "Osíris",
+    "text": "Combinado",
+    "at": "2026-10-12T10:40:00.000Z",
+    "by": "Conta osi",
+    "actorId": "osi",
+    "source": "tarologist",
+    "date": "2026-10-12",
+    "subject": "Diversos",
+    "startDate": "2026-10-12",
+    "endDate": "2026-10-12"
+   },
+   "conta": "osi",
+   "ok": true
+  },
+  {
+   "nota": {
+    "id": "n29",
+    "replyToId": "base-msg",
+    "replySequence": 1,
+    "delivery": {
+     "kind": "message",
+     "audience": "tarologist",
+     "senderId": "ate",
+     "recipientIds": [
+      "osi"
+     ],
+     "excludedIds": [],
+     "label": "Osíris"
+    },
+    "tarotId": "osiris",
+    "tarot": "Osíris",
+    "text": "Combinado",
+    "at": "2026-10-12T10:40:00.000Z",
+    "by": "Conta osi",
+    "actorId": "osi",
+    "source": "tarologist",
+    "date": "2026-10-12",
+    "subject": "Diversos",
+    "startDate": "2026-10-12",
+    "endDate": "2026-10-12"
+   },
+   "conta": "nyx",
+   "ok": false
+  },
+  {
+   "nota": {
+    "id": "n28",
+    "tarotId": "osiris",
+    "tarot": "Osíris",
+    "text": "Chego às 14h",
+    "at": "2026-10-12T10:20:00.000Z",
+    "by": "Conta osi",
+    "actorId": "osi",
+    "source": "tarologist",
+    "date": "2026-10-12",
+    "subject": "Escala",
+    "startDate": "2026-10-12",
+    "endDate": "2026-10-12"
+   },
+   "conta": "adm",
+   "ok": true
+  },
+  {
+   "nota": {
+    "id": "n28",
+    "tarotId": "osiris",
+    "tarot": "Osíris",
+    "text": "Chego às 14h",
+    "at": "2026-10-12T10:20:00.000Z",
+    "by": "Conta osi",
+    "actorId": "osi",
+    "source": "tarologist",
+    "date": "2026-10-12",
+    "subject": "Escala",
+    "startDate": "2026-10-12",
+    "endDate": "2026-10-12"
+   },
+   "conta": "ass",
+   "ok": true
+  },
+  {
+   "nota": {
+    "id": "n28",
+    "tarotId": "osiris",
+    "tarot": "Osíris",
+    "text": "Chego às 14h",
+    "at": "2026-10-12T10:20:00.000Z",
+    "by": "Conta osi",
+    "actorId": "osi",
+    "source": "tarologist",
+    "date": "2026-10-12",
+    "subject": "Escala",
+    "startDate": "2026-10-12",
+    "endDate": "2026-10-12"
+   },
+   "conta": "sup",
+   "ok": true
+  },
+  {
+   "nota": {
+    "id": "n28",
+    "tarotId": "osiris",
+    "tarot": "Osíris",
+    "text": "Chego às 14h",
+    "at": "2026-10-12T10:20:00.000Z",
+    "by": "Conta osi",
+    "actorId": "osi",
+    "source": "tarologist",
+    "date": "2026-10-12",
+    "subject": "Escala",
+    "startDate": "2026-10-12",
+    "endDate": "2026-10-12"
+   },
+   "conta": "ate",
+   "ok": true
+  },
+  {
+   "nota": {
+    "id": "n28",
+    "tarotId": "osiris",
+    "tarot": "Osíris",
+    "text": "Chego às 14h",
+    "at": "2026-10-12T10:20:00.000Z",
+    "by": "Conta osi",
+    "actorId": "osi",
+    "source": "tarologist",
+    "date": "2026-10-12",
+    "subject": "Escala",
+    "startDate": "2026-10-12",
+    "endDate": "2026-10-12"
+   },
+   "conta": "osi",
+   "ok": true
+  },
+  {
+   "nota": {
+    "id": "n28",
+    "tarotId": "osiris",
+    "tarot": "Osíris",
+    "text": "Chego às 14h",
+    "at": "2026-10-12T10:20:00.000Z",
+    "by": "Conta osi",
+    "actorId": "osi",
+    "source": "tarologist",
+    "date": "2026-10-12",
+    "subject": "Escala",
+    "startDate": "2026-10-12",
+    "endDate": "2026-10-12"
+   },
+   "conta": "nyx",
+   "ok": false
+  },
+  {
+   "nota": {
+    "id": "n32",
+    "replyToId": "base-quadro",
+    "replySequence": 1,
+    "delivery": {
+     "kind": "board",
+     "audience": "staff",
+     "senderId": "ate",
+     "recipientIds": [
+      "adm",
+      "ass",
+      "sup",
+      "ate"
+     ],
+     "excludedIds": [],
+     "label": "Toda a equipe de atendimento"
+    },
+    "subjectTarotId": "osiris",
+    "tarotId": "osiris",
+    "tarot": "Osíris",
+    "text": "Combinado",
+    "at": "2026-10-12T10:40:00.000Z",
+    "by": "Conta ate",
+    "actorId": "ate",
+    "source": "staff",
+    "date": "2026-10-12",
+    "subject": "Mudança de horário",
+    "startDate": "2026-10-12",
+    "endDate": "2026-10-12"
+   },
+   "conta": "adm",
+   "ok": true
+  },
+  {
+   "nota": {
+    "id": "n32",
+    "replyToId": "base-quadro",
+    "replySequence": 1,
+    "delivery": {
+     "kind": "board",
+     "audience": "staff",
+     "senderId": "ate",
+     "recipientIds": [
+      "adm",
+      "ass",
+      "sup",
+      "ate"
+     ],
+     "excludedIds": [],
+     "label": "Toda a equipe de atendimento"
+    },
+    "subjectTarotId": "osiris",
+    "tarotId": "osiris",
+    "tarot": "Osíris",
+    "text": "Combinado",
+    "at": "2026-10-12T10:40:00.000Z",
+    "by": "Conta ate",
+    "actorId": "ate",
+    "source": "staff",
+    "date": "2026-10-12",
+    "subject": "Mudança de horário",
+    "startDate": "2026-10-12",
+    "endDate": "2026-10-12"
+   },
+   "conta": "ass",
+   "ok": true
+  },
+  {
+   "nota": {
+    "id": "n32",
+    "replyToId": "base-quadro",
+    "replySequence": 1,
+    "delivery": {
+     "kind": "board",
+     "audience": "staff",
+     "senderId": "ate",
+     "recipientIds": [
+      "adm",
+      "ass",
+      "sup",
+      "ate"
+     ],
+     "excludedIds": [],
+     "label": "Toda a equipe de atendimento"
+    },
+    "subjectTarotId": "osiris",
+    "tarotId": "osiris",
+    "tarot": "Osíris",
+    "text": "Combinado",
+    "at": "2026-10-12T10:40:00.000Z",
+    "by": "Conta ate",
+    "actorId": "ate",
+    "source": "staff",
+    "date": "2026-10-12",
+    "subject": "Mudança de horário",
+    "startDate": "2026-10-12",
+    "endDate": "2026-10-12"
+   },
+   "conta": "sup",
+   "ok": true
+  },
+  {
+   "nota": {
+    "id": "n32",
+    "replyToId": "base-quadro",
+    "replySequence": 1,
+    "delivery": {
+     "kind": "board",
+     "audience": "staff",
+     "senderId": "ate",
+     "recipientIds": [
+      "adm",
+      "ass",
+      "sup",
+      "ate"
+     ],
+     "excludedIds": [],
+     "label": "Toda a equipe de atendimento"
+    },
+    "subjectTarotId": "osiris",
+    "tarotId": "osiris",
+    "tarot": "Osíris",
+    "text": "Combinado",
+    "at": "2026-10-12T10:40:00.000Z",
+    "by": "Conta ate",
+    "actorId": "ate",
+    "source": "staff",
+    "date": "2026-10-12",
+    "subject": "Mudança de horário",
+    "startDate": "2026-10-12",
+    "endDate": "2026-10-12"
+   },
+   "conta": "ate",
+   "ok": true
+  },
+  {
+   "nota": {
+    "id": "n32",
+    "replyToId": "base-quadro",
+    "replySequence": 1,
+    "delivery": {
+     "kind": "board",
+     "audience": "staff",
+     "senderId": "ate",
+     "recipientIds": [
+      "adm",
+      "ass",
+      "sup",
+      "ate"
+     ],
+     "excludedIds": [],
+     "label": "Toda a equipe de atendimento"
+    },
+    "subjectTarotId": "osiris",
+    "tarotId": "osiris",
+    "tarot": "Osíris",
+    "text": "Combinado",
+    "at": "2026-10-12T10:40:00.000Z",
+    "by": "Conta ate",
+    "actorId": "ate",
+    "source": "staff",
+    "date": "2026-10-12",
+    "subject": "Mudança de horário",
+    "startDate": "2026-10-12",
+    "endDate": "2026-10-12"
+   },
+   "conta": "osi",
+   "ok": false
+  },
+  {
+   "nota": {
+    "id": "n32",
+    "replyToId": "base-quadro",
+    "replySequence": 1,
+    "delivery": {
+     "kind": "board",
+     "audience": "staff",
+     "senderId": "ate",
+     "recipientIds": [
+      "adm",
+      "ass",
+      "sup",
+      "ate"
+     ],
+     "excludedIds": [],
+     "label": "Toda a equipe de atendimento"
+    },
+    "subjectTarotId": "osiris",
+    "tarotId": "osiris",
+    "tarot": "Osíris",
+    "text": "Combinado",
+    "at": "2026-10-12T10:40:00.000Z",
+    "by": "Conta ate",
+    "actorId": "ate",
+    "source": "staff",
+    "date": "2026-10-12",
+    "subject": "Mudança de horário",
+    "startDate": "2026-10-12",
+    "endDate": "2026-10-12"
+   },
+   "conta": "nyx",
+   "ok": false
+  }
+ ]
+}

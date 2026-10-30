@@ -1,0 +1,96 @@
+const { Router } = require('express');
+const authRoutes = require('../features/auth/auth.routes');
+const chatwootRoutes = require('../features/chatwoot/chatwoot.routes');
+const evolutionRoutes = require('../features/evolution/evolution.routes');
+const specialistsRoutes = require('../features/specialists/specialists.routes');
+const sessionsRoutes = require('../features/sessions/sessions.routes');
+const paymentsRoutes = require('../features/payments/payments.routes');
+const configRoutes = require('../features/config/config.routes');
+const queuesRoutes = require('../features/queues/queues.routes');
+const adminRoutes = require('../features/admin/admin.routes');
+const payoutsRoutes = require('../features/payouts/payouts.routes');
+const diariesRoutes = require('../features/diaries/diaries.routes');
+const accountRecoveryRoutes = require('../features/account-recovery/account-recovery.routes');
+const specialistCandidatesPublicRoutes = require('../features/specialist-candidates/specialist-candidates.public.routes');
+const jobApplicationsPublicRoutes = require('../features/job-applications/job-applications.public.routes');
+const gestaoFadas = require('../gestao-fadas');
+/**
+ * Módulo `features/telecom` (Intelbras/WideVoice) está **desativado**.
+ * Ver `src/features/telecom/DESATIVADO.md`. Tempo real consolidado em Agora.io.
+ */
+const { responderSucesso } = require('../utils/response.util');
+const { API_VERSION_SEMVER } = require('../config/version');
+
+const router = Router();
+
+router.use('/v1/auth', authRoutes);
+router.use('/v1/config', configRoutes);
+router.use('/v1/chatwoot', chatwootRoutes);
+router.use('/v1/evolution-admin', evolutionRoutes);
+router.use('/v1/specialists', specialistsRoutes);
+router.use('/v1/sessions', sessionsRoutes);
+router.use('/v1/payments', paymentsRoutes);
+router.use('/v1/queues', queuesRoutes);
+router.use('/v1/admin', adminRoutes);
+router.use('/v1/payouts', payoutsRoutes);
+router.use('/v1/diaries', diariesRoutes);
+router.use('/v1/account-recovery', accountRecoveryRoutes);
+router.use('/v1/public/tarologa', specialistCandidatesPublicRoutes);
+router.use('/v1/public/jobs', jobApplicationsPublicRoutes);
+
+/** Sistema B (Gestão Fadas) sobre o banco legado: só monta com GESTAO_FADAS_ENABLED=true. */
+if (gestaoFadas.moduloHabilitado()) {
+  router.use(gestaoFadas.PREFIXO, gestaoFadas.routes);
+}
+
+router.get('/ping', (_req, res) => {
+  return responderSucesso(
+    res,
+    { pong: true, versao: API_VERSION_SEMVER },
+    'pong',
+    200
+  );
+});
+
+router.get('/v1/ping', (_req, res) => {
+  return responderSucesso(
+    res,
+    { pong: true, versao: API_VERSION_SEMVER },
+    'pong',
+    200
+  );
+});
+
+router.get('/health', (_req, res) => {
+  const anthropicApiKeyPresent = Boolean(
+    process.env.ANTHROPIC_API_KEY && String(process.env.ANTHROPIC_API_KEY).trim()
+  );
+  return responderSucesso(
+    res,
+    {
+      servico: 'fadasdobem-api',
+      versao: API_VERSION_SEMVER,
+      modulo: 'api',
+      agrupamento: '/',
+      anthropic_api_key_configurada: anthropicApiKeyPresent,
+    },
+    'API disponível.',
+    200
+  );
+});
+
+router.get('/v1/health', (_req, res) => {
+  return responderSucesso(
+    res,
+    {
+      ok: true,
+      servico: 'fadasdobem-api',
+      versao: API_VERSION_SEMVER,
+      rotas: 'v1',
+    },
+    'Confirmação de rotas versionadas bem-sucedida.',
+    200
+  );
+});
+
+module.exports = router;

@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Fila Socket — smoke test local</title>
+  <style>
+    :root {
+      font-family: system-ui, sans-serif;
+      background: #0f1117;
+      color: #e8eaef;
+      line-height: 1.35;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 720px;
+      padding: 1.25rem;
+    }
+    h1 {
+      font-size: 1.15rem;
+      font-weight: 600;
+      margin: 0 0 1rem;
+    }
+    label {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      margin-bottom: 0.85rem;
+      font-size: 0.92rem;
+    }
+    input {
+      padding: 0.5rem 0.65rem;
+      border-radius: 6px;
+      border: 1px solid #2a3244;
+      background: #1a2130;
+      color: inherit;
+      font-size: 0.95rem;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.85rem;
+    }
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.55rem;
+      margin: 0.85rem 0 1rem;
+    }
+    button {
+      cursor: pointer;
+      border-radius: 6px;
+      border: 1px solid #3d4863;
+      background: #252f45;
+      color: #dce2f6;
+      padding: 0.45rem 0.85rem;
+      font-size: 0.92rem;
+    }
+    button:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+    textarea {
+      width: 100%;
+      min-height: 220px;
+      box-sizing: border-box;
+      border-radius: 8px;
+      border: 1px solid #2a3244;
+      padding: 0.65rem;
+      background: #131822;
+      color: #b8cad9;
+      font-family: ui-monospace, monospace;
+      font-size: 0.78rem;
+    }
+    .hint {
+      font-size: 0.82rem;
+      color: #8b96a8;
+      margin-bottom: 0.75rem;
+    }
+    .pill {
+      font-size: 0.74rem;
+      background: #1e2636;
+      border-radius: 4px;
+      padding: 0.15rem 0.35rem;
+    }
+  </style>
+  <script src="https://cdn.socket.io/4.7.4/socket.io.min.js" defer></script>
+</head>
+<body>
+  <h1>Fila ao vivo · teste rápido (Socket.io)</h1>
+  <p class="hint">
+    Sirva pela mesma origem da API (ex.: <span class="pill">http://localhost:3000/socket-queue-test.html</span>)
+    para partilhar JWT e sessão WS sem CORS frágil.
+  </p>
+
+  <label>
+    API URL (origem só, sem <code>/api</code>)
+    <input id="apiUrl" value="http://localhost:3000" autocomplete="off" />
+  </label>
+
+  <div class="grid">
+    <label>Email <input id="email" type="email" placeholder="cliente@teste.pt" autocomplete="username" /></label>
+    <label>Senha <input id="password" type="password" autocomplete="current-password" /></label>
+    <label style="grid-column: span 2">Specialist ID (UUID) <input id="specialistId" autocomplete="off" /></label>
+  </div>
+
+  <div class="actions">
+    <button type="button" id="btnLogin">1. Login</button>
+    <button type="button" id="btnSocket" disabled>2. Conectar Socket</button>
+    <button type="button" id="btnSubscribe" disabled>3. Subscrever fila taróloga</button>
+    <button type="button" id="btnJoinQueue" disabled>4. Entrar na fila (POST)</button>
+    <button type="button" id="btnDisconnect" disabled>Desligar WS</button>
+  </div>
+
+  <label> Log
+    <textarea id="log" readonly></textarea>
+  </label>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    let accessToken = '';
+    let socket = null;
+
+    function log(...args) {
+      const ln = '[' + new Date().toISOString() + '] ' + args.join(' ');
+      $('log').value += ln + '\n';
+      $('log').scrollTop = $('log').scrollHeight;
+    }
+
+    function apiBase() {
+      return $('apiUrl').value.replace(/\/+$/, '');
+    }
+
+    $('btnLogin').addEventListener('click', async () => {
+      $('log').value = '';
+      const email = $('email').value.trim();
+      const password = $('password').value;
+      if (!email || !password) {
+        log('Preencha email e senha.');
+        return;
+      }
+      try {
+        const url = `${apiBase()}/api/v1/auth/login`;
+        log('POST', url);
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password }),
+        });
+        const j = await res.json().catch(() => ({}));
+        if (!j.sucesso || !j.dados?.access_token) {
+          log('Login falhou', res.status, JSON.stringify(j, null, 2));
+          return;
+        }
+        accessToken = j.dados.access_token;
+        log('Login OK · access_token gravado.', 'role?', j.dados.usuario?.role ?? '?');
+        $('btnSocket').disabled = false;
+        $('btnJoinQueue').disabled = false;
+      } catch (e) {
+        log('Erro rede login:', String(e.message || e));
+      }
+    });
+
+    $('btnSocket').addEventListener('click', () => {
+      if (socket && socket.connected) {
+        log('Socket já ligado.');
+        return;
+      }
+      if (!accessToken) {
+        log('Faça login primeiro.');
+        return;
+      }
+      if (typeof io === 'undefined') {
+        log('Socket.io cliente não carregou (CDN).');
+        return;
+      }
+      const origin = apiBase();
+      log('Ligando a', origin, '…');
+
+      socket = io(origin, {
+        path: '/socket.io/',
+        auth: { token: accessToken },
+        transports: ['websocket', 'polling'],
+      });
+
+      socket.on('connect', () => {
+        log('WS connect', socket.id);
+        $('btnSubscribe').disabled = false;
+        $('btnDisconnect').disabled = false;
+      });
+      socket.on('authenticated', (p) => log('authenticated', JSON.stringify(p)));
+      socket.on('queue_updated', (p) => log('«queue_updated»', JSON.stringify(p)));
+      socket.on('turn_started', (p) => log('«turn_started»', JSON.stringify(p)));
+      socket.on('subscribed_specialist_queue', (p) => log('subscribed', JSON.stringify(p)));
+      socket.on('connect_error', (e) => log('connect_error', e?.message || e));
+      socket.on('disconnect', (r) => log('disconnect', r));
+      socket.on('error', (e) => log('socket error evt', typeof e === 'object' ? JSON.stringify(e) : e));
+    });
+
+    $('btnSubscribe').addEventListener('click', () => {
+      const specialistId = $('specialistId').value.trim();
+      if (!socket?.connected) {
+        log('Conecte o socket primeiro.');
+        return;
+      }
+      const uuidRx = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+      if (!uuidRx.test(specialistId)) {
+        log('specialist UUID inválido.');
+        return;
+      }
+      socket.emit('subscribe_specialist_queue', specialistId);
+      log('emit subscribe_specialist_queue', specialistId);
+    });
+
+    $('btnJoinQueue').addEventListener('click', async () => {
+      const specialistId = $('specialistId').value.trim();
+      if (!accessToken) {
+        log('Login primeiro.');
+        return;
+      }
+      try {
+        const url = `${apiBase()}/api/v1/queues`;
+        log('POST', url);
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: {
+            Authorization: 'Bearer ' + accessToken,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            specialist_id: specialistId,
+            preferred_modality: 'VIDEO',
+          }),
+        });
+        const j = await res.json().catch(() => ({}));
+        log('Resposta enqueue', res.status, JSON.stringify(j, null, 2));
+      } catch (e) {
+        log('Erro POST fila:', String(e.message || e));
+      }
+    });
+
+    $('btnDisconnect').addEventListener('click', () => {
+      if (!socket) return;
+      socket.disconnect();
+      socket = null;
+      $('btnSubscribe').disabled = true;
+      $('btnDisconnect').disabled = true;
+      log('disconnect manual');
+    });
+  </script>
+</body>
+</html>

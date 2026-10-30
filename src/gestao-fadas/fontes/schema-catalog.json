@@ -1,0 +1,1851 @@
+{
+  "source": "ddl_tabelas(2).sql",
+  "schema": "fadasdobem",
+  "tables": {
+    "tbl_consultas": {
+      "engine": "MyISAM",
+      "columns": {
+        "idConsulta": {
+          "type": "int(11)",
+          "nullable": false,
+          "definition": "int(11) NOT NULL AUTO_INCREMENT"
+        },
+        "idUsuario": {
+          "type": "int(11)",
+          "nullable": false,
+          "definition": "int(11) NOT NULL DEFAULT '0'"
+        },
+        "dtConsulta": {
+          "type": "datetime",
+          "nullable": false,
+          "definition": "datetime NOT NULL"
+        },
+        "iniConsulta": {
+          "type": "datetime",
+          "nullable": false,
+          "definition": "datetime NOT NULL"
+        },
+        "fimConsulta": {
+          "type": "datetime",
+          "nullable": false,
+          "definition": "datetime NOT NULL"
+        },
+        "tmpConsulta": {
+          "type": "int(8)",
+          "nullable": true,
+          "definition": "int(8) DEFAULT NULL"
+        },
+        "idTarologo": {
+          "type": "int(11)",
+          "nullable": false,
+          "definition": "int(11) NOT NULL"
+        },
+        "idFormaConsulta": {
+          "type": "int(11)",
+          "nullable": false,
+          "definition": "int(11) NOT NULL"
+        },
+        "idFormaPagto": {
+          "type": "int(11)",
+          "nullable": false,
+          "definition": "int(11) NOT NULL"
+        },
+        "obsConsulta": {
+          "type": "text",
+          "nullable": false,
+          "definition": "text CHARACTER SET utf8 NOT NULL"
+        },
+        "dtVencto": {
+          "type": "datetime",
+          "nullable": false,
+          "definition": "datetime NOT NULL"
+        },
+        "vlDesconto": {
+          "type": "int(3)",
+          "nullable": false,
+          "definition": "int(3) NOT NULL DEFAULT '0'"
+        },
+        "vlBonus": {
+          "type": "int(3)",
+          "nullable": false,
+          "definition": "int(3) NOT NULL DEFAULT '0'"
+        },
+        "nmuAtendente": {
+          "type": "varchar(25)",
+          "nullable": false,
+          "definition": "varchar(25) CHARACTER SET utf8 NOT NULL"
+        },
+        "atendenteFinalizou": {
+          "type": "varchar(25)",
+          "nullable": false,
+          "definition": "varchar(25) CHARACTER SET utf8 NOT NULL"
+        },
+        "IDProdutoConsulta": {
+          "type": "int(11)",
+          "nullable": true,
+          "definition": "int(11) DEFAULT '1'"
+        },
+        "dtManutencao": {
+          "type": "timestamp",
+          "nullable": true,
+          "definition": "timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"
+        },
+        "abatimento": {
+          "type": "decimal(20,2)",
+          "nullable": false,
+          "definition": "decimal(20,2) NOT NULL DEFAULT '0.00'"
+        },
+        "vlPre": {
+          "type": "decimal(20,2)",
+          "nullable": false,
+          "definition": "decimal(20,2) NOT NULL DEFAULT '0.00'"
+        },
+        "saldo": {
+          "type": "decimal(20,2)",
+          "nullable": false,
+          "definition": "decimal(20,2) NOT NULL DEFAULT '0.00'"
+        },
+        "emailCobranca": {
+          "type": "tinyint(1)",
+          "nullable": false,
+          "definition": "tinyint(1) NOT NULL DEFAULT '0' COMMENT 'Foi enviado email de crobrança'"
+        },
+        "valor_consulta": {
+          "type": "decimal(20,2)",
+          "nullable": false,
+          "definition": "decimal(20,2) NOT NULL"
+        },
+        "enviado": {
+          "type": "int(1)",
+          "nullable": false,
+          "definition": "int(1) NOT NULL DEFAULT '0'"
+        }
+      },
+      "constraints": [
+        "PRIMARY KEY (`idConsulta`)",
+        "KEY `idFormaConsulta` (`idFormaConsulta`)",
+        "KEY `idFormaPagto` (`idFormaPagto`)",
+        "KEY `IDProdutoConsulta` (`IDProdutoConsulta`)",
+        "KEY `idTarologo` (`idTarologo`)",
+        "KEY `idUsuario` (`idUsuario`)"
+      ]
+    },
+    "tbl_tarologos": {
+      "engine": "MyISAM",
+      "columns": {
+        "idTarologo": {
+          "type": "int(11)",
+          "nullable": false,
+          "definition": "int(11) NOT NULL AUTO_INCREMENT"
+        },
+        "ativo": {
+          "type": "tinyint(1)",
+          "nullable": false,
+          "definition": "tinyint(1) NOT NULL DEFAULT '1'"
+        },
+        "nmuTarologo": {
+          "type": "varchar(35)",
+          "nullable": true,
+          "definition": "varchar(35) CHARACTER SET utf8 DEFAULT NULL"
+        },
+        "nmcTarologo": {
+          "type": "varchar(100)",
+          "nullable": true,
+          "definition": "varchar(100) CHARACTER SET utf8 DEFAULT NULL"
+        },
+        "vlCartao": {
+          "type": "decimal(3,2)",
+          "nullable": false,
+          "definition": "decimal(3,2) NOT NULL DEFAULT '0.60'"
+        },
+        "vlPgtoNormal": {
+          "type": "decimal(3,2)",
+          "nullable": false,
+          "definition": "decimal(3,2) NOT NULL DEFAULT '0.60'"
+        },
+        "Ramal": {
+          "type": "int(11)",
+          "nullable": false,
+          "definition": "int(11) NOT NULL"
+        },
+        "sexo": {
+          "type": "varchar(1)",
+          "nullable": false,
+          "definition": "varchar(1) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'a'"
+        },
+        "oid": {
+          "type": "int(2)",
+          "nullable": false,
+          "definition": "int(2) NOT NULL"
+        },
+        "avatar": {
+          "type": "varchar(35)",
+          "nullable": true,
+          "definition": "varchar(35) COLLATE utf8_unicode_ci DEFAULT NULL"
+        },
+        "imagem_nome": {
+          "type": "varchar(35)",
+          "nullable": true,
+          "definition": "varchar(35) COLLATE utf8_unicode_ci DEFAULT NULL"
+        },
+        "desc_info": {
+          "type": "text",
+          "nullable": true,
+          "definition": "text COLLATE utf8_unicode_ci"
+        },
+        "bg_oraculos": {
+          "type": "varchar(35)",
+          "nullable": true,
+          "definition": "varchar(35) COLLATE utf8_unicode_ci DEFAULT NULL"
+        },
+        "exibir": {
+          "type": "int(11)",
+          "nullable": false,
+          "definition": "int(11) NOT NULL DEFAULT '0'"
+        },
+        "mural": {
+          "type": "text",
+          "nullable": true,
+          "definition": "text COLLATE utf8_unicode_ci"
+        },
+        "email": {
+          "type": "varchar(100)",
+          "nullable": true,
+          "definition": "varchar(100) COLLATE utf8_unicode_ci DEFAULT NULL"
+        },
+        "texto_oraculo": {
+          "type": "text",
+          "nullable": true,
+          "definition": "text COLLATE utf8_unicode_ci"
+        },
+        "meus_horarios": {
+          "type": "text",
+          "nullable": true,
+          "definition": "text COLLATE utf8_unicode_ci"
+        },
+        "desc_oraculos": {
+          "type": "varchar(100)",
+          "nullable": true,
+          "definition": "varchar(100) COLLATE utf8_unicode_ci DEFAULT NULL"
+        },
+        "mini_index": {
+          "type": "varchar(100)",
+          "nullable": true,
+          "definition": "varchar(100) COLLATE utf8_unicode_ci DEFAULT NULL"
+        },
+        "mini_interna": {
+          "type": "varchar(100)",
+          "nullable": true,
+          "definition": "varchar(100) COLLATE utf8_unicode_ci DEFAULT NULL"
+        },
+        "status": {
+          "type": "int(10) unsigned",
+          "nullable": true,
+          "definition": "int(10) unsigned DEFAULT '1'"
+        },
+        "pass": {
+          "type": "varchar(45)",
+          "nullable": true,
+          "definition": "varchar(45) COLLATE utf8_unicode_ci DEFAULT NULL"
+        }
+      },
+      "constraints": [
+        "PRIMARY KEY (`idTarologo`)"
+      ]
+    },
+    "tbl_pagtoinformado": {
+      "engine": "MyISAM",
+      "columns": {
+        "idPagtoInformado": {
+          "type": "int(11)",
+          "nullable": false,
+          "definition": "int(11) NOT NULL AUTO_INCREMENT"
+        },
+        "idUsuario": {
+          "type": "int(11)",
+          "nullable": false,
+          "definition": "int(11) NOT NULL"
+        },
+        "dtPagtoInformado": {
+          "type": "datetime",
+          "nullable": false,
+          "definition": "datetime NOT NULL"
+        },
+        "vlPagtoInformado": {
+          "type": "decimal(20,2)",
+          "nullable": true,
+          "definition": "decimal(20,2) DEFAULT '0.00'"
+        },
+        "autPagtoInformado": {
+          "type": "varchar(100)",
+          "nullable": false,
+          "definition": "varchar(100) CHARACTER SET utf8 NOT NULL"
+        },
+        "idBanco": {
+          "type": "int(11)",
+          "nullable": true,
+          "definition": "int(11) DEFAULT NULL"
+        },
+        "idFormaPagto": {
+          "type": "int(11)",
+          "nullable": false,
+          "definition": "int(11) NOT NULL"
+        },
+        "obsPagtoInformado": {
+          "type": "text",
+          "nullable": false,
+          "definition": "text CHARACTER SET utf8 NOT NULL"
+        },
+        "nmuAtendente": {
+          "type": "varchar(25)",
+          "nullable": false,
+          "definition": "varchar(25) CHARACTER SET utf8 NOT NULL"
+        },
+        "status": {
+          "type": "varchar(250)",
+          "nullable": false,
+          "definition": "varchar(250) CHARACTER SET utf8 NOT NULL DEFAULT 'informado'"
+        },
+        "dt_criado": {
+          "type": "timestamp",
+          "nullable": false,
+          "definition": "timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP"
+        },
+        "id_status_pagto": {
+          "type": "int(10) unsigned",
+          "nullable": false,
+          "definition": "int(10) unsigned NOT NULL"
+        },
+        "id_bandeira_cartao": {
+          "type": "int(10) unsigned",
+          "nullable": true,
+          "definition": "int(10) unsigned DEFAULT NULL"
+        },
+        "parcelas": {
+          "type": "int(10) unsigned",
+          "nullable": true,
+          "definition": "int(10) unsigned DEFAULT '1'"
+        }
+      },
+      "constraints": [
+        "PRIMARY KEY (`idPagtoInformado`)",
+        "KEY `idBanco` (`idBanco`)",
+        "KEY `idFormaPagto` (`idFormaPagto`)",
+        "KEY `idUsuario` (`idUsuario`)"
+      ]
+    },
+    "wp_mail_bank_logs": {
+      "engine": "MyISAM",
+      "columns": {
+        "id": {
+          "type": "int(11)",
+          "nullable": false,
+          "definition": "int(11) NOT NULL AUTO_INCREMENT"
+        },
+        "email_to": {
+          "type": "varchar(200)",
+          "nullable": true,
+          "definition": "varchar(200) COLLATE utf8mb4_unicode_ci DEFAULT NULL"
+        },
+        "cc": {
+          "type": "varchar(200)",
+          "nullable": true,
+          "definition": "varchar(200) COLLATE utf8mb4_unicode_ci DEFAULT NULL"
+        },
+        "bcc": {
+          "type": "varchar(200)",
+          "nullable": true,
+          "definition": "varchar(200) COLLATE utf8mb4_unicode_ci DEFAULT NULL"
+        },
+        "subject": {
+          "type": "longtext",
+          "nullable": true,
+          "definition": "longtext COLLATE utf8mb4_unicode_ci"
+        },
+        "content": {
+          "type": "longtext",
+          "nullable": true,
+          "definition": "longtext COLLATE utf8mb4_unicode_ci"
+        },
+        "sender_name": {
+          "type": "varchar(200)",
+          "nullable": true,
+          "definition": "varchar(200) COLLATE utf8mb4_unicode_ci DEFAULT NULL"
+        },
+        "sender_email": {
+          "type": "varchar(200)",
+          "nullable": true,
+          "definition": "varchar(200) COLLATE utf8mb4_unicode_ci DEFAULT NULL"
+        },
+        "debug_mode": {
+          "type": "varchar(50)",
+          "nullable": true,
+          "definition": "varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL"
+        },
+        "debugging_output": {
+          "type": "longtext",
+          "nullable": true,
+          "definition": "longtext COLLATE utf8mb4_unicode_ci"
+        },
+        "timestamp": {
+          "type": "int(20)",
+          "nullable": true,
+          "definition": "int(20) DEFAULT NULL"
+        },
+        "status": {
+          "type": "varchar(10)",
+          "nullable": true,
+          "definition": "varchar(10) COLLATE utf8mb4_unicode_ci DEFAULT NULL"
+        }
+      },
+      "constraints": [
+        "PRIMARY KEY (`id`)"
+      ]
+    },
+    "usuarios": {
+      "engine": "InnoDB",
+      "columns": {
+        "id": {
+          "type": "int(11)",
+          "nullable": false,
+          "definition": "int(11) NOT NULL AUTO_INCREMENT"
+        },
+        "data_cadastro": {
+          "type": "timestamp",
+          "nullable": false,
+          "definition": "timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP"
+        },
+        "nome2": {
+          "type": "varchar(50)",
+          "nullable": false,
+          "definition": "varchar(50) COLLATE utf8_unicode_ci NOT NULL"
+        },
+        "apelido": {
+          "type": "varchar(50)",
+          "nullable": false,
+          "definition": "varchar(50) COLLATE utf8_unicode_ci NOT NULL"
+        },
+        "nome": {
+          "type": "varchar(255)",
+          "nullable": false,
+          "definition": "varchar(255) COLLATE utf8_unicode_ci NOT NULL"
+        },
+        "tempo": {
+          "type": "int(11)",
+          "nullable": true,
+          "definition": "int(11) DEFAULT '0'"
+        },
+        "login": {
+          "type": "varchar(50)",
+          "nullable": false,
+          "definition": "varchar(50) COLLATE utf8_unicode_ci NOT NULL"
+        },
+        "senha": {
+          "type": "varchar(50)",
+          "nullable": false,
+          "definition": "varchar(50) COLLATE utf8_unicode_ci NOT NULL"
+        },
+        "nomedesolteiro": {
+          "type": "varchar(50)",
+          "nullable": false,
+          "definition": "varchar(50) COLLATE utf8_unicode_ci NOT NULL"
+        },
+        "cidadedenascimento": {
+          "type": "varchar(50)",
+          "nullable": false,
+          "definition": "varchar(50) COLLATE utf8_unicode_ci NOT NULL"
+        },
+        "complemento": {
+          "type": "varchar(50)",
+          "nullable": false,
+          "definition": "varchar(50) COLLATE utf8_unicode_ci NOT NULL"
+        },
+        "endereco": {
+          "type": "varchar(250)",
+          "nullable": false,
+          "definition": "varchar(250) COLLATE utf8_unicode_ci NOT NULL"
+        },
+        "numero": {
+          "type": "varchar(50)",
+          "nullable": false,
+          "definition": "varchar(50) COLLATE utf8_unicode_ci NOT NULL"
+        },
+        "bairro": {
+          "type": "varchar(50)",
+          "nullable": false,
+          "definition": "varchar(50) COLLATE utf8_unicode_ci NOT NULL"
+        },
+        "cidade": {
+          "type": "varchar(50)",
+          "nullable": false,
+          "definition": "varchar(50) COLLATE utf8_unicode_ci NOT NULL"
+        },
+        "estado": {
+          "type": "varchar(50)",
+          "nullable": false,
+          "definition": "varchar(50) COLLATE utf8_unicode_ci NOT NULL"
+        },
+        "pais": {
+          "type": "int(11)",
+          "nullable": true,
+          "definition": "int(11) DEFAULT '1'"
+        },
+        "ddd": {
+          "type": "varchar(50)",
+          "nullable": false,
+          "definition": "varchar(50) COLLATE utf8_unicode_ci NOT NULL"
+        },
+        "ddd_real": {
+          "type": "int(2)",
+          "nullable": false,
+          "definition": "int(2) NOT NULL"
+        },
+        "telresidencial": {
+          "type": "varchar(50)",
+          "nullable": false,
+          "definition": "varchar(50) COLLATE utf8_unicode_ci NOT NULL"
+        },
+        "telcomercial": {
+          "type": "varchar(50)",
+          "nullable": false,
+          "definition": "varchar(50) COLLATE utf8_unicode_ci NOT NULL"
+        },
+        "cel": {
+          "type": "varchar(50)",
+          "nullable": true,
+          "definition": "varchar(50) CHARACTER SET utf8 DEFAULT NULL"
+        },
+        "rg": {
+          "type": "varchar(50)",
+          "nullable": false,
+          "definition": "varchar(50) COLLATE utf8_unicode_ci NOT NULL"
+        },
+        "cpf": {
+          "type": "varchar(50)",
+          "nullable": false,
+          "definition": "varchar(50) COLLATE utf8_unicode_ci NOT NULL"
+        },
+        "datanascimento": {
+          "type": "datetime",
+          "nullable": false,
+          "definition": "datetime NOT NULL"
+        },
+        "horanascimento": {
+          "type": "datetime",
+          "nullable": false,
+          "definition": "datetime NOT NULL"
+        },
+        "email": {
+          "type": "varchar(50)",
+          "nullable": false,
+          "definition": "varchar(50) COLLATE utf8_unicode_ci NOT NULL"
+        },
+        "mensagem": {
+          "type": "text",
+          "nullable": false,
+          "definition": "text COLLATE utf8_unicode_ci NOT NULL"
+        },
+        "credito": {
+          "type": "tinyint(4)",
+          "nullable": true,
+          "definition": "tinyint(4) DEFAULT '0'"
+        },
+        "sexo": {
+          "type": "tinyint(4)",
+          "nullable": false,
+          "definition": "tinyint(4) NOT NULL"
+        },
+        "nivel": {
+          "type": "int(11)",
+          "nullable": true,
+          "definition": "int(11) DEFAULT '0'"
+        },
+        "chat": {
+          "type": "tinyint(4)",
+          "nullable": false,
+          "definition": "tinyint(4) NOT NULL"
+        },
+        "tel": {
+          "type": "tinyint(4)",
+          "nullable": false,
+          "definition": "tinyint(4) NOT NULL"
+        },
+        "skype": {
+          "type": "tinyint(4)",
+          "nullable": false,
+          "definition": "tinyint(4) NOT NULL"
+        },
+        "manha": {
+          "type": "tinyint(4)",
+          "nullable": false,
+          "definition": "tinyint(4) NOT NULL"
+        },
+        "tarde": {
+          "type": "tinyint(4)",
+          "nullable": false,
+          "definition": "tinyint(4) NOT NULL"
+        },
+        "noite": {
+          "type": "tinyint(4)",
+          "nullable": false,
+          "definition": "tinyint(4) NOT NULL"
+        },
+        "manhaobs": {
+          "type": "text",
+          "nullable": false,
+          "definition": "text COLLATE utf8_unicode_ci NOT NULL"
+        },
+        "tardeobs": {
+          "type": "text",
+          "nullable": false,
+          "definition": "text COLLATE utf8_unicode_ci NOT NULL"
+        },
+        "noiteobs": {
+          "type": "text",
+          "nullable": false,
+          "definition": "text COLLATE utf8_unicode_ci NOT NULL"
+        },
+        "cep": {
+          "type": "varchar(50)",
+          "nullable": false,
+          "definition": "varchar(50) COLLATE utf8_unicode_ci NOT NULL"
+        },
+        "observacoes": {
+          "type": "text",
+          "nullable": false,
+          "definition": "text COLLATE utf8_unicode_ci NOT NULL"
+        },
+        "ddi": {
+          "type": "int(11)",
+          "nullable": false,
+          "definition": "int(11) NOT NULL"
+        },
+        "categoria": {
+          "type": "int(11)",
+          "nullable": true,
+          "definition": "int(11) DEFAULT '0'"
+        },
+        "nome_id": {
+          "type": "varchar(50)",
+          "nullable": false,
+          "definition": "varchar(50) COLLATE utf8_unicode_ci NOT NULL"
+        },
+        "status_cpf_id": {
+          "type": "int(11)",
+          "nullable": false,
+          "definition": "int(11) NOT NULL"
+        },
+        "fone_observacoes": {
+          "type": "text",
+          "nullable": false,
+          "definition": "text COLLATE utf8_unicode_ci NOT NULL"
+        },
+        "email_correto": {
+          "type": "tinyint(4)",
+          "nullable": true,
+          "definition": "tinyint(4) DEFAULT '1'"
+        },
+        "email2": {
+          "type": "varchar(100)",
+          "nullable": false,
+          "definition": "varchar(100) COLLATE utf8_unicode_ci NOT NULL"
+        },
+        "msn_user": {
+          "type": "varchar(100)",
+          "nullable": false,
+          "definition": "varchar(100) COLLATE utf8_unicode_ci NOT NULL"
+        },
+        "Twitter_user": {
+          "type": "varchar(100)",
+          "nullable": false,
+          "definition": "varchar(100) COLLATE utf8_unicode_ci NOT NULL"
+        },
+        "Skype_user": {
+          "type": "varchar(100)",
+          "nullable": false,
+          "definition": "varchar(100) COLLATE utf8_unicode_ci NOT NULL"
+        },
+        "ligouParaMarcar": {
+          "type": "tinyint(4)",
+          "nullable": true,
+          "definition": "tinyint(4) DEFAULT '0'"
+        },
+        "resultadoLigouMarcar": {
+          "type": "varchar(255)",
+          "nullable": false,
+          "definition": "varchar(255) COLLATE utf8_unicode_ci NOT NULL"
+        },
+        "ligouParaCompletar": {
+          "type": "tinyint(4)",
+          "nullable": true,
+          "definition": "tinyint(4) DEFAULT '0'"
+        },
+        "resultadoLigouCompletar": {
+          "type": "varchar(255)",
+          "nullable": false,
+          "definition": "varchar(255) COLLATE utf8_unicode_ci NOT NULL"
+        },
+        "ufNascimento": {
+          "type": "varchar(2)",
+          "nullable": false,
+          "definition": "varchar(2) COLLATE utf8_unicode_ci NOT NULL"
+        },
+        "IDpaisNascimento": {
+          "type": "int(11)",
+          "nullable": false,
+          "definition": "int(11) NOT NULL"
+        },
+        "buscaNaReceita": {
+          "type": "text",
+          "nullable": false,
+          "definition": "text COLLATE utf8_unicode_ci NOT NULL"
+        },
+        "idPais": {
+          "type": "int(11)",
+          "nullable": false,
+          "definition": "int(11) NOT NULL"
+        },
+        "cidadeNascimento": {
+          "type": "varchar(100)",
+          "nullable": false,
+          "definition": "varchar(100) COLLATE utf8_unicode_ci NOT NULL"
+        },
+        "obs_liberacao": {
+          "type": "text",
+          "nullable": false,
+          "definition": "text COLLATE utf8_unicode_ci NOT NULL"
+        },
+        "saldo": {
+          "type": "decimal(20,2)",
+          "nullable": true,
+          "definition": "decimal(20,2) DEFAULT '0.00'"
+        },
+        "valorAPagar": {
+          "type": "decimal(20,2)",
+          "nullable": true,
+          "definition": "decimal(20,2) DEFAULT '0.00'"
+        },
+        "vlMinuto": {
+          "type": "decimal(20,2)",
+          "nullable": false,
+          "definition": "decimal(20,2) NOT NULL DEFAULT '1.97'"
+        },
+        "vlBonus": {
+          "type": "decimal(20,2)",
+          "nullable": false,
+          "definition": "decimal(20,2) NOT NULL DEFAULT '0.00'"
+        },
+        "vlPrepago": {
+          "type": "decimal(20,2)",
+          "nullable": false,
+          "definition": "decimal(20,2) NOT NULL DEFAULT '0.00'"
+        },
+        "vlDesconto": {
+          "type": "int(5)",
+          "nullable": false,
+          "definition": "int(5) NOT NULL DEFAULT '0'"
+        },
+        "troca_senha": {
+          "type": "tinyint(1)",
+          "nullable": false,
+          "definition": "tinyint(1) NOT NULL"
+        },
+        "data_troca_senha": {
+          "type": "date",
+          "nullable": false,
+          "definition": "date NOT NULL"
+        },
+        "email_liberacao": {
+          "type": "tinyint(1)",
+          "nullable": false,
+          "definition": "tinyint(1) NOT NULL DEFAULT '0'"
+        },
+        "email_completar": {
+          "type": "tinyint(1)",
+          "nullable": false,
+          "definition": "tinyint(1) NOT NULL DEFAULT '0'"
+        },
+        "nao_exportado": {
+          "type": "int(1)",
+          "nullable": true,
+          "definition": "int(1) DEFAULT '0'"
+        },
+        "obs_perfil": {
+          "type": "varchar(100)",
+          "nullable": false,
+          "definition": "varchar(100) COLLATE utf8_unicode_ci NOT NULL"
+        },
+        "cpf_vinculado": {
+          "type": "varchar(100)",
+          "nullable": false,
+          "definition": "varchar(100) COLLATE utf8_unicode_ci NOT NULL"
+        },
+        "id_cliente_valido": {
+          "type": "int(11)",
+          "nullable": false,
+          "definition": "int(11) NOT NULL DEFAULT '0'"
+        },
+        "email_enviado": {
+          "type": "int(11)",
+          "nullable": true,
+          "definition": "int(11) DEFAULT '0'"
+        },
+        "id_perfil_cliente": {
+          "type": "int(10) unsigned",
+          "nullable": false,
+          "definition": "int(10) unsigned NOT NULL DEFAULT '1'"
+        },
+        "avatar": {
+          "type": "varchar(255)",
+          "nullable": true,
+          "definition": "varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL"
+        },
+        "whats": {
+          "type": "varchar(45)",
+          "nullable": true,
+          "definition": "varchar(45) COLLATE utf8_unicode_ci DEFAULT NULL"
+        },
+        "cel2": {
+          "type": "varchar(45)",
+          "nullable": true,
+          "definition": "varchar(45) COLLATE utf8_unicode_ci DEFAULT NULL"
+        }
+      },
+      "constraints": [
+        "PRIMARY KEY (`id`)",
+        "KEY `data_cadastro` (`data_cadastro`)",
+        "KEY `idPais` (`idPais`)",
+        "KEY `nome_id` (`nome_id`)",
+        "KEY `status_cpf_id` (`status_cpf_id`)"
+      ]
+    },
+    "usuarios_backup": {
+      "engine": "MyISAM",
+      "columns": {
+        "id": {
+          "type": "int(11)",
+          "nullable": false,
+          "definition": "int(11) NOT NULL AUTO_INCREMENT"
+        },
+        "data_cadastro": {
+          "type": "timestamp",
+          "nullable": false,
+          "definition": "timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP"
+        },
+        "nome2": {
+          "type": "varchar(50)",
+          "nullable": false,
+          "definition": "varchar(50) COLLATE utf8_unicode_ci NOT NULL"
+        },
+        "apelido": {
+          "type": "varchar(50)",
+          "nullable": false,
+          "definition": "varchar(50) COLLATE utf8_unicode_ci NOT NULL"
+        },
+        "nome": {
+          "type": "varchar(255)",
+          "nullable": false,
+          "definition": "varchar(255) COLLATE utf8_unicode_ci NOT NULL"
+        },
+        "tempo": {
+          "type": "int(11)",
+          "nullable": true,
+          "definition": "int(11) DEFAULT '0'"
+        },
+        "login": {
+          "type": "varchar(50)",
+          "nullable": false,
+          "definition": "varchar(50) COLLATE utf8_unicode_ci NOT NULL"
+        },
+        "senha": {
+          "type": "varchar(50)",
+          "nullable": false,
+          "definition": "varchar(50) COLLATE utf8_unicode_ci NOT NULL"
+        },
+        "nomedesolteiro": {
+          "type": "varchar(50)",
+          "nullable": false,
+          "definition": "varchar(50) COLLATE utf8_unicode_ci NOT NULL"
+        },
+        "cidadedenascimento": {
+          "type": "varchar(50)",
+          "nullable": false,
+          "definition": "varchar(50) COLLATE utf8_unicode_ci NOT NULL"
+        },
+        "complemento": {
+          "type": "varchar(50)",
+          "nullable": false,
+          "definition": "varchar(50) COLLATE utf8_unicode_ci NOT NULL"
+        },
+        "endereco": {
+          "type": "varchar(250)",
+          "nullable": false,
+          "definition": "varchar(250) COLLATE utf8_unicode_ci NOT NULL"
+        },
+        "numero": {
+          "type": "varchar(50)",
+          "nullable": false,
+          "definition": "varchar(50) COLLATE utf8_unicode_ci NOT NULL"
+        },
+        "bairro": {
+          "type": "varchar(50)",
+          "nullable": false,
+          "definition": "varchar(50) COLLATE utf8_unicode_ci NOT NULL"
+        },
+        "cidade": {
+          "type": "varchar(50)",
+          "nullable": false,
+          "definition": "varchar(50) COLLATE utf8_unicode_ci NOT NULL"
+        },
+        "estado": {
+          "type": "varchar(50)",
+          "nullable": false,
+          "definition": "varchar(50) COLLATE utf8_unicode_ci NOT NULL"
+        },
+        "pais": {
+          "type": "int(11)",
+          "nullable": true,
+          "definition": "int(11) DEFAULT '1'"
+        },
+        "ddd": {
+          "type": "varchar(50)",
+          "nullable": false,
+          "definition": "varchar(50) COLLATE utf8_unicode_ci NOT NULL"
+        },
+        "ddd_real": {
+          "type": "int(2)",
+          "nullable": false,
+          "definition": "int(2) NOT NULL"
+        },
+        "telresidencial": {
+          "type": "varchar(50)",
+          "nullable": false,
+          "definition": "varchar(50) COLLATE utf8_unicode_ci NOT NULL"
+        },
+        "telcomercial": {
+          "type": "varchar(50)",
+          "nullable": false,
+          "definition": "varchar(50) COLLATE utf8_unicode_ci NOT NULL"
+        },
+        "cel": {
+          "type": "varchar(50)",
+          "nullable": true,
+          "definition": "varchar(50) CHARACTER SET utf8 DEFAULT NULL"
+        },
+        "rg": {
+          "type": "varchar(50)",
+          "nullable": false,
+          "definition": "varchar(50) COLLATE utf8_unicode_ci NOT NULL"
+        },
+        "cpf": {
+          "type": "varchar(50)",
+          "nullable": false,
+          "definition": "varchar(50) COLLATE utf8_unicode_ci NOT NULL"
+        },
+        "datanascimento": {
+          "type": "datetime",
+          "nullable": false,
+          "definition": "datetime NOT NULL"
+        },
+        "horanascimento": {
+          "type": "datetime",
+          "nullable": false,
+          "definition": "datetime NOT NULL"
+        },
+        "email": {
+          "type": "varchar(50)",
+          "nullable": false,
+          "definition": "varchar(50) COLLATE utf8_unicode_ci NOT NULL"
+        },
+        "mensagem": {
+          "type": "text",
+          "nullable": false,
+          "definition": "text COLLATE utf8_unicode_ci NOT NULL"
+        },
+        "credito": {
+          "type": "tinyint(4)",
+          "nullable": true,
+          "definition": "tinyint(4) DEFAULT '0'"
+        },
+        "sexo": {
+          "type": "tinyint(4)",
+          "nullable": false,
+          "definition": "tinyint(4) NOT NULL"
+        },
+        "nivel": {
+          "type": "int(11)",
+          "nullable": true,
+          "definition": "int(11) DEFAULT '0'"
+        },
+        "chat": {
+          "type": "tinyint(4)",
+          "nullable": false,
+          "definition": "tinyint(4) NOT NULL"
+        },
+        "tel": {
+          "type": "tinyint(4)",
+          "nullable": false,
+          "definition": "tinyint(4) NOT NULL"
+        },
+        "skype": {
+          "type": "tinyint(4)",
+          "nullable": false,
+          "definition": "tinyint(4) NOT NULL"
+        },
+        "manha": {
+          "type": "tinyint(4)",
+          "nullable": false,
+          "definition": "tinyint(4) NOT NULL"
+        },
+        "tarde": {
+          "type": "tinyint(4)",
+          "nullable": false,
+          "definition": "tinyint(4) NOT NULL"
+        },
+        "noite": {
+          "type": "tinyint(4)",
+          "nullable": false,
+          "definition": "tinyint(4) NOT NULL"
+        },
+        "manhaobs": {
+          "type": "text",
+          "nullable": false,
+          "definition": "text COLLATE utf8_unicode_ci NOT NULL"
+        },
+        "tardeobs": {
+          "type": "text",
+          "nullable": false,
+          "definition": "text COLLATE utf8_unicode_ci NOT NULL"
+        },
+        "noiteobs": {
+          "type": "text",
+          "nullable": false,
+          "definition": "text COLLATE utf8_unicode_ci NOT NULL"
+        },
+        "cep": {
+          "type": "varchar(50)",
+          "nullable": false,
+          "definition": "varchar(50) COLLATE utf8_unicode_ci NOT NULL"
+        },
+        "observacoes": {
+          "type": "text",
+          "nullable": false,
+          "definition": "text COLLATE utf8_unicode_ci NOT NULL"
+        },
+        "ddi": {
+          "type": "int(11)",
+          "nullable": false,
+          "definition": "int(11) NOT NULL"
+        },
+        "categoria": {
+          "type": "int(11)",
+          "nullable": true,
+          "definition": "int(11) DEFAULT '0'"
+        },
+        "nome_id": {
+          "type": "varchar(50)",
+          "nullable": false,
+          "definition": "varchar(50) COLLATE utf8_unicode_ci NOT NULL"
+        },
+        "status_cpf_id": {
+          "type": "int(11)",
+          "nullable": false,
+          "definition": "int(11) NOT NULL"
+        },
+        "fone_observacoes": {
+          "type": "text",
+          "nullable": false,
+          "definition": "text COLLATE utf8_unicode_ci NOT NULL"
+        },
+        "email_correto": {
+          "type": "tinyint(4)",
+          "nullable": true,
+          "definition": "tinyint(4) DEFAULT '1'"
+        },
+        "email2": {
+          "type": "varchar(100)",
+          "nullable": false,
+          "definition": "varchar(100) COLLATE utf8_unicode_ci NOT NULL"
+        },
+        "msn_user": {
+          "type": "varchar(100)",
+          "nullable": false,
+          "definition": "varchar(100) COLLATE utf8_unicode_ci NOT NULL"
+        },
+        "Twitter_user": {
+          "type": "varchar(100)",
+          "nullable": false,
+          "definition": "varchar(100) COLLATE utf8_unicode_ci NOT NULL"
+        },
+        "Skype_user": {
+          "type": "varchar(100)",
+          "nullable": false,
+          "definition": "varchar(100) COLLATE utf8_unicode_ci NOT NULL"
+        },
+        "ligouParaMarcar": {
+          "type": "tinyint(4)",
+          "nullable": true,
+          "definition": "tinyint(4) DEFAULT '0'"
+        },
+        "resultadoLigouMarcar": {
+          "type": "varchar(255)",
+          "nullable": false,
+          "definition": "varchar(255) COLLATE utf8_unicode_ci NOT NULL"
+        },
+        "ligouParaCompletar": {
+          "type": "tinyint(4)",
+          "nullable": true,
+          "definition": "tinyint(4) DEFAULT '0'"
+        },
+        "resultadoLigouCompletar": {
+          "type": "varchar(255)",
+          "nullable": false,
+          "definition": "varchar(255) COLLATE utf8_unicode_ci NOT NULL"
+        },
+        "ufNascimento": {
+          "type": "varchar(2)",
+          "nullable": false,
+          "definition": "varchar(2) COLLATE utf8_unicode_ci NOT NULL"
+        },
+        "IDpaisNascimento": {
+          "type": "int(11)",
+          "nullable": false,
+          "definition": "int(11) NOT NULL"
+        },
+        "buscaNaReceita": {
+          "type": "text",
+          "nullable": false,
+          "definition": "text COLLATE utf8_unicode_ci NOT NULL"
+        },
+        "idPais": {
+          "type": "int(11)",
+          "nullable": false,
+          "definition": "int(11) NOT NULL"
+        },
+        "cidadeNascimento": {
+          "type": "varchar(100)",
+          "nullable": false,
+          "definition": "varchar(100) COLLATE utf8_unicode_ci NOT NULL"
+        },
+        "obs_liberacao": {
+          "type": "text",
+          "nullable": false,
+          "definition": "text COLLATE utf8_unicode_ci NOT NULL"
+        },
+        "saldo": {
+          "type": "decimal(20,2)",
+          "nullable": true,
+          "definition": "decimal(20,2) DEFAULT '0.00'"
+        },
+        "valorAPagar": {
+          "type": "decimal(20,2)",
+          "nullable": true,
+          "definition": "decimal(20,2) DEFAULT '0.00'"
+        },
+        "vlMinuto": {
+          "type": "decimal(20,2)",
+          "nullable": false,
+          "definition": "decimal(20,2) NOT NULL DEFAULT '1.97'"
+        },
+        "vlBonus": {
+          "type": "decimal(20,2)",
+          "nullable": false,
+          "definition": "decimal(20,2) NOT NULL DEFAULT '0.00'"
+        },
+        "vlPrepago": {
+          "type": "decimal(20,2)",
+          "nullable": false,
+          "definition": "decimal(20,2) NOT NULL DEFAULT '0.00'"
+        },
+        "vlDesconto": {
+          "type": "int(5)",
+          "nullable": false,
+          "definition": "int(5) NOT NULL DEFAULT '0'"
+        },
+        "troca_senha": {
+          "type": "tinyint(1)",
+          "nullable": false,
+          "definition": "tinyint(1) NOT NULL"
+        },
+        "data_troca_senha": {
+          "type": "date",
+          "nullable": false,
+          "definition": "date NOT NULL"
+        },
+        "email_liberacao": {
+          "type": "tinyint(1)",
+          "nullable": false,
+          "definition": "tinyint(1) NOT NULL DEFAULT '0'"
+        },
+        "email_completar": {
+          "type": "tinyint(1)",
+          "nullable": false,
+          "definition": "tinyint(1) NOT NULL DEFAULT '0'"
+        },
+        "nao_exportado": {
+          "type": "int(1)",
+          "nullable": true,
+          "definition": "int(1) DEFAULT '0'"
+        },
+        "obs_perfil": {
+          "type": "varchar(100)",
+          "nullable": false,
+          "definition": "varchar(100) COLLATE utf8_unicode_ci NOT NULL"
+        },
+        "cpf_vinculado": {
+          "type": "varchar(100)",
+          "nullable": false,
+          "definition": "varchar(100) COLLATE utf8_unicode_ci NOT NULL"
+        },
+        "id_cliente_valido": {
+          "type": "int(11)",
+          "nullable": false,
+          "definition": "int(11) NOT NULL DEFAULT '0'"
+        },
+        "email_enviado": {
+          "type": "int(11)",
+          "nullable": true,
+          "definition": "int(11) DEFAULT '0'"
+        },
+        "id_perfil_cliente": {
+          "type": "int(10) unsigned",
+          "nullable": false,
+          "definition": "int(10) unsigned NOT NULL DEFAULT '1'"
+        },
+        "avatar": {
+          "type": "varchar(255)",
+          "nullable": true,
+          "definition": "varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL"
+        },
+        "whats": {
+          "type": "varchar(45)",
+          "nullable": true,
+          "definition": "varchar(45) COLLATE utf8_unicode_ci DEFAULT NULL"
+        },
+        "cel2": {
+          "type": "varchar(45)",
+          "nullable": true,
+          "definition": "varchar(45) COLLATE utf8_unicode_ci DEFAULT NULL"
+        }
+      },
+      "constraints": [
+        "PRIMARY KEY (`id`)",
+        "KEY `data_cadastro` (`data_cadastro`)",
+        "KEY `idPais` (`idPais`)",
+        "KEY `nome_id` (`nome_id`)",
+        "KEY `status_cpf_id` (`status_cpf_id`)"
+      ]
+    },
+    "tbl_atendente": {
+      "engine": "MyISAM",
+      "columns": {
+        "idAtendente": {
+          "type": "int(11)",
+          "nullable": false,
+          "definition": "int(11) NOT NULL AUTO_INCREMENT"
+        },
+        "muAtendente": {
+          "type": "varchar(25)",
+          "nullable": true,
+          "definition": "varchar(25) CHARACTER SET utf8 DEFAULT NULL"
+        },
+        "nmcAtendente": {
+          "type": "varchar(75)",
+          "nullable": true,
+          "definition": "varchar(75) CHARACTER SET utf8 DEFAULT NULL"
+        },
+        "sttAtendente": {
+          "type": "tinyint(4)",
+          "nullable": true,
+          "definition": "tinyint(4) DEFAULT '0'"
+        }
+      },
+      "constraints": [
+        "PRIMARY KEY (`idAtendente`)",
+        "KEY `idAtendente` (`idAtendente`)"
+      ]
+    },
+    "tbl_usuario": {
+      "engine": "MyISAM",
+      "columns": {
+        "IDUsuario": {
+          "type": "int(11)",
+          "nullable": false,
+          "definition": "int(11) NOT NULL AUTO_INCREMENT"
+        },
+        "nmcUsuario": {
+          "type": "varchar(50)",
+          "nullable": true,
+          "definition": "varchar(50) CHARACTER SET utf8 DEFAULT NULL"
+        },
+        "senUsuario": {
+          "type": "varchar(12)",
+          "nullable": true,
+          "definition": "varchar(12) CHARACTER SET utf8 DEFAULT NULL"
+        },
+        "ysnAtivo": {
+          "type": "tinyint(4)",
+          "nullable": true,
+          "definition": "tinyint(4) DEFAULT '0'"
+        }
+      },
+      "constraints": [
+        "PRIMARY KEY (`IDUsuario`)",
+        "KEY `IDUsuario` (`IDUsuario`)"
+      ]
+    },
+    "tbl_pagtonaolocalizado": {
+      "engine": "MyISAM",
+      "columns": {
+        "idPagtoInformado": {
+          "type": "int(11)",
+          "nullable": false,
+          "definition": "int(11) NOT NULL AUTO_INCREMENT"
+        },
+        "idUsuario": {
+          "type": "int(11)",
+          "nullable": true,
+          "definition": "int(11) DEFAULT NULL"
+        },
+        "dtPagtoInformado": {
+          "type": "datetime",
+          "nullable": true,
+          "definition": "datetime DEFAULT NULL"
+        },
+        "vlPagtoInformado": {
+          "type": "double",
+          "nullable": true,
+          "definition": "double DEFAULT '0'"
+        },
+        "autPagtoInformado": {
+          "type": "varchar(100)",
+          "nullable": true,
+          "definition": "varchar(100) CHARACTER SET utf8 DEFAULT NULL"
+        },
+        "idBanco": {
+          "type": "int(11)",
+          "nullable": true,
+          "definition": "int(11) DEFAULT NULL"
+        },
+        "idFormaPagto": {
+          "type": "int(11)",
+          "nullable": true,
+          "definition": "int(11) DEFAULT NULL"
+        },
+        "obsPagtoInformado": {
+          "type": "text",
+          "nullable": true,
+          "definition": "text CHARACTER SET utf8"
+        },
+        "nmuAtendente": {
+          "type": "varchar(25)",
+          "nullable": true,
+          "definition": "varchar(25) CHARACTER SET utf8 DEFAULT NULL"
+        }
+      },
+      "constraints": [
+        "PRIMARY KEY (`idPagtoInformado`)",
+        "KEY `idBanco` (`idBanco`)",
+        "KEY `idFormaPagto` (`idFormaPagto`)",
+        "KEY `idUsuario` (`idUsuario`)"
+      ]
+    },
+    "tbl_pagtoconfirmado": {
+      "engine": "MyISAM",
+      "columns": {
+        "idPagtoInformado": {
+          "type": "int(11)",
+          "nullable": false,
+          "definition": "int(11) NOT NULL AUTO_INCREMENT"
+        },
+        "idUsuario": {
+          "type": "int(11)",
+          "nullable": false,
+          "definition": "int(11) NOT NULL"
+        },
+        "dtPagtoInformado": {
+          "type": "datetime",
+          "nullable": false,
+          "definition": "datetime NOT NULL"
+        },
+        "vlPagtoInformado": {
+          "type": "decimal(20,2)",
+          "nullable": true,
+          "definition": "decimal(20,2) DEFAULT '0.00'"
+        },
+        "autPagtoInformado": {
+          "type": "varchar(100)",
+          "nullable": false,
+          "definition": "varchar(100) CHARACTER SET utf8 NOT NULL"
+        },
+        "idBanco": {
+          "type": "int(11)",
+          "nullable": false,
+          "definition": "int(11) NOT NULL"
+        },
+        "idFormaPagto": {
+          "type": "int(11)",
+          "nullable": false,
+          "definition": "int(11) NOT NULL"
+        },
+        "obsPagtoInformado": {
+          "type": "text",
+          "nullable": false,
+          "definition": "text CHARACTER SET utf8 NOT NULL"
+        },
+        "nmuAtendente": {
+          "type": "varchar(25)",
+          "nullable": false,
+          "definition": "varchar(25) CHARACTER SET utf8 NOT NULL"
+        }
+      },
+      "constraints": [
+        "PRIMARY KEY (`idPagtoInformado`)",
+        "KEY `idBanco` (`idBanco`)",
+        "KEY `idFormaPagto` (`idFormaPagto`)",
+        "KEY `idUsuario` (`idUsuario`)"
+      ]
+    },
+    "tbl_pagtoaberto": {
+      "engine": "MyISAM",
+      "columns": {
+        "idPagto": {
+          "type": "int(100)",
+          "nullable": false,
+          "definition": "int(100) NOT NULL AUTO_INCREMENT"
+        },
+        "idUsuario": {
+          "type": "int(11)",
+          "nullable": false,
+          "definition": "int(11) NOT NULL"
+        },
+        "idConsulta": {
+          "type": "int(11)",
+          "nullable": false,
+          "definition": "int(11) NOT NULL"
+        },
+        "valor_consulta": {
+          "type": "decimal(20,2)",
+          "nullable": false,
+          "definition": "decimal(20,2) NOT NULL"
+        },
+        "obsPgto": {
+          "type": "text",
+          "nullable": false,
+          "definition": "text COLLATE utf8_unicode_ci NOT NULL"
+        }
+      },
+      "constraints": [
+        "PRIMARY KEY (`idPagto`)"
+      ]
+    },
+    "wp_options": {
+      "engine": "InnoDB",
+      "columns": {
+        "option_id": {
+          "type": "bigint(20) unsigned",
+          "nullable": false,
+          "definition": "bigint(20) unsigned NOT NULL AUTO_INCREMENT"
+        },
+        "option_name": {
+          "type": "varchar(191)",
+          "nullable": false,
+          "definition": "varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT ''"
+        },
+        "option_value": {
+          "type": "longtext",
+          "nullable": false,
+          "definition": "longtext COLLATE utf8mb4_unicode_ci NOT NULL"
+        },
+        "autoload": {
+          "type": "varchar(20)",
+          "nullable": false,
+          "definition": "varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'yes'"
+        }
+      },
+      "constraints": [
+        "PRIMARY KEY (`option_id`)",
+        "UNIQUE KEY `option_name` (`option_name`)",
+        "KEY `autoload` (`autoload`)"
+      ]
+    },
+    "bandeira_cartao": {
+      "engine": "MyISAM",
+      "columns": {
+        "id": {
+          "type": "int(10) unsigned",
+          "nullable": false,
+          "definition": "int(10) unsigned NOT NULL AUTO_INCREMENT"
+        },
+        "nome": {
+          "type": "varchar(45)",
+          "nullable": false,
+          "definition": "varchar(45) NOT NULL"
+        }
+      },
+      "constraints": [
+        "PRIMARY KEY (`id`)"
+      ],
+      "source": "resultado_pedido_05.txt"
+    },
+    "contacorrente": {
+      "engine": "MyISAM",
+      "columns": {
+        "idMovimentacao": {
+          "type": "int(11)",
+          "nullable": false,
+          "definition": "int(11) NOT NULL AUTO_INCREMENT"
+        },
+        "idUsuario": {
+          "type": "int(11)",
+          "nullable": false,
+          "definition": "int(11) NOT NULL"
+        },
+        "dtMovimentacao": {
+          "type": "timestamp",
+          "nullable": false,
+          "definition": "timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP"
+        },
+        "tpMovimentacao": {
+          "type": "varchar(255)",
+          "nullable": false,
+          "definition": "varchar(255) COLLATE utf8_unicode_ci NOT NULL"
+        },
+        "idPagto": {
+          "type": "int(11)",
+          "nullable": false,
+          "definition": "int(11) NOT NULL"
+        },
+        "idConsulta": {
+          "type": "int(11)",
+          "nullable": false,
+          "definition": "int(11) NOT NULL"
+        },
+        "vlMovimentacao": {
+          "type": "decimal(5,2)",
+          "nullable": false,
+          "definition": "decimal(5,2) NOT NULL"
+        }
+      },
+      "constraints": [
+        "PRIMARY KEY (`idMovimentacao`)"
+      ],
+      "source": "resultado_pedido_05.txt"
+    },
+    "cpf_status": {
+      "engine": "MyISAM",
+      "columns": {
+        "idStatus": {
+          "type": "int(11)",
+          "nullable": false,
+          "definition": "int(11) NOT NULL"
+        },
+        "nomeStatus": {
+          "type": "varchar(50)",
+          "nullable": true,
+          "definition": "varchar(50) CHARACTER SET utf8 DEFAULT NULL"
+        },
+        "descricaoStatus": {
+          "type": "varchar(255)",
+          "nullable": true,
+          "definition": "varchar(255) CHARACTER SET utf8 DEFAULT NULL"
+        }
+      },
+      "constraints": [
+        "PRIMARY KEY (`idStatus`)"
+      ],
+      "source": "resultado_pedido_05.txt"
+    },
+    "obs_liberacao_consulta": {
+      "engine": "InnoDB",
+      "columns": {
+        "id": {
+          "type": "int(11) unsigned",
+          "nullable": false,
+          "definition": "int(11) unsigned NOT NULL AUTO_INCREMENT"
+        },
+        "id_usuario": {
+          "type": "int(11)",
+          "nullable": false,
+          "definition": "int(11) NOT NULL"
+        },
+        "desc": {
+          "type": "varchar(500)",
+          "nullable": false,
+          "definition": "varchar(500) COLLATE utf8_unicode_ci NOT NULL"
+        },
+        "id_atendente": {
+          "type": "int(11)",
+          "nullable": false,
+          "definition": "int(11) NOT NULL"
+        },
+        "dt_hr": {
+          "type": "timestamp",
+          "nullable": true,
+          "definition": "timestamp NULL DEFAULT CURRENT_TIMESTAMP"
+        }
+      },
+      "constraints": [
+        "PRIMARY KEY (`id`)"
+      ],
+      "source": "resultado_pedido_05.txt"
+    },
+    "paises": {
+      "engine": "MyISAM",
+      "columns": {
+        "Paises": {
+          "type": "varchar(50)",
+          "nullable": true,
+          "definition": "varchar(50) CHARACTER SET utf8 DEFAULT NULL"
+        },
+        "ID": {
+          "type": "int(11)",
+          "nullable": false,
+          "definition": "int(11) NOT NULL AUTO_INCREMENT"
+        }
+      },
+      "constraints": [
+        "PRIMARY KEY (`ID`)",
+        "KEY `ID` (`ID`)"
+      ],
+      "source": "resultado_pedido_05.txt"
+    },
+    "perfil_cliente": {
+      "engine": "InnoDB",
+      "columns": {
+        "id": {
+          "type": "int(10) unsigned",
+          "nullable": false,
+          "definition": "int(10) unsigned NOT NULL AUTO_INCREMENT"
+        },
+        "nome": {
+          "type": "varchar(50)",
+          "nullable": false,
+          "definition": "varchar(50) COLLATE utf8_unicode_ci NOT NULL"
+        },
+        "consulta_autorizada": {
+          "type": "int(10) unsigned",
+          "nullable": false,
+          "definition": "int(10) unsigned NOT NULL DEFAULT '1'"
+        }
+      },
+      "constraints": [
+        "PRIMARY KEY (`id`)"
+      ],
+      "source": "resultado_pedido_05.txt"
+    },
+    "recado": {
+      "engine": "InnoDB",
+      "columns": {
+        "id_recado": {
+          "type": "bigint(20) unsigned",
+          "nullable": false,
+          "definition": "bigint(20) unsigned NOT NULL AUTO_INCREMENT"
+        },
+        "conteudo": {
+          "type": "varchar(500)",
+          "nullable": false,
+          "definition": "varchar(500) COLLATE utf8_unicode_ci NOT NULL"
+        },
+        "id_criador": {
+          "type": "int(11)",
+          "nullable": false,
+          "definition": "int(11) NOT NULL"
+        },
+        "id_cliente": {
+          "type": "int(11)",
+          "nullable": true,
+          "definition": "int(11) DEFAULT NULL"
+        },
+        "id_tarologo": {
+          "type": "int(11)",
+          "nullable": true,
+          "definition": "int(11) DEFAULT NULL"
+        },
+        "dt_hr_criacao": {
+          "type": "datetime",
+          "nullable": false,
+          "definition": "datetime NOT NULL"
+        },
+        "id_editor": {
+          "type": "int(11)",
+          "nullable": true,
+          "definition": "int(11) DEFAULT NULL"
+        },
+        "dt_hr_atualizacao": {
+          "type": "datetime",
+          "nullable": true,
+          "definition": "datetime DEFAULT NULL"
+        },
+        "pos_x": {
+          "type": "decimal(12,2)",
+          "nullable": true,
+          "definition": "decimal(12,2) DEFAULT NULL"
+        },
+        "pos_y": {
+          "type": "decimal(12,2)",
+          "nullable": true,
+          "definition": "decimal(12,2) DEFAULT NULL"
+        },
+        "dt_vig_ini": {
+          "type": "datetime",
+          "nullable": true,
+          "definition": "datetime DEFAULT NULL"
+        },
+        "dt_vig_fim": {
+          "type": "datetime",
+          "nullable": true,
+          "definition": "datetime DEFAULT NULL"
+        },
+        "ativo": {
+          "type": "int(11)",
+          "nullable": true,
+          "definition": "int(11) DEFAULT '1'"
+        }
+      },
+      "constraints": [
+        "PRIMARY KEY (`id_recado`)",
+        "UNIQUE KEY `id_recado_UNIQUE` (`id_recado`)"
+      ],
+      "source": "resultado_pedido_05.txt"
+    },
+    "status_pagamento": {
+      "engine": "InnoDB",
+      "columns": {
+        "id_status_pagto": {
+          "type": "int(10) unsigned",
+          "nullable": false,
+          "definition": "int(10) unsigned NOT NULL AUTO_INCREMENT"
+        },
+        "descricao": {
+          "type": "varchar(15)",
+          "nullable": false,
+          "definition": "varchar(15) COLLATE utf8_unicode_ci NOT NULL"
+        }
+      },
+      "constraints": [
+        "PRIMARY KEY (`id_status_pagto`)"
+      ],
+      "source": "resultado_pedido_05.txt"
+    },
+    "tbl_bancos": {
+      "engine": "MyISAM",
+      "columns": {
+        "idBanco": {
+          "type": "int(11)",
+          "nullable": false,
+          "definition": "int(11) NOT NULL AUTO_INCREMENT"
+        },
+        "nmBanco": {
+          "type": "varchar(25)",
+          "nullable": true,
+          "definition": "varchar(25) CHARACTER SET utf8 DEFAULT NULL"
+        },
+        "agBanco": {
+          "type": "varchar(8)",
+          "nullable": true,
+          "definition": "varchar(8) CHARACTER SET utf8 DEFAULT NULL"
+        },
+        "ccBanco": {
+          "type": "varchar(12)",
+          "nullable": true,
+          "definition": "varchar(12) CHARACTER SET utf8 DEFAULT NULL"
+        }
+      },
+      "constraints": [
+        "PRIMARY KEY (`idBanco`)",
+        "KEY `idBanco` (`idBanco`)"
+      ],
+      "source": "resultado_pedido_05.txt"
+    },
+    "tbl_formaconsulta": {
+      "engine": "MyISAM",
+      "columns": {
+        "idFormaConsulta": {
+          "type": "int(11)",
+          "nullable": false,
+          "definition": "int(11) NOT NULL AUTO_INCREMENT"
+        },
+        "tpFormaConsulta": {
+          "type": "varchar(10)",
+          "nullable": true,
+          "definition": "varchar(10) CHARACTER SET utf8 DEFAULT NULL"
+        },
+        "dscFormaConsulta": {
+          "type": "varchar(255)",
+          "nullable": true,
+          "definition": "varchar(255) CHARACTER SET utf8 DEFAULT NULL"
+        },
+        "imagem_forma_consulta": {
+          "type": "varchar(35)",
+          "nullable": true,
+          "definition": "varchar(35) COLLATE utf8_unicode_ci DEFAULT NULL"
+        },
+        "title": {
+          "type": "varchar(60)",
+          "nullable": true,
+          "definition": "varchar(60) COLLATE utf8_unicode_ci DEFAULT NULL"
+        }
+      },
+      "constraints": [
+        "PRIMARY KEY (`idFormaConsulta`)",
+        "KEY `idFormaConsulta` (`idFormaConsulta`)"
+      ],
+      "source": "resultado_pedido_05.txt"
+    },
+    "tbl_opcaopagto": {
+      "engine": "MyISAM",
+      "columns": {
+        "idOpcaoPagto": {
+          "type": "int(11)",
+          "nullable": false,
+          "definition": "int(11) NOT NULL AUTO_INCREMENT"
+        },
+        "tpOpcaoPagto": {
+          "type": "varchar(25)",
+          "nullable": true,
+          "definition": "varchar(25) CHARACTER SET utf8 DEFAULT NULL"
+        },
+        "dscOpcaoPagto": {
+          "type": "varchar(50)",
+          "nullable": true,
+          "definition": "varchar(50) CHARACTER SET utf8 DEFAULT NULL"
+        },
+        "imagem_forma_pagamento": {
+          "type": "varchar(35)",
+          "nullable": true,
+          "definition": "varchar(35) COLLATE utf8_unicode_ci DEFAULT NULL"
+        },
+        "title_forma_pagamento": {
+          "type": "varchar(60)",
+          "nullable": true,
+          "definition": "varchar(60) COLLATE utf8_unicode_ci DEFAULT NULL"
+        }
+      },
+      "constraints": [
+        "PRIMARY KEY (`idOpcaoPagto`)"
+      ],
+      "source": "resultado_pedido_05.txt"
+    }
+  },
+  "sources": [
+    {
+      "file": "ddl_tabelas(2).sql",
+      "tables": 12,
+      "columns": 269
+    },
+    {
+      "file": "resultado_pedido_05.txt",
+      "reportDateLocal": "2026-09-22 18:15:02",
+      "sha256": "ada99272fae941b886b7c5ea69f9b23f57d5e20e1b291813b7ad98def0ba3575",
+      "tables": 11,
+      "columns": 51
+    }
+  ],
+  "confirmedAbsentObjects": [
+    "escala_tarologos"
+  ],
+  "physicalNameCorrections": {
+    "contaCorrente": "contacorrente"
+  }
+}

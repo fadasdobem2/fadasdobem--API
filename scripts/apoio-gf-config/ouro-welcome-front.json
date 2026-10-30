@@ -1,0 +1,1773 @@
+{
+ "gerado": "a partir do código do front (features/auth/welcome-model.ts: validateWelcome e DEFAULT_WELCOME)",
+ "padrao": {
+  "greetings": [
+   {
+    "id": "morning-1",
+    "period": "morning",
+    "title": "Que bom ter você aqui.",
+    "text": "A casa vai ganhando vida com a chegada de cada um.",
+    "active": true,
+    "audience": "atendimento"
+   },
+   {
+    "id": "afternoon-1",
+    "period": "afternoon",
+    "title": "Entre, fique à vontade.",
+    "text": "Ainda temos uma tarde inteira de encontros pela frente.",
+    "active": true,
+    "audience": "atendimento"
+   },
+   {
+    "id": "evening-1",
+    "period": "evening",
+    "title": "Nossa luz continua acesa.",
+    "text": "Tem gente chegando, histórias começando e você por aqui.",
+    "active": true,
+    "audience": "atendimento"
+   },
+   {
+    "id": "dawn-1",
+    "period": "dawn",
+    "title": "A casa está quietinha.",
+    "text": "A esta hora, nossa companhia tem um aconchego diferente.",
+    "active": true,
+    "audience": "atendimento"
+   },
+   {
+    "id": "tarologo-morning-1",
+    "audience": "tarologo",
+    "period": "morning",
+    "title": "Tem gente esperando pela sua leitura.",
+    "text": "As cartas ainda estão na mesa, mas as histórias de hoje já começaram.",
+    "active": true
+   },
+   {
+    "id": "tarologo-afternoon-1",
+    "audience": "tarologo",
+    "period": "afternoon",
+    "title": "Uma boa conversa começa nas cartas.",
+    "text": "Entre uma história e outra, que esta tarde também traga bons encontros para você.",
+    "active": true
+   },
+   {
+    "id": "tarologo-evening-1",
+    "audience": "tarologo",
+    "period": "evening",
+    "title": "A noite chegou. As cartas têm companhia.",
+    "text": "Há quem guarde para esta hora a conversa que esperou o dia inteiro para ter.",
+    "active": true
+   },
+   {
+    "id": "tarologo-dawn-1",
+    "audience": "tarologo",
+    "period": "dawn",
+    "title": "Ainda há histórias acordadas.",
+    "text": "Nesta hora mais quieta, cada consulta encontra seu próprio ritmo.",
+    "active": true
+   }
+  ],
+  "messages": [
+   {
+    "id": "fortune-1",
+    "title": "Biscoitinho da Sorte",
+    "text": "Uma boa notícia pode chegar sem fazer alarde.",
+    "active": true,
+    "audience": "atendimento"
+   },
+   {
+    "id": "fortune-2",
+    "title": "Biscoitinho da Sorte",
+    "text": "Alguém vai gostar de saber de você.",
+    "active": true,
+    "audience": "atendimento"
+   },
+   {
+    "id": "fortune-3",
+    "title": "Biscoitinho da Sorte",
+    "text": "A sorte pode estar numa conversa que você quase deixou para depois.",
+    "active": true,
+    "audience": "atendimento"
+   },
+   {
+    "id": "fortune-4",
+    "title": "Biscoitinho da Sorte",
+    "text": "Há um reencontro procurando espaço na sua agenda.",
+    "active": true,
+    "audience": "atendimento"
+   },
+   {
+    "id": "fortune-5",
+    "title": "Biscoitinho da Sorte",
+    "text": "Uma gentileza sua ainda vai voltar em forma de surpresa.",
+    "active": true,
+    "audience": "atendimento"
+   },
+   {
+    "id": "fortune-6",
+    "title": "Biscoitinho da Sorte",
+    "text": "A resposta pode vir de quem você menos espera.",
+    "active": true,
+    "audience": "atendimento"
+   },
+   {
+    "id": "fortune-7",
+    "title": "Biscoitinho da Sorte",
+    "text": "Tem coisa boa chegando sem hora marcada.",
+    "active": true,
+    "audience": "atendimento"
+   },
+   {
+    "id": "fortune-8",
+    "title": "Biscoitinho da Sorte",
+    "text": "Um convite pequeno pode render uma grande história.",
+    "active": true,
+    "audience": "atendimento"
+   },
+   {
+    "id": "fortune-9",
+    "title": "Biscoitinho da Sorte",
+    "text": "Hoje, alguém pode lembrar de você e sorrir.",
+    "active": true,
+    "audience": "atendimento"
+   },
+   {
+    "id": "fortune-10",
+    "title": "Biscoitinho da Sorte",
+    "text": "Uma coincidência pode deixar o seu dia mais interessante.",
+    "active": true,
+    "audience": "atendimento"
+   },
+   {
+    "id": "fortune-11",
+    "title": "Biscoitinho da Sorte",
+    "text": "Nem toda visita avisa. A sorte, por exemplo.",
+    "active": true,
+    "audience": "atendimento"
+   },
+   {
+    "id": "fortune-12",
+    "title": "Biscoitinho da Sorte",
+    "text": "Um assunto antigo ainda pode ganhar um final feliz.",
+    "active": true,
+    "audience": "atendimento"
+   },
+   {
+    "id": "tarologo-fortune-1",
+    "title": "Biscoitinho da Sorte",
+    "text": "Uma boa notícia pode chegar sem fazer alarde.",
+    "active": true,
+    "audience": "tarologo"
+   },
+   {
+    "id": "tarologo-fortune-2",
+    "title": "Biscoitinho da Sorte",
+    "text": "Alguém vai gostar de saber de você.",
+    "active": true,
+    "audience": "tarologo"
+   },
+   {
+    "id": "tarologo-fortune-3",
+    "title": "Biscoitinho da Sorte",
+    "text": "A sorte pode estar numa conversa que você quase deixou para depois.",
+    "active": true,
+    "audience": "tarologo"
+   },
+   {
+    "id": "tarologo-fortune-4",
+    "title": "Biscoitinho da Sorte",
+    "text": "Há um reencontro procurando espaço na sua agenda.",
+    "active": true,
+    "audience": "tarologo"
+   },
+   {
+    "id": "tarologo-fortune-5",
+    "title": "Biscoitinho da Sorte",
+    "text": "Uma gentileza sua ainda vai voltar em forma de surpresa.",
+    "active": true,
+    "audience": "tarologo"
+   },
+   {
+    "id": "tarologo-fortune-6",
+    "title": "Biscoitinho da Sorte",
+    "text": "A resposta pode vir de quem você menos espera.",
+    "active": true,
+    "audience": "tarologo"
+   },
+   {
+    "id": "tarologo-fortune-7",
+    "title": "Biscoitinho da Sorte",
+    "text": "Tem coisa boa chegando sem hora marcada.",
+    "active": true,
+    "audience": "tarologo"
+   },
+   {
+    "id": "tarologo-fortune-8",
+    "title": "Biscoitinho da Sorte",
+    "text": "Um convite pequeno pode render uma grande história.",
+    "active": true,
+    "audience": "tarologo"
+   },
+   {
+    "id": "tarologo-fortune-9",
+    "title": "Biscoitinho da Sorte",
+    "text": "Hoje, alguém pode lembrar de você e sorrir.",
+    "active": true,
+    "audience": "tarologo"
+   },
+   {
+    "id": "tarologo-fortune-10",
+    "title": "Biscoitinho da Sorte",
+    "text": "Uma coincidência pode deixar o seu dia mais interessante.",
+    "active": true,
+    "audience": "tarologo"
+   },
+   {
+    "id": "tarologo-fortune-11",
+    "title": "Biscoitinho da Sorte",
+    "text": "Nem toda visita avisa. A sorte, por exemplo.",
+    "active": true,
+    "audience": "tarologo"
+   },
+   {
+    "id": "tarologo-fortune-12",
+    "title": "Biscoitinho da Sorte",
+    "text": "Um assunto antigo ainda pode ganhar um final feliz.",
+    "active": true,
+    "audience": "tarologo"
+   }
+  ]
+ },
+ "cenarios": [
+  {
+   "nome": "padrão completo é aceito e volta igual",
+   "conteudo": {
+    "greetings": [
+     {
+      "id": "morning-1",
+      "active": true,
+      "audience": "atendimento",
+      "period": "morning",
+      "title": "Que bom ter você aqui.",
+      "text": "A casa vai ganhando vida com a chegada de cada um."
+     },
+     {
+      "id": "afternoon-1",
+      "active": true,
+      "audience": "atendimento",
+      "period": "afternoon",
+      "title": "Entre, fique à vontade.",
+      "text": "Ainda temos uma tarde inteira de encontros pela frente."
+     },
+     {
+      "id": "evening-1",
+      "active": true,
+      "audience": "atendimento",
+      "period": "evening",
+      "title": "Nossa luz continua acesa.",
+      "text": "Tem gente chegando, histórias começando e você por aqui."
+     },
+     {
+      "id": "dawn-1",
+      "active": true,
+      "audience": "atendimento",
+      "period": "dawn",
+      "title": "A casa está quietinha.",
+      "text": "A esta hora, nossa companhia tem um aconchego diferente."
+     },
+     {
+      "id": "tarologo-morning-1",
+      "active": true,
+      "audience": "tarologo",
+      "period": "morning",
+      "title": "Tem gente esperando pela sua leitura.",
+      "text": "As cartas ainda estão na mesa, mas as histórias de hoje já começaram."
+     },
+     {
+      "id": "tarologo-afternoon-1",
+      "active": true,
+      "audience": "tarologo",
+      "period": "afternoon",
+      "title": "Uma boa conversa começa nas cartas.",
+      "text": "Entre uma história e outra, que esta tarde também traga bons encontros para você."
+     },
+     {
+      "id": "tarologo-evening-1",
+      "active": true,
+      "audience": "tarologo",
+      "period": "evening",
+      "title": "A noite chegou. As cartas têm companhia.",
+      "text": "Há quem guarde para esta hora a conversa que esperou o dia inteiro para ter."
+     },
+     {
+      "id": "tarologo-dawn-1",
+      "active": true,
+      "audience": "tarologo",
+      "period": "dawn",
+      "title": "Ainda há histórias acordadas.",
+      "text": "Nesta hora mais quieta, cada consulta encontra seu próprio ritmo."
+     }
+    ],
+    "messages": [
+     {
+      "id": "fortune-1",
+      "active": true,
+      "audience": "atendimento",
+      "title": "Biscoitinho da Sorte",
+      "text": "Uma boa notícia pode chegar sem fazer alarde."
+     },
+     {
+      "id": "fortune-2",
+      "active": true,
+      "audience": "atendimento",
+      "title": "Biscoitinho da Sorte",
+      "text": "Alguém vai gostar de saber de você."
+     },
+     {
+      "id": "fortune-3",
+      "active": true,
+      "audience": "atendimento",
+      "title": "Biscoitinho da Sorte",
+      "text": "A sorte pode estar numa conversa que você quase deixou para depois."
+     },
+     {
+      "id": "fortune-4",
+      "active": true,
+      "audience": "atendimento",
+      "title": "Biscoitinho da Sorte",
+      "text": "Há um reencontro procurando espaço na sua agenda."
+     },
+     {
+      "id": "fortune-5",
+      "active": true,
+      "audience": "atendimento",
+      "title": "Biscoitinho da Sorte",
+      "text": "Uma gentileza sua ainda vai voltar em forma de surpresa."
+     },
+     {
+      "id": "fortune-6",
+      "active": true,
+      "audience": "atendimento",
+      "title": "Biscoitinho da Sorte",
+      "text": "A resposta pode vir de quem você menos espera."
+     },
+     {
+      "id": "fortune-7",
+      "active": true,
+      "audience": "atendimento",
+      "title": "Biscoitinho da Sorte",
+      "text": "Tem coisa boa chegando sem hora marcada."
+     },
+     {
+      "id": "fortune-8",
+      "active": true,
+      "audience": "atendimento",
+      "title": "Biscoitinho da Sorte",
+      "text": "Um convite pequeno pode render uma grande história."
+     },
+     {
+      "id": "fortune-9",
+      "active": true,
+      "audience": "atendimento",
+      "title": "Biscoitinho da Sorte",
+      "text": "Hoje, alguém pode lembrar de você e sorrir."
+     },
+     {
+      "id": "fortune-10",
+      "active": true,
+      "audience": "atendimento",
+      "title": "Biscoitinho da Sorte",
+      "text": "Uma coincidência pode deixar o seu dia mais interessante."
+     },
+     {
+      "id": "fortune-11",
+      "active": true,
+      "audience": "atendimento",
+      "title": "Biscoitinho da Sorte",
+      "text": "Nem toda visita avisa. A sorte, por exemplo."
+     },
+     {
+      "id": "fortune-12",
+      "active": true,
+      "audience": "atendimento",
+      "title": "Biscoitinho da Sorte",
+      "text": "Um assunto antigo ainda pode ganhar um final feliz."
+     },
+     {
+      "id": "tarologo-fortune-1",
+      "active": true,
+      "audience": "tarologo",
+      "title": "Biscoitinho da Sorte",
+      "text": "Uma boa notícia pode chegar sem fazer alarde."
+     },
+     {
+      "id": "tarologo-fortune-2",
+      "active": true,
+      "audience": "tarologo",
+      "title": "Biscoitinho da Sorte",
+      "text": "Alguém vai gostar de saber de você."
+     },
+     {
+      "id": "tarologo-fortune-3",
+      "active": true,
+      "audience": "tarologo",
+      "title": "Biscoitinho da Sorte",
+      "text": "A sorte pode estar numa conversa que você quase deixou para depois."
+     },
+     {
+      "id": "tarologo-fortune-4",
+      "active": true,
+      "audience": "tarologo",
+      "title": "Biscoitinho da Sorte",
+      "text": "Há um reencontro procurando espaço na sua agenda."
+     },
+     {
+      "id": "tarologo-fortune-5",
+      "active": true,
+      "audience": "tarologo",
+      "title": "Biscoitinho da Sorte",
+      "text": "Uma gentileza sua ainda vai voltar em forma de surpresa."
+     },
+     {
+      "id": "tarologo-fortune-6",
+      "active": true,
+      "audience": "tarologo",
+      "title": "Biscoitinho da Sorte",
+      "text": "A resposta pode vir de quem você menos espera."
+     },
+     {
+      "id": "tarologo-fortune-7",
+      "active": true,
+      "audience": "tarologo",
+      "title": "Biscoitinho da Sorte",
+      "text": "Tem coisa boa chegando sem hora marcada."
+     },
+     {
+      "id": "tarologo-fortune-8",
+      "active": true,
+      "audience": "tarologo",
+      "title": "Biscoitinho da Sorte",
+      "text": "Um convite pequeno pode render uma grande história."
+     },
+     {
+      "id": "tarologo-fortune-9",
+      "active": true,
+      "audience": "tarologo",
+      "title": "Biscoitinho da Sorte",
+      "text": "Hoje, alguém pode lembrar de você e sorrir."
+     },
+     {
+      "id": "tarologo-fortune-10",
+      "active": true,
+      "audience": "tarologo",
+      "title": "Biscoitinho da Sorte",
+      "text": "Uma coincidência pode deixar o seu dia mais interessante."
+     },
+     {
+      "id": "tarologo-fortune-11",
+      "active": true,
+      "audience": "tarologo",
+      "title": "Biscoitinho da Sorte",
+      "text": "Nem toda visita avisa. A sorte, por exemplo."
+     },
+     {
+      "id": "tarologo-fortune-12",
+      "active": true,
+      "audience": "tarologo",
+      "title": "Biscoitinho da Sorte",
+      "text": "Um assunto antigo ainda pode ganhar um final feliz."
+     }
+    ]
+   }
+  },
+  {
+   "nome": "conteúdo antigo sem público recebe o público e os textos do tarólogo",
+   "conteudo": {
+    "greetings": [
+     {
+      "id": "morning-1",
+      "active": true,
+      "audience": "atendimento",
+      "period": "morning",
+      "title": "Que bom ter você aqui.",
+      "text": "A casa vai ganhando vida com a chegada de cada um."
+     },
+     {
+      "id": "afternoon-1",
+      "active": true,
+      "audience": "atendimento",
+      "period": "afternoon",
+      "title": "Entre, fique à vontade.",
+      "text": "Ainda temos uma tarde inteira de encontros pela frente."
+     },
+     {
+      "id": "evening-1",
+      "active": true,
+      "audience": "atendimento",
+      "period": "evening",
+      "title": "Nossa luz continua acesa.",
+      "text": "Tem gente chegando, histórias começando e você por aqui."
+     },
+     {
+      "id": "dawn-1",
+      "active": true,
+      "audience": "atendimento",
+      "period": "dawn",
+      "title": "A casa está quietinha.",
+      "text": "A esta hora, nossa companhia tem um aconchego diferente."
+     },
+     {
+      "id": "tarologo-morning-1",
+      "audience": "tarologo",
+      "period": "morning",
+      "title": "Tem gente esperando pela sua leitura.",
+      "text": "As cartas ainda estão na mesa, mas as histórias de hoje já começaram.",
+      "active": true
+     },
+     {
+      "id": "tarologo-afternoon-1",
+      "audience": "tarologo",
+      "period": "afternoon",
+      "title": "Uma boa conversa começa nas cartas.",
+      "text": "Entre uma história e outra, que esta tarde também traga bons encontros para você.",
+      "active": true
+     },
+     {
+      "id": "tarologo-evening-1",
+      "audience": "tarologo",
+      "period": "evening",
+      "title": "A noite chegou. As cartas têm companhia.",
+      "text": "Há quem guarde para esta hora a conversa que esperou o dia inteiro para ter.",
+      "active": true
+     },
+     {
+      "id": "tarologo-dawn-1",
+      "audience": "tarologo",
+      "period": "dawn",
+      "title": "Ainda há histórias acordadas.",
+      "text": "Nesta hora mais quieta, cada consulta encontra seu próprio ritmo.",
+      "active": true
+     }
+    ],
+    "messages": [
+     {
+      "id": "fortune-1",
+      "active": true,
+      "audience": "atendimento",
+      "title": "Biscoitinho da Sorte",
+      "text": "Uma boa notícia pode chegar sem fazer alarde."
+     },
+     {
+      "id": "fortune-2",
+      "active": true,
+      "audience": "atendimento",
+      "title": "Biscoitinho da Sorte",
+      "text": "Alguém vai gostar de saber de você."
+     },
+     {
+      "id": "fortune-3",
+      "active": true,
+      "audience": "atendimento",
+      "title": "Biscoitinho da Sorte",
+      "text": "A sorte pode estar numa conversa que você quase deixou para depois."
+     },
+     {
+      "id": "fortune-4",
+      "active": true,
+      "audience": "atendimento",
+      "title": "Biscoitinho da Sorte",
+      "text": "Há um reencontro procurando espaço na sua agenda."
+     },
+     {
+      "id": "fortune-5",
+      "active": true,
+      "audience": "atendimento",
+      "title": "Biscoitinho da Sorte",
+      "text": "Uma gentileza sua ainda vai voltar em forma de surpresa."
+     },
+     {
+      "id": "fortune-6",
+      "active": true,
+      "audience": "atendimento",
+      "title": "Biscoitinho da Sorte",
+      "text": "A resposta pode vir de quem você menos espera."
+     },
+     {
+      "id": "fortune-7",
+      "active": true,
+      "audience": "atendimento",
+      "title": "Biscoitinho da Sorte",
+      "text": "Tem coisa boa chegando sem hora marcada."
+     },
+     {
+      "id": "fortune-8",
+      "active": true,
+      "audience": "atendimento",
+      "title": "Biscoitinho da Sorte",
+      "text": "Um convite pequeno pode render uma grande história."
+     },
+     {
+      "id": "fortune-9",
+      "active": true,
+      "audience": "atendimento",
+      "title": "Biscoitinho da Sorte",
+      "text": "Hoje, alguém pode lembrar de você e sorrir."
+     },
+     {
+      "id": "fortune-10",
+      "active": true,
+      "audience": "atendimento",
+      "title": "Biscoitinho da Sorte",
+      "text": "Uma coincidência pode deixar o seu dia mais interessante."
+     },
+     {
+      "id": "fortune-11",
+      "active": true,
+      "audience": "atendimento",
+      "title": "Biscoitinho da Sorte",
+      "text": "Nem toda visita avisa. A sorte, por exemplo."
+     },
+     {
+      "id": "fortune-12",
+      "active": true,
+      "audience": "atendimento",
+      "title": "Biscoitinho da Sorte",
+      "text": "Um assunto antigo ainda pode ganhar um final feliz."
+     },
+     {
+      "id": "tarologo-fortune-1",
+      "title": "Biscoitinho da Sorte",
+      "text": "Uma boa notícia pode chegar sem fazer alarde.",
+      "active": true,
+      "audience": "tarologo"
+     },
+     {
+      "id": "tarologo-fortune-2",
+      "title": "Biscoitinho da Sorte",
+      "text": "Alguém vai gostar de saber de você.",
+      "active": true,
+      "audience": "tarologo"
+     },
+     {
+      "id": "tarologo-fortune-3",
+      "title": "Biscoitinho da Sorte",
+      "text": "A sorte pode estar numa conversa que você quase deixou para depois.",
+      "active": true,
+      "audience": "tarologo"
+     },
+     {
+      "id": "tarologo-fortune-4",
+      "title": "Biscoitinho da Sorte",
+      "text": "Há um reencontro procurando espaço na sua agenda.",
+      "active": true,
+      "audience": "tarologo"
+     },
+     {
+      "id": "tarologo-fortune-5",
+      "title": "Biscoitinho da Sorte",
+      "text": "Uma gentileza sua ainda vai voltar em forma de surpresa.",
+      "active": true,
+      "audience": "tarologo"
+     },
+     {
+      "id": "tarologo-fortune-6",
+      "title": "Biscoitinho da Sorte",
+      "text": "A resposta pode vir de quem você menos espera.",
+      "active": true,
+      "audience": "tarologo"
+     },
+     {
+      "id": "tarologo-fortune-7",
+      "title": "Biscoitinho da Sorte",
+      "text": "Tem coisa boa chegando sem hora marcada.",
+      "active": true,
+      "audience": "tarologo"
+     },
+     {
+      "id": "tarologo-fortune-8",
+      "title": "Biscoitinho da Sorte",
+      "text": "Um convite pequeno pode render uma grande história.",
+      "active": true,
+      "audience": "tarologo"
+     },
+     {
+      "id": "tarologo-fortune-9",
+      "title": "Biscoitinho da Sorte",
+      "text": "Hoje, alguém pode lembrar de você e sorrir.",
+      "active": true,
+      "audience": "tarologo"
+     },
+     {
+      "id": "tarologo-fortune-10",
+      "title": "Biscoitinho da Sorte",
+      "text": "Uma coincidência pode deixar o seu dia mais interessante.",
+      "active": true,
+      "audience": "tarologo"
+     },
+     {
+      "id": "tarologo-fortune-11",
+      "title": "Biscoitinho da Sorte",
+      "text": "Nem toda visita avisa. A sorte, por exemplo.",
+      "active": true,
+      "audience": "tarologo"
+     },
+     {
+      "id": "tarologo-fortune-12",
+      "title": "Biscoitinho da Sorte",
+      "text": "Um assunto antigo ainda pode ganhar um final feliz.",
+      "active": true,
+      "audience": "tarologo"
+     }
+    ]
+   }
+  },
+  {
+   "nome": "texto com espaços nas pontas é aparado",
+   "conteudo": {
+    "greetings": [
+     {
+      "id": "morning-1",
+      "active": true,
+      "audience": "atendimento",
+      "period": "morning",
+      "title": "Olá",
+      "text": "A casa vai ganhando vida com a chegada de cada um."
+     },
+     {
+      "id": "afternoon-1",
+      "active": true,
+      "audience": "atendimento",
+      "period": "afternoon",
+      "title": "Entre, fique à vontade.",
+      "text": "Ainda temos uma tarde inteira de encontros pela frente."
+     },
+     {
+      "id": "evening-1",
+      "active": true,
+      "audience": "atendimento",
+      "period": "evening",
+      "title": "Nossa luz continua acesa.",
+      "text": "Tem gente chegando, histórias começando e você por aqui."
+     },
+     {
+      "id": "dawn-1",
+      "active": true,
+      "audience": "atendimento",
+      "period": "dawn",
+      "title": "A casa está quietinha.",
+      "text": "A esta hora, nossa companhia tem um aconchego diferente."
+     },
+     {
+      "id": "tarologo-morning-1",
+      "active": true,
+      "audience": "tarologo",
+      "period": "morning",
+      "title": "Tem gente esperando pela sua leitura.",
+      "text": "As cartas ainda estão na mesa, mas as histórias de hoje já começaram."
+     },
+     {
+      "id": "tarologo-afternoon-1",
+      "active": true,
+      "audience": "tarologo",
+      "period": "afternoon",
+      "title": "Uma boa conversa começa nas cartas.",
+      "text": "Entre uma história e outra, que esta tarde também traga bons encontros para você."
+     },
+     {
+      "id": "tarologo-evening-1",
+      "active": true,
+      "audience": "tarologo",
+      "period": "evening",
+      "title": "A noite chegou. As cartas têm companhia.",
+      "text": "Há quem guarde para esta hora a conversa que esperou o dia inteiro para ter."
+     },
+     {
+      "id": "tarologo-dawn-1",
+      "active": true,
+      "audience": "tarologo",
+      "period": "dawn",
+      "title": "Ainda há histórias acordadas.",
+      "text": "Nesta hora mais quieta, cada consulta encontra seu próprio ritmo."
+     }
+    ],
+    "messages": [
+     {
+      "id": "fortune-1",
+      "active": true,
+      "audience": "atendimento",
+      "title": "Biscoitinho da Sorte",
+      "text": "Uma mensagem"
+     },
+     {
+      "id": "fortune-2",
+      "active": true,
+      "audience": "atendimento",
+      "title": "Biscoitinho da Sorte",
+      "text": "Alguém vai gostar de saber de você."
+     },
+     {
+      "id": "fortune-3",
+      "active": true,
+      "audience": "atendimento",
+      "title": "Biscoitinho da Sorte",
+      "text": "A sorte pode estar numa conversa que você quase deixou para depois."
+     },
+     {
+      "id": "fortune-4",
+      "active": true,
+      "audience": "atendimento",
+      "title": "Biscoitinho da Sorte",
+      "text": "Há um reencontro procurando espaço na sua agenda."
+     },
+     {
+      "id": "fortune-5",
+      "active": true,
+      "audience": "atendimento",
+      "title": "Biscoitinho da Sorte",
+      "text": "Uma gentileza sua ainda vai voltar em forma de surpresa."
+     },
+     {
+      "id": "fortune-6",
+      "active": true,
+      "audience": "atendimento",
+      "title": "Biscoitinho da Sorte",
+      "text": "A resposta pode vir de quem você menos espera."
+     },
+     {
+      "id": "fortune-7",
+      "active": true,
+      "audience": "atendimento",
+      "title": "Biscoitinho da Sorte",
+      "text": "Tem coisa boa chegando sem hora marcada."
+     },
+     {
+      "id": "fortune-8",
+      "active": true,
+      "audience": "atendimento",
+      "title": "Biscoitinho da Sorte",
+      "text": "Um convite pequeno pode render uma grande história."
+     },
+     {
+      "id": "fortune-9",
+      "active": true,
+      "audience": "atendimento",
+      "title": "Biscoitinho da Sorte",
+      "text": "Hoje, alguém pode lembrar de você e sorrir."
+     },
+     {
+      "id": "fortune-10",
+      "active": true,
+      "audience": "atendimento",
+      "title": "Biscoitinho da Sorte",
+      "text": "Uma coincidência pode deixar o seu dia mais interessante."
+     },
+     {
+      "id": "fortune-11",
+      "active": true,
+      "audience": "atendimento",
+      "title": "Biscoitinho da Sorte",
+      "text": "Nem toda visita avisa. A sorte, por exemplo."
+     },
+     {
+      "id": "fortune-12",
+      "active": true,
+      "audience": "atendimento",
+      "title": "Biscoitinho da Sorte",
+      "text": "Um assunto antigo ainda pode ganhar um final feliz."
+     },
+     {
+      "id": "tarologo-fortune-1",
+      "active": true,
+      "audience": "tarologo",
+      "title": "Biscoitinho da Sorte",
+      "text": "Uma boa notícia pode chegar sem fazer alarde."
+     },
+     {
+      "id": "tarologo-fortune-2",
+      "active": true,
+      "audience": "tarologo",
+      "title": "Biscoitinho da Sorte",
+      "text": "Alguém vai gostar de saber de você."
+     },
+     {
+      "id": "tarologo-fortune-3",
+      "active": true,
+      "audience": "tarologo",
+      "title": "Biscoitinho da Sorte",
+      "text": "A sorte pode estar numa conversa que você quase deixou para depois."
+     },
+     {
+      "id": "tarologo-fortune-4",
+      "active": true,
+      "audience": "tarologo",
+      "title": "Biscoitinho da Sorte",
+      "text": "Há um reencontro procurando espaço na sua agenda."
+     },
+     {
+      "id": "tarologo-fortune-5",
+      "active": true,
+      "audience": "tarologo",
+      "title": "Biscoitinho da Sorte",
+      "text": "Uma gentileza sua ainda vai voltar em forma de surpresa."
+     },
+     {
+      "id": "tarologo-fortune-6",
+      "active": true,
+      "audience": "tarologo",
+      "title": "Biscoitinho da Sorte",
+      "text": "A resposta pode vir de quem você menos espera."
+     },
+     {
+      "id": "tarologo-fortune-7",
+      "active": true,
+      "audience": "tarologo",
+      "title": "Biscoitinho da Sorte",
+      "text": "Tem coisa boa chegando sem hora marcada."
+     },
+     {
+      "id": "tarologo-fortune-8",
+      "active": true,
+      "audience": "tarologo",
+      "title": "Biscoitinho da Sorte",
+      "text": "Um convite pequeno pode render uma grande história."
+     },
+     {
+      "id": "tarologo-fortune-9",
+      "active": true,
+      "audience": "tarologo",
+      "title": "Biscoitinho da Sorte",
+      "text": "Hoje, alguém pode lembrar de você e sorrir."
+     },
+     {
+      "id": "tarologo-fortune-10",
+      "active": true,
+      "audience": "tarologo",
+      "title": "Biscoitinho da Sorte",
+      "text": "Uma coincidência pode deixar o seu dia mais interessante."
+     },
+     {
+      "id": "tarologo-fortune-11",
+      "active": true,
+      "audience": "tarologo",
+      "title": "Biscoitinho da Sorte",
+      "text": "Nem toda visita avisa. A sorte, por exemplo."
+     },
+     {
+      "id": "tarologo-fortune-12",
+      "active": true,
+      "audience": "tarologo",
+      "title": "Biscoitinho da Sorte",
+      "text": "Um assunto antigo ainda pode ganhar um final feliz."
+     }
+    ]
+   }
+  },
+  {
+   "nome": "mensagem sem título ganha o título padrão",
+   "conteudo": {
+    "greetings": [
+     {
+      "id": "morning-1",
+      "active": true,
+      "audience": "atendimento",
+      "period": "morning",
+      "title": "Que bom ter você aqui.",
+      "text": "A casa vai ganhando vida com a chegada de cada um."
+     },
+     {
+      "id": "afternoon-1",
+      "active": true,
+      "audience": "atendimento",
+      "period": "afternoon",
+      "title": "Entre, fique à vontade.",
+      "text": "Ainda temos uma tarde inteira de encontros pela frente."
+     },
+     {
+      "id": "evening-1",
+      "active": true,
+      "audience": "atendimento",
+      "period": "evening",
+      "title": "Nossa luz continua acesa.",
+      "text": "Tem gente chegando, histórias começando e você por aqui."
+     },
+     {
+      "id": "dawn-1",
+      "active": true,
+      "audience": "atendimento",
+      "period": "dawn",
+      "title": "A casa está quietinha.",
+      "text": "A esta hora, nossa companhia tem um aconchego diferente."
+     },
+     {
+      "id": "tarologo-morning-1",
+      "active": true,
+      "audience": "tarologo",
+      "period": "morning",
+      "title": "Tem gente esperando pela sua leitura.",
+      "text": "As cartas ainda estão na mesa, mas as histórias de hoje já começaram."
+     },
+     {
+      "id": "tarologo-afternoon-1",
+      "active": true,
+      "audience": "tarologo",
+      "period": "afternoon",
+      "title": "Uma boa conversa começa nas cartas.",
+      "text": "Entre uma história e outra, que esta tarde também traga bons encontros para você."
+     },
+     {
+      "id": "tarologo-evening-1",
+      "active": true,
+      "audience": "tarologo",
+      "period": "evening",
+      "title": "A noite chegou. As cartas têm companhia.",
+      "text": "Há quem guarde para esta hora a conversa que esperou o dia inteiro para ter."
+     },
+     {
+      "id": "tarologo-dawn-1",
+      "active": true,
+      "audience": "tarologo",
+      "period": "dawn",
+      "title": "Ainda há histórias acordadas.",
+      "text": "Nesta hora mais quieta, cada consulta encontra seu próprio ritmo."
+     }
+    ],
+    "messages": [
+     {
+      "id": "fortune-1",
+      "active": true,
+      "audience": "atendimento",
+      "title": "Biscoitinho da Sorte",
+      "text": "Uma boa notícia pode chegar sem fazer alarde."
+     },
+     {
+      "id": "fortune-2",
+      "active": true,
+      "audience": "atendimento",
+      "title": "Biscoitinho da Sorte",
+      "text": "Alguém vai gostar de saber de você."
+     },
+     {
+      "id": "fortune-3",
+      "active": true,
+      "audience": "atendimento",
+      "title": "Biscoitinho da Sorte",
+      "text": "A sorte pode estar numa conversa que você quase deixou para depois."
+     },
+     {
+      "id": "fortune-4",
+      "active": true,
+      "audience": "atendimento",
+      "title": "Biscoitinho da Sorte",
+      "text": "Há um reencontro procurando espaço na sua agenda."
+     },
+     {
+      "id": "fortune-5",
+      "active": true,
+      "audience": "atendimento",
+      "title": "Biscoitinho da Sorte",
+      "text": "Uma gentileza sua ainda vai voltar em forma de surpresa."
+     },
+     {
+      "id": "fortune-6",
+      "active": true,
+      "audience": "atendimento",
+      "title": "Biscoitinho da Sorte",
+      "text": "A resposta pode vir de quem você menos espera."
+     },
+     {
+      "id": "fortune-7",
+      "active": true,
+      "audience": "atendimento",
+      "title": "Biscoitinho da Sorte",
+      "text": "Tem coisa boa chegando sem hora marcada."
+     },
+     {
+      "id": "fortune-8",
+      "active": true,
+      "audience": "atendimento",
+      "title": "Biscoitinho da Sorte",
+      "text": "Um convite pequeno pode render uma grande história."
+     },
+     {
+      "id": "fortune-9",
+      "active": true,
+      "audience": "atendimento",
+      "title": "Biscoitinho da Sorte",
+      "text": "Hoje, alguém pode lembrar de você e sorrir."
+     },
+     {
+      "id": "fortune-10",
+      "active": true,
+      "audience": "atendimento",
+      "title": "Biscoitinho da Sorte",
+      "text": "Uma coincidência pode deixar o seu dia mais interessante."
+     },
+     {
+      "id": "fortune-11",
+      "active": true,
+      "audience": "atendimento",
+      "title": "Biscoitinho da Sorte",
+      "text": "Nem toda visita avisa. A sorte, por exemplo."
+     },
+     {
+      "id": "fortune-12",
+      "active": true,
+      "audience": "atendimento",
+      "title": "Biscoitinho da Sorte",
+      "text": "Um assunto antigo ainda pode ganhar um final feliz."
+     },
+     {
+      "id": "tarologo-fortune-1",
+      "active": true,
+      "audience": "tarologo",
+      "title": "Biscoitinho da Sorte",
+      "text": "Uma boa notícia pode chegar sem fazer alarde."
+     },
+     {
+      "id": "tarologo-fortune-2",
+      "active": true,
+      "audience": "tarologo",
+      "title": "Biscoitinho da Sorte",
+      "text": "Alguém vai gostar de saber de você."
+     },
+     {
+      "id": "tarologo-fortune-3",
+      "active": true,
+      "audience": "tarologo",
+      "title": "Biscoitinho da Sorte",
+      "text": "A sorte pode estar numa conversa que você quase deixou para depois."
+     },
+     {
+      "id": "tarologo-fortune-4",
+      "active": true,
+      "audience": "tarologo",
+      "title": "Biscoitinho da Sorte",
+      "text": "Há um reencontro procurando espaço na sua agenda."
+     },
+     {
+      "id": "tarologo-fortune-5",
+      "active": true,
+      "audience": "tarologo",
+      "title": "Biscoitinho da Sorte",
+      "text": "Uma gentileza sua ainda vai voltar em forma de surpresa."
+     },
+     {
+      "id": "tarologo-fortune-6",
+      "active": true,
+      "audience": "tarologo",
+      "title": "Biscoitinho da Sorte",
+      "text": "A resposta pode vir de quem você menos espera."
+     },
+     {
+      "id": "tarologo-fortune-7",
+      "active": true,
+      "audience": "tarologo",
+      "title": "Biscoitinho da Sorte",
+      "text": "Tem coisa boa chegando sem hora marcada."
+     },
+     {
+      "id": "tarologo-fortune-8",
+      "active": true,
+      "audience": "tarologo",
+      "title": "Biscoitinho da Sorte",
+      "text": "Um convite pequeno pode render uma grande história."
+     },
+     {
+      "id": "tarologo-fortune-9",
+      "active": true,
+      "audience": "tarologo",
+      "title": "Biscoitinho da Sorte",
+      "text": "Hoje, alguém pode lembrar de você e sorrir."
+     },
+     {
+      "id": "tarologo-fortune-10",
+      "active": true,
+      "audience": "tarologo",
+      "title": "Biscoitinho da Sorte",
+      "text": "Uma coincidência pode deixar o seu dia mais interessante."
+     },
+     {
+      "id": "tarologo-fortune-11",
+      "active": true,
+      "audience": "tarologo",
+      "title": "Biscoitinho da Sorte",
+      "text": "Nem toda visita avisa. A sorte, por exemplo."
+     },
+     {
+      "id": "tarologo-fortune-12",
+      "active": true,
+      "audience": "tarologo",
+      "title": "Biscoitinho da Sorte",
+      "text": "Um assunto antigo ainda pode ganhar um final feliz."
+     }
+    ]
+   }
+  },
+  {
+   "nome": "saudação sem complemento é aceita (complemento opcional)",
+   "conteudo": {
+    "greetings": [
+     {
+      "id": "morning-1",
+      "active": true,
+      "audience": "atendimento",
+      "period": "morning",
+      "title": "Que bom ter você aqui.",
+      "text": ""
+     },
+     {
+      "id": "afternoon-1",
+      "active": true,
+      "audience": "atendimento",
+      "period": "afternoon",
+      "title": "Entre, fique à vontade.",
+      "text": "Ainda temos uma tarde inteira de encontros pela frente."
+     },
+     {
+      "id": "evening-1",
+      "active": true,
+      "audience": "atendimento",
+      "period": "evening",
+      "title": "Nossa luz continua acesa.",
+      "text": "Tem gente chegando, histórias começando e você por aqui."
+     },
+     {
+      "id": "dawn-1",
+      "active": true,
+      "audience": "atendimento",
+      "period": "dawn",
+      "title": "A casa está quietinha.",
+      "text": "A esta hora, nossa companhia tem um aconchego diferente."
+     },
+     {
+      "id": "tarologo-morning-1",
+      "active": true,
+      "audience": "tarologo",
+      "period": "morning",
+      "title": "Tem gente esperando pela sua leitura.",
+      "text": "As cartas ainda estão na mesa, mas as histórias de hoje já começaram."
+     },
+     {
+      "id": "tarologo-afternoon-1",
+      "active": true,
+      "audience": "tarologo",
+      "period": "afternoon",
+      "title": "Uma boa conversa começa nas cartas.",
+      "text": "Entre uma história e outra, que esta tarde também traga bons encontros para você."
+     },
+     {
+      "id": "tarologo-evening-1",
+      "active": true,
+      "audience": "tarologo",
+      "period": "evening",
+      "title": "A noite chegou. As cartas têm companhia.",
+      "text": "Há quem guarde para esta hora a conversa que esperou o dia inteiro para ter."
+     },
+     {
+      "id": "tarologo-dawn-1",
+      "active": true,
+      "audience": "tarologo",
+      "period": "dawn",
+      "title": "Ainda há histórias acordadas.",
+      "text": "Nesta hora mais quieta, cada consulta encontra seu próprio ritmo."
+     }
+    ],
+    "messages": [
+     {
+      "id": "fortune-1",
+      "active": true,
+      "audience": "atendimento",
+      "title": "Biscoitinho da Sorte",
+      "text": "Uma boa notícia pode chegar sem fazer alarde."
+     },
+     {
+      "id": "fortune-2",
+      "active": true,
+      "audience": "atendimento",
+      "title": "Biscoitinho da Sorte",
+      "text": "Alguém vai gostar de saber de você."
+     },
+     {
+      "id": "fortune-3",
+      "active": true,
+      "audience": "atendimento",
+      "title": "Biscoitinho da Sorte",
+      "text": "A sorte pode estar numa conversa que você quase deixou para depois."
+     },
+     {
+      "id": "fortune-4",
+      "active": true,
+      "audience": "atendimento",
+      "title": "Biscoitinho da Sorte",
+      "text": "Há um reencontro procurando espaço na sua agenda."
+     },
+     {
+      "id": "fortune-5",
+      "active": true,
+      "audience": "atendimento",
+      "title": "Biscoitinho da Sorte",
+      "text": "Uma gentileza sua ainda vai voltar em forma de surpresa."
+     },
+     {
+      "id": "fortune-6",
+      "active": true,
+      "audience": "atendimento",
+      "title": "Biscoitinho da Sorte",
+      "text": "A resposta pode vir de quem você menos espera."
+     },
+     {
+      "id": "fortune-7",
+      "active": true,
+      "audience": "atendimento",
+      "title": "Biscoitinho da Sorte",
+      "text": "Tem coisa boa chegando sem hora marcada."
+     },
+     {
+      "id": "fortune-8",
+      "active": true,
+      "audience": "atendimento",
+      "title": "Biscoitinho da Sorte",
+      "text": "Um convite pequeno pode render uma grande história."
+     },
+     {
+      "id": "fortune-9",
+      "active": true,
+      "audience": "atendimento",
+      "title": "Biscoitinho da Sorte",
+      "text": "Hoje, alguém pode lembrar de você e sorrir."
+     },
+     {
+      "id": "fortune-10",
+      "active": true,
+      "audience": "atendimento",
+      "title": "Biscoitinho da Sorte",
+      "text": "Uma coincidência pode deixar o seu dia mais interessante."
+     },
+     {
+      "id": "fortune-11",
+      "active": true,
+      "audience": "atendimento",
+      "title": "Biscoitinho da Sorte",
+      "text": "Nem toda visita avisa. A sorte, por exemplo."
+     },
+     {
+      "id": "fortune-12",
+      "active": true,
+      "audience": "atendimento",
+      "title": "Biscoitinho da Sorte",
+      "text": "Um assunto antigo ainda pode ganhar um final feliz."
+     },
+     {
+      "id": "tarologo-fortune-1",
+      "active": true,
+      "audience": "tarologo",
+      "title": "Biscoitinho da Sorte",
+      "text": "Uma boa notícia pode chegar sem fazer alarde."
+     },
+     {
+      "id": "tarologo-fortune-2",
+      "active": true,
+      "audience": "tarologo",
+      "title": "Biscoitinho da Sorte",
+      "text": "Alguém vai gostar de saber de você."
+     },
+     {
+      "id": "tarologo-fortune-3",
+      "active": true,
+      "audience": "tarologo",
+      "title": "Biscoitinho da Sorte",
+      "text": "A sorte pode estar numa conversa que você quase deixou para depois."
+     },
+     {
+      "id": "tarologo-fortune-4",
+      "active": true,
+      "audience": "tarologo",
+      "title": "Biscoitinho da Sorte",
+      "text": "Há um reencontro procurando espaço na sua agenda."
+     },
+     {
+      "id": "tarologo-fortune-5",
+      "active": true,
+      "audience": "tarologo",
+      "title": "Biscoitinho da Sorte",
+      "text": "Uma gentileza sua ainda vai voltar em forma de surpresa."
+     },
+     {
+      "id": "tarologo-fortune-6",
+      "active": true,
+      "audience": "tarologo",
+      "title": "Biscoitinho da Sorte",
+      "text": "A resposta pode vir de quem você menos espera."
+     },
+     {
+      "id": "tarologo-fortune-7",
+      "active": true,
+      "audience": "tarologo",
+      "title": "Biscoitinho da Sorte",
+      "text": "Tem coisa boa chegando sem hora marcada."
+     },
+     {
+      "id": "tarologo-fortune-8",
+      "active": true,
+      "audience": "tarologo",
+      "title": "Biscoitinho da Sorte",
+      "text": "Um convite pequeno pode render uma grande história."
+     },
+     {
+      "id": "tarologo-fortune-9",
+      "active": true,
+      "audience": "tarologo",
+      "title": "Biscoitinho da Sorte",
+      "text": "Hoje, alguém pode lembrar de você e sorrir."
+     },
+     {
+      "id": "tarologo-fortune-10",
+      "active": true,
+      "audience": "tarologo",
+      "title": "Biscoitinho da Sorte",
+      "text": "Uma coincidência pode deixar o seu dia mais interessante."
+     },
+     {
+      "id": "tarologo-fortune-11",
+      "active": true,
+      "audience": "tarologo",
+      "title": "Biscoitinho da Sorte",
+      "text": "Nem toda visita avisa. A sorte, por exemplo."
+     },
+     {
+      "id": "tarologo-fortune-12",
+      "active": true,
+      "audience": "tarologo",
+      "title": "Biscoitinho da Sorte",
+      "text": "Um assunto antigo ainda pode ganhar um final feliz."
+     }
+    ]
+   }
+  },
+  {
+   "nome": "nulo",
+   "erro": "Conteúdo inválido."
+  },
+  {
+   "nome": "saudações ausentes",
+   "erro": "Use até 300 saudações e 500 mensagens por público."
+  },
+  {
+   "nome": "frase grande vazia",
+   "erro": "Frase grande: preencha um texto de até 90 caracteres."
+  },
+  {
+   "nome": "frase grande com 91 caracteres",
+   "erro": "Frase grande: preencha um texto de até 90 caracteres."
+  },
+  {
+   "nome": "saudação abaixo com 221 caracteres",
+   "erro": "Saudação abaixo: preencha um texto de até 220 caracteres."
+  },
+  {
+   "nome": "mensagem com 281 caracteres",
+   "erro": "Mensagem: preencha um texto de até 280 caracteres."
+  },
+  {
+   "nome": "mensagem vazia",
+   "erro": "Mensagem: preencha um texto de até 280 caracteres."
+  },
+  {
+   "nome": "título da mensagem com 91 caracteres",
+   "erro": "Título da mensagem: preencha um texto de até 90 caracteres."
+  },
+  {
+   "nome": "id repetido",
+   "erro": "Há uma linha inválida ou repetida."
+  },
+  {
+   "nome": "id com caractere inválido",
+   "erro": "Há uma linha inválida ou repetida."
+  },
+  {
+   "nome": "active que não é booleano",
+   "erro": "Há uma linha inválida ou repetida."
+  },
+  {
+   "nome": "público desconhecido",
+   "erro": "Selecione Atendimento ou Tarólogo como público do texto."
+  },
+  {
+   "nome": "período desconhecido",
+   "erro": "Selecione o período da saudação."
+  },
+  {
+   "nome": "sem saudação ativa na manhã do atendimento",
+   "erro": "Mantenha ao menos uma saudação ativa para manhã de Atendimento."
+  },
+  {
+   "nome": "sem saudação ativa na madrugada do tarólogo",
+   "erro": "Mantenha ao menos uma saudação ativa para madrugada de Tarólogo."
+  },
+  {
+   "nome": "nenhuma mensagem ativa para o atendimento",
+   "erro": "Mantenha ao menos uma mensagem ativa para Atendimento."
+  },
+  {
+   "nome": "nenhuma mensagem ativa para o tarólogo",
+   "erro": "Mantenha ao menos uma mensagem ativa para Tarólogo."
+  },
+  {
+   "nome": "saudação inativa com a outra do mesmo período ativa é aceita",
+   "conteudo": {
+    "greetings": [
+     {
+      "id": "morning-1",
+      "active": true,
+      "audience": "atendimento",
+      "period": "morning",
+      "title": "Que bom ter você aqui.",
+      "text": "A casa vai ganhando vida com a chegada de cada um."
+     },
+     {
+      "id": "afternoon-1",
+      "active": true,
+      "audience": "atendimento",
+      "period": "afternoon",
+      "title": "Entre, fique à vontade.",
+      "text": "Ainda temos uma tarde inteira de encontros pela frente."
+     },
+     {
+      "id": "evening-1",
+      "active": true,
+      "audience": "atendimento",
+      "period": "evening",
+      "title": "Nossa luz continua acesa.",
+      "text": "Tem gente chegando, histórias começando e você por aqui."
+     },
+     {
+      "id": "dawn-1",
+      "active": true,
+      "audience": "atendimento",
+      "period": "dawn",
+      "title": "A casa está quietinha.",
+      "text": "A esta hora, nossa companhia tem um aconchego diferente."
+     },
+     {
+      "id": "tarologo-morning-1",
+      "active": true,
+      "audience": "tarologo",
+      "period": "morning",
+      "title": "Tem gente esperando pela sua leitura.",
+      "text": "As cartas ainda estão na mesa, mas as histórias de hoje já começaram."
+     },
+     {
+      "id": "tarologo-afternoon-1",
+      "active": true,
+      "audience": "tarologo",
+      "period": "afternoon",
+      "title": "Uma boa conversa começa nas cartas.",
+      "text": "Entre uma história e outra, que esta tarde também traga bons encontros para você."
+     },
+     {
+      "id": "tarologo-evening-1",
+      "active": true,
+      "audience": "tarologo",
+      "period": "evening",
+      "title": "A noite chegou. As cartas têm companhia.",
+      "text": "Há quem guarde para esta hora a conversa que esperou o dia inteiro para ter."
+     },
+     {
+      "id": "tarologo-dawn-1",
+      "active": true,
+      "audience": "tarologo",
+      "period": "dawn",
+      "title": "Ainda há histórias acordadas.",
+      "text": "Nesta hora mais quieta, cada consulta encontra seu próprio ritmo."
+     },
+     {
+      "id": "morning-2",
+      "active": false,
+      "audience": "atendimento",
+      "period": "morning",
+      "title": "Outra",
+      "text": ""
+     }
+    ],
+    "messages": [
+     {
+      "id": "fortune-1",
+      "active": true,
+      "audience": "atendimento",
+      "title": "Biscoitinho da Sorte",
+      "text": "Uma boa notícia pode chegar sem fazer alarde."
+     },
+     {
+      "id": "fortune-2",
+      "active": true,
+      "audience": "atendimento",
+      "title": "Biscoitinho da Sorte",
+      "text": "Alguém vai gostar de saber de você."
+     },
+     {
+      "id": "fortune-3",
+      "active": true,
+      "audience": "atendimento",
+      "title": "Biscoitinho da Sorte",
+      "text": "A sorte pode estar numa conversa que você quase deixou para depois."
+     },
+     {
+      "id": "fortune-4",
+      "active": true,
+      "audience": "atendimento",
+      "title": "Biscoitinho da Sorte",
+      "text": "Há um reencontro procurando espaço na sua agenda."
+     },
+     {
+      "id": "fortune-5",
+      "active": true,
+      "audience": "atendimento",
+      "title": "Biscoitinho da Sorte",
+      "text": "Uma gentileza sua ainda vai voltar em forma de surpresa."
+     },
+     {
+      "id": "fortune-6",
+      "active": true,
+      "audience": "atendimento",
+      "title": "Biscoitinho da Sorte",
+      "text": "A resposta pode vir de quem você menos espera."
+     },
+     {
+      "id": "fortune-7",
+      "active": true,
+      "audience": "atendimento",
+      "title": "Biscoitinho da Sorte",
+      "text": "Tem coisa boa chegando sem hora marcada."
+     },
+     {
+      "id": "fortune-8",
+      "active": true,
+      "audience": "atendimento",
+      "title": "Biscoitinho da Sorte",
+      "text": "Um convite pequeno pode render uma grande história."
+     },
+     {
+      "id": "fortune-9",
+      "active": true,
+      "audience": "atendimento",
+      "title": "Biscoitinho da Sorte",
+      "text": "Hoje, alguém pode lembrar de você e sorrir."
+     },
+     {
+      "id": "fortune-10",
+      "active": true,
+      "audience": "atendimento",
+      "title": "Biscoitinho da Sorte",
+      "text": "Uma coincidência pode deixar o seu dia mais interessante."
+     },
+     {
+      "id": "fortune-11",
+      "active": true,
+      "audience": "atendimento",
+      "title": "Biscoitinho da Sorte",
+      "text": "Nem toda visita avisa. A sorte, por exemplo."
+     },
+     {
+      "id": "fortune-12",
+      "active": true,
+      "audience": "atendimento",
+      "title": "Biscoitinho da Sorte",
+      "text": "Um assunto antigo ainda pode ganhar um final feliz."
+     },
+     {
+      "id": "tarologo-fortune-1",
+      "active": true,
+      "audience": "tarologo",
+      "title": "Biscoitinho da Sorte",
+      "text": "Uma boa notícia pode chegar sem fazer alarde."
+     },
+     {
+      "id": "tarologo-fortune-2",
+      "active": true,
+      "audience": "tarologo",
+      "title": "Biscoitinho da Sorte",
+      "text": "Alguém vai gostar de saber de você."
+     },
+     {
+      "id": "tarologo-fortune-3",
+      "active": true,
+      "audience": "tarologo",
+      "title": "Biscoitinho da Sorte",
+      "text": "A sorte pode estar numa conversa que você quase deixou para depois."
+     },
+     {
+      "id": "tarologo-fortune-4",
+      "active": true,
+      "audience": "tarologo",
+      "title": "Biscoitinho da Sorte",
+      "text": "Há um reencontro procurando espaço na sua agenda."
+     },
+     {
+      "id": "tarologo-fortune-5",
+      "active": true,
+      "audience": "tarologo",
+      "title": "Biscoitinho da Sorte",
+      "text": "Uma gentileza sua ainda vai voltar em forma de surpresa."
+     },
+     {
+      "id": "tarologo-fortune-6",
+      "active": true,
+      "audience": "tarologo",
+      "title": "Biscoitinho da Sorte",
+      "text": "A resposta pode vir de quem você menos espera."
+     },
+     {
+      "id": "tarologo-fortune-7",
+      "active": true,
+      "audience": "tarologo",
+      "title": "Biscoitinho da Sorte",
+      "text": "Tem coisa boa chegando sem hora marcada."
+     },
+     {
+      "id": "tarologo-fortune-8",
+      "active": true,
+      "audience": "tarologo",
+      "title": "Biscoitinho da Sorte",
+      "text": "Um convite pequeno pode render uma grande história."
+     },
+     {
+      "id": "tarologo-fortune-9",
+      "active": true,
+      "audience": "tarologo",
+      "title": "Biscoitinho da Sorte",
+      "text": "Hoje, alguém pode lembrar de você e sorrir."
+     },
+     {
+      "id": "tarologo-fortune-10",
+      "active": true,
+      "audience": "tarologo",
+      "title": "Biscoitinho da Sorte",
+      "text": "Uma coincidência pode deixar o seu dia mais interessante."
+     },
+     {
+      "id": "tarologo-fortune-11",
+      "active": true,
+      "audience": "tarologo",
+      "title": "Biscoitinho da Sorte",
+      "text": "Nem toda visita avisa. A sorte, por exemplo."
+     },
+     {
+      "id": "tarologo-fortune-12",
+      "active": true,
+      "audience": "tarologo",
+      "title": "Biscoitinho da Sorte",
+      "text": "Um assunto antigo ainda pode ganhar um final feliz."
+     }
+    ]
+   }
+  },
+  {
+   "nome": "mais de 300 saudações para o atendimento",
+   "erro": "Use até 300 saudações e 500 mensagens para Atendimento."
+  },
+  {
+   "nome": "mais de 600 saudações no total",
+   "erro": "Use até 300 saudações e 500 mensagens por público."
+  }
+ ]
+}

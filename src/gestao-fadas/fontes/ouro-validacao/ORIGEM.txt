@@ -1,0 +1,10 @@
+Fixtures geradas pelo código REAL da API B (zod de real-payouts-http.server.ts e db/finance-store.ts, view e store) por
+scripts/gerar-ouro-gf-diferencial-b.js, nos cenários e casos de scripts/apoio-gf-diferencial/. Conferidas offline por
+scripts/verificar-gf-diferencial-b.js. SHA-256 dos arquivos da B usados:
+  7d3b97759f014d944982c7546b9e057059d9c5b3dc442fe52743932631e899e9  features/finance/real-payouts-http.server.ts
+  e24ad7237bd40d40c3f13cc9ea199a6f82fbaa54c8e4a506ec944a21616e765a  features/clientes/real-clients-http.server.ts
+  3cf04589df09d19b4c0e696191e60d167171869f11b0e7a2bb368d26f0ee64ff  db/finance-store.ts
+  5b9ac2bea3757641c743d6c50ff11d4ae6f1035ed1cf26a39d3b256db71ed980  features/clientes/real-clients-model.ts
+  f6e01a1c7e89c990a0fa9bddbac8aaa831108d42db83c2e08d5765d7424030e9  features/integrations/payout-audit.ts
+  bc1c59bd5cdf3b9286051fd8d2de48f5d13a6447d8f913980ea8d3dbf1d45983  features/integration/legacy-values.ts
+  0d53d25dbfd3d42f8006f63f4be4b7e59d4dc2464a678cf94c25ea30c49cd1eb  features/shared/real-period.ts

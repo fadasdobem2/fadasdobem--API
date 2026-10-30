@@ -1,0 +1,6717 @@
+{
+ "geradoDe": "features/agenda/agenda-order-command.ts e agenda-contact.ts do front",
+ "casos": [
+  {
+   "tarotId": "osiris",
+   "itens": [
+    {
+     "id": "ag-9i2f0",
+     "tarotId": "osiris",
+     "position": 1,
+     "date": "2026-11-10",
+     "clientId": "900000",
+     "client": "Cliente 0",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "orderCommand": {
+      "id": "cmd-0",
+      "queueKey": "queue:osiris",
+      "baseRevision": "queue-v1:0:x",
+      "at": "2026-11-10T10:00:00.000Z",
+      "actorRole": "atendente",
+      "beforeIds": [],
+      "afterIds": []
+     }
+    },
+    {
+     "id": "ag-1g7t1",
+     "tarotId": "osiris",
+     "position": 2,
+     "date": "2026-11-10",
+     "clientId": "900001",
+     "client": "Cliente 1",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": [
+       "Concluída"
+      ]
+     },
+     "agendaOutcome": "Concluída"
+    },
+    {
+     "id": "ag-b3wv2",
+     "tarotId": "osiris",
+     "position": 3,
+     "date": "2026-11-10",
+     "clientId": "900002",
+     "client": "Cliente 2",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": [
+       "Concluída"
+      ]
+     },
+     "agendaOutcome": "Concluída"
+    },
+    {
+     "id": "ag-hc333",
+     "tarotId": "osiris",
+     "position": 4,
+     "date": "2026-11-10",
+     "clientId": "900003",
+     "client": "Cliente 3",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "id": "ag-9utx4",
+     "tarotId": "osiris",
+     "position": 5,
+     "date": "2026-11-10",
+     "clientId": "900004",
+     "client": "Cliente 4",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "positionOverrides": {
+      "explicit:queue:osiris": 9
+     },
+     "orderCommand": {
+      "id": "cmd-4",
+      "queueKey": "queue:osiris",
+      "baseRevision": "queue-v1:0:x",
+      "at": "2026-11-10T10:00:00.000Z",
+      "actorRole": "atendente",
+      "beforeIds": [],
+      "afterIds": []
+     }
+    },
+    {
+     "id": "ag-69p85",
+     "tarotId": "osiris",
+     "position": 6,
+     "date": "2026-11-10",
+     "clientId": "900005",
+     "client": "Cliente 5",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    }
+   ],
+   "revisao": "queue-v1:201:89e9fc154cd031a701e50de960185703",
+   "encerrados": [
+    false,
+    true,
+    true,
+    false,
+    false,
+    false
+   ],
+   "fotos": [
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": [
+       "Concluída"
+      ]
+     },
+     "agendaOutcome": "Concluída"
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": [
+       "Concluída"
+      ]
+     },
+     "agendaOutcome": "Concluída"
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    }
+   ],
+   "proximaPosicao": 7
+  },
+  {
+   "tarotId": "nyx",
+   "itens": [
+    {
+     "id": "ag-hykz0",
+     "tarotId": "nyx",
+     "position": 1,
+     "date": "2026-11-10",
+     "clientId": "900000",
+     "client": "Cliente 0",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "positionOverrides": {
+      "yield:queue:nyx": 1
+     }
+    },
+    {
+     "id": "ag-gckq1",
+     "tarotId": "nyx",
+     "position": 2,
+     "date": "2026-11-10",
+     "clientId": "900001",
+     "client": "Cliente 1",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "positionOverrides": {
+      "explicit:queue:nyx": 9,
+      "yield:queue:nyx": 2
+     },
+     "orderCommand": {
+      "id": "cmd-1",
+      "queueKey": "queue:nyx",
+      "baseRevision": "queue-v1:0:x",
+      "at": "2026-11-10T10:00:00.000Z",
+      "actorRole": "atendente",
+      "beforeIds": [],
+      "afterIds": []
+     },
+     "contactHistory": [
+      {
+       "id": "ev-1",
+       "actor": "Teste",
+       "at": "2026-11-10T10:00:00.000Z",
+       "date": "2026-11-10",
+       "attempt": 1,
+       "tag": "Avisada",
+       "active": true,
+       "before": [],
+       "after": [
+        "Avisada"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "ag-nny2",
+     "tarotId": "nyx",
+     "position": 3,
+     "date": "2026-11-10",
+     "clientId": "900002",
+     "client": "Cliente 2",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "positionOverrides": {
+      "explicit:queue:nyx": 5
+     }
+    },
+    {
+     "id": "ag-c0al3",
+     "tarotId": "nyx",
+     "position": 4,
+     "date": "2026-11-10",
+     "clientId": "900003",
+     "client": "Cliente 3",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": [
+       "Cancelada"
+      ]
+     },
+     "positionOverrides": {
+      "explicit:queue:nyx": 7
+     },
+     "agendaOutcome": "Cancelada"
+    },
+    {
+     "id": "ag-hhtl4",
+     "tarotId": "nyx",
+     "position": 5,
+     "date": "2026-11-10",
+     "clientId": "900004",
+     "client": "Cliente 4",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 2,
+      "date": "2026-11-10",
+      "tags": [
+       "Avisada",
+       "Vai pagar"
+      ]
+     },
+     "orderCommand": {
+      "id": "cmd-4",
+      "queueKey": "queue:nyx",
+      "baseRevision": "queue-v1:0:x",
+      "at": "2026-11-10T10:00:00.000Z",
+      "actorRole": "atendente",
+      "beforeIds": [],
+      "afterIds": []
+     }
+    }
+   ],
+   "revisao": "queue-v1:288:f3dcd507235b2775f1facff3c46c7249",
+   "encerrados": [
+    false,
+    false,
+    false,
+    true,
+    false
+   ],
+   "fotos": [
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": [
+       "Avisada"
+      ]
+     },
+     "lastEvent": "ev-1"
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": [
+       "Cancelada"
+      ]
+     },
+     "agendaOutcome": "Cancelada"
+    },
+    {
+     "contact": {
+      "attempt": 2,
+      "date": "2026-11-10",
+      "tags": [
+       "Avisada",
+       "Vai pagar"
+      ]
+     }
+    }
+   ],
+   "proximaPosicao": 6
+  },
+  {
+   "tarotId": "estrela",
+   "itens": [
+    {
+     "id": "ag-etwt0",
+     "tarotId": "estrela",
+     "position": 1,
+     "date": "2026-11-10",
+     "clientId": "900000",
+     "client": "Cliente 0",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "positionOverrides": {
+      "explicit:queue:estrela": 6
+     }
+    },
+    {
+     "id": "ag-2qpf1",
+     "tarotId": "estrela",
+     "position": 2,
+     "date": "2026-11-10",
+     "clientId": "900001",
+     "client": "Cliente 1",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "positionOverrides": {
+      "yield:queue:estrela": 2
+     },
+     "orderCommand": {
+      "id": "cmd-1",
+      "queueKey": "queue:estrela",
+      "baseRevision": "queue-v1:0:x",
+      "at": "2026-11-10T10:00:00.000Z",
+      "actorRole": "atendente",
+      "beforeIds": [],
+      "afterIds": []
+     }
+    },
+    {
+     "id": "ag-8irc2",
+     "tarotId": "estrela",
+     "position": 3,
+     "date": "2026-11-10",
+     "clientId": "900002",
+     "client": "Cliente 2",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "positionOverrides": {
+      "explicit:queue:estrela": 7,
+      "yield:queue:estrela": 3
+     },
+     "orderCommand": {
+      "id": "cmd-2",
+      "queueKey": "queue:estrela",
+      "baseRevision": "queue-v1:0:x",
+      "at": "2026-11-10T10:00:00.000Z",
+      "actorRole": "atendente",
+      "beforeIds": [],
+      "afterIds": []
+     }
+    },
+    {
+     "id": "ag-ija23",
+     "tarotId": "estrela",
+     "position": 4,
+     "date": "2026-11-10",
+     "clientId": "900003",
+     "client": "Cliente 3",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "positionOverrides": {
+      "explicit:queue:estrela": 5
+     },
+     "orderCommand": {
+      "id": "cmd-3",
+      "queueKey": "queue:estrela",
+      "baseRevision": "queue-v1:0:x",
+      "at": "2026-11-10T10:00:00.000Z",
+      "actorRole": "atendente",
+      "beforeIds": [],
+      "afterIds": []
+     }
+    },
+    {
+     "id": "ag-54h44",
+     "tarotId": "estrela",
+     "position": 5,
+     "date": "2026-11-10",
+     "clientId": "900004",
+     "client": "Cliente 4",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "positionOverrides": {
+      "explicit:queue:estrela": 7
+     },
+     "orderCommand": {
+      "id": "cmd-4",
+      "queueKey": "queue:estrela",
+      "baseRevision": "queue-v1:0:x",
+      "at": "2026-11-10T10:00:00.000Z",
+      "actorRole": "atendente",
+      "beforeIds": [],
+      "afterIds": []
+     }
+    },
+    {
+     "id": "ag-cxzf5",
+     "tarotId": "nyx",
+     "position": 6,
+     "date": "2026-11-10",
+     "clientId": "900005",
+     "client": "Cliente 5",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": [
+       "Cancelada"
+      ]
+     },
+     "positionOverrides": {
+      "yield:queue:nyx": 6
+     },
+     "agendaOutcome": "Cancelada"
+    },
+    {
+     "id": "ag-69db6",
+     "tarotId": "estrela",
+     "position": 7,
+     "date": "2026-11-10",
+     "clientId": "900006",
+     "client": "Cliente 6",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 2,
+      "date": "2026-11-10",
+      "tags": [
+       "Avisada",
+       "Vai pagar"
+      ]
+     }
+    }
+   ],
+   "revisao": "queue-v1:485:548e0ad798d1ae0f0449a77743e3e7ef",
+   "encerrados": [
+    false,
+    false,
+    false,
+    false,
+    false,
+    true,
+    false
+   ],
+   "fotos": [
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": [
+       "Cancelada"
+      ]
+     },
+     "agendaOutcome": "Cancelada"
+    },
+    {
+     "contact": {
+      "attempt": 2,
+      "date": "2026-11-10",
+      "tags": [
+       "Avisada",
+       "Vai pagar"
+      ]
+     }
+    }
+   ],
+   "proximaPosicao": 8
+  },
+  {
+   "tarotId": "estrela",
+   "itens": [
+    {
+     "id": "ag-83px0",
+     "tarotId": "estrela",
+     "position": 1,
+     "date": "2026-11-10",
+     "clientId": "900000",
+     "client": "Cliente 0",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "positionOverrides": {
+      "explicit:queue:estrela": 4
+     }
+    },
+    {
+     "id": "ag-2vys1",
+     "tarotId": "estrela",
+     "position": 2,
+     "date": "2026-11-10",
+     "clientId": "900001",
+     "client": "Cliente 1",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "contactHistory": [
+      {
+       "id": "ev-1",
+       "actor": "Teste",
+       "at": "2026-11-10T10:00:00.000Z",
+       "date": "2026-11-10",
+       "attempt": 1,
+       "tag": "Avisada",
+       "active": true,
+       "before": [],
+       "after": [
+        "Avisada"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "ag-f0jf2",
+     "tarotId": "estrela",
+     "position": 3,
+     "date": "2026-11-10",
+     "clientId": "900002",
+     "client": "Cliente 2",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 2,
+      "date": "2026-11-10",
+      "tags": [
+       "Avisada",
+       "Vai pagar"
+      ]
+     },
+     "positionOverrides": {
+      "yield:queue:estrela": 3
+     },
+     "contactHistory": [
+      {
+       "id": "ev-2",
+       "actor": "Teste",
+       "at": "2026-11-10T10:00:00.000Z",
+       "date": "2026-11-10",
+       "attempt": 1,
+       "tag": "Avisada",
+       "active": true,
+       "before": [],
+       "after": [
+        "Avisada"
+       ]
+      }
+     ]
+    }
+   ],
+   "revisao": "queue-v1:173:69e499926a15e648462cc376efae3604",
+   "encerrados": [
+    false,
+    false,
+    false
+   ],
+   "fotos": [
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": [
+       "Avisada"
+      ]
+     },
+     "lastEvent": "ev-1"
+    },
+    {
+     "contact": {
+      "attempt": 2,
+      "date": "2026-11-10",
+      "tags": [
+       "Avisada",
+       "Vai pagar"
+      ]
+     },
+     "lastEvent": "ev-2"
+    }
+   ],
+   "proximaPosicao": 4
+  },
+  {
+   "tarotId": "estrela",
+   "itens": [
+    {
+     "id": "ag-5xdj0",
+     "tarotId": "estrela",
+     "position": 1,
+     "date": "2026-11-10",
+     "clientId": "900000",
+     "client": "Cliente 0",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "id": "ag-fcu81",
+     "tarotId": "estrela",
+     "position": 2,
+     "date": "2026-11-10",
+     "clientId": "900001",
+     "client": "Cliente 1",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "id": "ag-8uo62",
+     "tarotId": "nyx",
+     "position": 3,
+     "date": "2026-11-10",
+     "clientId": "900002",
+     "client": "Cliente 2",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 2,
+      "date": "2026-11-10",
+      "tags": [
+       "Avisada",
+       "Vai pagar"
+      ]
+     },
+     "positionOverrides": {
+      "explicit:queue:nyx": 6
+     }
+    },
+    {
+     "id": "ag-5blp3",
+     "tarotId": "estrela",
+     "position": 4,
+     "date": "2026-11-10",
+     "clientId": "900003",
+     "client": "Cliente 3",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "id": "ag-854j4",
+     "tarotId": "nyx",
+     "position": 5,
+     "date": "2026-11-10",
+     "clientId": "900004",
+     "client": "Cliente 4",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "id": "ag-jvaj5",
+     "tarotId": "estrela",
+     "position": 6,
+     "date": "2026-11-10",
+     "clientId": "900005",
+     "client": "Cliente 5",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 2,
+      "date": "2026-11-10",
+      "tags": [
+       "Avisada",
+       "Vai pagar"
+      ]
+     },
+     "agendaOutcome": "Cancelada"
+    },
+    {
+     "id": "ag-54kv6",
+     "tarotId": "estrela",
+     "position": 7,
+     "date": "2026-11-10",
+     "clientId": "900006",
+     "client": "Cliente 6",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "id": "ag-bhr27",
+     "tarotId": "estrela",
+     "position": 8,
+     "date": "2026-11-10",
+     "clientId": "900007",
+     "client": "Cliente 7",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "positionOverrides": {
+      "explicit:queue:estrela": 2,
+      "yield:queue:estrela": 8
+     }
+    },
+    {
+     "id": "ag-23nz8",
+     "tarotId": "estrela",
+     "position": 9,
+     "date": "2026-11-10",
+     "clientId": "900008",
+     "client": "Cliente 8",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 2,
+      "date": "2026-11-10",
+      "tags": [
+       "Avisada",
+       "Vai pagar"
+      ]
+     }
+    },
+    {
+     "id": "ag-9ufx9",
+     "tarotId": "estrela",
+     "position": 10,
+     "date": "2026-11-10",
+     "clientId": "900009",
+     "client": "Cliente 9",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 2,
+      "date": "2026-11-10",
+      "tags": [
+       "Avisada",
+       "Vai pagar"
+      ]
+     },
+     "positionOverrides": {
+      "yield:queue:estrela": 10
+     },
+     "orderCommand": {
+      "id": "cmd-9",
+      "queueKey": "queue:estrela",
+      "baseRevision": "queue-v1:0:x",
+      "at": "2026-11-10T10:00:00.000Z",
+      "actorRole": "atendente",
+      "beforeIds": [],
+      "afterIds": []
+     },
+     "contactHistory": [
+      {
+       "id": "ev-9",
+       "actor": "Teste",
+       "at": "2026-11-10T10:00:00.000Z",
+       "date": "2026-11-10",
+       "attempt": 1,
+       "tag": "Avisada",
+       "active": true,
+       "before": [],
+       "after": [
+        "Avisada"
+       ]
+      }
+     ]
+    }
+   ],
+   "revisao": "queue-v1:341:ebe895228810bfd2aa21232289d19422",
+   "encerrados": [
+    false,
+    false,
+    false,
+    false,
+    false,
+    true,
+    false,
+    false,
+    false,
+    false
+   ],
+   "fotos": [
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 2,
+      "date": "2026-11-10",
+      "tags": [
+       "Avisada",
+       "Vai pagar"
+      ]
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 2,
+      "date": "2026-11-10",
+      "tags": [
+       "Avisada",
+       "Vai pagar"
+      ]
+     },
+     "agendaOutcome": "Cancelada"
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 2,
+      "date": "2026-11-10",
+      "tags": [
+       "Avisada",
+       "Vai pagar"
+      ]
+     }
+    },
+    {
+     "contact": {
+      "attempt": 2,
+      "date": "2026-11-10",
+      "tags": [
+       "Avisada",
+       "Vai pagar"
+      ]
+     },
+     "lastEvent": "ev-9"
+    }
+   ],
+   "proximaPosicao": 11
+  },
+  {
+   "tarotId": "osiris",
+   "itens": [
+    {
+     "id": "ag-3wi10",
+     "tarotId": "osiris",
+     "position": 1,
+     "date": "2026-11-10",
+     "clientId": "900000",
+     "client": "Cliente 0",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "id": "ag-i3e41",
+     "tarotId": "osiris",
+     "position": 2,
+     "date": "2026-11-10",
+     "clientId": "900001",
+     "client": "Cliente 1",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "positionOverrides": {
+      "explicit:queue:osiris": 9
+     }
+    },
+    {
+     "id": "ag-9pyn2",
+     "tarotId": "nyx",
+     "position": 3,
+     "date": "2026-11-10",
+     "clientId": "900002",
+     "client": "Cliente 2",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "orderCommand": {
+      "id": "cmd-2",
+      "queueKey": "queue:nyx",
+      "baseRevision": "queue-v1:0:x",
+      "at": "2026-11-10T10:00:00.000Z",
+      "actorRole": "atendente",
+      "beforeIds": [],
+      "afterIds": []
+     }
+    },
+    {
+     "id": "ag-ihct3",
+     "tarotId": "osiris",
+     "position": 4,
+     "date": "2026-11-10",
+     "clientId": "900003",
+     "client": "Cliente 3",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 2,
+      "date": "2026-11-10",
+      "tags": [
+       "Avisada",
+       "Vai pagar"
+      ]
+     },
+     "positionOverrides": {
+      "yield:queue:osiris": 4
+     }
+    },
+    {
+     "id": "ag-5psp4",
+     "tarotId": "osiris",
+     "position": 5,
+     "date": "2026-11-10",
+     "clientId": "900004",
+     "client": "Cliente 4",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "positionOverrides": {
+      "yield:queue:osiris": 5
+     },
+     "orderCommand": {
+      "id": "cmd-4",
+      "queueKey": "queue:osiris",
+      "baseRevision": "queue-v1:0:x",
+      "at": "2026-11-10T10:00:00.000Z",
+      "actorRole": "atendente",
+      "beforeIds": [],
+      "afterIds": []
+     }
+    },
+    {
+     "id": "ag-hrg15",
+     "tarotId": "osiris",
+     "position": 6,
+     "date": "2026-11-10",
+     "clientId": "900005",
+     "client": "Cliente 5",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "positionOverrides": {
+      "explicit:queue:osiris": 7,
+      "yield:queue:osiris": 6
+     }
+    },
+    {
+     "id": "ag-exyp6",
+     "tarotId": "osiris",
+     "position": 7,
+     "date": "2026-11-10",
+     "clientId": "900006",
+     "client": "Cliente 6",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "positionOverrides": {
+      "explicit:queue:osiris": 1
+     }
+    },
+    {
+     "id": "ag-am3j7",
+     "tarotId": "osiris",
+     "position": 8,
+     "date": "2026-11-10",
+     "clientId": "900007",
+     "client": "Cliente 7",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "positionOverrides": {
+      "explicit:queue:osiris": 5
+     }
+    },
+    {
+     "id": "ag-44ds8",
+     "tarotId": "nyx",
+     "position": 9,
+     "date": "2026-11-10",
+     "clientId": "900008",
+     "client": "Cliente 8",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "positionOverrides": {
+      "yield:queue:nyx": 9
+     },
+     "orderCommand": {
+      "id": "cmd-8",
+      "queueKey": "queue:nyx",
+      "baseRevision": "queue-v1:0:x",
+      "at": "2026-11-10T10:00:00.000Z",
+      "actorRole": "atendente",
+      "beforeIds": [],
+      "afterIds": []
+     },
+     "contactHistory": [
+      {
+       "id": "ev-8",
+       "actor": "Teste",
+       "at": "2026-11-10T10:00:00.000Z",
+       "date": "2026-11-10",
+       "attempt": 1,
+       "tag": "Avisada",
+       "active": true,
+       "before": [],
+       "after": [
+        "Avisada"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "ag-gsh99",
+     "tarotId": "osiris",
+     "position": 10,
+     "date": "2026-11-10",
+     "clientId": "900009",
+     "client": "Cliente 9",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    }
+   ],
+   "revisao": "queue-v1:525:1b167f153743036f12f78631b5642683",
+   "encerrados": [
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "fotos": [
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 2,
+      "date": "2026-11-10",
+      "tags": [
+       "Avisada",
+       "Vai pagar"
+      ]
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": [
+       "Avisada"
+      ]
+     },
+     "lastEvent": "ev-8"
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    }
+   ],
+   "proximaPosicao": 11
+  },
+  {
+   "tarotId": "estrela",
+   "itens": [
+    {
+     "id": "ag-2dcx0",
+     "tarotId": "estrela",
+     "position": 1,
+     "date": "2026-11-10",
+     "clientId": "900000",
+     "client": "Cliente 0",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "positionOverrides": {
+      "explicit:queue:estrela": 1
+     }
+    },
+    {
+     "id": "ag-57lx1",
+     "tarotId": "estrela",
+     "position": 2,
+     "date": "2026-11-10",
+     "clientId": "900001",
+     "client": "Cliente 1",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "positionOverrides": {
+      "explicit:queue:estrela": 3
+     }
+    },
+    {
+     "id": "ag-3t7q2",
+     "tarotId": "estrela",
+     "position": 3,
+     "date": "2026-11-10",
+     "clientId": "900002",
+     "client": "Cliente 2",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "id": "ag-gad63",
+     "tarotId": "nyx",
+     "position": 4,
+     "date": "2026-11-10",
+     "clientId": "900003",
+     "client": "Cliente 3",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "positionOverrides": {
+      "explicit:queue:nyx": 7,
+      "yield:queue:nyx": 4
+     },
+     "orderCommand": {
+      "id": "cmd-3",
+      "queueKey": "queue:nyx",
+      "baseRevision": "queue-v1:0:x",
+      "at": "2026-11-10T10:00:00.000Z",
+      "actorRole": "atendente",
+      "beforeIds": [],
+      "afterIds": []
+     }
+    },
+    {
+     "id": "ag-4llm4",
+     "tarotId": "estrela",
+     "position": 5,
+     "date": "2026-11-10",
+     "clientId": "900004",
+     "client": "Cliente 4",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "positionOverrides": {
+      "yield:queue:estrela": 5
+     },
+     "orderCommand": {
+      "id": "cmd-4",
+      "queueKey": "queue:estrela",
+      "baseRevision": "queue-v1:0:x",
+      "at": "2026-11-10T10:00:00.000Z",
+      "actorRole": "atendente",
+      "beforeIds": [],
+      "afterIds": []
+     }
+    },
+    {
+     "id": "ag-1yw45",
+     "tarotId": "estrela",
+     "position": 6,
+     "date": "2026-11-10",
+     "clientId": "900005",
+     "client": "Cliente 5",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 2,
+      "date": "2026-11-10",
+      "tags": [
+       "Avisada",
+       "Vai pagar"
+      ]
+     },
+     "positionOverrides": {
+      "explicit:queue:estrela": 4
+     }
+    },
+    {
+     "id": "ag-eu886",
+     "tarotId": "estrela",
+     "position": 7,
+     "date": "2026-11-10",
+     "clientId": "900006",
+     "client": "Cliente 6",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    }
+   ],
+   "revisao": "queue-v1:366:a529bd1b3e86f53febfda903d4ac5f47",
+   "encerrados": [
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "fotos": [
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 2,
+      "date": "2026-11-10",
+      "tags": [
+       "Avisada",
+       "Vai pagar"
+      ]
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    }
+   ],
+   "proximaPosicao": 8
+  },
+  {
+   "tarotId": "nyx",
+   "itens": [
+    {
+     "id": "ag-40ml0",
+     "tarotId": "nyx",
+     "position": 1,
+     "date": "2026-11-10",
+     "clientId": "900000",
+     "client": "Cliente 0",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "positionOverrides": {
+      "explicit:queue:nyx": 2
+     },
+     "orderCommand": {
+      "id": "cmd-0",
+      "queueKey": "queue:nyx",
+      "baseRevision": "queue-v1:0:x",
+      "at": "2026-11-10T10:00:00.000Z",
+      "actorRole": "atendente",
+      "beforeIds": [],
+      "afterIds": []
+     }
+    },
+    {
+     "id": "ag-i0z61",
+     "tarotId": "nyx",
+     "position": 2,
+     "date": "2026-11-10",
+     "clientId": "900001",
+     "client": "Cliente 1",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "positionOverrides": {
+      "explicit:queue:nyx": 4
+     }
+    },
+    {
+     "id": "ag-a7bo2",
+     "tarotId": "nyx",
+     "position": 3,
+     "date": "2026-11-10",
+     "clientId": "900002",
+     "client": "Cliente 2",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": [
+       "Cancelada"
+      ]
+     },
+     "positionOverrides": {
+      "yield:queue:nyx": 3
+     },
+     "agendaOutcome": "Cancelada"
+    },
+    {
+     "id": "ag-d1vw3",
+     "tarotId": "nyx",
+     "position": 4,
+     "date": "2026-11-10",
+     "clientId": "900003",
+     "client": "Cliente 3",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "id": "ag-jcf04",
+     "tarotId": "nyx",
+     "position": 5,
+     "date": "2026-11-10",
+     "clientId": "900004",
+     "client": "Cliente 4",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 2,
+      "date": "2026-11-10",
+      "tags": [
+       "Avisada",
+       "Vai pagar"
+      ]
+     }
+    },
+    {
+     "id": "ag-ecmh5",
+     "tarotId": "nyx",
+     "position": 6,
+     "date": "2026-11-10",
+     "clientId": "900005",
+     "client": "Cliente 5",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 2,
+      "date": "2026-11-10",
+      "tags": [
+       "Avisada",
+       "Vai pagar"
+      ]
+     }
+    },
+    {
+     "id": "ag-cec46",
+     "tarotId": "nyx",
+     "position": 7,
+     "date": "2026-11-10",
+     "clientId": "900006",
+     "client": "Cliente 6",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": [
+       "Cancelada"
+      ]
+     },
+     "orderCommand": {
+      "id": "cmd-6",
+      "queueKey": "queue:nyx",
+      "baseRevision": "queue-v1:0:x",
+      "at": "2026-11-10T10:00:00.000Z",
+      "actorRole": "atendente",
+      "beforeIds": [],
+      "afterIds": []
+     },
+     "agendaOutcome": "Cancelada"
+    },
+    {
+     "id": "ag-g6wz7",
+     "tarotId": "nyx",
+     "position": 8,
+     "date": "2026-11-10",
+     "clientId": "900007",
+     "client": "Cliente 7",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "positionOverrides": {
+      "yield:queue:nyx": 8
+     },
+     "orderCommand": {
+      "id": "cmd-7",
+      "queueKey": "queue:nyx",
+      "baseRevision": "queue-v1:0:x",
+      "at": "2026-11-10T10:00:00.000Z",
+      "actorRole": "atendente",
+      "beforeIds": [],
+      "afterIds": []
+     }
+    },
+    {
+     "id": "ag-tf18",
+     "tarotId": "nyx",
+     "position": 9,
+     "date": "2026-11-10",
+     "clientId": "900008",
+     "client": "Cliente 8",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 2,
+      "date": "2026-11-10",
+      "tags": [
+       "Avisada",
+       "Vai pagar"
+      ]
+     },
+     "positionOverrides": {
+      "explicit:queue:nyx": 5
+     },
+     "agendaOutcome": "Concluída",
+     "contactHistory": [
+      {
+       "id": "ev-8",
+       "actor": "Teste",
+       "at": "2026-11-10T10:00:00.000Z",
+       "date": "2026-11-10",
+       "attempt": 1,
+       "tag": "Avisada",
+       "active": true,
+       "before": [],
+       "after": [
+        "Avisada"
+       ]
+      }
+     ]
+    }
+   ],
+   "revisao": "queue-v1:331:0f7cbea69959b7d603837b8e88436d2e",
+   "encerrados": [
+    false,
+    false,
+    true,
+    false,
+    false,
+    false,
+    true,
+    false,
+    true
+   ],
+   "fotos": [
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": [
+       "Cancelada"
+      ]
+     },
+     "agendaOutcome": "Cancelada"
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 2,
+      "date": "2026-11-10",
+      "tags": [
+       "Avisada",
+       "Vai pagar"
+      ]
+     }
+    },
+    {
+     "contact": {
+      "attempt": 2,
+      "date": "2026-11-10",
+      "tags": [
+       "Avisada",
+       "Vai pagar"
+      ]
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": [
+       "Cancelada"
+      ]
+     },
+     "agendaOutcome": "Cancelada"
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 2,
+      "date": "2026-11-10",
+      "tags": [
+       "Avisada",
+       "Vai pagar"
+      ]
+     },
+     "lastEvent": "ev-8",
+     "agendaOutcome": "Concluída"
+    }
+   ],
+   "proximaPosicao": 9
+  },
+  {
+   "tarotId": "osiris",
+   "itens": [
+    {
+     "id": "ag-9f9s0",
+     "tarotId": "osiris",
+     "position": 1,
+     "date": "2026-11-10",
+     "clientId": "900000",
+     "client": "Cliente 0",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "positionOverrides": {
+      "explicit:queue:osiris": 9
+     },
+     "orderCommand": {
+      "id": "cmd-0",
+      "queueKey": "queue:osiris",
+      "baseRevision": "queue-v1:0:x",
+      "at": "2026-11-10T10:00:00.000Z",
+      "actorRole": "atendente",
+      "beforeIds": [],
+      "afterIds": []
+     }
+    },
+    {
+     "id": "ag-9u3a1",
+     "tarotId": "osiris",
+     "position": 2,
+     "date": "2026-11-10",
+     "clientId": "900001",
+     "client": "Cliente 1",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "positionOverrides": {
+      "yield:queue:osiris": 2
+     },
+     "contactHistory": [
+      {
+       "id": "ev-1",
+       "actor": "Teste",
+       "at": "2026-11-10T10:00:00.000Z",
+       "date": "2026-11-10",
+       "attempt": 1,
+       "tag": "Avisada",
+       "active": true,
+       "before": [],
+       "after": [
+        "Avisada"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "ag-7a8e2",
+     "tarotId": "osiris",
+     "position": 3,
+     "date": "2026-11-10",
+     "clientId": "900002",
+     "client": "Cliente 2",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "positionOverrides": {
+      "explicit:queue:osiris": 7
+     }
+    },
+    {
+     "id": "ag-828v3",
+     "tarotId": "osiris",
+     "position": 4,
+     "date": "2026-11-10",
+     "clientId": "900003",
+     "client": "Cliente 3",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "positionOverrides": {
+      "explicit:queue:osiris": 1,
+      "yield:queue:osiris": 4
+     }
+    },
+    {
+     "id": "ag-9xos4",
+     "tarotId": "osiris",
+     "position": 5,
+     "date": "2026-11-10",
+     "clientId": "900004",
+     "client": "Cliente 4",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "positionOverrides": {
+      "explicit:queue:osiris": 1
+     },
+     "orderCommand": {
+      "id": "cmd-4",
+      "queueKey": "queue:osiris",
+      "baseRevision": "queue-v1:0:x",
+      "at": "2026-11-10T10:00:00.000Z",
+      "actorRole": "atendente",
+      "beforeIds": [],
+      "afterIds": []
+     }
+    },
+    {
+     "id": "ag-h61z5",
+     "tarotId": "osiris",
+     "position": 6,
+     "date": "2026-11-10",
+     "clientId": "900005",
+     "client": "Cliente 5",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "positionOverrides": {
+      "explicit:queue:osiris": 1
+     }
+    },
+    {
+     "id": "ag-dhup6",
+     "tarotId": "osiris",
+     "position": 7,
+     "date": "2026-11-10",
+     "clientId": "900006",
+     "client": "Cliente 6",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": [
+       "Cancelada"
+      ]
+     },
+     "orderCommand": {
+      "id": "cmd-6",
+      "queueKey": "queue:osiris",
+      "baseRevision": "queue-v1:0:x",
+      "at": "2026-11-10T10:00:00.000Z",
+      "actorRole": "atendente",
+      "beforeIds": [],
+      "afterIds": []
+     },
+     "agendaOutcome": "Cancelada"
+    },
+    {
+     "id": "ag-hs897",
+     "tarotId": "osiris",
+     "position": 8,
+     "date": "2026-11-10",
+     "clientId": "900007",
+     "client": "Cliente 7",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "positionOverrides": {
+      "yield:queue:osiris": 8
+     }
+    },
+    {
+     "id": "ag-izdr8",
+     "tarotId": "osiris",
+     "position": 9,
+     "date": "2026-11-10",
+     "clientId": "900008",
+     "client": "Cliente 8",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": [
+       "Concluída"
+      ]
+     },
+     "agendaOutcome": "Concluída"
+    },
+    {
+     "id": "ag-6v1e9",
+     "tarotId": "osiris",
+     "position": 10,
+     "date": "2026-11-10",
+     "clientId": "900009",
+     "client": "Cliente 9",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "id": "ag-7spt10",
+     "tarotId": "osiris",
+     "position": 11,
+     "date": "2026-11-10",
+     "clientId": "900010",
+     "client": "Cliente 10",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "id": "ag-dfto11",
+     "tarotId": "osiris",
+     "position": 12,
+     "date": "2026-11-10",
+     "clientId": "900011",
+     "client": "Cliente 11",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": [
+       "Cancelada"
+      ]
+     },
+     "positionOverrides": {
+      "explicit:queue:osiris": 2
+     },
+     "agendaOutcome": "Cancelada"
+    }
+   ],
+   "revisao": "queue-v1:616:24e84f8783bd2593bf3590afe2d826eb",
+   "encerrados": [
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    true,
+    false,
+    true,
+    false,
+    false,
+    true
+   ],
+   "fotos": [
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": [
+       "Avisada"
+      ]
+     },
+     "lastEvent": "ev-1"
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": [
+       "Cancelada"
+      ]
+     },
+     "agendaOutcome": "Cancelada"
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": [
+       "Concluída"
+      ]
+     },
+     "agendaOutcome": "Concluída"
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": [
+       "Cancelada"
+      ]
+     },
+     "agendaOutcome": "Cancelada"
+    }
+   ],
+   "proximaPosicao": 12
+  },
+  {
+   "tarotId": "nyx",
+   "itens": [
+    {
+     "id": "ag-a09p0",
+     "tarotId": "nyx",
+     "position": 1,
+     "date": "2026-11-10",
+     "clientId": "900000",
+     "client": "Cliente 0",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "positionOverrides": {
+      "explicit:queue:nyx": 4
+     },
+     "contactHistory": [
+      {
+       "id": "ev-0",
+       "actor": "Teste",
+       "at": "2026-11-10T10:00:00.000Z",
+       "date": "2026-11-10",
+       "attempt": 1,
+       "tag": "Avisada",
+       "active": true,
+       "before": [],
+       "after": [
+        "Avisada"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "ag-fixe1",
+     "tarotId": "nyx",
+     "position": 2,
+     "date": "2026-11-10",
+     "clientId": "900001",
+     "client": "Cliente 1",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "positionOverrides": {
+      "explicit:queue:nyx": 1,
+      "yield:queue:nyx": 2
+     },
+     "orderCommand": {
+      "id": "cmd-1",
+      "queueKey": "queue:nyx",
+      "baseRevision": "queue-v1:0:x",
+      "at": "2026-11-10T10:00:00.000Z",
+      "actorRole": "atendente",
+      "beforeIds": [],
+      "afterIds": []
+     }
+    },
+    {
+     "id": "ag-be3d2",
+     "tarotId": "nyx",
+     "position": 3,
+     "date": "2026-11-10",
+     "clientId": "900002",
+     "client": "Cliente 2",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": [
+       "Cancelada"
+      ]
+     },
+     "agendaOutcome": "Cancelada"
+    },
+    {
+     "id": "ag-4o1u3",
+     "tarotId": "nyx",
+     "position": 4,
+     "date": "2026-11-10",
+     "clientId": "900003",
+     "client": "Cliente 3",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "id": "ag-e42x4",
+     "tarotId": "nyx",
+     "position": 5,
+     "date": "2026-11-10",
+     "clientId": "900004",
+     "client": "Cliente 4",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "orderCommand": {
+      "id": "cmd-4",
+      "queueKey": "queue:nyx",
+      "baseRevision": "queue-v1:0:x",
+      "at": "2026-11-10T10:00:00.000Z",
+      "actorRole": "atendente",
+      "beforeIds": [],
+      "afterIds": []
+     }
+    },
+    {
+     "id": "ag-bv445",
+     "tarotId": "nyx",
+     "position": 6,
+     "date": "2026-11-10",
+     "clientId": "900005",
+     "client": "Cliente 5",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": [
+       "Concluída"
+      ]
+     },
+     "positionOverrides": {
+      "explicit:queue:nyx": 1
+     },
+     "agendaOutcome": "Concluída",
+     "contactHistory": [
+      {
+       "id": "ev-5",
+       "actor": "Teste",
+       "at": "2026-11-10T10:00:00.000Z",
+       "date": "2026-11-10",
+       "attempt": 1,
+       "tag": "Avisada",
+       "active": true,
+       "before": [],
+       "after": [
+        "Avisada"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "ag-eps86",
+     "tarotId": "nyx",
+     "position": 7,
+     "date": "2026-11-10",
+     "clientId": "900006",
+     "client": "Cliente 6",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "positionOverrides": {
+      "yield:queue:nyx": 7
+     }
+    },
+    {
+     "id": "ag-cuzt7",
+     "tarotId": "nyx",
+     "position": 8,
+     "date": "2026-11-10",
+     "clientId": "900007",
+     "client": "Cliente 7",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "positionOverrides": {
+      "explicit:queue:nyx": 8
+     }
+    },
+    {
+     "id": "ag-9wcw8",
+     "tarotId": "nyx",
+     "position": 9,
+     "date": "2026-11-10",
+     "clientId": "900008",
+     "client": "Cliente 8",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "id": "ag-f22w9",
+     "tarotId": "nyx",
+     "position": 10,
+     "date": "2026-11-10",
+     "clientId": "900009",
+     "client": "Cliente 9",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": [
+       "Concluída"
+      ]
+     },
+     "positionOverrides": {
+      "explicit:queue:nyx": 3
+     },
+     "orderCommand": {
+      "id": "cmd-9",
+      "queueKey": "queue:nyx",
+      "baseRevision": "queue-v1:0:x",
+      "at": "2026-11-10T10:00:00.000Z",
+      "actorRole": "atendente",
+      "beforeIds": [],
+      "afterIds": []
+     },
+     "agendaOutcome": "Concluída"
+    }
+   ],
+   "revisao": "queue-v1:419:8ffab91a107f63de470bbf627817e476",
+   "encerrados": [
+    false,
+    false,
+    true,
+    false,
+    false,
+    true,
+    false,
+    false,
+    false,
+    true
+   ],
+   "fotos": [
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": [
+       "Avisada"
+      ]
+     },
+     "lastEvent": "ev-0"
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": [
+       "Cancelada"
+      ]
+     },
+     "agendaOutcome": "Cancelada"
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": [
+       "Avisada",
+       "Concluída"
+      ]
+     },
+     "lastEvent": "ev-5",
+     "agendaOutcome": "Concluída"
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": [
+       "Concluída"
+      ]
+     },
+     "agendaOutcome": "Concluída"
+    }
+   ],
+   "proximaPosicao": 10
+  },
+  {
+   "tarotId": "osiris",
+   "itens": [
+    {
+     "id": "ag-81ro0",
+     "tarotId": "osiris",
+     "position": 1,
+     "date": "2026-11-10",
+     "clientId": "900000",
+     "client": "Cliente 0",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "positionOverrides": {
+      "explicit:queue:osiris": 2,
+      "yield:queue:osiris": 1
+     }
+    },
+    {
+     "id": "ag-180d1",
+     "tarotId": "osiris",
+     "position": 2,
+     "date": "2026-11-10",
+     "clientId": "900001",
+     "client": "Cliente 1",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "positionOverrides": {
+      "explicit:queue:osiris": 7
+     }
+    },
+    {
+     "id": "ag-cxjj2",
+     "tarotId": "osiris",
+     "position": 3,
+     "date": "2026-11-10",
+     "clientId": "900002",
+     "client": "Cliente 2",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "positionOverrides": {
+      "explicit:queue:osiris": 1
+     }
+    },
+    {
+     "id": "ag-f31z3",
+     "tarotId": "osiris",
+     "position": 4,
+     "date": "2026-11-10",
+     "clientId": "900003",
+     "client": "Cliente 3",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "positionOverrides": {
+      "explicit:queue:osiris": 6
+     }
+    },
+    {
+     "id": "ag-fqkm4",
+     "tarotId": "osiris",
+     "position": 5,
+     "date": "2026-11-10",
+     "clientId": "900004",
+     "client": "Cliente 4",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "positionOverrides": {
+      "explicit:queue:osiris": 3
+     },
+     "orderCommand": {
+      "id": "cmd-4",
+      "queueKey": "queue:osiris",
+      "baseRevision": "queue-v1:0:x",
+      "at": "2026-11-10T10:00:00.000Z",
+      "actorRole": "atendente",
+      "beforeIds": [],
+      "afterIds": []
+     }
+    },
+    {
+     "id": "ag-bdwu5",
+     "tarotId": "osiris",
+     "position": 6,
+     "date": "2026-11-10",
+     "clientId": "900005",
+     "client": "Cliente 5",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "orderCommand": {
+      "id": "cmd-5",
+      "queueKey": "queue:osiris",
+      "baseRevision": "queue-v1:0:x",
+      "at": "2026-11-10T10:00:00.000Z",
+      "actorRole": "atendente",
+      "beforeIds": [],
+      "afterIds": []
+     }
+    },
+    {
+     "id": "ag-3exq6",
+     "tarotId": "osiris",
+     "position": 7,
+     "date": "2026-11-10",
+     "clientId": "900006",
+     "client": "Cliente 6",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "positionOverrides": {
+      "explicit:queue:osiris": 4
+     },
+     "orderCommand": {
+      "id": "cmd-6",
+      "queueKey": "queue:osiris",
+      "baseRevision": "queue-v1:0:x",
+      "at": "2026-11-10T10:00:00.000Z",
+      "actorRole": "atendente",
+      "beforeIds": [],
+      "afterIds": []
+     }
+    },
+    {
+     "id": "ag-1gmv7",
+     "tarotId": "osiris",
+     "position": 8,
+     "date": "2026-11-10",
+     "clientId": "900007",
+     "client": "Cliente 7",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "positionOverrides": {
+      "explicit:queue:osiris": 5,
+      "yield:queue:osiris": 8
+     }
+    },
+    {
+     "id": "ag-e88r8",
+     "tarotId": "osiris",
+     "position": 9,
+     "date": "2026-11-10",
+     "clientId": "900008",
+     "client": "Cliente 8",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "positionOverrides": {
+      "explicit:queue:osiris": 6,
+      "yield:queue:osiris": 9
+     },
+     "orderCommand": {
+      "id": "cmd-8",
+      "queueKey": "queue:osiris",
+      "baseRevision": "queue-v1:0:x",
+      "at": "2026-11-10T10:00:00.000Z",
+      "actorRole": "atendente",
+      "beforeIds": [],
+      "afterIds": []
+     }
+    },
+    {
+     "id": "ag-xsu9",
+     "tarotId": "osiris",
+     "position": 10,
+     "date": "2026-11-10",
+     "clientId": "900009",
+     "client": "Cliente 9",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    }
+   ],
+   "revisao": "queue-v1:772:f62ae212af3424c4d796a43e12dac9e8",
+   "encerrados": [
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "fotos": [
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    }
+   ],
+   "proximaPosicao": 11
+  },
+  {
+   "tarotId": "osiris",
+   "itens": [
+    {
+     "id": "ag-t550",
+     "tarotId": "osiris",
+     "position": 1,
+     "date": "2026-11-10",
+     "clientId": "900000",
+     "client": "Cliente 0",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": [
+       "Concluída"
+      ]
+     },
+     "agendaOutcome": "Concluída"
+    },
+    {
+     "id": "ag-fxwl1",
+     "tarotId": "osiris",
+     "position": 2,
+     "date": "2026-11-10",
+     "clientId": "900001",
+     "client": "Cliente 1",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 2,
+      "date": "2026-11-10",
+      "tags": [
+       "Avisada",
+       "Vai pagar"
+      ]
+     }
+    },
+    {
+     "id": "ag-fjqy2",
+     "tarotId": "osiris",
+     "position": 3,
+     "date": "2026-11-10",
+     "clientId": "900002",
+     "client": "Cliente 2",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "positionOverrides": {
+      "explicit:queue:osiris": 4
+     }
+    },
+    {
+     "id": "ag-d4m43",
+     "tarotId": "osiris",
+     "position": 4,
+     "date": "2026-11-10",
+     "clientId": "900003",
+     "client": "Cliente 3",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": [
+       "Concluída"
+      ]
+     },
+     "agendaOutcome": "Concluída"
+    },
+    {
+     "id": "ag-bba44",
+     "tarotId": "osiris",
+     "position": 5,
+     "date": "2026-11-10",
+     "clientId": "900004",
+     "client": "Cliente 4",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 2,
+      "date": "2026-11-10",
+      "tags": [
+       "Avisada",
+       "Vai pagar"
+      ]
+     }
+    }
+   ],
+   "revisao": "queue-v1:134:364a8bcce14253603d95a85438b912d8",
+   "encerrados": [
+    true,
+    false,
+    false,
+    true,
+    false
+   ],
+   "fotos": [
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": [
+       "Concluída"
+      ]
+     },
+     "agendaOutcome": "Concluída"
+    },
+    {
+     "contact": {
+      "attempt": 2,
+      "date": "2026-11-10",
+      "tags": [
+       "Avisada",
+       "Vai pagar"
+      ]
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": [
+       "Concluída"
+      ]
+     },
+     "agendaOutcome": "Concluída"
+    },
+    {
+     "contact": {
+      "attempt": 2,
+      "date": "2026-11-10",
+      "tags": [
+       "Avisada",
+       "Vai pagar"
+      ]
+     }
+    }
+   ],
+   "proximaPosicao": 6
+  },
+  {
+   "tarotId": "nyx",
+   "itens": [
+    {
+     "id": "ag-12570",
+     "tarotId": "nyx",
+     "position": 1,
+     "date": "2026-11-10",
+     "clientId": "900000",
+     "client": "Cliente 0",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "orderCommand": {
+      "id": "cmd-0",
+      "queueKey": "queue:nyx",
+      "baseRevision": "queue-v1:0:x",
+      "at": "2026-11-10T10:00:00.000Z",
+      "actorRole": "atendente",
+      "beforeIds": [],
+      "afterIds": []
+     }
+    },
+    {
+     "id": "ag-8re21",
+     "tarotId": "nyx",
+     "position": 2,
+     "date": "2026-11-10",
+     "clientId": "900001",
+     "client": "Cliente 1",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "id": "ag-8vw42",
+     "tarotId": "nyx",
+     "position": 3,
+     "date": "2026-11-10",
+     "clientId": "900002",
+     "client": "Cliente 2",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "id": "ag-ax653",
+     "tarotId": "nyx",
+     "position": 4,
+     "date": "2026-11-10",
+     "clientId": "900003",
+     "client": "Cliente 3",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "id": "ag-93uu4",
+     "tarotId": "nyx",
+     "position": 5,
+     "date": "2026-11-10",
+     "clientId": "900004",
+     "client": "Cliente 4",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "id": "ag-8xn95",
+     "tarotId": "nyx",
+     "position": 6,
+     "date": "2026-11-10",
+     "clientId": "900005",
+     "client": "Cliente 5",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "positionOverrides": {
+      "yield:queue:nyx": 6
+     }
+    },
+    {
+     "id": "ag-1egs6",
+     "tarotId": "nyx",
+     "position": 7,
+     "date": "2026-11-10",
+     "clientId": "900006",
+     "client": "Cliente 6",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": [
+       "Cancelada"
+      ]
+     },
+     "agendaOutcome": "Cancelada"
+    }
+   ],
+   "revisao": "queue-v1:239:da9c4de3fe3da52b18c22403e6bec5db",
+   "encerrados": [
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    true
+   ],
+   "fotos": [
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": [
+       "Cancelada"
+      ]
+     },
+     "agendaOutcome": "Cancelada"
+    }
+   ],
+   "proximaPosicao": 7
+  },
+  {
+   "tarotId": "osiris",
+   "itens": [
+    {
+     "id": "ag-fi2s0",
+     "tarotId": "osiris",
+     "position": 1,
+     "date": "2026-11-10",
+     "clientId": "900000",
+     "client": "Cliente 0",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": [
+       "Concluída"
+      ]
+     },
+     "positionOverrides": {
+      "explicit:queue:osiris": 5
+     },
+     "orderCommand": {
+      "id": "cmd-0",
+      "queueKey": "queue:osiris",
+      "baseRevision": "queue-v1:0:x",
+      "at": "2026-11-10T10:00:00.000Z",
+      "actorRole": "atendente",
+      "beforeIds": [],
+      "afterIds": []
+     },
+     "agendaOutcome": "Concluída"
+    },
+    {
+     "id": "ag-cter1",
+     "tarotId": "osiris",
+     "position": 2,
+     "date": "2026-11-10",
+     "clientId": "900001",
+     "client": "Cliente 1",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "positionOverrides": {
+      "yield:queue:osiris": 2
+     }
+    },
+    {
+     "id": "ag-jviy2",
+     "tarotId": "osiris",
+     "position": 3,
+     "date": "2026-11-10",
+     "clientId": "900002",
+     "client": "Cliente 2",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "positionOverrides": {
+      "explicit:queue:osiris": 2
+     }
+    },
+    {
+     "id": "ag-i44q3",
+     "tarotId": "osiris",
+     "position": 4,
+     "date": "2026-11-10",
+     "clientId": "900003",
+     "client": "Cliente 3",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "contactHistory": [
+      {
+       "id": "ev-3",
+       "actor": "Teste",
+       "at": "2026-11-10T10:00:00.000Z",
+       "date": "2026-11-10",
+       "attempt": 1,
+       "tag": "Avisada",
+       "active": true,
+       "before": [],
+       "after": [
+        "Avisada"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "ag-k06d4",
+     "tarotId": "osiris",
+     "position": 5,
+     "date": "2026-11-10",
+     "clientId": "900004",
+     "client": "Cliente 4",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "positionOverrides": {
+      "explicit:queue:osiris": 7
+     }
+    },
+    {
+     "id": "ag-k6e75",
+     "tarotId": "osiris",
+     "position": 6,
+     "date": "2026-11-10",
+     "clientId": "900005",
+     "client": "Cliente 5",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "positionOverrides": {
+      "explicit:queue:osiris": 7,
+      "yield:queue:osiris": 6
+     }
+    },
+    {
+     "id": "ag-5ofr6",
+     "tarotId": "osiris",
+     "position": 7,
+     "date": "2026-11-10",
+     "clientId": "900006",
+     "client": "Cliente 6",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": [
+       "Concluída"
+      ]
+     },
+     "positionOverrides": {
+      "explicit:queue:osiris": 6
+     },
+     "agendaOutcome": "Concluída"
+    }
+   ],
+   "revisao": "queue-v1:336:3bcb0d69005e393fa5f99ee5fd9af633",
+   "encerrados": [
+    true,
+    false,
+    false,
+    false,
+    false,
+    false,
+    true
+   ],
+   "fotos": [
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": [
+       "Concluída"
+      ]
+     },
+     "agendaOutcome": "Concluída"
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": [
+       "Avisada"
+      ]
+     },
+     "lastEvent": "ev-3"
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": [
+       "Concluída"
+      ]
+     },
+     "agendaOutcome": "Concluída"
+    }
+   ],
+   "proximaPosicao": 7
+  },
+  {
+   "tarotId": "osiris",
+   "itens": [
+    {
+     "id": "ag-cn0g0",
+     "tarotId": "osiris",
+     "position": 1,
+     "date": "2026-11-10",
+     "clientId": "900000",
+     "client": "Cliente 0",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": [
+       "Cancelada"
+      ]
+     },
+     "positionOverrides": {
+      "explicit:queue:osiris": 2
+     },
+     "agendaOutcome": "Cancelada"
+    },
+    {
+     "id": "ag-dbl91",
+     "tarotId": "osiris",
+     "position": 2,
+     "date": "2026-11-10",
+     "clientId": "900001",
+     "client": "Cliente 1",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "id": "ag-gpf22",
+     "tarotId": "osiris",
+     "position": 3,
+     "date": "2026-11-10",
+     "clientId": "900002",
+     "client": "Cliente 2",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 2,
+      "date": "2026-11-10",
+      "tags": [
+       "Avisada",
+       "Vai pagar"
+      ]
+     }
+    }
+   ],
+   "revisao": "queue-v1:63:3163ab9f607330b7abcdc7af9f06d107",
+   "encerrados": [
+    true,
+    false,
+    false
+   ],
+   "fotos": [
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": [
+       "Cancelada"
+      ]
+     },
+     "agendaOutcome": "Cancelada"
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 2,
+      "date": "2026-11-10",
+      "tags": [
+       "Avisada",
+       "Vai pagar"
+      ]
+     }
+    }
+   ],
+   "proximaPosicao": 4
+  },
+  {
+   "tarotId": "osiris",
+   "itens": [
+    {
+     "id": "ag-i68k0",
+     "tarotId": "osiris",
+     "position": 1,
+     "date": "2026-11-10",
+     "clientId": "900000",
+     "client": "Cliente 0",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "id": "ag-dd1a1",
+     "tarotId": "osiris",
+     "position": 2,
+     "date": "2026-11-10",
+     "clientId": "900001",
+     "client": "Cliente 1",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "orderCommand": {
+      "id": "cmd-1",
+      "queueKey": "queue:osiris",
+      "baseRevision": "queue-v1:0:x",
+      "at": "2026-11-10T10:00:00.000Z",
+      "actorRole": "atendente",
+      "beforeIds": [],
+      "afterIds": []
+     }
+    },
+    {
+     "id": "ag-1d5v2",
+     "tarotId": "osiris",
+     "position": 3,
+     "date": "2026-11-10",
+     "clientId": "900002",
+     "client": "Cliente 2",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "positionOverrides": {
+      "explicit:queue:osiris": 9
+     }
+    },
+    {
+     "id": "ag-2j8h3",
+     "tarotId": "osiris",
+     "position": 4,
+     "date": "2026-11-10",
+     "clientId": "900003",
+     "client": "Cliente 3",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "positionOverrides": {
+      "yield:queue:osiris": 4
+     },
+     "orderCommand": {
+      "id": "cmd-3",
+      "queueKey": "queue:osiris",
+      "baseRevision": "queue-v1:0:x",
+      "at": "2026-11-10T10:00:00.000Z",
+      "actorRole": "atendente",
+      "beforeIds": [],
+      "afterIds": []
+     }
+    },
+    {
+     "id": "ag-hvu44",
+     "tarotId": "osiris",
+     "position": 5,
+     "date": "2026-11-10",
+     "clientId": "900004",
+     "client": "Cliente 4",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 2,
+      "date": "2026-11-10",
+      "tags": [
+       "Avisada",
+       "Vai pagar"
+      ]
+     },
+     "positionOverrides": {
+      "explicit:queue:osiris": 3
+     },
+     "orderCommand": {
+      "id": "cmd-4",
+      "queueKey": "queue:osiris",
+      "baseRevision": "queue-v1:0:x",
+      "at": "2026-11-10T10:00:00.000Z",
+      "actorRole": "atendente",
+      "beforeIds": [],
+      "afterIds": []
+     }
+    },
+    {
+     "id": "ag-facg5",
+     "tarotId": "osiris",
+     "position": 6,
+     "date": "2026-11-10",
+     "clientId": "900005",
+     "client": "Cliente 5",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 2,
+      "date": "2026-11-10",
+      "tags": [
+       "Avisada",
+       "Vai pagar"
+      ]
+     },
+     "positionOverrides": {
+      "yield:queue:osiris": 6
+     }
+    },
+    {
+     "id": "ag-dk426",
+     "tarotId": "osiris",
+     "position": 7,
+     "date": "2026-11-10",
+     "clientId": "900006",
+     "client": "Cliente 6",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "orderCommand": {
+      "id": "cmd-6",
+      "queueKey": "queue:osiris",
+      "baseRevision": "queue-v1:0:x",
+      "at": "2026-11-10T10:00:00.000Z",
+      "actorRole": "atendente",
+      "beforeIds": [],
+      "afterIds": []
+     }
+    },
+    {
+     "id": "ag-6cnm7",
+     "tarotId": "osiris",
+     "position": 8,
+     "date": "2026-11-10",
+     "clientId": "900007",
+     "client": "Cliente 7",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "positionOverrides": {
+      "explicit:queue:osiris": 3
+     }
+    },
+    {
+     "id": "ag-fuv78",
+     "tarotId": "osiris",
+     "position": 9,
+     "date": "2026-11-10",
+     "clientId": "900008",
+     "client": "Cliente 8",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "orderCommand": {
+      "id": "cmd-8",
+      "queueKey": "queue:osiris",
+      "baseRevision": "queue-v1:0:x",
+      "at": "2026-11-10T10:00:00.000Z",
+      "actorRole": "atendente",
+      "beforeIds": [],
+      "afterIds": []
+     }
+    },
+    {
+     "id": "ag-lajn9",
+     "tarotId": "osiris",
+     "position": 10,
+     "date": "2026-11-10",
+     "clientId": "900009",
+     "client": "Cliente 9",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 2,
+      "date": "2026-11-10",
+      "tags": [
+       "Avisada",
+       "Vai pagar"
+      ]
+     },
+     "orderCommand": {
+      "id": "cmd-9",
+      "queueKey": "queue:osiris",
+      "baseRevision": "queue-v1:0:x",
+      "at": "2026-11-10T10:00:00.000Z",
+      "actorRole": "atendente",
+      "beforeIds": [],
+      "afterIds": []
+     },
+     "contactHistory": [
+      {
+       "id": "ev-9",
+       "actor": "Teste",
+       "at": "2026-11-10T10:00:00.000Z",
+       "date": "2026-11-10",
+       "attempt": 1,
+       "tag": "Avisada",
+       "active": true,
+       "before": [],
+       "after": [
+        "Avisada"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "ag-37pw10",
+     "tarotId": "osiris",
+     "position": 11,
+     "date": "2026-11-10",
+     "clientId": "900010",
+     "client": "Cliente 10",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    }
+   ],
+   "revisao": "queue-v1:647:dcafccf4f9ec347844e6fdf45b5c9968",
+   "encerrados": [
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "fotos": [
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 2,
+      "date": "2026-11-10",
+      "tags": [
+       "Avisada",
+       "Vai pagar"
+      ]
+     }
+    },
+    {
+     "contact": {
+      "attempt": 2,
+      "date": "2026-11-10",
+      "tags": [
+       "Avisada",
+       "Vai pagar"
+      ]
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 2,
+      "date": "2026-11-10",
+      "tags": [
+       "Avisada",
+       "Vai pagar"
+      ]
+     },
+     "lastEvent": "ev-9"
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    }
+   ],
+   "proximaPosicao": 12
+  },
+  {
+   "tarotId": "osiris",
+   "itens": [
+    {
+     "id": "ag-g0cw0",
+     "tarotId": "osiris",
+     "position": 1,
+     "date": "2026-11-10",
+     "clientId": "900000",
+     "client": "Cliente 0",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "positionOverrides": {
+      "yield:queue:osiris": 1
+     }
+    },
+    {
+     "id": "ag-jbtn1",
+     "tarotId": "osiris",
+     "position": 2,
+     "date": "2026-11-10",
+     "clientId": "900001",
+     "client": "Cliente 1",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": [
+       "Concluída"
+      ]
+     },
+     "agendaOutcome": "Concluída"
+    },
+    {
+     "id": "ag-rs32",
+     "tarotId": "osiris",
+     "position": 3,
+     "date": "2026-11-10",
+     "clientId": "900002",
+     "client": "Cliente 2",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": [
+       "Concluída"
+      ]
+     },
+     "positionOverrides": {
+      "explicit:queue:osiris": 8
+     },
+     "agendaOutcome": "Concluída"
+    },
+    {
+     "id": "ag-behq3",
+     "tarotId": "osiris",
+     "position": 4,
+     "date": "2026-11-10",
+     "clientId": "900003",
+     "client": "Cliente 3",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "contactHistory": [
+      {
+       "id": "ev-3",
+       "actor": "Teste",
+       "at": "2026-11-10T10:00:00.000Z",
+       "date": "2026-11-10",
+       "attempt": 1,
+       "tag": "Avisada",
+       "active": true,
+       "before": [],
+       "after": [
+        "Avisada"
+       ]
+      }
+     ]
+    }
+   ],
+   "revisao": "queue-v1:100:5c49a55fc3ae82e334e11cff25ad67e3",
+   "encerrados": [
+    false,
+    true,
+    true,
+    false
+   ],
+   "fotos": [
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": [
+       "Concluída"
+      ]
+     },
+     "agendaOutcome": "Concluída"
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": [
+       "Concluída"
+      ]
+     },
+     "agendaOutcome": "Concluída"
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": [
+       "Avisada"
+      ]
+     },
+     "lastEvent": "ev-3"
+    }
+   ],
+   "proximaPosicao": 5
+  },
+  {
+   "tarotId": "estrela",
+   "itens": [
+    {
+     "id": "ag-6fq30",
+     "tarotId": "estrela",
+     "position": 1,
+     "date": "2026-11-10",
+     "clientId": "900000",
+     "client": "Cliente 0",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "contactHistory": [
+      {
+       "id": "ev-0",
+       "actor": "Teste",
+       "at": "2026-11-10T10:00:00.000Z",
+       "date": "2026-11-10",
+       "attempt": 1,
+       "tag": "Avisada",
+       "active": true,
+       "before": [],
+       "after": [
+        "Avisada"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "ag-ggi71",
+     "tarotId": "nyx",
+     "position": 2,
+     "date": "2026-11-10",
+     "clientId": "900001",
+     "client": "Cliente 1",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": [
+       "Cancelada"
+      ]
+     },
+     "orderCommand": {
+      "id": "cmd-1",
+      "queueKey": "queue:nyx",
+      "baseRevision": "queue-v1:0:x",
+      "at": "2026-11-10T10:00:00.000Z",
+      "actorRole": "atendente",
+      "beforeIds": [],
+      "afterIds": []
+     },
+     "agendaOutcome": "Cancelada"
+    },
+    {
+     "id": "ag-ev1u2",
+     "tarotId": "estrela",
+     "position": 3,
+     "date": "2026-11-10",
+     "clientId": "900002",
+     "client": "Cliente 2",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 2,
+      "date": "2026-11-10",
+      "tags": [
+       "Avisada",
+       "Vai pagar"
+      ]
+     },
+     "positionOverrides": {
+      "explicit:queue:estrela": 7
+     }
+    },
+    {
+     "id": "ag-7sxh3",
+     "tarotId": "nyx",
+     "position": 4,
+     "date": "2026-11-10",
+     "clientId": "900003",
+     "client": "Cliente 3",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "positionOverrides": {
+      "explicit:queue:nyx": 5
+     }
+    }
+   ],
+   "revisao": "queue-v1:104:ebb6a63f1a8fc941bb56c61bf5347545",
+   "encerrados": [
+    false,
+    true,
+    false,
+    false
+   ],
+   "fotos": [
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": [
+       "Avisada"
+      ]
+     },
+     "lastEvent": "ev-0"
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": [
+       "Cancelada"
+      ]
+     },
+     "agendaOutcome": "Cancelada"
+    },
+    {
+     "contact": {
+      "attempt": 2,
+      "date": "2026-11-10",
+      "tags": [
+       "Avisada",
+       "Vai pagar"
+      ]
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    }
+   ],
+   "proximaPosicao": 4
+  },
+  {
+   "tarotId": "nyx",
+   "itens": [
+    {
+     "id": "ag-2efo0",
+     "tarotId": "nyx",
+     "position": 1,
+     "date": "2026-11-10",
+     "clientId": "900000",
+     "client": "Cliente 0",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "positionOverrides": {
+      "explicit:queue:nyx": 1
+     }
+    }
+   ],
+   "revisao": "queue-v1:69:6a6e749d040341db741d79e1046c5237",
+   "encerrados": [
+    false
+   ],
+   "fotos": [
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    }
+   ],
+   "proximaPosicao": 2
+  },
+  {
+   "tarotId": "estrela",
+   "itens": [
+    {
+     "id": "ag-2dqs0",
+     "tarotId": "estrela",
+     "position": 1,
+     "date": "2026-11-10",
+     "clientId": "900000",
+     "client": "Cliente 0",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 2,
+      "date": "2026-11-10",
+      "tags": [
+       "Avisada",
+       "Vai pagar"
+      ]
+     },
+     "positionOverrides": {
+      "explicit:queue:estrela": 9
+     },
+     "contactHistory": [
+      {
+       "id": "ev-0",
+       "actor": "Teste",
+       "at": "2026-11-10T10:00:00.000Z",
+       "date": "2026-11-10",
+       "attempt": 1,
+       "tag": "Avisada",
+       "active": true,
+       "before": [],
+       "after": [
+        "Avisada"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "ag-aszk1",
+     "tarotId": "estrela",
+     "position": 2,
+     "date": "2026-11-10",
+     "clientId": "900001",
+     "client": "Cliente 1",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 2,
+      "date": "2026-11-10",
+      "tags": [
+       "Avisada",
+       "Vai pagar"
+      ]
+     },
+     "positionOverrides": {
+      "explicit:queue:estrela": 8
+     },
+     "agendaOutcome": "Concluída"
+    },
+    {
+     "id": "ag-fzyg2",
+     "tarotId": "estrela",
+     "position": 3,
+     "date": "2026-11-10",
+     "clientId": "900002",
+     "client": "Cliente 2",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "orderCommand": {
+      "id": "cmd-2",
+      "queueKey": "queue:estrela",
+      "baseRevision": "queue-v1:0:x",
+      "at": "2026-11-10T10:00:00.000Z",
+      "actorRole": "atendente",
+      "beforeIds": [],
+      "afterIds": []
+     },
+     "contactHistory": [
+      {
+       "id": "ev-2",
+       "actor": "Teste",
+       "at": "2026-11-10T10:00:00.000Z",
+       "date": "2026-11-10",
+       "attempt": 1,
+       "tag": "Avisada",
+       "active": true,
+       "before": [],
+       "after": [
+        "Avisada"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "ag-884k3",
+     "tarotId": "estrela",
+     "position": 4,
+     "date": "2026-11-10",
+     "clientId": "900003",
+     "client": "Cliente 3",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "positionOverrides": {
+      "explicit:queue:estrela": 4
+     },
+     "orderCommand": {
+      "id": "cmd-3",
+      "queueKey": "queue:estrela",
+      "baseRevision": "queue-v1:0:x",
+      "at": "2026-11-10T10:00:00.000Z",
+      "actorRole": "atendente",
+      "beforeIds": [],
+      "afterIds": []
+     }
+    },
+    {
+     "id": "ag-9ke64",
+     "tarotId": "estrela",
+     "position": 5,
+     "date": "2026-11-10",
+     "clientId": "900004",
+     "client": "Cliente 4",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "positionOverrides": {
+      "yield:queue:estrela": 5
+     }
+    }
+   ],
+   "revisao": "queue-v1:281:660f6993225e736be856fe931f60083b",
+   "encerrados": [
+    false,
+    true,
+    false,
+    false,
+    false
+   ],
+   "fotos": [
+    {
+     "contact": {
+      "attempt": 2,
+      "date": "2026-11-10",
+      "tags": [
+       "Avisada",
+       "Vai pagar"
+      ]
+     },
+     "lastEvent": "ev-0"
+    },
+    {
+     "contact": {
+      "attempt": 2,
+      "date": "2026-11-10",
+      "tags": [
+       "Avisada",
+       "Vai pagar"
+      ]
+     },
+     "agendaOutcome": "Concluída"
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": [
+       "Avisada"
+      ]
+     },
+     "lastEvent": "ev-2"
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    }
+   ],
+   "proximaPosicao": 6
+  },
+  {
+   "tarotId": "osiris",
+   "itens": [
+    {
+     "id": "ag-kvs70",
+     "tarotId": "osiris",
+     "position": 1,
+     "date": "2026-11-10",
+     "clientId": "900000",
+     "client": "Cliente 0",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 2,
+      "date": "2026-11-10",
+      "tags": [
+       "Avisada",
+       "Vai pagar"
+      ]
+     },
+     "positionOverrides": {
+      "yield:queue:osiris": 1
+     }
+    },
+    {
+     "id": "ag-ga4n1",
+     "tarotId": "osiris",
+     "position": 2,
+     "date": "2026-11-10",
+     "clientId": "900001",
+     "client": "Cliente 1",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": [
+       "Cancelada"
+      ]
+     },
+     "positionOverrides": {
+      "explicit:queue:osiris": 4
+     },
+     "agendaOutcome": "Cancelada"
+    },
+    {
+     "id": "ag-ey3o2",
+     "tarotId": "osiris",
+     "position": 3,
+     "date": "2026-11-10",
+     "clientId": "900002",
+     "client": "Cliente 2",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "id": "ag-gwmh3",
+     "tarotId": "osiris",
+     "position": 4,
+     "date": "2026-11-10",
+     "clientId": "900003",
+     "client": "Cliente 3",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "positionOverrides": {
+      "explicit:queue:osiris": 5,
+      "yield:queue:osiris": 4
+     },
+     "orderCommand": {
+      "id": "cmd-3",
+      "queueKey": "queue:osiris",
+      "baseRevision": "queue-v1:0:x",
+      "at": "2026-11-10T10:00:00.000Z",
+      "actorRole": "atendente",
+      "beforeIds": [],
+      "afterIds": []
+     }
+    },
+    {
+     "id": "ag-ldjn4",
+     "tarotId": "osiris",
+     "position": 5,
+     "date": "2026-11-10",
+     "clientId": "900004",
+     "client": "Cliente 4",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "positionOverrides": {
+      "explicit:queue:osiris": 2
+     }
+    },
+    {
+     "id": "ag-l96s5",
+     "tarotId": "osiris",
+     "position": 6,
+     "date": "2026-11-10",
+     "clientId": "900005",
+     "client": "Cliente 5",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "positionOverrides": {
+      "explicit:queue:osiris": 4,
+      "yield:queue:osiris": 6
+     }
+    },
+    {
+     "id": "ag-cmpf6",
+     "tarotId": "osiris",
+     "position": 7,
+     "date": "2026-11-10",
+     "clientId": "900006",
+     "client": "Cliente 6",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": [
+       "Cancelada"
+      ]
+     },
+     "agendaOutcome": "Cancelada"
+    }
+   ],
+   "revisao": "queue-v1:377:58f9f1634d5bf85f594d04fb4dfcef17",
+   "encerrados": [
+    false,
+    true,
+    false,
+    false,
+    false,
+    false,
+    true
+   ],
+   "fotos": [
+    {
+     "contact": {
+      "attempt": 2,
+      "date": "2026-11-10",
+      "tags": [
+       "Avisada",
+       "Vai pagar"
+      ]
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": [
+       "Cancelada"
+      ]
+     },
+     "agendaOutcome": "Cancelada"
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": [
+       "Cancelada"
+      ]
+     },
+     "agendaOutcome": "Cancelada"
+    }
+   ],
+   "proximaPosicao": 7
+  },
+  {
+   "tarotId": "nyx",
+   "itens": [
+    {
+     "id": "ag-d55a0",
+     "tarotId": "nyx",
+     "position": 1,
+     "date": "2026-11-10",
+     "clientId": "900000",
+     "client": "Cliente 0",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "positionOverrides": {
+      "explicit:queue:nyx": 8
+     }
+    },
+    {
+     "id": "ag-gsne1",
+     "tarotId": "nyx",
+     "position": 2,
+     "date": "2026-11-10",
+     "clientId": "900001",
+     "client": "Cliente 1",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "id": "ag-buso2",
+     "tarotId": "nyx",
+     "position": 3,
+     "date": "2026-11-10",
+     "clientId": "900002",
+     "client": "Cliente 2",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": [
+       "Concluída"
+      ]
+     },
+     "agendaOutcome": "Concluída"
+    },
+    {
+     "id": "ag-2irw3",
+     "tarotId": "nyx",
+     "position": 4,
+     "date": "2026-11-10",
+     "clientId": "900003",
+     "client": "Cliente 3",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "positionOverrides": {
+      "explicit:queue:nyx": 1
+     }
+    },
+    {
+     "id": "ag-e28v4",
+     "tarotId": "nyx",
+     "position": 5,
+     "date": "2026-11-10",
+     "clientId": "900004",
+     "client": "Cliente 4",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 2,
+      "date": "2026-11-10",
+      "tags": [
+       "Avisada",
+       "Vai pagar"
+      ]
+     },
+     "positionOverrides": {
+      "explicit:queue:nyx": 1
+     }
+    },
+    {
+     "id": "ag-dkjw5",
+     "tarotId": "nyx",
+     "position": 6,
+     "date": "2026-11-10",
+     "clientId": "900005",
+     "client": "Cliente 5",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "positionOverrides": {
+      "explicit:queue:nyx": 4,
+      "yield:queue:nyx": 6
+     },
+     "orderCommand": {
+      "id": "cmd-5",
+      "queueKey": "queue:nyx",
+      "baseRevision": "queue-v1:0:x",
+      "at": "2026-11-10T10:00:00.000Z",
+      "actorRole": "atendente",
+      "beforeIds": [],
+      "afterIds": []
+     }
+    },
+    {
+     "id": "ag-448p6",
+     "tarotId": "nyx",
+     "position": 7,
+     "date": "2026-11-10",
+     "clientId": "900006",
+     "client": "Cliente 6",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 2,
+      "date": "2026-11-10",
+      "tags": [
+       "Avisada",
+       "Vai pagar"
+      ]
+     }
+    },
+    {
+     "id": "ag-jnbl7",
+     "tarotId": "nyx",
+     "position": 8,
+     "date": "2026-11-10",
+     "clientId": "900007",
+     "client": "Cliente 7",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    }
+   ],
+   "revisao": "queue-v1:404:c597963cfbc38f4420d32cbcaac0ce44",
+   "encerrados": [
+    false,
+    false,
+    true,
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "fotos": [
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": [
+       "Concluída"
+      ]
+     },
+     "agendaOutcome": "Concluída"
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 2,
+      "date": "2026-11-10",
+      "tags": [
+       "Avisada",
+       "Vai pagar"
+      ]
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 2,
+      "date": "2026-11-10",
+      "tags": [
+       "Avisada",
+       "Vai pagar"
+      ]
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    }
+   ],
+   "proximaPosicao": 9
+  },
+  {
+   "tarotId": "estrela",
+   "itens": [
+    {
+     "id": "ag-9hca0",
+     "tarotId": "nyx",
+     "position": 1,
+     "date": "2026-11-10",
+     "clientId": "900000",
+     "client": "Cliente 0",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "contactHistory": [
+      {
+       "id": "ev-0",
+       "actor": "Teste",
+       "at": "2026-11-10T10:00:00.000Z",
+       "date": "2026-11-10",
+       "attempt": 1,
+       "tag": "Avisada",
+       "active": true,
+       "before": [],
+       "after": [
+        "Avisada"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "ag-dhra1",
+     "tarotId": "estrela",
+     "position": 2,
+     "date": "2026-11-10",
+     "clientId": "900001",
+     "client": "Cliente 1",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "id": "ag-1jp52",
+     "tarotId": "estrela",
+     "position": 3,
+     "date": "2026-11-10",
+     "clientId": "900002",
+     "client": "Cliente 2",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "positionOverrides": {
+      "explicit:queue:estrela": 4
+     }
+    },
+    {
+     "id": "ag-l19o3",
+     "tarotId": "estrela",
+     "position": 4,
+     "date": "2026-11-10",
+     "clientId": "900003",
+     "client": "Cliente 3",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "id": "ag-2rwi4",
+     "tarotId": "estrela",
+     "position": 5,
+     "date": "2026-11-10",
+     "clientId": "900004",
+     "client": "Cliente 4",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "id": "ag-12zs5",
+     "tarotId": "estrela",
+     "position": 6,
+     "date": "2026-11-10",
+     "clientId": "900005",
+     "client": "Cliente 5",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "positionOverrides": {
+      "explicit:queue:estrela": 8
+     },
+     "orderCommand": {
+      "id": "cmd-5",
+      "queueKey": "queue:estrela",
+      "baseRevision": "queue-v1:0:x",
+      "at": "2026-11-10T10:00:00.000Z",
+      "actorRole": "atendente",
+      "beforeIds": [],
+      "afterIds": []
+     }
+    },
+    {
+     "id": "ag-2l5i6",
+     "tarotId": "estrela",
+     "position": 7,
+     "date": "2026-11-10",
+     "clientId": "900006",
+     "client": "Cliente 6",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": [
+       "Cancelada"
+      ]
+     },
+     "positionOverrides": {
+      "yield:queue:estrela": 7
+     },
+     "agendaOutcome": "Cancelada"
+    }
+   ],
+   "revisao": "queue-v1:256:76b07d98ea0a4cd6416f84745146f70a",
+   "encerrados": [
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    true
+   ],
+   "fotos": [
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": [
+       "Avisada"
+      ]
+     },
+     "lastEvent": "ev-0"
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": [
+       "Cancelada"
+      ]
+     },
+     "agendaOutcome": "Cancelada"
+    }
+   ],
+   "proximaPosicao": 7
+  },
+  {
+   "tarotId": "osiris",
+   "itens": [
+    {
+     "id": "ag-e7q30",
+     "tarotId": "osiris",
+     "position": 1,
+     "date": "2026-11-10",
+     "clientId": "900000",
+     "client": "Cliente 0",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 2,
+      "date": "2026-11-10",
+      "tags": [
+       "Avisada",
+       "Vai pagar"
+      ]
+     },
+     "orderCommand": {
+      "id": "cmd-0",
+      "queueKey": "queue:osiris",
+      "baseRevision": "queue-v1:0:x",
+      "at": "2026-11-10T10:00:00.000Z",
+      "actorRole": "atendente",
+      "beforeIds": [],
+      "afterIds": []
+     }
+    },
+    {
+     "id": "ag-1y7z1",
+     "tarotId": "nyx",
+     "position": 2,
+     "date": "2026-11-10",
+     "clientId": "900001",
+     "client": "Cliente 1",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "positionOverrides": {
+      "explicit:queue:nyx": 6,
+      "yield:queue:nyx": 2
+     },
+     "contactHistory": [
+      {
+       "id": "ev-1",
+       "actor": "Teste",
+       "at": "2026-11-10T10:00:00.000Z",
+       "date": "2026-11-10",
+       "attempt": 1,
+       "tag": "Avisada",
+       "active": true,
+       "before": [],
+       "after": [
+        "Avisada"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "ag-bx712",
+     "tarotId": "nyx",
+     "position": 3,
+     "date": "2026-11-10",
+     "clientId": "900002",
+     "client": "Cliente 2",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "contactHistory": [
+      {
+       "id": "ev-2",
+       "actor": "Teste",
+       "at": "2026-11-10T10:00:00.000Z",
+       "date": "2026-11-10",
+       "attempt": 1,
+       "tag": "Avisada",
+       "active": true,
+       "before": [],
+       "after": [
+        "Avisada"
+       ]
+      }
+     ]
+    }
+   ],
+   "revisao": "queue-v1:50:dd6f1eb37c00d77bc85f27a3bac74c1b",
+   "encerrados": [
+    false,
+    false,
+    false
+   ],
+   "fotos": [
+    {
+     "contact": {
+      "attempt": 2,
+      "date": "2026-11-10",
+      "tags": [
+       "Avisada",
+       "Vai pagar"
+      ]
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": [
+       "Avisada"
+      ]
+     },
+     "lastEvent": "ev-1"
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": [
+       "Avisada"
+      ]
+     },
+     "lastEvent": "ev-2"
+    }
+   ],
+   "proximaPosicao": 2
+  },
+  {
+   "tarotId": "afila",
+   "itens": [
+    {
+     "id": "ag-jwfw0",
+     "tarotId": "afila",
+     "position": 1,
+     "date": "2026-11-10",
+     "clientId": "900000",
+     "client": "Cliente 0",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": [
+       "Cancelada"
+      ]
+     },
+     "positionOverrides": {
+      "explicit:queue:afila": 1,
+      "yield:queue:afila": 1
+     },
+     "agendaOutcome": "Cancelada"
+    },
+    {
+     "id": "ag-7ajb1",
+     "tarotId": "afila",
+     "position": 2,
+     "date": "2026-11-10",
+     "clientId": "900001",
+     "client": "Cliente 1",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 2,
+      "date": "2026-11-10",
+      "tags": [
+       "Avisada",
+       "Vai pagar"
+      ]
+     },
+     "positionOverrides": {
+      "explicit:queue:afila": 1
+     }
+    },
+    {
+     "id": "ag-d5rq2",
+     "tarotId": "afila",
+     "position": 3,
+     "date": "2026-11-10",
+     "clientId": "900002",
+     "client": "Cliente 2",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "id": "ag-yj03",
+     "tarotId": "nyx",
+     "position": 4,
+     "date": "2026-11-10",
+     "clientId": "900003",
+     "client": "Cliente 3",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "positionOverrides": {
+      "explicit:queue:nyx": 8,
+      "yield:queue:nyx": 4
+     }
+    },
+    {
+     "id": "ag-edbr4",
+     "tarotId": "nyx",
+     "position": 5,
+     "date": "2026-11-10",
+     "clientId": "900004",
+     "client": "Cliente 4",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": [
+       "Concluída"
+      ]
+     },
+     "positionOverrides": {
+      "yield:queue:nyx": 5
+     },
+     "agendaOutcome": "Concluída"
+    },
+    {
+     "id": "ag-hwf85",
+     "tarotId": "afila",
+     "position": 6,
+     "date": "2026-11-10",
+     "clientId": "900005",
+     "client": "Cliente 5",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": [
+       "Concluída"
+      ]
+     },
+     "agendaOutcome": "Concluída"
+    },
+    {
+     "id": "ag-bll6",
+     "tarotId": "afila",
+     "position": 7,
+     "date": "2026-11-10",
+     "clientId": "900006",
+     "client": "Cliente 6",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "id": "ag-7xma7",
+     "tarotId": "afila",
+     "position": 8,
+     "date": "2026-11-10",
+     "clientId": "900007",
+     "client": "Cliente 7",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "positionOverrides": {
+      "explicit:queue:afila": 8
+     },
+     "orderCommand": {
+      "id": "cmd-7",
+      "queueKey": "queue:afila",
+      "baseRevision": "queue-v1:0:x",
+      "at": "2026-11-10T10:00:00.000Z",
+      "actorRole": "atendente",
+      "beforeIds": [],
+      "afterIds": []
+     }
+    },
+    {
+     "id": "ag-inpt8",
+     "tarotId": "afila",
+     "position": 9,
+     "date": "2026-11-10",
+     "clientId": "900008",
+     "client": "Cliente 8",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 2,
+      "date": "2026-11-10",
+      "tags": [
+       "Avisada",
+       "Vai pagar"
+      ]
+     },
+     "positionOverrides": {
+      "explicit:queue:afila": 5
+     },
+     "orderCommand": {
+      "id": "cmd-8",
+      "queueKey": "queue:afila",
+      "baseRevision": "queue-v1:0:x",
+      "at": "2026-11-10T10:00:00.000Z",
+      "actorRole": "atendente",
+      "beforeIds": [],
+      "afterIds": []
+     }
+    },
+    {
+     "id": "ag-fzvo9",
+     "tarotId": "afila",
+     "position": 10,
+     "date": "2026-11-10",
+     "clientId": "900009",
+     "client": "Cliente 9",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "positionOverrides": {
+      "explicit:queue:afila": 2
+     }
+    },
+    {
+     "id": "ag-7udb10",
+     "tarotId": "afila",
+     "position": 11,
+     "date": "2026-11-10",
+     "clientId": "900010",
+     "client": "Cliente 10",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": [
+       "Concluída"
+      ]
+     },
+     "positionOverrides": {
+      "yield:queue:afila": 11
+     },
+     "agendaOutcome": "Concluída"
+    }
+   ],
+   "revisao": "queue-v1:379:330c46f6ce59dd22db8415fef989ac8a",
+   "encerrados": [
+    true,
+    false,
+    false,
+    false,
+    true,
+    true,
+    false,
+    false,
+    false,
+    false,
+    true
+   ],
+   "fotos": [
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": [
+       "Cancelada"
+      ]
+     },
+     "agendaOutcome": "Cancelada"
+    },
+    {
+     "contact": {
+      "attempt": 2,
+      "date": "2026-11-10",
+      "tags": [
+       "Avisada",
+       "Vai pagar"
+      ]
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": [
+       "Concluída"
+      ]
+     },
+     "agendaOutcome": "Concluída"
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": [
+       "Concluída"
+      ]
+     },
+     "agendaOutcome": "Concluída"
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 2,
+      "date": "2026-11-10",
+      "tags": [
+       "Avisada",
+       "Vai pagar"
+      ]
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": [
+       "Concluída"
+      ]
+     },
+     "agendaOutcome": "Concluída"
+    }
+   ],
+   "proximaPosicao": 11
+  },
+  {
+   "tarotId": "osiris",
+   "itens": [
+    {
+     "id": "ag-9ghi0",
+     "tarotId": "osiris",
+     "position": 1,
+     "date": "2026-11-10",
+     "clientId": "900000",
+     "client": "Cliente 0",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": [
+       "Cancelada"
+      ]
+     },
+     "orderCommand": {
+      "id": "cmd-0",
+      "queueKey": "queue:osiris",
+      "baseRevision": "queue-v1:0:x",
+      "at": "2026-11-10T10:00:00.000Z",
+      "actorRole": "atendente",
+      "beforeIds": [],
+      "afterIds": []
+     },
+     "agendaOutcome": "Cancelada"
+    },
+    {
+     "id": "ag-f30x1",
+     "tarotId": "osiris",
+     "position": 2,
+     "date": "2026-11-10",
+     "clientId": "900001",
+     "client": "Cliente 1",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "orderCommand": {
+      "id": "cmd-1",
+      "queueKey": "queue:osiris",
+      "baseRevision": "queue-v1:0:x",
+      "at": "2026-11-10T10:00:00.000Z",
+      "actorRole": "atendente",
+      "beforeIds": [],
+      "afterIds": []
+     }
+    },
+    {
+     "id": "ag-jfcw2",
+     "tarotId": "osiris",
+     "position": 3,
+     "date": "2026-11-10",
+     "clientId": "900002",
+     "client": "Cliente 2",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "positionOverrides": {
+      "explicit:queue:osiris": 8
+     }
+    },
+    {
+     "id": "ag-90za3",
+     "tarotId": "nyx",
+     "position": 4,
+     "date": "2026-11-10",
+     "clientId": "900003",
+     "client": "Cliente 3",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "orderCommand": {
+      "id": "cmd-3",
+      "queueKey": "queue:nyx",
+      "baseRevision": "queue-v1:0:x",
+      "at": "2026-11-10T10:00:00.000Z",
+      "actorRole": "atendente",
+      "beforeIds": [],
+      "afterIds": []
+     }
+    },
+    {
+     "id": "ag-l2h4",
+     "tarotId": "osiris",
+     "position": 5,
+     "date": "2026-11-10",
+     "clientId": "900004",
+     "client": "Cliente 4",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "id": "ag-8wzm5",
+     "tarotId": "osiris",
+     "position": 6,
+     "date": "2026-11-10",
+     "clientId": "900005",
+     "client": "Cliente 5",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "positionOverrides": {
+      "explicit:queue:osiris": 5
+     }
+    },
+    {
+     "id": "ag-ee56",
+     "tarotId": "osiris",
+     "position": 7,
+     "date": "2026-11-10",
+     "clientId": "900006",
+     "client": "Cliente 6",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": [
+       "Cancelada"
+      ]
+     },
+     "agendaOutcome": "Cancelada"
+    }
+   ],
+   "revisao": "queue-v1:222:73af9b6c8a7027a48da39aaccb2caa94",
+   "encerrados": [
+    true,
+    false,
+    false,
+    false,
+    false,
+    false,
+    true
+   ],
+   "fotos": [
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": [
+       "Cancelada"
+      ]
+     },
+     "agendaOutcome": "Cancelada"
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": [
+       "Cancelada"
+      ]
+     },
+     "agendaOutcome": "Cancelada"
+    }
+   ],
+   "proximaPosicao": 7
+  },
+  {
+   "tarotId": "estrela",
+   "itens": [
+    {
+     "id": "ag-6ic10",
+     "tarotId": "estrela",
+     "position": 1,
+     "date": "2026-11-10",
+     "clientId": "900000",
+     "client": "Cliente 0",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "positionOverrides": {
+      "explicit:queue:estrela": 9
+     },
+     "contactHistory": [
+      {
+       "id": "ev-0",
+       "actor": "Teste",
+       "at": "2026-11-10T10:00:00.000Z",
+       "date": "2026-11-10",
+       "attempt": 1,
+       "tag": "Avisada",
+       "active": true,
+       "before": [],
+       "after": [
+        "Avisada"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "ag-285z1",
+     "tarotId": "estrela",
+     "position": 2,
+     "date": "2026-11-10",
+     "clientId": "900001",
+     "client": "Cliente 1",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": [
+       "Concluída"
+      ]
+     },
+     "positionOverrides": {
+      "explicit:queue:estrela": 8
+     },
+     "agendaOutcome": "Concluída"
+    }
+   ],
+   "revisao": "queue-v1:73:95ac5645662604afd71f33e9444f6afb",
+   "encerrados": [
+    false,
+    true
+   ],
+   "fotos": [
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": [
+       "Avisada"
+      ]
+     },
+     "lastEvent": "ev-0"
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": [
+       "Concluída"
+      ]
+     },
+     "agendaOutcome": "Concluída"
+    }
+   ],
+   "proximaPosicao": 2
+  },
+  {
+   "tarotId": "afila",
+   "itens": [
+    {
+     "id": "ag-dhah0",
+     "tarotId": "afila",
+     "position": 1,
+     "date": "2026-11-10",
+     "clientId": "900000",
+     "client": "Cliente 0",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "id": "ag-ks6t1",
+     "tarotId": "afila",
+     "position": 2,
+     "date": "2026-11-10",
+     "clientId": "900001",
+     "client": "Cliente 1",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": [
+       "Cancelada"
+      ]
+     },
+     "positionOverrides": {
+      "explicit:queue:afila": 5,
+      "yield:queue:afila": 2
+     },
+     "agendaOutcome": "Cancelada"
+    },
+    {
+     "id": "ag-21ld2",
+     "tarotId": "afila",
+     "position": 3,
+     "date": "2026-11-10",
+     "clientId": "900002",
+     "client": "Cliente 2",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "positionOverrides": {
+      "yield:queue:afila": 3
+     },
+     "contactHistory": [
+      {
+       "id": "ev-2",
+       "actor": "Teste",
+       "at": "2026-11-10T10:00:00.000Z",
+       "date": "2026-11-10",
+       "attempt": 1,
+       "tag": "Avisada",
+       "active": true,
+       "before": [],
+       "after": [
+        "Avisada"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "ag-2i2p3",
+     "tarotId": "afila",
+     "position": 4,
+     "date": "2026-11-10",
+     "clientId": "900003",
+     "client": "Cliente 3",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "id": "ag-2dhr4",
+     "tarotId": "nyx",
+     "position": 5,
+     "date": "2026-11-10",
+     "clientId": "900004",
+     "client": "Cliente 4",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "positionOverrides": {
+      "explicit:queue:nyx": 4
+     }
+    },
+    {
+     "id": "ag-9udn5",
+     "tarotId": "afila",
+     "position": 6,
+     "date": "2026-11-10",
+     "clientId": "900005",
+     "client": "Cliente 5",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "positionOverrides": {
+      "explicit:queue:afila": 8
+     }
+    }
+   ],
+   "revisao": "queue-v1:200:ccc199e27cccbb34aed7a426b95b50f0",
+   "encerrados": [
+    false,
+    true,
+    false,
+    false,
+    false,
+    false
+   ],
+   "fotos": [
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": [
+       "Cancelada"
+      ]
+     },
+     "agendaOutcome": "Cancelada"
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": [
+       "Avisada"
+      ]
+     },
+     "lastEvent": "ev-2"
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    }
+   ],
+   "proximaPosicao": 7
+  },
+  {
+   "tarotId": "osiris",
+   "itens": [
+    {
+     "id": "ag-8tss0",
+     "tarotId": "osiris",
+     "position": 1,
+     "date": "2026-11-10",
+     "clientId": "900000",
+     "client": "Cliente 0",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "id": "ag-jb3h1",
+     "tarotId": "osiris",
+     "position": 2,
+     "date": "2026-11-10",
+     "clientId": "900001",
+     "client": "Cliente 1",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "id": "ag-4csv2",
+     "tarotId": "osiris",
+     "position": 3,
+     "date": "2026-11-10",
+     "clientId": "900002",
+     "client": "Cliente 2",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 2,
+      "date": "2026-11-10",
+      "tags": [
+       "Avisada",
+       "Vai pagar"
+      ]
+     }
+    },
+    {
+     "id": "ag-e8bi3",
+     "tarotId": "osiris",
+     "position": 4,
+     "date": "2026-11-10",
+     "clientId": "900003",
+     "client": "Cliente 3",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "positionOverrides": {
+      "explicit:queue:osiris": 6
+     }
+    },
+    {
+     "id": "ag-h1li4",
+     "tarotId": "osiris",
+     "position": 5,
+     "date": "2026-11-10",
+     "clientId": "900004",
+     "client": "Cliente 4",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "positionOverrides": {
+      "explicit:queue:osiris": 2
+     }
+    },
+    {
+     "id": "ag-b6d95",
+     "tarotId": "osiris",
+     "position": 6,
+     "date": "2026-11-10",
+     "clientId": "900005",
+     "client": "Cliente 5",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 2,
+      "date": "2026-11-10",
+      "tags": [
+       "Avisada",
+       "Vai pagar"
+      ]
+     },
+     "positionOverrides": {
+      "yield:queue:osiris": 6
+     }
+    }
+   ],
+   "revisao": "queue-v1:304:073804cf548dd45b1175b027ad65adf3",
+   "encerrados": [
+    false,
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "fotos": [
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 2,
+      "date": "2026-11-10",
+      "tags": [
+       "Avisada",
+       "Vai pagar"
+      ]
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 2,
+      "date": "2026-11-10",
+      "tags": [
+       "Avisada",
+       "Vai pagar"
+      ]
+     }
+    }
+   ],
+   "proximaPosicao": 7
+  },
+  {
+   "tarotId": "estrela",
+   "itens": [
+    {
+     "id": "ag-kvs10",
+     "tarotId": "estrela",
+     "position": 1,
+     "date": "2026-11-10",
+     "clientId": "900000",
+     "client": "Cliente 0",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     },
+     "positionOverrides": {
+      "explicit:queue:estrela": 7
+     }
+    },
+    {
+     "id": "ag-agtm1",
+     "tarotId": "estrela",
+     "position": 2,
+     "date": "2026-11-10",
+     "clientId": "900001",
+     "client": "Cliente 1",
+     "time": "10:00",
+     "channel": "WhatsApp",
+     "observation": "",
+     "response": "Aguardando resposta",
+     "contact": {
+      "attempt": 2,
+      "date": "2026-11-10",
+      "tags": [
+       "Avisada",
+       "Vai pagar"
+      ]
+     }
+    }
+   ],
+   "revisao": "queue-v1:104:5e203e6876a3898e1f007754480dae82",
+   "encerrados": [
+    false,
+    false
+   ],
+   "fotos": [
+    {
+     "contact": {
+      "attempt": 1,
+      "date": "2026-11-10",
+      "tags": []
+     }
+    },
+    {
+     "contact": {
+      "attempt": 2,
+      "date": "2026-11-10",
+      "tags": [
+       "Avisada",
+       "Vai pagar"
+      ]
+     }
+    }
+   ],
+   "proximaPosicao": 3
+  }
+ ]
+}

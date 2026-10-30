@@ -1,0 +1,342 @@
+{
+  "info": {
+    "_postman_id": "fadbem-single-collection-v1",
+    "name": "Fadas do Bem",
+    "description": "Collection única do projeto — pastas Evolution, Chatwoot, API própria e Autenticação. Variáveis: Environment `Fadas do Bem — Local`.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Evolution API",
+      "description": "Chamadas diretas ao cluster Evolution API (Easypanel). Credenciais em `{{evolution_apikey}}` e `{{evolution_url}}`.",
+      "item": [
+        {
+          "name": "1. Criar Instância + Integrar Chatwoot",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "apikey",
+                "value": "{{evolution_apikey}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"instanceName\": \"fadas_whatsapp\",\n  \"qrcode\": true,\n  \"integration\": \"CHATWOOT\",\n  \"chatwootAccountId\": \"{{chatwoot_account_id}}\",\n  \"chatwootToken\": \"{{chatwoot_token}}\",\n  \"chatwootUrl\": \"{{chatwoot_url}}\",\n  \"chatwootSignMsg\": true,\n  \"chatwootReopenConversation\": true,\n  \"chatwootConversationPending\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{evolution_url}}/instance/create",
+            "description": "Cria instância na Evolution com integração ao Chatwoot (proxy administrativo ficará na API própria em fases futuras)."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Chatwoot",
+      "description": "Webhooks acionados pelo painel Chatwoot + proxies administrativos via `chatwoot_url` / token.",
+      "item": [
+        {
+          "name": "Webhook (simulação)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"event\": \"message_created\",\n  \"content\": \"Quanto eu tenho de saldo?\",\n  \"message_type\": \"incoming\",\n  \"sender\": {\n    \"type\": \"contact\",\n    \"id\": \"999\"\n  },\n  \"conversation\": {\n    \"id\": \"4242\"\n  },\n  \"message\": {\n    \"id\": \"msg-inner\",\n    \"content\": \"Quanto eu tenho de saldo?\",\n    \"message_type\": \"incoming\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{api_base_url}}/chatwoot/webhook",
+            "description": "`POST /api/v1/chatwoot/webhook` — garanta `users.chatwoot_contact_id` igual a `sender.id`."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Fadas do Bem API",
+      "description": "Rotas públicas/internas servidas pela aplicação Node (`{{api_base_url}}`).",
+      "item": [
+        {
+          "name": "Healthcheck",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{api_base_url}}/health",
+            "description": "`GET /api/v1/health` — base de smoke test local."
+          },
+          "response": []
+        },
+        {
+          "name": "Public — Especialistas (vitrine)",
+          "description": "Endpoints sem JWT — listagem (`GET /`) e perfil público por UUID (`GET /:id`).",
+          "item": [
+            {
+              "name": "Listagem GET /specialists",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{api_base_url}}/specialists?limit=20&sort=ranking",
+                "description": "`GET /api/v1/specialists` — inclui métricas de vitrine (`experience_years`, `timezone`, URLs de mídia) e remove dados sensíveis (PIX, `user_id`, integrações)."
+              },
+              "response": []
+            },
+            {
+              "name": "Perfil público por id GET /specialists/:id",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": "{{api_base_url}}/specialists/00000000-0000-4000-8000-000000000002",
+                "description": "`GET /api/v1/specialists/:id` — eager load modalidades, oráculos e `agenda_horarios` (`is_active: true`), ordenadas por dia e hora inicial."
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Fase 3 — Painel da Taróloga",
+          "description": "JWT Bearer com papel `TAROLOGA` (`{{jwt_token}}`). Prefixo `/api/v1/specialists`. Hooks de estado usam `individualHooks: true`.",
+          "item": [
+            {
+              "name": "PATCH me/profile",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{jwt_token}}", "type": "text" },
+                  { "key": "Content-Type", "value": "application/json", "type": "text" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"bio\": \"Apresentação actualizada pela taróloga.\",\n  \"experience_years\": 8,\n  \"timezone\": \"America/Sao_Paulo\",\n  \"greeting_audio_url\": \"https://cdn.example.com/audio/boas-vindas.mp3\",\n  \"presentation_video_url\": \"https://cdn.example.com/video/apresentacao.mp4\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": "{{api_base_url}}/specialists/me/profile",
+                "description": "`PATCH /api/v1/specialists/me/profile` — campos opcionais: `bio`, `greeting_audio_url`, `presentation_video_url`, `experience_years`, `timezone`."
+              },
+              "response": []
+            },
+            {
+              "name": "PATCH me/status",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{jwt_token}}", "type": "text" },
+                  { "key": "Content-Type", "value": "application/json", "type": "text" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"status\": \"ONLINE\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": "{{api_base_url}}/specialists/me/status",
+                "description": "`PATCH /api/v1/specialists/me/status` — `ONLINE` | `EM_ATENDIMENTO` | `AUSENTE` | `OFFLINE`. Garante entrada em `specialist_status_logs`."
+              },
+              "response": []
+            },
+            {
+              "name": "PUT me/schedule",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{jwt_token}}", "type": "text" },
+                  { "key": "Content-Type", "value": "application/json", "type": "text" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"slots\": [\n    { \"day_of_week\": 1, \"start_time\": \"09:00\", \"end_time\": \"12:30\" },\n    { \"day_of_week\": 1, \"start_time\": \"14:00\", \"end_time\": \"18:00\", \"is_active\": true }\n  ]\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": "{{api_base_url}}/specialists/me/schedule",
+                "description": "`PUT /api/v1/specialists/me/schedule` — substitui toda a agenda (transação: destroy + bulkCreate). `day_of_week` 0–6 (Domingo–Sábado)."
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Evolution Admin — instances",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{api_base_url}}/evolution-admin/instances",
+            "description": "`GET /api/v1/evolution-admin/instances` — painel Gestora stub."
+          },
+          "response": []
+        },
+        {
+          "name": "Evolution Admin — status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{api_base_url}}/evolution-admin/integrations/status",
+            "description": "Probe rápido reachability Evolution usando global API KEY."
+          },
+          "response": []
+        },
+        {
+          "name": "Fase 5 - Sessões e Agora.io",
+          "description": "Criar sessão na BD (canal Agora + UIDs) e pedir token RTC.",
+          "item": [
+            {
+              "name": "1. Criar sessão (VIDEO)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "try {",
+                      "  const j = pm.response.json();",
+                      "  if (j.sucesso && j.dados && j.dados.id) {",
+                      "    pm.environment.set('current_session_id', j.dados.id);",
+                      "    pm.collectionVariables.set('current_session_id', j.dados.id);",
+                      "  }",
+                      "} catch (e) { console.warn(e); }",
+                      ""
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{jwt_token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"specialist_id\": \"00000000-0000-4000-8000-000000000001\",\n  \"modality\": \"VIDEO\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": "{{api_base_url}}/sessions",
+                "description": "`POST /api/v1/sessions` — JWT de utilizador com perfil Cliente. Corpo: `specialist_id`, `modality`. Opcional: `status` (SCHEDULED|READY). Grava `id` da sessão em `current_session_id` (environment + collection)."
+              },
+              "response": []
+            },
+            {
+              "name": "2. Token Agora (RTC)",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{jwt_token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": "{{api_base_url}}/sessions/{{current_session_id}}/token?expiresIn=3600&role=publisher",
+                "description": "`GET /api/v1/sessions/:id/token` — corre após (1). `role`: publisher (taróloga) ou audience (cliente)."
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Sessões — RTC token Agora (auth)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": "{{api_base_url}}/sessions/{{current_session_id}}/token?expiresIn=3600&role=publisher",
+            "description": "`GET /api/v1/sessions/:id/token` — requer JWT; sessão com `telecom_provider` AGORA e `provider_channel_id` / `agora_uid_*`. Preferir variável `current_session_id` após criar sessão (Fase 5)."
+          },
+          "response": []
+        },
+        {
+          "name": "Sessões — Webhook Agora NCS (simulação)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"eventType\": 103,\n  \"notifyMs\": 1712345678000,\n  \"payload\": {\n    \"channelName\": \"consulta_demo\",\n    \"uid\": 10001,\n    \"platform\": 1,\n    \"clientType\": 1,\n    \"clientSeq\": 1,\n    \"ts\": 1712345678\n  }\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{api_base_url}}/sessions/agora-webhook",
+            "description": "`POST /api/v1/sessions/agora-webhook` — o servidor responde 200 imediatamente; ajuste `channelName` e `uid` para corresponder à linha na tabela `sessions`."
+          },
+          "response": []
+        },
+        {
+          "name": "Fase 5 — Financeiro (Mercado Pago)",
+          "description": "Checkout transparente PIX e cartão (`/api/v1/payments`). JWT de perfil Cliente + `MP_ACCESS_TOKEN` no backend.",
+          "item": [
+            {
+              "name": "Gerar PIX (auth)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{jwt_token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"package_id\": \"avulso_demo\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": "{{api_base_url}}/payments/pix",
+                "description": "`POST /api/v1/payments/pix` — ou use `\"amount\": 25.5` em BRL. Opcional: `credit_type` (`AVULSO`|`PACOTE_SESSAO_UNICA`). Resposta: QR copia-e-cola + base64 quando o MP devolver."
+              },
+              "response": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Autenticação",
+      "description": "Login, refresh, OTP e OAuth próprios conforme fluxos JWT forem disponibilizados em `/features/auth`. Pasta reservada para não misturar com integrações externas.",
+      "item": []
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+# dependências e ambiente
+node_modules/
+.env
+.env.*
+!.env.example
+
+# ambiente local do Gestão Fadas (segredos gerados, dados do Redis, senha de teste)
+.local-dev/
+
+# arquivos enviados por usuários
+uploads/
+
+# sistema operacional e editores
+.DS_Store
+*.log
+.idea/
+.vscode/
+
+# páginas de teste com credenciais e documentação de terceiros (podem conter chaves reais)
+public/agora-test.html
+public/intelbras-test.*
+src/documentacao-externa/

@@ -1,0 +1,969 @@
+{
+  "source": "resultado_pedido_05.txt",
+  "reportDateLocal": "2026-09-22 18:15:02",
+  "semantics": "Snapshot recebido; não comprova significado de códigos em todas as datas históricas.",
+  "omittedColumns": {
+    "tbl_bancos": [
+      "agBanco",
+      "ccBanco"
+    ]
+  },
+  "tables": {
+    "tbl_formaconsulta": [
+      {
+        "idFormaConsulta": "1",
+        "tpFormaConsulta": "PABX",
+        "dscFormaConsulta": "Realizada pelo PABX"
+      },
+      {
+        "idFormaConsulta": "2",
+        "tpFormaConsulta": "MSN",
+        "dscFormaConsulta": "pelo MSN"
+      },
+      {
+        "idFormaConsulta": "3",
+        "tpFormaConsulta": "CHAT",
+        "dscFormaConsulta": "Realizada pelo CHAT"
+      },
+      {
+        "idFormaConsulta": "4",
+        "tpFormaConsulta": "Skype",
+        "dscFormaConsulta": "Realizada pelo Skipe"
+      },
+      {
+        "idFormaConsulta": "5",
+        "tpFormaConsulta": "Fone",
+        "dscFormaConsulta": "Realizada diretamente pelo telefone do consulmidor"
+      },
+      {
+        "idFormaConsulta": "6",
+        "tpFormaConsulta": "Indefinida",
+        "dscFormaConsulta": "Consulta antiga que não foi especificado a forma de consulta."
+      }
+    ],
+    "tbl_opcaopagto": [
+      {
+        "idOpcaoPagto": "1",
+        "tpOpcaoPagto": "Depósito",
+        "dscOpcaoPagto": "depósito em bancos ou caixas eletrônicos"
+      },
+      {
+        "idOpcaoPagto": "2",
+        "tpOpcaoPagto": "Cartão de crédito",
+        "dscOpcaoPagto": "cartão de crédito"
+      },
+      {
+        "idOpcaoPagto": "3",
+        "tpOpcaoPagto": "Transferência",
+        "dscOpcaoPagto": "Transferência eletrônia"
+      },
+      {
+        "idOpcaoPagto": "4",
+        "tpOpcaoPagto": "DOC",
+        "dscOpcaoPagto": "DOC"
+      },
+      {
+        "idOpcaoPagto": "5",
+        "tpOpcaoPagto": "Boleto Bancário",
+        "dscOpcaoPagto": "Boleto Bancário"
+      },
+      {
+        "idOpcaoPagto": "6",
+        "tpOpcaoPagto": "Indefinido",
+        "dscOpcaoPagto": "Não definido"
+      },
+      {
+        "idOpcaoPagto": "7",
+        "tpOpcaoPagto": "Cheque",
+        "dscOpcaoPagto": "Pagamento feito com cheque"
+      },
+      {
+        "idOpcaoPagto": "8",
+        "tpOpcaoPagto": "Pré Pago",
+        "dscOpcaoPagto": "Pré Pago"
+      },
+      {
+        "idOpcaoPagto": "9",
+        "tpOpcaoPagto": "PayPal - Pré",
+        "dscOpcaoPagto": "Pré Pago pelo PayPal"
+      },
+      {
+        "idOpcaoPagto": "10",
+        "tpOpcaoPagto": "PayPal - Pós",
+        "dscOpcaoPagto": "Pós Pago com PayPal"
+      },
+      {
+        "idOpcaoPagto": "11",
+        "tpOpcaoPagto": "SERASA",
+        "dscOpcaoPagto": "Pagamento feito pelo serasa"
+      },
+      {
+        "idOpcaoPagto": "12",
+        "tpOpcaoPagto": "PagSeguro",
+        "dscOpcaoPagto": "Pagamento feito pelo gateway do pagseguro"
+      }
+    ],
+    "tbl_bancos": [
+      {
+        "idBanco": "1",
+        "nmBanco": "Bradesco"
+      },
+      {
+        "idBanco": "2",
+        "nmBanco": "Itaú"
+      },
+      {
+        "idBanco": "3",
+        "nmBanco": "Banco do Brasil"
+      },
+      {
+        "idBanco": "4",
+        "nmBanco": "Santander"
+      },
+      {
+        "idBanco": "5",
+        "nmBanco": "Indefinido"
+      }
+    ],
+    "status_pagamento": [
+      {
+        "id_status_pagto": "1",
+        "descricao": "Não Confirmado"
+      },
+      {
+        "id_status_pagto": "2",
+        "descricao": "Confirmado"
+      }
+    ],
+    "bandeira_cartao": [
+      {
+        "id": "1",
+        "nome": "amex"
+      },
+      {
+        "id": "2",
+        "nome": "visa"
+      },
+      {
+        "id": "3",
+        "nome": "mastercard"
+      },
+      {
+        "id": "4",
+        "nome": "dinners"
+      },
+      {
+        "id": "5",
+        "nome": "elo"
+      }
+    ],
+    "perfil_cliente": [
+      {
+        "id": "1",
+        "nome": "Basico I",
+        "consulta_autorizada": "1"
+      },
+      {
+        "id": "2",
+        "nome": "Bloqueado",
+        "consulta_autorizada": "0"
+      }
+    ],
+    "cpf_status": [
+      {
+        "idStatus": "1",
+        "nomeStatus": "Regular",
+        "descricaoStatus": "regular na Secretaria da Fazenda"
+      },
+      {
+        "idStatus": "2",
+        "nomeStatus": "Pendente de Regularização",
+        "descricaoStatus": "precisa ser regularizado na Secretária da Fazenda"
+      },
+      {
+        "idStatus": "3",
+        "nomeStatus": "Suspenso",
+        "descricaoStatus": "cpf suspenso - não aceito"
+      },
+      {
+        "idStatus": "4",
+        "nomeStatus": "Falsa identidade",
+        "descricaoStatus": "cpf com nome diferente do colocado no cadastro"
+      }
+    ],
+    "paises": [
+      {
+        "ID": "1",
+        "Paises": "Brasil"
+      },
+      {
+        "ID": "3",
+        "Paises": "USA"
+      },
+      {
+        "ID": "4",
+        "Paises": "França"
+      },
+      {
+        "ID": "5",
+        "Paises": "Portugal"
+      },
+      {
+        "ID": "6",
+        "Paises": "Bélgica"
+      },
+      {
+        "ID": "7",
+        "Paises": "Dinamarca"
+      },
+      {
+        "ID": "8",
+        "Paises": "Itália"
+      },
+      {
+        "ID": "9",
+        "Paises": "Noruega"
+      },
+      {
+        "ID": "10",
+        "Paises": "Espanha"
+      },
+      {
+        "ID": "11",
+        "Paises": "Suécia"
+      },
+      {
+        "ID": "12",
+        "Paises": "Alemanha"
+      },
+      {
+        "ID": "13",
+        "Paises": "Mexico"
+      },
+      {
+        "ID": "14",
+        "Paises": "Reino Unido"
+      },
+      {
+        "ID": "15",
+        "Paises": "Japão"
+      },
+      {
+        "ID": "16",
+        "Paises": "Angola"
+      },
+      {
+        "ID": "17",
+        "Paises": "Canada"
+      },
+      {
+        "ID": "18",
+        "Paises": "Suiça"
+      },
+      {
+        "ID": "19",
+        "Paises": "Argentina"
+      },
+      {
+        "ID": "20",
+        "Paises": "Austrália"
+      },
+      {
+        "ID": "21",
+        "Paises": "Bolívia"
+      },
+      {
+        "ID": "22",
+        "Paises": "Chile"
+      },
+      {
+        "ID": "23",
+        "Paises": "Colômbia"
+      },
+      {
+        "ID": "24",
+        "Paises": "Formosa"
+      },
+      {
+        "ID": "25",
+        "Paises": "China"
+      },
+      {
+        "ID": "26",
+        "Paises": "Paraguai"
+      },
+      {
+        "ID": "27",
+        "Paises": "Peru"
+      },
+      {
+        "ID": "28",
+        "Paises": "Uruguai"
+      },
+      {
+        "ID": "29",
+        "Paises": "Venezuela"
+      },
+      {
+        "ID": "30",
+        "Paises": "Bulgária"
+      },
+      {
+        "ID": "31",
+        "Paises": "Países Baixos"
+      },
+      {
+        "ID": "32",
+        "Paises": "República Tcheca"
+      },
+      {
+        "ID": "33",
+        "Paises": "Finlândia"
+      },
+      {
+        "ID": "34",
+        "Paises": "Grécia"
+      },
+      {
+        "ID": "35",
+        "Paises": "Hungria"
+      },
+      {
+        "ID": "36",
+        "Paises": "India"
+      },
+      {
+        "ID": "37",
+        "Paises": "Indonésia"
+      },
+      {
+        "ID": "38",
+        "Paises": "Irlanda"
+      },
+      {
+        "ID": "39",
+        "Paises": "Israel"
+      },
+      {
+        "ID": "40",
+        "Paises": "Coreia do Sul"
+      },
+      {
+        "ID": "41",
+        "Paises": "Malasia"
+      },
+      {
+        "ID": "42",
+        "Paises": "Nova Zelândia"
+      },
+      {
+        "ID": "43",
+        "Paises": "Filipinas"
+      },
+      {
+        "ID": "44",
+        "Paises": "Polônia"
+      },
+      {
+        "ID": "45",
+        "Paises": "Romênia"
+      },
+      {
+        "ID": "46",
+        "Paises": "Rússia"
+      },
+      {
+        "ID": "47",
+        "Paises": "Singapura"
+      },
+      {
+        "ID": "48",
+        "Paises": "Africa do Sul"
+      },
+      {
+        "ID": "49",
+        "Paises": "Tailândia"
+      },
+      {
+        "ID": "50",
+        "Paises": "Turquia"
+      },
+      {
+        "ID": "51",
+        "Paises": "Sérvia e Montenegro"
+      },
+      {
+        "ID": "52",
+        "Paises": "Catar"
+      },
+      {
+        "ID": "53",
+        "Paises": "Laos"
+      },
+      {
+        "ID": "54",
+        "Paises": "Quênia"
+      },
+      {
+        "ID": "55",
+        "Paises": "República do Congo"
+      },
+      {
+        "ID": "56",
+        "Paises": "Namíbia"
+      },
+      {
+        "ID": "57",
+        "Paises": "São Marinho"
+      },
+      {
+        "ID": "58",
+        "Paises": "Níger"
+      },
+      {
+        "ID": "59",
+        "Paises": "Brunei"
+      },
+      {
+        "ID": "60",
+        "Paises": "Eslovênia"
+      },
+      {
+        "ID": "61",
+        "Paises": "Islândia"
+      },
+      {
+        "ID": "62",
+        "Paises": "Chade"
+      },
+      {
+        "ID": "63",
+        "Paises": "Somália"
+      },
+      {
+        "ID": "64",
+        "Paises": "Gabão"
+      },
+      {
+        "ID": "65",
+        "Paises": "Samoa"
+      },
+      {
+        "ID": "66",
+        "Paises": "Quirguistão"
+      },
+      {
+        "ID": "67",
+        "Paises": "Jamaica"
+      },
+      {
+        "ID": "68",
+        "Paises": "Mauritânia"
+      },
+      {
+        "ID": "69",
+        "Paises": "Jordânia"
+      },
+      {
+        "ID": "70",
+        "Paises": "Equador"
+      },
+      {
+        "ID": "71",
+        "Paises": "Maurício"
+      },
+      {
+        "ID": "72",
+        "Paises": "Macedônia"
+      },
+      {
+        "ID": "73",
+        "Paises": "Sudão"
+      },
+      {
+        "ID": "74",
+        "Paises": "Costa Rica"
+      },
+      {
+        "ID": "75",
+        "Paises": "República Popular do Congo"
+      },
+      {
+        "ID": "76",
+        "Paises": "Santa Lúcia"
+      },
+      {
+        "ID": "77",
+        "Paises": "Geórgia"
+      },
+      {
+        "ID": "78",
+        "Paises": "Serra Leoa"
+      },
+      {
+        "ID": "79",
+        "Paises": "Omã"
+      },
+      {
+        "ID": "80",
+        "Paises": "Arábia Saudita"
+      },
+      {
+        "ID": "81",
+        "Paises": "Marrocos"
+      },
+      {
+        "ID": "82",
+        "Paises": "Ilhas Salomão"
+      },
+      {
+        "ID": "83",
+        "Paises": "Sri Lanka"
+      },
+      {
+        "ID": "84",
+        "Paises": "Gâmbia"
+      },
+      {
+        "ID": "85",
+        "Paises": "Bahrein"
+      },
+      {
+        "ID": "86",
+        "Paises": "Cazaquistão"
+      },
+      {
+        "ID": "87",
+        "Paises": "Granada"
+      },
+      {
+        "ID": "88",
+        "Paises": "Síria"
+      },
+      {
+        "ID": "89",
+        "Paises": "Barbados"
+      },
+      {
+        "ID": "90",
+        "Paises": "Groenlândia"
+      },
+      {
+        "ID": "91",
+        "Paises": "Ilhas Comores"
+      },
+      {
+        "ID": "92",
+        "Paises": "Burundi"
+      },
+      {
+        "ID": "93",
+        "Paises": "Argélia"
+      },
+      {
+        "ID": "94",
+        "Paises": "Guiné Equatorial"
+      },
+      {
+        "ID": "95",
+        "Paises": "Emirados Árabes Unidos"
+      },
+      {
+        "ID": "96",
+        "Paises": "Maldivas"
+      },
+      {
+        "ID": "97",
+        "Paises": "Camarões"
+      },
+      {
+        "ID": "98",
+        "Paises": "Paquistão"
+      },
+      {
+        "ID": "99",
+        "Paises": "Senegal"
+      },
+      {
+        "ID": "100",
+        "Paises": "Guiana"
+      },
+      {
+        "ID": "101",
+        "Paises": "Butão"
+      },
+      {
+        "ID": "102",
+        "Paises": "Vanuatu"
+      },
+      {
+        "ID": "103",
+        "Paises": "Domínica"
+      },
+      {
+        "ID": "104",
+        "Paises": "Vietnã"
+      },
+      {
+        "ID": "105",
+        "Paises": "Kiribati"
+      },
+      {
+        "ID": "106",
+        "Paises": "Croácia"
+      },
+      {
+        "ID": "107",
+        "Paises": "Seicheles"
+      },
+      {
+        "ID": "108",
+        "Paises": "Ilhas Cayman"
+      },
+      {
+        "ID": "109",
+        "Paises": "Santa Helena"
+      },
+      {
+        "ID": "110",
+        "Paises": "Ilhas Spratly"
+      },
+      {
+        "ID": "111",
+        "Paises": "Afeganistão"
+      },
+      {
+        "ID": "112",
+        "Paises": "Zâmbia"
+      },
+      {
+        "ID": "113",
+        "Paises": "Ilhas Paracel"
+      },
+      {
+        "ID": "114",
+        "Paises": "Iêmen"
+      },
+      {
+        "ID": "115",
+        "Paises": "Guiné-Bissau"
+      },
+      {
+        "ID": "116",
+        "Paises": "República Dominicana"
+      },
+      {
+        "ID": "117",
+        "Paises": "Nigéria"
+      },
+      {
+        "ID": "118",
+        "Paises": "Tunísia"
+      },
+      {
+        "ID": "119",
+        "Paises": "Etiópia"
+      },
+      {
+        "ID": "120",
+        "Paises": "Tadjiquistão"
+      },
+      {
+        "ID": "121",
+        "Paises": "Eritréia"
+      },
+      {
+        "ID": "122",
+        "Paises": "Côte d'Ivoire (Costa do Marfim)"
+      },
+      {
+        "ID": "123",
+        "Paises": "Moçambique"
+      },
+      {
+        "ID": "124",
+        "Paises": "Papua-Nova Guiné"
+      },
+      {
+        "ID": "125",
+        "Paises": "São Vicente e Granadinas"
+      },
+      {
+        "ID": "126",
+        "Paises": "Andorra"
+      },
+      {
+        "ID": "127",
+        "Paises": "Coréia do Norte"
+      },
+      {
+        "ID": "128",
+        "Paises": "Bermuda"
+      },
+      {
+        "ID": "129",
+        "Paises": "Togo"
+      },
+      {
+        "ID": "130",
+        "Paises": "Botsuana"
+      },
+      {
+        "ID": "131",
+        "Paises": "Macau"
+      },
+      {
+        "ID": "132",
+        "Paises": "Zimbábue"
+      },
+      {
+        "ID": "133",
+        "Paises": "Bahamas"
+      },
+      {
+        "ID": "134",
+        "Paises": "Líbano"
+      },
+      {
+        "ID": "135",
+        "Paises": "Azerbaijão"
+      },
+      {
+        "ID": "136",
+        "Paises": "Irã"
+      },
+      {
+        "ID": "137",
+        "Paises": "Lituânia"
+      },
+      {
+        "ID": "138",
+        "Paises": "Tonga"
+      },
+      {
+        "ID": "139",
+        "Paises": "Montserrat"
+      },
+      {
+        "ID": "140",
+        "Paises": "Letônia"
+      },
+      {
+        "ID": "141",
+        "Paises": "Gana"
+      },
+      {
+        "ID": "142",
+        "Paises": "Mongólia"
+      },
+      {
+        "ID": "143",
+        "Paises": "Armênia"
+      },
+      {
+        "ID": "144",
+        "Paises": "Ucrânia"
+      },
+      {
+        "ID": "145",
+        "Paises": "São Tomé e Príncipe"
+      },
+      {
+        "ID": "146",
+        "Paises": "Uzbequistão"
+      },
+      {
+        "ID": "147",
+        "Paises": "Panamá"
+      },
+      {
+        "ID": "148",
+        "Paises": "Lesoto"
+      },
+      {
+        "ID": "149",
+        "Paises": "Bangladeche"
+      },
+      {
+        "ID": "150",
+        "Paises": "Suazilândia"
+      },
+      {
+        "ID": "151",
+        "Paises": "Albânia"
+      },
+      {
+        "ID": "152",
+        "Paises": "Ruanda"
+      },
+      {
+        "ID": "153",
+        "Paises": "Burquina Faso"
+      },
+      {
+        "ID": "154",
+        "Paises": "Chipre"
+      },
+      {
+        "ID": "155",
+        "Paises": "Antígua e Barbuda"
+      },
+      {
+        "ID": "156",
+        "Paises": "Egito"
+      },
+      {
+        "ID": "157",
+        "Paises": "Trinidad e Tobago"
+      },
+      {
+        "ID": "158",
+        "Paises": "São Cristóvão e Névis"
+      },
+      {
+        "ID": "159",
+        "Paises": "Guiné"
+      },
+      {
+        "ID": "160",
+        "Paises": "Kuwait"
+      },
+      {
+        "ID": "161",
+        "Paises": "Uganda"
+      },
+      {
+        "ID": "162",
+        "Paises": "Belorússia"
+      },
+      {
+        "ID": "163",
+        "Paises": "Nepal"
+      },
+      {
+        "ID": "164",
+        "Paises": "Mali"
+      },
+      {
+        "ID": "165",
+        "Paises": "Madagascar"
+      },
+      {
+        "ID": "166",
+        "Paises": "Haiti"
+      },
+      {
+        "ID": "167",
+        "Paises": "Nauru"
+      },
+      {
+        "ID": "168",
+        "Paises": "Listenstaine"
+      },
+      {
+        "ID": "169",
+        "Paises": "Fiji"
+      },
+      {
+        "ID": "170",
+        "Paises": "Jibuti"
+      },
+      {
+        "ID": "171",
+        "Paises": "Honduras"
+      },
+      {
+        "ID": "172",
+        "Paises": "Tanzânia"
+      },
+      {
+        "ID": "173",
+        "Paises": "Belize"
+      },
+      {
+        "ID": "174",
+        "Paises": "Estônia"
+      },
+      {
+        "ID": "175",
+        "Paises": "Burma"
+      },
+      {
+        "ID": "176",
+        "Paises": "Cuba"
+      },
+      {
+        "ID": "177",
+        "Paises": "Eslováquia"
+      },
+      {
+        "ID": "178",
+        "Paises": "Libéria"
+      },
+      {
+        "ID": "179",
+        "Paises": "Benin"
+      },
+      {
+        "ID": "180",
+        "Paises": "Guatemala"
+      },
+      {
+        "ID": "181",
+        "Paises": "Malávi"
+      },
+      {
+        "ID": "182",
+        "Paises": "Moldova"
+      },
+      {
+        "ID": "183",
+        "Paises": "Turcomenistão"
+      },
+      {
+        "ID": "184",
+        "Paises": "Líbia"
+      },
+      {
+        "ID": "185",
+        "Paises": "El Salvador"
+      },
+      {
+        "ID": "186",
+        "Paises": "Suriname"
+      },
+      {
+        "ID": "187",
+        "Paises": "Iraque"
+      },
+      {
+        "ID": "188",
+        "Paises": "Micronésia"
+      },
+      {
+        "ID": "189",
+        "Paises": "Camboja"
+      },
+      {
+        "ID": "190",
+        "Paises": "Nicarágua"
+      },
+      {
+        "ID": "191",
+        "Paises": "República Centro-Africana"
+      },
+      {
+        "ID": "192",
+        "Paises": "Bósnia e Herzegovina"
+      },
+      {
+        "ID": "193",
+        "Paises": "Luxemburgo"
+      },
+      {
+        "ID": "194",
+        "Paises": "Cabo Verde"
+      }
+    ]
+  }
+}

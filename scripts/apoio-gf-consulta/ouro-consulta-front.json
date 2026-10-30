@@ -1,0 +1,1504 @@
+{
+ "gerado": "a partir do código do front (tarologist-consultation-session, consultation-pause, tarologist-finish-report, staff-consultation-start, tarologist-commission-policy, consultation-time-limit, agenda-consultation-resolution)",
+ "cenarios": [
+  {
+   "nome": "início pela taróloga dona",
+   "tipo": "iniciar",
+   "item": {
+    "id": "c1",
+    "clientId": "900013",
+    "client": "Cliente Teste",
+    "tarotId": "osiris",
+    "tarot": "Osiris",
+    "startedAt": "2026-11-10T14:02:00.000Z",
+    "sentToTarologistAt": "2026-11-10T14:00:00.000Z",
+    "durationSeconds": 0,
+    "awaitingTarologistStart": false,
+    "paymentProfile": "Pós-paga",
+    "channel": "WhatsApp Áudio",
+    "attendant": "Khloe",
+    "observation": "",
+    "status": "Em curso",
+    "updatedAt": "2026-11-10T14:02:00.000Z",
+    "audit": [
+     {
+      "id": "audit-c1-tarot-start-2026-11-10T14:02:00.000Z",
+      "action": "Consulta iniciada pelo tarólogo",
+      "detail": "O tarólogo iniciou a consulta; a contagem começou neste horário.",
+      "actor": "Osiris",
+      "createdAt": "2026-11-10T14:02:00.000Z"
+     }
+    ],
+    "commissionRate": 30,
+    "timeLimit": {
+     "kind": "maximum",
+     "minutes": 30
+    },
+    "expectedMinutes": 30,
+    "tarologistStartedAt": "2026-11-10T14:02:00.000Z"
+   }
+  },
+  {
+   "nome": "início recusado: outro tarólogo",
+   "tipo": "iniciar",
+   "erro": "Esta consulta não pertence ao seu perfil."
+  },
+  {
+   "nome": "início recusado: já iniciada",
+   "tipo": "iniciar",
+   "erro": "Esta consulta não está aguardando início."
+  },
+  {
+   "nome": "início recusado: ocupada por outra aberta da mesma cliente",
+   "tipo": "iniciar",
+   "erro": "Encerre a consulta de Cliente Teste antes de iniciar outra."
+  },
+  {
+   "nome": "início recusado: antes do envio",
+   "tipo": "iniciar",
+   "erro": "Não foi possível registrar o horário de início."
+  },
+  {
+   "nome": "início com aprovação de lançamento simultâneo",
+   "tipo": "iniciar",
+   "item": {
+    "id": "c1",
+    "clientId": "900013",
+    "client": "Cliente Teste",
+    "tarotId": "osiris",
+    "tarot": "Osiris",
+    "startedAt": "2026-11-10T14:02:00.000Z",
+    "sentToTarologistAt": "2026-11-10T14:00:00.000Z",
+    "durationSeconds": 0,
+    "awaitingTarologistStart": false,
+    "paymentProfile": "Pós-paga",
+    "channel": "WhatsApp Áudio",
+    "attendant": "Khloe",
+    "observation": "",
+    "status": "Em curso",
+    "updatedAt": "2026-11-10T14:02:00.000Z",
+    "audit": [
+     {
+      "id": "audit-c1-tarot-start-2026-11-10T14:02:00.000Z",
+      "action": "Consulta iniciada pelo tarólogo",
+      "detail": "O tarólogo iniciou a consulta; a contagem começou neste horário.",
+      "actor": "Osiris",
+      "createdAt": "2026-11-10T14:02:00.000Z"
+     }
+    ],
+    "commissionRate": 30,
+    "timeLimit": {
+     "kind": "maximum",
+     "minutes": 30
+    },
+    "expectedMinutes": 30,
+    "occupancyOverride": {
+     "clientId": "900013",
+     "tarotId": "osiris",
+     "consultationIds": [
+      "c9"
+     ],
+     "by": "Khloe",
+     "at": "2026-11-10T14:00:00.000Z"
+    },
+    "tarologistStartedAt": "2026-11-10T14:02:00.000Z"
+   }
+  },
+  {
+   "nome": "início fecha a pausa aberta",
+   "tipo": "iniciar",
+   "item": {
+    "id": "c1",
+    "clientId": "900013",
+    "client": "Cliente Teste",
+    "tarotId": "osiris",
+    "tarot": "Osiris",
+    "startedAt": "2026-11-10T14:03:00.000Z",
+    "sentToTarologistAt": "2026-11-10T14:00:00.000Z",
+    "durationSeconds": 0,
+    "awaitingTarologistStart": false,
+    "paymentProfile": "Pós-paga",
+    "channel": "WhatsApp Áudio",
+    "attendant": "Khloe",
+    "observation": "",
+    "status": "Em curso",
+    "updatedAt": "2026-11-10T14:03:00.000Z",
+    "audit": [
+     {
+      "id": "audit-c1-tarot-start-2026-11-10T14:03:00.000Z",
+      "action": "Consulta iniciada pelo tarólogo",
+      "detail": "O tarólogo iniciou a consulta; a contagem começou neste horário.",
+      "actor": "Osiris",
+      "createdAt": "2026-11-10T14:03:00.000Z"
+     }
+    ],
+    "commissionRate": 30,
+    "timeLimit": {
+     "kind": "maximum",
+     "minutes": 30
+    },
+    "expectedMinutes": 30,
+    "pauseHistory": [
+     {
+      "id": "pause-c1-2026-11-10T14:01:00.000Z",
+      "startedAt": "2026-11-10T14:01:00.000Z",
+      "startedBy": "Osiris",
+      "reason": "Taróloga pediu tempo",
+      "awaitingStart": false,
+      "endedAt": "2026-11-10T14:03:00.000Z",
+      "endedBy": "Osiris",
+      "endReason": "started"
+     }
+    ],
+    "tarologistStartedAt": "2026-11-10T14:03:00.000Z"
+   }
+  },
+  {
+   "nome": "início pela equipe",
+   "tipo": "iniciar-equipe",
+   "item": {
+    "id": "c1",
+    "clientId": "900013",
+    "client": "Cliente Teste",
+    "tarotId": "osiris",
+    "tarot": "Osiris",
+    "startedAt": "2026-11-10T14:03:00.000Z",
+    "sentToTarologistAt": "2026-11-10T14:00:00.000Z",
+    "durationSeconds": 0,
+    "awaitingTarologistStart": false,
+    "paymentProfile": "Pós-paga",
+    "channel": "WhatsApp Áudio",
+    "attendant": "Khloe",
+    "observation": "",
+    "status": "Em curso",
+    "updatedAt": "2026-11-10T14:03:00.000Z",
+    "audit": [
+     {
+      "id": "audit-c1-staff-start-2026-11-10T14:03:00.000Z",
+      "action": "Consulta iniciada pela equipe",
+      "detail": "A equipe registrou o início informado pelo tarólogo; a contagem começou neste horário.",
+      "actor": "Khloe",
+      "createdAt": "2026-11-10T14:03:00.000Z"
+     }
+    ],
+    "commissionRate": 30,
+    "timeLimit": {
+     "kind": "maximum",
+     "minutes": 30
+    },
+    "expectedMinutes": 30,
+    "tarologistStartedAt": "2026-11-10T14:03:00.000Z"
+   }
+  },
+  {
+   "nome": "pausa da equipe (aguardando)",
+   "tipo": "pausar",
+   "item": {
+    "id": "c1",
+    "clientId": "900013",
+    "client": "Cliente Teste",
+    "tarotId": "osiris",
+    "tarot": "Osiris",
+    "startedAt": "2026-11-10T14:00:00.000Z",
+    "sentToTarologistAt": "2026-11-10T14:00:00.000Z",
+    "durationSeconds": 0,
+    "awaitingTarologistStart": true,
+    "paymentProfile": "Pós-paga",
+    "channel": "WhatsApp Áudio",
+    "attendant": "Khloe",
+    "observation": "",
+    "status": "Em curso",
+    "updatedAt": "2026-11-10T14:01:00.000Z",
+    "audit": [
+     {
+      "id": "audit-pause-c1-2026-11-10T14:01:00.000Z",
+      "action": "Consulta pausada",
+      "actor": "Khloe",
+      "createdAt": "2026-11-10T14:01:00.000Z",
+      "detail": "Taróloga pediu tempo. Consulta aguardando início; cliente, vínculo e pagamento preservados."
+     }
+    ],
+    "commissionRate": 30,
+    "timeLimit": {
+     "kind": "maximum",
+     "minutes": 30
+    },
+    "expectedMinutes": 30,
+    "pauseHistory": [
+     {
+      "id": "pause-c1-2026-11-10T14:01:00.000Z",
+      "startedAt": "2026-11-10T14:01:00.000Z",
+      "startedBy": "Khloe",
+      "reason": "Taróloga pediu tempo",
+      "awaitingStart": true
+     }
+    ]
+   }
+  },
+  {
+   "nome": "pausa da taróloga dona aguardando",
+   "tipo": "pausar",
+   "item": {
+    "id": "c1",
+    "clientId": "900013",
+    "client": "Cliente Teste",
+    "tarotId": "osiris",
+    "tarot": "Osiris",
+    "startedAt": "2026-11-10T14:00:00.000Z",
+    "sentToTarologistAt": "2026-11-10T14:00:00.000Z",
+    "durationSeconds": 0,
+    "awaitingTarologistStart": true,
+    "paymentProfile": "Pós-paga",
+    "channel": "WhatsApp Áudio",
+    "attendant": "Khloe",
+    "observation": "",
+    "status": "Em curso",
+    "updatedAt": "2026-11-10T14:01:00.000Z",
+    "audit": [
+     {
+      "id": "audit-pause-c1-2026-11-10T14:01:00.000Z",
+      "action": "Consulta pausada",
+      "actor": "Osiris",
+      "createdAt": "2026-11-10T14:01:00.000Z",
+      "detail": "Taróloga pediu tempo. Consulta aguardando início; cliente, vínculo e pagamento preservados."
+     }
+    ],
+    "commissionRate": 30,
+    "timeLimit": {
+     "kind": "maximum",
+     "minutes": 30
+    },
+    "expectedMinutes": 30,
+    "pauseHistory": [
+     {
+      "id": "pause-c1-2026-11-10T14:01:00.000Z",
+      "startedAt": "2026-11-10T14:01:00.000Z",
+      "startedBy": "Osiris",
+      "reason": "Taróloga pediu tempo",
+      "awaitingStart": true
+     }
+    ]
+   }
+  },
+  {
+   "nome": "pausa recusada: taróloga com consulta iniciada",
+   "tipo": "pausar",
+   "erro": "Você não tem permissão para pausar esta consulta."
+  },
+  {
+   "nome": "pausa recusada: taróloga de outro perfil",
+   "tipo": "pausar",
+   "erro": "Você não tem permissão para pausar esta consulta."
+  },
+  {
+   "nome": "pausa repetida devolve igual",
+   "tipo": "pausar",
+   "item": {
+    "id": "c1",
+    "clientId": "900013",
+    "client": "Cliente Teste",
+    "tarotId": "osiris",
+    "tarot": "Osiris",
+    "startedAt": "2026-11-10T14:00:00.000Z",
+    "sentToTarologistAt": "2026-11-10T14:00:00.000Z",
+    "durationSeconds": 0,
+    "awaitingTarologistStart": true,
+    "paymentProfile": "Pós-paga",
+    "channel": "WhatsApp Áudio",
+    "attendant": "Khloe",
+    "observation": "",
+    "status": "Em curso",
+    "updatedAt": "2026-11-10T14:00:00.000Z",
+    "audit": [],
+    "commissionRate": 30,
+    "timeLimit": {
+     "kind": "maximum",
+     "minutes": 30
+    },
+    "expectedMinutes": 30,
+    "pauseHistory": [
+     {
+      "id": "pause-c1-2026-11-10T14:01:00.000Z",
+      "startedAt": "2026-11-10T14:01:00.000Z",
+      "startedBy": "Osiris",
+      "reason": "Taróloga pediu tempo",
+      "awaitingStart": false
+     }
+    ]
+   }
+  },
+  {
+   "nome": "pausa recusada: já encerrada",
+   "tipo": "pausar",
+   "erro": "Esta consulta já foi encerrada."
+  },
+  {
+   "nome": "retomada fecha a pausa",
+   "tipo": "retomar",
+   "item": {
+    "id": "c1",
+    "clientId": "900013",
+    "client": "Cliente Teste",
+    "tarotId": "osiris",
+    "tarot": "Osiris",
+    "startedAt": "2026-11-10T14:00:00.000Z",
+    "sentToTarologistAt": "2026-11-10T14:00:00.000Z",
+    "durationSeconds": 0,
+    "awaitingTarologistStart": true,
+    "paymentProfile": "Pós-paga",
+    "channel": "WhatsApp Áudio",
+    "attendant": "Khloe",
+    "observation": "",
+    "status": "Em curso",
+    "updatedAt": "2026-11-10T14:04:00.000Z",
+    "audit": [
+     {
+      "id": "audit-c1-resume-2026-11-10T14:04:00.000Z",
+      "action": "Consulta retomada",
+      "actor": "Khloe",
+      "createdAt": "2026-11-10T14:04:00.000Z",
+      "detail": "Pausa encerrada; a mesma consulta continua aguardando início."
+     }
+    ],
+    "commissionRate": 30,
+    "timeLimit": {
+     "kind": "maximum",
+     "minutes": 30
+    },
+    "expectedMinutes": 30,
+    "pauseHistory": [
+     {
+      "id": "pause-c1-2026-11-10T14:01:00.000Z",
+      "startedAt": "2026-11-10T14:01:00.000Z",
+      "startedBy": "Osiris",
+      "reason": "Taróloga pediu tempo",
+      "awaitingStart": false,
+      "endedAt": "2026-11-10T14:04:00.000Z",
+      "endedBy": "Khloe",
+      "endReason": "resumed"
+     }
+    ]
+   }
+  },
+  {
+   "nome": "retomada sem pausa devolve igual",
+   "tipo": "retomar",
+   "item": {
+    "id": "c1",
+    "clientId": "900013",
+    "client": "Cliente Teste",
+    "tarotId": "osiris",
+    "tarot": "Osiris",
+    "startedAt": "2026-11-10T14:00:00.000Z",
+    "sentToTarologistAt": "2026-11-10T14:00:00.000Z",
+    "durationSeconds": 0,
+    "awaitingTarologistStart": true,
+    "paymentProfile": "Pós-paga",
+    "channel": "WhatsApp Áudio",
+    "attendant": "Khloe",
+    "observation": "",
+    "status": "Em curso",
+    "updatedAt": "2026-11-10T14:00:00.000Z",
+    "audit": [],
+    "commissionRate": 30,
+    "timeLimit": {
+     "kind": "maximum",
+     "minutes": 30
+    },
+    "expectedMinutes": 30
+   }
+  },
+  {
+   "nome": "término dentro do limite com motivo (antecipado)",
+   "tipo": "termino",
+   "item": {
+    "id": "c1",
+    "clientId": "900013",
+    "client": "Cliente Teste",
+    "tarotId": "osiris",
+    "tarot": "Osiris",
+    "startedAt": "2026-11-10T14:02:00.000Z",
+    "sentToTarologistAt": "2026-11-10T14:00:00.000Z",
+    "durationSeconds": 1200,
+    "awaitingTarologistStart": false,
+    "paymentProfile": "Pós-paga",
+    "channel": "WhatsApp Áudio",
+    "attendant": "Khloe",
+    "observation": "",
+    "status": "Finalizada pelo tarólogo",
+    "updatedAt": "2026-11-10T14:22:00.000Z",
+    "audit": [
+     {
+      "id": "audit-c1-tarot-end-2026-11-10T14:22:00.000Z",
+      "action": "Término informado pelo tarólogo",
+      "detail": "20 minutos informados; tempo em destaque para conferência do atendimento. Tempo menor que o máximo de 30 minutos. Ela disse que estava bom.",
+      "actor": "Osiris",
+      "createdAt": "2026-11-10T14:22:00.000Z"
+     }
+    ],
+    "commissionRate": 30,
+    "timeLimit": {
+     "kind": "maximum",
+     "minutes": 30
+    },
+    "expectedMinutes": 30,
+    "tarologistStartedAt": "2026-11-10T14:02:00.000Z",
+    "endedAt": "2026-11-10T14:22:00.000Z",
+    "performedDurationSeconds": 1200,
+    "tarologistFinishReport": {
+     "minutes": 20,
+     "reviewReasons": [
+      "early_finish"
+     ],
+     "clientWantsMoreTime": false,
+     "earlyFinish": {
+      "reason": "client_satisfied",
+      "note": "",
+      "maximumMinutes": 30
+     },
+     "endedAt": "2026-11-10T14:22:00.000Z",
+     "submittedAt": "2026-11-10T14:22:00.000Z",
+     "reporterTarotId": "osiris",
+     "reporterName": "Osiris",
+     "reporterRole": "tarologo"
+    }
+   }
+  },
+  {
+   "nome": "término no limite exato",
+   "tipo": "termino",
+   "item": {
+    "id": "c1",
+    "clientId": "900013",
+    "client": "Cliente Teste",
+    "tarotId": "osiris",
+    "tarot": "Osiris",
+    "startedAt": "2026-11-10T14:02:00.000Z",
+    "sentToTarologistAt": "2026-11-10T14:00:00.000Z",
+    "durationSeconds": 1800,
+    "awaitingTarologistStart": false,
+    "paymentProfile": "Pós-paga",
+    "channel": "WhatsApp Áudio",
+    "attendant": "Khloe",
+    "observation": "",
+    "status": "Concluída",
+    "updatedAt": "2026-11-10T14:33:00.000Z",
+    "audit": [
+     {
+      "id": "audit-c1-tarot-end-2026-11-10T14:33:00.000Z",
+      "action": "Término informado pelo tarólogo",
+      "detail": "30 minutos informados; consulta encerrada pelo tarólogo.",
+      "actor": "Osiris",
+      "createdAt": "2026-11-10T14:33:00.000Z"
+     }
+    ],
+    "commissionRate": 30,
+    "timeLimit": {
+     "kind": "maximum",
+     "minutes": 30
+    },
+    "expectedMinutes": 30,
+    "tarologistStartedAt": "2026-11-10T14:02:00.000Z",
+    "endedAt": "2026-11-10T14:32:00.000Z",
+    "performedDurationSeconds": 1800,
+    "tarologistFinishReport": {
+     "minutes": 30,
+     "reviewReasons": [],
+     "clientWantsMoreTime": false,
+     "endedAt": "2026-11-10T14:32:00.000Z",
+     "submittedAt": "2026-11-10T14:33:00.000Z",
+     "reporterTarotId": "osiris",
+     "reporterName": "Osiris",
+     "reporterRole": "tarologo"
+    }
+   }
+  },
+  {
+   "nome": "término acima do máximo (corta e vai à conferência)",
+   "tipo": "termino",
+   "item": {
+    "id": "c1",
+    "clientId": "900013",
+    "client": "Cliente Teste",
+    "tarotId": "osiris",
+    "tarot": "Osiris",
+    "startedAt": "2026-11-10T14:02:00.000Z",
+    "sentToTarologistAt": "2026-11-10T14:00:00.000Z",
+    "durationSeconds": 1800,
+    "awaitingTarologistStart": false,
+    "paymentProfile": "Pós-paga",
+    "channel": "WhatsApp Áudio",
+    "attendant": "Khloe",
+    "observation": "",
+    "status": "Finalizada pelo tarólogo",
+    "updatedAt": "2026-11-10T14:40:00.000Z",
+    "audit": [
+     {
+      "id": "audit-c1-tarot-end-2026-11-10T14:40:00.000Z",
+      "action": "Término informado pelo tarólogo",
+      "detail": "35 minutos informados; tempo em destaque para conferência do atendimento. Mantidos 30 min para cobrança e comissão; adicional aguardando reconhecimento e conferência do pagamento.",
+      "actor": "Osiris",
+      "createdAt": "2026-11-10T14:40:00.000Z"
+     }
+    ],
+    "commissionRate": 30,
+    "timeLimit": {
+     "kind": "maximum",
+     "minutes": 30
+    },
+    "expectedMinutes": 30,
+    "tarologistStartedAt": "2026-11-10T14:02:00.000Z",
+    "endedAt": "2026-11-10T14:37:00.000Z",
+    "performedDurationSeconds": 2100,
+    "financialReview": {
+     "authorizedMinutes": 30,
+     "reportedMinutes": 35,
+     "status": "awaiting-contact",
+     "at": "2026-11-10T14:40:00.000Z",
+     "by": "Osiris",
+     "note": "Tempo adicional aguardando contato e decisão.",
+     "history": []
+    },
+    "tarologistFinishReport": {
+     "minutes": 35,
+     "financialCap": {
+      "minutes": 30,
+      "at": "2026-11-10T14:40:00.000Z",
+      "reason": "O saldo confirmado não cobre esse tempo adicional. Peça ao atendimento para registrar ou conferir o pagamento."
+     },
+     "reviewReasons": [
+      "extra_minutes",
+      "unfunded_extra"
+     ],
+     "clientWantsMoreTime": false,
+     "endedAt": "2026-11-10T14:37:00.000Z",
+     "submittedAt": "2026-11-10T14:40:00.000Z",
+     "reporterTarotId": "osiris",
+     "reporterName": "Osiris",
+     "reporterRole": "tarologo"
+    }
+   }
+  },
+  {
+   "nome": "término recusado: maior que o intervalo sem confirmar",
+   "tipo": "termino",
+   "erro": "Confirme o tempo informado: ele é maior que o intervalo desde o início marcado."
+  },
+  {
+   "nome": "término com confirmação do tempo",
+   "tipo": "termino",
+   "item": {
+    "id": "c1",
+    "clientId": "900013",
+    "client": "Cliente Teste",
+    "tarotId": "osiris",
+    "tarot": "Osiris",
+    "startedAt": "2026-11-10T14:02:00.000Z",
+    "sentToTarologistAt": "2026-11-10T14:00:00.000Z",
+    "durationSeconds": 1500,
+    "awaitingTarologistStart": false,
+    "paymentProfile": "Pós-paga",
+    "channel": "WhatsApp Áudio",
+    "attendant": "Khloe",
+    "observation": "",
+    "status": "Finalizada pelo tarólogo",
+    "updatedAt": "2026-11-10T14:12:00.000Z",
+    "audit": [
+     {
+      "id": "audit-c1-tarot-end-2026-11-10T14:12:00.000Z",
+      "action": "Término informado pelo tarólogo",
+      "detail": "25 minutos informados; tempo em destaque para conferência do atendimento. Confirmou 25 min após 10 min desde o início marcado; horários originais preservados. Tempo menor que o máximo de 30 minutos. cliente saiu",
+      "actor": "Osiris",
+      "createdAt": "2026-11-10T14:12:00.000Z"
+     }
+    ],
+    "commissionRate": 30,
+    "timeLimit": {
+     "kind": "maximum",
+     "minutes": 30
+    },
+    "expectedMinutes": 30,
+    "tarologistStartedAt": "2026-11-10T14:02:00.000Z",
+    "endedAt": "2026-11-10T14:12:00.000Z",
+    "performedDurationSeconds": 1500,
+    "tarologistFinishReport": {
+     "minutes": 25,
+     "reviewReasons": [
+      "time_before_dispatch",
+      "early_finish"
+     ],
+     "timingConfirmation": {
+      "at": "2026-11-10T14:12:00.000Z",
+      "clickedStartAt": "2026-11-10T14:02:00.000Z",
+      "elapsedMinutes": 10,
+      "sentElapsedMinutes": 12
+     },
+     "clientWantsMoreTime": false,
+     "earlyFinish": {
+      "note": "cliente saiu",
+      "maximumMinutes": 30
+     },
+     "endedAt": "2026-11-10T14:12:00.000Z",
+     "submittedAt": "2026-11-10T14:12:00.000Z",
+     "reporterTarotId": "osiris",
+     "reporterName": "Osiris",
+     "reporterRole": "tarologo"
+    }
+   }
+  },
+  {
+   "nome": "término recusado: antecipado sem motivo",
+   "tipo": "termino",
+   "erro": "Selecione um motivo ou explique por que a consulta terminou antes do previsto."
+  },
+  {
+   "nome": "término recusado: aguardando início",
+   "tipo": "termino",
+   "erro": "Inicie a consulta antes de informar o tempo final."
+  },
+  {
+   "nome": "término recusado: já encerrada uma vez",
+   "tipo": "termino",
+   "erro": "Esta consulta já foi encerrada. Informe o erro ao atendimento ou abra uma divergência."
+  },
+  {
+   "nome": "término recusado: outra taróloga",
+   "tipo": "termino",
+   "erro": "Esta consulta não pertence ao seu perfil."
+  },
+  {
+   "nome": "término recusado: minutos zero",
+   "tipo": "termino",
+   "erro": "Informe o tempo final em minutos."
+  },
+  {
+   "nome": "término com horários informados (clock)",
+   "tipo": "termino",
+   "item": {
+    "id": "c1",
+    "clientId": "900013",
+    "client": "Cliente Teste",
+    "tarotId": "osiris",
+    "tarot": "Osiris",
+    "startedAt": "2026-11-10T14:02:00.000Z",
+    "sentToTarologistAt": "2026-11-10T14:00:00.000Z",
+    "durationSeconds": 1800,
+    "awaitingTarologistStart": false,
+    "paymentProfile": "Pós-paga",
+    "channel": "WhatsApp Áudio",
+    "attendant": "Khloe",
+    "observation": "",
+    "status": "Concluída",
+    "updatedAt": "2026-11-10T14:34:00.000Z",
+    "audit": [
+     {
+      "id": "audit-c1-tarot-end-2026-11-10T14:34:00.000Z",
+      "action": "Término informado pelo tarólogo",
+      "detail": "30 minutos informados; consulta encerrada pelo tarólogo. Horários informados: 11:02 às 11:32; início registrado preservado.",
+      "actor": "Osiris",
+      "createdAt": "2026-11-10T14:34:00.000Z"
+     }
+    ],
+    "commissionRate": 30,
+    "timeLimit": {
+     "kind": "maximum",
+     "minutes": 30
+    },
+    "expectedMinutes": 30,
+    "tarologistStartedAt": "2026-11-10T14:02:00.000Z",
+    "endedAt": "2026-11-10T14:32:00.000Z",
+    "performedDurationSeconds": 1800,
+    "tarologistFinishReport": {
+     "minutes": 30,
+     "timeEntry": {
+      "mode": "clock",
+      "startTime": "11:02",
+      "endTime": "11:32",
+      "nextDay": false
+     },
+     "reviewReasons": [],
+     "clientWantsMoreTime": false,
+     "endedAt": "2026-11-10T14:32:00.000Z",
+     "submittedAt": "2026-11-10T14:34:00.000Z",
+     "reporterTarotId": "osiris",
+     "reporterName": "Osiris",
+     "reporterRole": "tarologo"
+    }
+   }
+  },
+  {
+   "nome": "término recusado: horários não batem",
+   "tipo": "termino",
+   "erro": "Os horários não correspondem à duração informada. Confira o início e o fim."
+  },
+  {
+   "nome": "término com pausa no meio",
+   "tipo": "termino",
+   "item": {
+    "id": "c1",
+    "clientId": "900013",
+    "client": "Cliente Teste",
+    "tarotId": "osiris",
+    "tarot": "Osiris",
+    "startedAt": "2026-11-10T14:02:00.000Z",
+    "sentToTarologistAt": "2026-11-10T14:00:00.000Z",
+    "durationSeconds": 1500,
+    "awaitingTarologistStart": false,
+    "paymentProfile": "Pós-paga",
+    "channel": "WhatsApp Áudio",
+    "attendant": "Khloe",
+    "observation": "",
+    "status": "Finalizada pelo tarólogo",
+    "updatedAt": "2026-11-10T14:34:00.000Z",
+    "audit": [
+     {
+      "id": "audit-c1-tarot-end-2026-11-10T14:34:00.000Z",
+      "action": "Término informado pelo tarólogo",
+      "detail": "25 minutos informados; tempo em destaque para conferência do atendimento. Tempo menor que o máximo de 30 minutos. Conexão dela caiu.",
+      "actor": "Osiris",
+      "createdAt": "2026-11-10T14:34:00.000Z"
+     }
+    ],
+    "commissionRate": 30,
+    "timeLimit": {
+     "kind": "maximum",
+     "minutes": 30
+    },
+    "expectedMinutes": 30,
+    "tarologistStartedAt": "2026-11-10T14:02:00.000Z",
+    "pauseHistory": [
+     {
+      "id": "pause-c1-2026-11-10T14:10:00.000Z",
+      "startedAt": "2026-11-10T14:10:00.000Z",
+      "startedBy": "Osiris",
+      "reason": "Taróloga pediu tempo",
+      "awaitingStart": false,
+      "endedAt": "2026-11-10T14:15:00.000Z",
+      "endedBy": "Osiris",
+      "endReason": "resumed"
+     }
+    ],
+    "endedAt": "2026-11-10T14:32:00.000Z",
+    "performedDurationSeconds": 1500,
+    "tarologistFinishReport": {
+     "minutes": 25,
+     "reviewReasons": [
+      "early_finish"
+     ],
+     "clientWantsMoreTime": false,
+     "earlyFinish": {
+      "reason": "client_connection",
+      "note": "",
+      "maximumMinutes": 30
+     },
+     "endedAt": "2026-11-10T14:32:00.000Z",
+     "submittedAt": "2026-11-10T14:34:00.000Z",
+     "reporterTarotId": "osiris",
+     "reporterName": "Osiris",
+     "reporterRole": "tarologo"
+    }
+   }
+  },
+  {
+   "nome": "término pós-paga tempo livre",
+   "tipo": "termino",
+   "item": {
+    "id": "c1",
+    "clientId": "900013",
+    "client": "Cliente Teste",
+    "tarotId": "osiris",
+    "tarot": "Osiris",
+    "startedAt": "2026-11-10T14:02:00.000Z",
+    "sentToTarologistAt": "2026-11-10T14:00:00.000Z",
+    "durationSeconds": 2700,
+    "awaitingTarologistStart": false,
+    "paymentProfile": "Pós-paga",
+    "channel": "WhatsApp Áudio",
+    "attendant": "Khloe",
+    "observation": "",
+    "status": "Concluída",
+    "updatedAt": "2026-11-10T14:50:00.000Z",
+    "audit": [
+     {
+      "id": "audit-c1-tarot-end-2026-11-10T14:50:00.000Z",
+      "action": "Término informado pelo tarólogo",
+      "detail": "45 minutos informados; consulta encerrada pelo tarólogo.",
+      "actor": "Osiris",
+      "createdAt": "2026-11-10T14:50:00.000Z"
+     }
+    ],
+    "commissionRate": 30,
+    "timeLimit": {
+     "kind": "free"
+    },
+    "tarologistStartedAt": "2026-11-10T14:02:00.000Z",
+    "endedAt": "2026-11-10T14:47:00.000Z",
+    "performedDurationSeconds": 2700,
+    "tarologistFinishReport": {
+     "minutes": 45,
+     "reviewReasons": [],
+     "clientWantsMoreTime": false,
+     "endedAt": "2026-11-10T14:47:00.000Z",
+     "submittedAt": "2026-11-10T14:50:00.000Z",
+     "reporterTarotId": "osiris",
+     "reporterName": "Osiris",
+     "reporterRole": "tarologo"
+    }
+   }
+  },
+  {
+   "nome": "término mantém pedido de mais tempo",
+   "tipo": "termino",
+   "item": {
+    "id": "c1",
+    "clientId": "900013",
+    "client": "Cliente Teste",
+    "tarotId": "osiris",
+    "tarot": "Osiris",
+    "startedAt": "2026-11-10T14:02:00.000Z",
+    "sentToTarologistAt": "2026-11-10T14:00:00.000Z",
+    "durationSeconds": 1800,
+    "awaitingTarologistStart": false,
+    "paymentProfile": "Pós-paga",
+    "channel": "WhatsApp Áudio",
+    "attendant": "Khloe",
+    "observation": "",
+    "status": "Concluída",
+    "updatedAt": "2026-11-10T14:33:00.000Z",
+    "audit": [
+     {
+      "id": "audit-c1-tarot-end-2026-11-10T14:33:00.000Z",
+      "action": "Término informado pelo tarólogo",
+      "detail": "30 minutos informados; consulta encerrada pelo tarólogo. Cliente quer mais tempo; atendimento deve falar com a cliente pelo WhatsApp.",
+      "actor": "Osiris",
+      "createdAt": "2026-11-10T14:33:00.000Z"
+     }
+    ],
+    "commissionRate": 30,
+    "timeLimit": {
+     "kind": "maximum",
+     "minutes": 30
+    },
+    "expectedMinutes": 30,
+    "tarologistStartedAt": "2026-11-10T14:02:00.000Z",
+    "tarologistMoreTimeRequest": {
+     "active": true,
+     "requestedAt": "2026-11-10T14:20:00.000Z",
+     "reporterTarotId": "osiris",
+     "reporterName": "Osiris"
+    },
+    "endedAt": "2026-11-10T14:32:00.000Z",
+    "performedDurationSeconds": 1800,
+    "tarologistFinishReport": {
+     "minutes": 30,
+     "reviewReasons": [],
+     "clientWantsMoreTime": true,
+     "endedAt": "2026-11-10T14:32:00.000Z",
+     "submittedAt": "2026-11-10T14:33:00.000Z",
+     "reporterTarotId": "osiris",
+     "reporterName": "Osiris",
+     "reporterRole": "tarologo"
+    }
+   }
+  },
+  {
+   "nome": "término pela equipe",
+   "tipo": "termino-equipe",
+   "erro": "Selecione um motivo ou explique por que a consulta terminou antes do previsto."
+  },
+  {
+   "nome": "pedido de mais tempo",
+   "tipo": "mais-tempo",
+   "item": {
+    "id": "c1",
+    "clientId": "900013",
+    "client": "Cliente Teste",
+    "tarotId": "osiris",
+    "tarot": "Osiris",
+    "startedAt": "2026-11-10T14:02:00.000Z",
+    "sentToTarologistAt": "2026-11-10T14:00:00.000Z",
+    "durationSeconds": 0,
+    "awaitingTarologistStart": false,
+    "paymentProfile": "Pós-paga",
+    "channel": "WhatsApp Áudio",
+    "attendant": "Khloe",
+    "observation": "",
+    "status": "Em curso",
+    "updatedAt": "2026-11-10T14:20:00.000Z",
+    "audit": [
+     {
+      "id": "audit-c1-more-time-2026-11-10T14:20:00.000Z",
+      "action": "Pedido de mais tempo",
+      "detail": "Cliente pediu mais tempo. Atendimento avisado; tempo da consulta preservado.",
+      "actor": "Osiris",
+      "createdAt": "2026-11-10T14:20:00.000Z"
+     }
+    ],
+    "commissionRate": 30,
+    "timeLimit": {
+     "kind": "maximum",
+     "minutes": 30
+    },
+    "expectedMinutes": 30,
+    "tarologistStartedAt": "2026-11-10T14:02:00.000Z",
+    "tarologistMoreTimeRequest": {
+     "active": true,
+     "requestedAt": "2026-11-10T14:20:00.000Z",
+     "reporterTarotId": "osiris",
+     "reporterName": "Osiris"
+    }
+   }
+  },
+  {
+   "nome": "pedido de mais tempo recusado: aguardando início",
+   "tipo": "mais-tempo",
+   "erro": "Inicie a consulta antes de pedir mais tempo."
+  },
+  {
+   "nome": "pedido de mais tempo repetido devolve igual",
+   "tipo": "mais-tempo",
+   "item": {
+    "id": "c1",
+    "clientId": "900013",
+    "client": "Cliente Teste",
+    "tarotId": "osiris",
+    "tarot": "Osiris",
+    "startedAt": "2026-11-10T14:02:00.000Z",
+    "sentToTarologistAt": "2026-11-10T14:00:00.000Z",
+    "durationSeconds": 0,
+    "awaitingTarologistStart": false,
+    "paymentProfile": "Pós-paga",
+    "channel": "WhatsApp Áudio",
+    "attendant": "Khloe",
+    "observation": "",
+    "status": "Em curso",
+    "updatedAt": "2026-11-10T14:00:00.000Z",
+    "audit": [],
+    "commissionRate": 30,
+    "timeLimit": {
+     "kind": "maximum",
+     "minutes": 30
+    },
+    "expectedMinutes": 30,
+    "tarologistStartedAt": "2026-11-10T14:02:00.000Z",
+    "tarologistMoreTimeRequest": {
+     "active": true,
+     "requestedAt": "2026-11-10T14:10:00.000Z",
+     "reporterTarotId": "osiris",
+     "reporterName": "Osiris"
+    }
+   }
+  },
+  {
+   "nome": "devolução da taróloga com consulta em andamento",
+   "tipo": "devolver",
+   "item": {
+    "id": "c1",
+    "clientId": "900013",
+    "client": "Cliente Teste",
+    "tarotId": "osiris",
+    "tarot": "Osiris",
+    "startedAt": "2026-11-10T14:02:00.000Z",
+    "sentToTarologistAt": "2026-11-10T14:00:00.000Z",
+    "durationSeconds": 125,
+    "awaitingTarologistStart": false,
+    "paymentProfile": "Pós-paga",
+    "channel": "WhatsApp Áudio",
+    "attendant": "Khloe",
+    "observation": "nota\nDevolvida pelo tarólogo: Não bateu. sem sinal Devolvida ao atendimento; sem repasse, com a cobertura liberada. Tempo registrado: 3 min.",
+    "status": "Devolvida",
+    "updatedAt": "2026-11-10T14:05:00.000Z",
+    "audit": [
+     {
+      "id": "audit-c1-tarot-return-2026-11-10T14:05:00.000Z",
+      "action": "Consulta devolvida",
+      "detail": "Devolvida pelo tarólogo: Não bateu. sem sinal Devolvida ao atendimento; sem repasse, com a cobertura liberada. Tempo registrado: 3 min.",
+      "actor": "Osiris",
+      "createdAt": "2026-11-10T14:05:00.000Z"
+     }
+    ],
+    "commissionRate": 30,
+    "timeLimit": {
+     "kind": "maximum",
+     "minutes": 30
+    },
+    "expectedMinutes": 30,
+    "tarologistStartedAt": "2026-11-10T14:02:00.000Z",
+    "endedAt": "2026-11-10T14:05:00.000Z",
+    "tarologistCancellation": {
+     "reason": "Não bateu",
+     "note": "sem sinal",
+     "at": "2026-11-10T14:05:00.000Z",
+     "reporterTarotId": "osiris",
+     "reporterName": "Osiris"
+    }
+   }
+  },
+  {
+   "nome": "devolução da taróloga aguardando início zera o tempo",
+   "tipo": "devolver",
+   "item": {
+    "id": "c1",
+    "clientId": "900013",
+    "client": "Cliente Teste",
+    "tarotId": "osiris",
+    "tarot": "Osiris",
+    "startedAt": "2026-11-10T14:00:00.000Z",
+    "sentToTarologistAt": "2026-11-10T14:00:00.000Z",
+    "durationSeconds": 0,
+    "awaitingTarologistStart": false,
+    "paymentProfile": "Pós-paga",
+    "channel": "WhatsApp Áudio",
+    "attendant": "Khloe",
+    "observation": "Devolvida pelo tarólogo: Outros. Devolvida ao atendimento; sem repasse, com a cobertura liberada. Tempo registrado: 0 min.",
+    "status": "Devolvida",
+    "updatedAt": "2026-11-10T14:05:00.000Z",
+    "audit": [
+     {
+      "id": "audit-c1-tarot-return-2026-11-10T14:05:00.000Z",
+      "action": "Consulta devolvida",
+      "detail": "Devolvida pelo tarólogo: Outros. Devolvida ao atendimento; sem repasse, com a cobertura liberada. Tempo registrado: 0 min.",
+      "actor": "Osiris",
+      "createdAt": "2026-11-10T14:05:00.000Z"
+     }
+    ],
+    "commissionRate": 30,
+    "timeLimit": {
+     "kind": "maximum",
+     "minutes": 30
+    },
+    "expectedMinutes": 30,
+    "endedAt": "2026-11-10T14:05:00.000Z",
+    "tarologistCancellation": {
+     "reason": "Outros",
+     "note": "",
+     "at": "2026-11-10T14:05:00.000Z",
+     "reporterTarotId": "osiris",
+     "reporterName": "Osiris"
+    }
+   }
+  },
+  {
+   "nome": "devolução retira o pedido de mais tempo",
+   "tipo": "devolver",
+   "item": {
+    "id": "c1",
+    "clientId": "900013",
+    "client": "Cliente Teste",
+    "tarotId": "osiris",
+    "tarot": "Osiris",
+    "startedAt": "2026-11-10T14:02:00.000Z",
+    "sentToTarologistAt": "2026-11-10T14:00:00.000Z",
+    "durationSeconds": 300,
+    "awaitingTarologistStart": false,
+    "paymentProfile": "Pós-paga",
+    "channel": "WhatsApp Áudio",
+    "attendant": "Khloe",
+    "observation": "Devolvida pelo tarólogo: Prefiro não atender. x Devolvida ao atendimento; sem repasse, com a cobertura liberada. Tempo registrado: 5 min. Pedido de mais tempo retirado pela devolução.",
+    "status": "Devolvida",
+    "updatedAt": "2026-11-10T14:08:00.000Z",
+    "audit": [
+     {
+      "id": "audit-c1-tarot-return-2026-11-10T14:08:00.000Z",
+      "action": "Consulta devolvida",
+      "detail": "Devolvida pelo tarólogo: Prefiro não atender. x Devolvida ao atendimento; sem repasse, com a cobertura liberada. Tempo registrado: 5 min. Pedido de mais tempo retirado pela devolução.",
+      "actor": "Osiris",
+      "createdAt": "2026-11-10T14:08:00.000Z"
+     }
+    ],
+    "commissionRate": 30,
+    "timeLimit": {
+     "kind": "maximum",
+     "minutes": 30
+    },
+    "expectedMinutes": 30,
+    "tarologistStartedAt": "2026-11-10T14:02:00.000Z",
+    "tarologistMoreTimeRequest": {
+     "active": false,
+     "requestedAt": "2026-11-10T14:04:00.000Z",
+     "reporterTarotId": "osiris",
+     "reporterName": "Osiris"
+    },
+    "endedAt": "2026-11-10T14:08:00.000Z",
+    "tarologistCancellation": {
+     "reason": "Prefiro não atender",
+     "note": "x",
+     "at": "2026-11-10T14:08:00.000Z",
+     "reporterTarotId": "osiris",
+     "reporterName": "Osiris"
+    }
+   }
+  },
+  {
+   "nome": "devolução recusada: motivo fora da lista",
+   "tipo": "devolver",
+   "erro": "Motivo: selecione uma opção válida."
+  },
+  {
+   "nome": "devolução recusada: outra taróloga",
+   "tipo": "devolver",
+   "erro": "Esta consulta não pertence ao seu perfil."
+  },
+  {
+   "nome": "devolução recusada: já encerrada",
+   "tipo": "devolver",
+   "erro": "Esta consulta já foi encerrada. Atualize a página."
+  },
+  {
+   "nome": "pedido de correção do término",
+   "tipo": "correcao",
+   "item": {
+    "id": "c1",
+    "clientId": "900013",
+    "client": "Cliente Teste",
+    "tarotId": "osiris",
+    "tarot": "Osiris",
+    "startedAt": "2026-11-10T14:02:00.000Z",
+    "sentToTarologistAt": "2026-11-10T14:00:00.000Z",
+    "durationSeconds": 1800,
+    "awaitingTarologistStart": false,
+    "paymentProfile": "Pós-paga",
+    "channel": "WhatsApp Áudio",
+    "attendant": "Khloe",
+    "observation": "",
+    "status": "Concluída",
+    "updatedAt": "2026-11-10T14:40:00.000Z",
+    "audit": [
+     {
+      "id": "request-correction-c1-2026-11-10T14:40:00.000Z",
+      "action": "Término informado pelo tarólogo",
+      "actor": "Osiris",
+      "createdAt": "2026-11-10T14:40:00.000Z",
+      "detail": "Correção solicitada: 30 → 25 min. Motivo: Errei a conta. O tempo anterior permanece até a conferência."
+     }
+    ],
+    "commissionRate": 30,
+    "timeLimit": {
+     "kind": "maximum",
+     "minutes": 30
+    },
+    "expectedMinutes": 30,
+    "tarologistStartedAt": "2026-11-10T14:02:00.000Z",
+    "performedDurationSeconds": 1800,
+    "tarologistFinishReport": {
+     "minutes": 30,
+     "endedAt": "2026-11-10T14:32:00.000Z",
+     "submittedAt": "2026-11-10T14:32:00.000Z",
+     "reporterTarotId": "osiris",
+     "reporterName": "Osiris",
+     "reporterRole": "tarologo"
+    },
+    "finishCorrections": [
+     {
+      "id": "correction-c1-2026-11-10T14:40:00.000Z",
+      "beforeMinutes": 30,
+      "minutes": 25,
+      "reason": "Errei a conta",
+      "requestedAt": "2026-11-10T14:40:00.000Z",
+      "requestedBy": "Osiris",
+      "reporterTarotId": "osiris",
+      "status": "pending"
+     }
+    ]
+   }
+  },
+  {
+   "nome": "correção recusada: igual ao registrado",
+   "tipo": "correcao",
+   "erro": "O tempo informado é igual ao tempo já registrado."
+  },
+  {
+   "nome": "correção recusada: consulta ainda em curso",
+   "tipo": "correcao",
+   "erro": "Esta consulta não está disponível para correção no seu perfil."
+  },
+  {
+   "nome": "correção recusada: sem motivo",
+   "tipo": "correcao",
+   "erro": "Motivo da correção: preencha este campo."
+  },
+  {
+   "nome": "comissão padrão sem perfil",
+   "tipo": "comissao",
+   "taxa": 30
+  },
+  {
+   "nome": "comissão do perfil 35",
+   "tipo": "comissao",
+   "taxa": 35
+  },
+  {
+   "nome": "comissão fora do intervalo cai no padrão",
+   "tipo": "comissao",
+   "taxa": 30
+  },
+  {
+   "nome": "continuação herda a da origem",
+   "tipo": "comissao",
+   "taxa": 25
+  },
+  {
+   "nome": "continuação de origem sem taxa herda 30",
+   "tipo": "comissao",
+   "taxa": 30
+  },
+  {
+   "nome": "pré-paga com 20 min",
+   "tipo": "limite",
+   "limite": {
+    "kind": "maximum",
+    "minutes": 20
+   }
+  },
+  {
+   "nome": "pré-paga sem tempo recusa",
+   "tipo": "limite",
+   "erro": "Informe o tempo máximo da consulta em minutos. Cliente pré-paga precisa de um limite definido."
+  },
+  {
+   "nome": "pós-paga sem tempo é livre",
+   "tipo": "limite",
+   "limite": {
+    "kind": "free"
+   }
+  },
+  {
+   "nome": "pós-paga com fração recusa",
+   "tipo": "limite",
+   "erro": "Informe o tempo máximo da consulta em minutos. Cliente pré-paga precisa de um limite definido."
+  },
+  {
+   "nome": "duração em 30 min corridos",
+   "tipo": "relogio",
+   "duracao": 1800
+  },
+  {
+   "nome": "duração descontando a pausa",
+   "tipo": "relogio",
+   "duracao": 1500
+  },
+  {
+   "nome": "duração parada durante a pausa",
+   "tipo": "relogio",
+   "duracao": 480
+  },
+  {
+   "nome": "duração de quem aguarda é zero",
+   "tipo": "relogio",
+   "duracao": 0
+  },
+  {
+   "nome": "agenda resolvida pela consulta iniciada",
+   "tipo": "agenda-inicio",
+   "item": {
+    "id": "ag-1",
+    "publicNumber": 1,
+    "tarotId": "osiris",
+    "clientId": "900013",
+    "client": "Cliente Teste",
+    "date": "2026-11-10",
+    "time": "10:00",
+    "channel": "WhatsApp Áudio",
+    "position": 1,
+    "response": "Aguardando resposta",
+    "paymentPending": false,
+    "createdAt": "2026-11-10T12:00:00.000Z",
+    "createdBy": "Khloe",
+    "contact": {
+     "attempt": 1,
+     "date": "2026-11-10",
+     "tags": [
+      "Avisada",
+      "Em consulta"
+     ]
+    },
+    "workflowStatus": "Em consulta",
+    "resolvedAt": "2026-11-10T14:03:00.000Z",
+    "resolvedByConsultationId": "c1",
+    "contactHistory": [
+     {
+      "id": "agenda-resolution-ag-1-c1-contact",
+      "actor": "Atendimento",
+      "at": "2026-11-10T14:03:00.000Z",
+      "date": "2026-11-10",
+      "attempt": 1,
+      "tag": "Em consulta",
+      "active": true,
+      "before": [
+       "Avisada"
+      ],
+      "after": [
+       "Avisada",
+       "Em consulta"
+      ]
+     }
+    ],
+    "resolutionHistory": [
+     {
+      "id": "agenda-resolution-ag-1-c1",
+      "action": "Agendamento concluído",
+      "consultationId": "c1",
+      "actor": "Atendimento",
+      "createdAt": "2026-11-10T14:03:00.000Z",
+      "detail": "Agendamento atendido pela consulta c1, iniciada às 11:02 com Osiris. Retirado da fila de espera. A consulta continua em andamento."
+     }
+    ]
+   }
+  },
+  {
+   "nome": "agenda de outra cliente não é tocada",
+   "tipo": "agenda-inicio",
+   "item": {
+    "id": "ag-1",
+    "publicNumber": 1,
+    "tarotId": "osiris",
+    "clientId": "900099",
+    "client": "Cliente Teste",
+    "date": "2026-11-10",
+    "time": "10:00",
+    "channel": "WhatsApp Áudio",
+    "position": 1,
+    "response": "Aguardando resposta",
+    "paymentPending": false,
+    "createdAt": "2026-11-10T12:00:00.000Z",
+    "createdBy": "Khloe",
+    "contact": {
+     "attempt": 1,
+     "date": "2026-11-10",
+     "tags": [
+      "Avisada"
+     ]
+    }
+   }
+  },
+  {
+   "nome": "agenda sem aviso prévio",
+   "tipo": "agenda-inicio",
+   "item": {
+    "id": "ag-1",
+    "publicNumber": 1,
+    "tarotId": "osiris",
+    "clientId": "900013",
+    "client": "Cliente Teste",
+    "date": "2026-11-10",
+    "time": "10:00",
+    "channel": "WhatsApp Áudio",
+    "position": 1,
+    "response": "Aguardando resposta",
+    "paymentPending": false,
+    "createdAt": "2026-11-10T12:00:00.000Z",
+    "createdBy": "Khloe",
+    "contact": {
+     "attempt": 2,
+     "date": "2026-11-10",
+     "tags": [
+      "Em consulta"
+     ]
+    },
+    "workflowStatus": "Em consulta",
+    "resolvedAt": "2026-11-10T14:03:00.000Z",
+    "resolvedByConsultationId": "c1",
+    "contactHistory": [
+     {
+      "id": "agenda-resolution-ag-1-c1-contact",
+      "actor": "Atendimento",
+      "at": "2026-11-10T14:03:00.000Z",
+      "date": "2026-11-10",
+      "attempt": 2,
+      "tag": "Em consulta",
+      "active": true,
+      "before": [
+       "Pode agora"
+      ],
+      "after": [
+       "Em consulta"
+      ]
+     }
+    ],
+    "resolutionHistory": [
+     {
+      "id": "agenda-resolution-ag-1-c1",
+      "action": "Agendamento concluído",
+      "consultationId": "c1",
+      "actor": "Atendimento",
+      "createdAt": "2026-11-10T14:03:00.000Z",
+      "detail": "Agendamento atendido pela consulta c1, iniciada às 11:02 com Osiris. Retirado da fila de espera. A consulta continua em andamento."
+     }
+    ]
+   }
+  },
+  {
+   "nome": "consulta ainda aguardando início não resolve",
+   "tipo": "agenda-inicio",
+   "item": {
+    "id": "ag-1",
+    "publicNumber": 1,
+    "tarotId": "osiris",
+    "clientId": "900013",
+    "client": "Cliente Teste",
+    "date": "2026-11-10",
+    "time": "10:00",
+    "channel": "WhatsApp Áudio",
+    "position": 1,
+    "response": "Aguardando resposta",
+    "paymentPending": false,
+    "createdAt": "2026-11-10T12:00:00.000Z",
+    "createdBy": "Khloe",
+    "contact": {
+     "attempt": 1,
+     "date": "2026-11-10",
+     "tags": [
+      "Avisada"
+     ]
+    }
+   }
+  },
+  {
+   "nome": "agenda conclui quando a consulta termina",
+   "tipo": "agenda-fim",
+   "item": {
+    "id": "ag-1",
+    "publicNumber": 1,
+    "tarotId": "osiris",
+    "clientId": "900013",
+    "client": "Cliente Teste",
+    "date": "2026-11-10",
+    "time": "10:00",
+    "channel": "WhatsApp Áudio",
+    "position": 1,
+    "response": "Aguardando resposta",
+    "paymentPending": false,
+    "createdAt": "2026-11-10T12:00:00.000Z",
+    "createdBy": "Khloe",
+    "contact": {
+     "attempt": 1,
+     "date": "2026-11-10",
+     "tags": [
+      "Concluída"
+     ]
+    },
+    "resolvedByConsultationId": "c1",
+    "resolvedAt": "2026-11-10T14:03:00.000Z",
+    "workflowStatus": "Concluída",
+    "agendaOutcome": "Concluída",
+    "contactHistory": [
+     {
+      "id": "agenda-resolution-finish-ag-1-c1",
+      "actor": "Sistema",
+      "at": "2026-11-10T14:33:00.000Z",
+      "date": "2026-11-10",
+      "attempt": 1,
+      "tag": "Concluída",
+      "active": true,
+      "before": [
+       "Em consulta"
+      ],
+      "after": [
+       "Concluída"
+      ]
+     }
+    ]
+   }
+  }
+ ]
+}
