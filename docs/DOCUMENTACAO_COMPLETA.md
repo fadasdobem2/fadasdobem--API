@@ -139,6 +139,8 @@ Código em `src/gestao-fadas/legado-escrita/`. Regras:
 - Lista permitida de SQL com texto fixo: apenas `INSERT` e `UPDATE` de `tbl_consultas` e 4 leituras fixas. Recusa `DELETE`, DDL e qualquer outra tabela.
 - **Achado crítico:** `tbl_consultas` é **MyISAM**, inclusive no DEV, então `ROLLBACK` não desfaz a escrita. Por isso o ensaio troca, só na sessão, a tabela real por uma cópia **temporária InnoDB** e destrói a conexão no fim. Provado em DEV: a tabela real fica com a mesma contagem de linhas, maior id e `AUTO_INCREMENT` antes e depois.
 - **Não atômico em produção.** Para reduzir a janela de linha órfã: a intenção (`legado_estado=pendente` com uma chave natural) é gravada no PostgreSQL na mesma transação da consulta, antes de qualquer `INSERT` no legado; antes de inserir, procura-se no legado uma linha que já corresponda (uma livre: adota; nenhuma: insere; duas ou mais: erro "órfã ambígua", decisão humana); uma rotina de reconciliação refaz as pendentes antigas.
+- **Entidades além de consultas** (`GF_LEGADO_CLIENTES`, `GF_LEGADO_TAROLOGOS`, desligadas): cliente (`usuarios`: `nome_id`, `nome2`, `whats`, `datanascimento`, sempre com `nivel = 0`) e tarólogo (`tbl_tarologos`: nome com no máximo 35 caracteres e situação). Mesma segurança do espelho de consultas: lista permitida de `UPDATE` (nunca `INSERT`, `DELETE` ou DDL), só os campos alterados são enviados, intenção pendente gravada na transação do PostgreSQL, escrita depois do commit, reconciliação e ensaio em cópia temporária. A leitura combinada usa o legado como fonte do campo espelhado e a extensão `gf_*` só para campo ainda pendente.
+- **Sem casa no legado** (ficam só no PostgreSQL): Pré/Pós, orientação financeira, comissão, preços, restrições, agenda, horários, presença, recados, divergências, pendências, repasse e contas. **Dependem de resposta da Nice**: lançar, confirmar, corrigir e cancelar pagamento, Bônus e Cortesia, saldo e `valorAPagar`, notas da ficha, foto e biografia, tarólogo novo e atendente (15 perguntas, mais as 4 de `tbl_consultas`).
 - Mapeamentos ainda a confirmar com a Nice: valor de WhatsApp em `idFormaConsulta`, `idFormaPagto` da pós-paga, tratamento de Devolvida/Anulada/Erro/Não houve, PABX e Telefone.
 
 ### 4.4 Separação entre sistema provisório e plataforma definitiva
@@ -153,7 +155,7 @@ ASP32 (produção) ──► banco legado ◄── leitura ── API A ──�
 
 A separação é limpa por três motivos: (1) tudo do provisório está em `src/gestao-fadas/` e nas tabelas `gf_*`; (2) o legado só é lido, então o ASP32 não é afetado; (3) cada fatia tem flag, então liga e desliga sem tocar nas outras.
 
-Transição prevista (a confirmar com a Nice): quando o ASP32 for desligado, um backup do banco legado é restaurado dentro do banco novo. A API então passa a ler os mesmos dados do banco novo e o espelho de escrita deixa de ser necessário. O que está em `gf_*` já está na estrutura definitiva.
+Transição prevista (a confirmar com a Nice): o banco do sistema provisório e o da plataforma completa são **o mesmo PostgreSQL** (a mesma conexão `DB_*`, as mesmas migrações; as tabelas `gf_*` convivem com as da plataforma). O que ainda é separado é o **legado ASP32**, que é MySQL/MariaDB e só é lido. Quando o ASP32 for desligado, os dados do legado precisam ser **migrados** do MySQL para o PostgreSQL (não é possível restaurar o backup direto entre motores diferentes). A forma dessa migração ainda será definida com a Nice. Depois dela, a API lê tudo do PostgreSQL e o espelho de escrita deixa de ser necessário.
 
 ---
 
@@ -176,7 +178,8 @@ Cada fatia tem flag, migração, tabelas e rotas. Todas respondem `404` com a fl
 | Contas e Boas-vindas | `GF_FATIA_CONTAS`, `GF_FATIA_CONFIG` | `20261118000000` | `gf_contas_ext`, `gf_welcome` | `/accounts`, `/accounts/:id/{password,active}`, `/welcome` |
 | Pendências | `GF_FATIA_PENDENCIAS` | `20261119000000` | `gf_pendencias_encaminhamentos` | `GET /pending-routing`, `GET /pending-routing/derived`, `PUT /pending-routing` |
 | Ficha da cliente | `GF_FATIA_FICHA`, `GF_FATIA_CLIENTES` | `20261121000000` | `gf_clientes_orientacoes`, `gf_clientes_notas` | `/client-guidance`, `/client-notes`, `PATCH /catalog/clients/:id` |
-| Estado financeiro local | em integração | `20261125000000` | `gf_adicionais_itens`, `gf_motivos_financeiros`, `gf_log_operacional` | em integração |
+| Estado financeiro | `GF_FATIA_ESTADO_FINANCEIRO` | `20261125000000` | `gf_motivos_financeiros`, `gf_adicionais_itens`, `gf_log_operacional` | `GET/PUT /financial-reasons`, `GET/PUT /payout-additions`, `GET/POST /operation-audit` |
+| Espelho de cadastros no legado | `GF_LEGADO_CLIENTES`, `GF_LEGADO_TAROLOGOS` (desligadas) | `20261128000000` | colunas `legado_*` em `gf_clientes_ext` e `gf_tarologos_perfil` | sem rota própria: acompanha as gravações de cadastros |
 
 Particularidades de negócio que o servidor impõe:
 
@@ -198,6 +201,8 @@ O front calcula tudo em funções puras. Para o servidor ser a autoridade, cada 
 3. Há também **mutantes**: variações que o servidor deve recusar. Alterar de propósito uma regra (ex.: janela de 15 min) faz o verificador falhar.
 
 Como o servidor trata uma gravação do navegador: refaz o comando com o instante e o autor do navegador e exige registro igual (senão `422`); em seguida refaz com instante e autor do servidor e **grava esse resultado**.
+
+Nos pagamentos, o modo estrito (`GF_FINANCEIRO_REGRAS`, ligado por padrão; só `false` explícito desliga) faz o servidor descobrir qual função do front rodou e refazê-la com o contexto real do banco: movimentos, ocorrências, transferência de saldo, planilha, lote colado, preço escolhido e duplicidade.
 
 O que já é imposto com paridade provada inclui: horários e escala, presença, agenda e fila geral, o "livres agora" do painel (`panelFlow`), ciclo da consulta, correção de tempo com saldo real, conferência de encerramento, desfechos, compensação, autorização no lançamento, lançamento e revisão de pagamentos, divergências, pendências derivadas das fontes reais, recados e orientação financeira. A lista viva do que ainda é conferido só por forma está na matriz mantida junto à documentação de maturação.
 

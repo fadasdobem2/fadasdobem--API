@@ -114,8 +114,8 @@ async function offline() {
   await passo('nome 1 a 50, tratar por até 50 (vazio apaga), WhatsApp até 45, nascimento dd/mm/aaaa válido e nunca apagado', () => {
     assert.deepEqual(cli.validarMudancas({ name: ' Maria ', treatAs: '', whatsapp: '11 9', birthDate: '29/02/2024', paymentProfile: 'Pós-pago' }), { name: 'Maria', treatAs: '', whatsapp: '11 9', birthDate: '29/02/2024', paymentProfile: 'Pós-pago' });
     dizErro(() => cli.validarMudancas({ name: '' }), 'preencha este campo');
-    dizErro(() => cli.validarMudancas({ name: 'x'.repeat(51) }), 'use até 50 caracteres');
-    dizErro(() => cli.validarMudancas({ whatsapp: 'x'.repeat(46) }), 'use até 45 caracteres');
+    dizErro(() => cli.validarMudancas({ name: 'x'.repeat(51) }), 'use no máximo 50 caracteres. O texto não foi cortado.');
+    dizErro(() => cli.validarMudancas({ whatsapp: 'x'.repeat(46) }), 'use no máximo 45 caracteres. O texto não foi cortado.');
     dizErro(() => cli.validarMudancas({ birthDate: '' }), 'não pode ser apagada');
     dizErro(() => cli.validarMudancas({ birthDate: '30/02/2020' }), 'dd/mm/aaaa');
     dizErro(() => cli.validarMudancas({ name: 'Ana 😀' }), 'quatro bytes');

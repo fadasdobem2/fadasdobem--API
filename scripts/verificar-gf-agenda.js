@@ -131,7 +131,7 @@ async function offline() {
   });
   await passo('saídas: motivo e incidente da lista; transferência pede o tarólogo novo; remarcação pede o dia; cancelamento fecha o item', () => {
     const saida = (extra) => ({ id: 'd1', tarotId: 'osiris', date: '2026-11-10', originDate: '2026-11-10', actor: 'x', at: '2026-11-10T10:00:00.000Z', ...extra });
-    const cancelar = { set: { agendaOutcome: 'Cancelada', contact: { attempt: 2, date: '2026-11-10', tags: ['Cancelada'] } }, append: { departures: [saida({ action: 'cancel', reason: 'Desistiu' })] } };
+    const cancelar = { set: { agendaOutcome: 'Cancelada', resolvedAt: '2026-11-10T10:00:00.000Z', contact: { attempt: 2, date: '2026-11-10', tags: ['Cancelada'] } }, append: { departures: [saida({ action: 'cancel', reason: 'Desistiu' })] } };
     assert.equal(delta.aplicarDelta(item(), cancelar, 'saidas', ator).item.departures[0].actor, 'Khloe');
     lanca(() => delta.aplicarDelta(item(), { ...cancelar, append: { departures: [saida({ action: 'cancel', reason: 'Remarcou amanhã' })] } }, 'saidas', ator), regras.ErroDeRegra, 'Escolha o resultado do cancelamento.');
     lanca(() => delta.aplicarDelta(item(), { append: { departures: [saida({ action: 'transfer', reason: 'Pediu outro tarólogo' })] } }, 'saidas', ator), regras.ErroDeRegra, 'Escolha o que o tarólogo verá.');
@@ -155,7 +155,7 @@ async function offline() {
     lanca(() => delta.aplicarDelta(item(), { set: { contactPlan: { who: 'staff', timing: 'exact' } } }, 'agendamento', ator), regras.ErroDeRegra, 'Informe um horário válido, como 20:00.');
     lanca(() => delta.aplicarDelta(item(), { set: { contactPlan: { who: 'ninguem', timing: 'none' } } }, 'agendamento', ator), regras.ErroDeRegra, 'Confira o combinado de contato.');
     const ok2 = delta.aplicarDelta(item(), { set: { contactPlan: { who: 'staff', timing: 'exact', time: '8h' }, scheduledTime: '08:00', tarotId: 'nyx', date: '2026-11-11' }, unset: ['positionOverrides'] }, 'agendamento', ator);
-    assert.equal(ok2.item.contactPlan.time, '08:00'); assert.equal(ok2.item.tarotId, 'nyx');
+    assert.equal(ok2.item.contactPlan.time, '8h'); assert.equal(ok2.item.tarotId, 'nyx'); // o combinado é guardado como o front o guarda (validado, não reescrito; Maturacao/44)
     lanca(() => delta.aplicarDelta(item(), { append: { contactHistory: [{ id: 'x' }] } }, 'saidas', ator), regras.ErroDeRegra);
   });
 

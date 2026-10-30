@@ -23,6 +23,10 @@ module.exports = definir({
     atualizado_em: { type: DataTypes.DATE, allowNull: false, defaultValue: literal('CURRENT_TIMESTAMP') },
     atualizado_por: { type: DataTypes.STRING(120), allowNull: false },
     operation_key: { type: DataTypes.STRING(128), allowNull: true },
+    legado_estado: { type: DataTypes.STRING(16), allowNull: false, defaultValue: 'nao_espelhada' },
+    legado_detalhe: { type: DataTypes.STRING(300), allowNull: true },
+    legado_pendentes: { type: DataTypes.JSONB, allowNull: false, defaultValue: literal("'[]'::jsonb") },
+    legado_atualizado_em: { type: DataTypes.DATE, allowNull: true },
   },
   indexes: [
     { name: 'uq_tarologos_perfil_legado', fields: ['id_legado'], unique: true, where: { id_legado: { [Op.ne]: null } } },

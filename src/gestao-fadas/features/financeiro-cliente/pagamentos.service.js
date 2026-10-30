@@ -17,21 +17,23 @@ const { novosDadosNoPostgres } = require('../../novo/modo');
 const f = require('./fin.comum');
 const v = require('./pagamentos.validacao');
 const regras = require('../../_comum/dominio/pagamentos-regras');
+const { dadosEfetivosDoCliente } = require('../../legado-escrita/fusao');
 const refazer = require('../../_comum/dominio/pagamentos-refazer');
 const acompanhamento = require('../../_comum/dominio/painel-pagamentos');
 const ctx = require('./fin.contexto');
+const { contextoParaRefazer, contextoDoLancamento } = require('./pagamentos.contexto');
+
+/**
+ * REGRAS DE DINHEIRO NO SERVIDOR (Maturacao/42): com `GF_FINANCEIRO_REGRAS=true` o servidor REFAZ a função do front (lançamento, preço escolhido, duplicidade, correção,
+ * movimento, ocorrência, transferência de saldo) e grava o resultado DELE. Ligado por PADRÃO (só `false` explícito desliga); desligado, vale só a conferência de forma e invariantes (comportamento anterior).
+ */
+const estrito = () => process.env.GF_FINANCEIRO_REGRAS !== 'false';
 
 const COPIA_VERSAO = 'O pagamento mudou. Confira a situação atual antes de continuar.';
 const comoItem = (l) => ({ ...f.textoDe(l), id: l.id });
 let verificarCliente = async (id) => require('../clientes/clientes.service').clienteExiste(id);
 const definirVerificadorDeCliente = (fn) => { verificarCliente = fn; };
 const naoExiste = () => new (require('../../../utils/AppError'))('Cadastro de cliente não encontrado.', 404, { codigo: 'CLIENT_NOT_FOUND' }, true);
-
-/** Contexto REAL da cliente (pagamentos, consultas, benefícios e saldo de partida) para refazer as regras de dinheiro (Maturacao/42). */
-async function contextoDaCliente(ex, clientId) {
-  const [perfil] = await ex.execute('SELECT perfil_pagamento FROM gf_clientes_ext WHERE id_cliente = ?', [clientId]);
-  return ctx.carregar(ctx.porExecutor(ex), clientId, { perfilPagamento: (perfil[0] && perfil[0].perfil_pagamento) || '' });
-}
 
 const COLUNAS_INSERT = 'id, id_cliente, status, confirmacao, valor_centavos, metodo, id_consulta, informado_em, item, version, criado_por, operation_key';
 async function inserirEvento(ex, id, tipo, a, dados, versao, operationKey) {
@@ -73,7 +75,8 @@ async function lancar(req) {
       }
       await ctx.congelarPartida(ex, r.clientId, a.nome, operationKey);
       const agora = new Date().toISOString();
-      const reg = v.carimbarNovo(r, a, agora);
+      // O servidor REFAZ o lançamento (createPaymentRecord), o preço escolhido na tela e a duplicidade com os dados reais e grava o resultado DELE.
+      const reg = estrito() ? refazer.refazerLancamento(r, a, agora, await contextoDoLancamento(ex, r.clientId)) : v.carimbarNovo(r, a, agora);
       delete reg.serviceFollowUp; // acompanhamento nasce depois do recebimento, por revisão
       const { id: _id, ...resto } = reg;
       await ex.execute(`INSERT INTO gf_pagamentos (${COLUNAS_INSERT}) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?)`, [reg.id, reg.clientId, reg.status, reg.confirmation ?? null, Math.round(reg.amount * 100), reg.method, reg.linkedConsultationId ?? null, reg.informedAt, JSON.stringify(resto), a.nome, operationKey]);
@@ -103,7 +106,8 @@ async function revisar(req) {
       const agora = new Date().toISOString();
       // O servidor REFAZ a operação do front (movimento corrigido, ocorrência, transferência...) com o contexto real e grava o resultado DELE.
       let reg; let refeito = null;
-      if (refazer.reconhece(antes, pedido)) refeito = refazer.refazerRevisao(antes, pedido, a, agora, await contextoDaCliente(ex, antes.clientId));
+      const familia = estrito() ? refazer.reconhece(antes, pedido) : null;
+      if (familia) refeito = refazer.refazerRevisao(antes, pedido, a, agora, await contextoParaRefazer(ex, familia, antes, pedido, agora, verificarCliente), familia);
       if (refeito) reg = refeito.registro; else reg = v.carimbarRevisao(antes, pedido, a, agora);
       // `serviceFollowUp` é do servidor (Maturacao/39): o navegador só acrescenta um evento; ator e instante são os daqui.
       try { const seguimento = acompanhamento.conferirAcompanhamento(antes, pedido, a.nome, Date.parse(agora)); if (seguimento) reg.serviceFollowUp = seguimento; else delete reg.serviceFollowUp; } catch (e) { if (e instanceof acompanhamento.RegraDePagamentoError) throw f.regra(e.message); throw e; }
@@ -119,8 +123,10 @@ async function revisar(req) {
       const { id: _semId, ...semId } = reg;
       await ex.execute('UPDATE gf_pagamentos SET id_cliente = ?, status = ?, confirmacao = ?, valor_centavos = ?, metodo = ?, id_consulta = ?, informado_em = ?, item = ?, version = ?, atualizado_em = CURRENT_TIMESTAMP WHERE id = ?',
         [reg.clientId, reg.status, reg.confirmation ?? null, Math.round(reg.amount * 100), reg.method, reg.linkedConsultationId ?? null, reg.informedAt, JSON.stringify(semId), versao, id]);
+      // O tipo do evento é um dos 7 do CHECK; o detalhe (movimento-corrigido, ocorrencia-registrar, transferencia-saldo, planilha-minutes...) vai em `dados.tipo`.
       const tipo = refeito ? refeito.tipo : v.classificar(antes, reg);
-      await inserirEvento(ex, id, tipo, a, { tipo, status: reg.status, amountCents: Math.round(reg.amount * 100) }, versao, operationKey);
+      const tipoDoEvento = refeito ? (/^(movimento|ocorrencia|transferencia)/.test(tipo) ? 'movimento' : 'correcao') : tipo;
+      await inserirEvento(ex, id, tipoDoEvento, a, { tipo, status: reg.status, amountCents: Math.round(reg.amount * 100) }, versao, operationKey);
       return { antes: { version: expectedVersion, status: antes.status, amountCents: Math.round(antes.amount * 100) }, depois: { version: versao, status: reg.status, amountCents: Math.round(reg.amount * 100), tipo }, resposta: { readAt: agora, items: [reg], versions: { [id]: versao } } };
     },
   });
@@ -163,7 +169,7 @@ async function contas(req) {
     const exts = await m.GfClientesExt.findAll({ where: { id_cliente: ids } });
     const perfis = new Map(exts.map((e) => [e.id_cliente, e.perfil_pagamento || '']));
     // Nome de identificação editado na ficha (Maturacao/32) vence o do legado; sem edição, vale o do legado.
-    const nomes = new Map(exts.map((e) => { const d = typeof e.dados === 'string' ? JSON.parse(e.dados) : e.dados || {}; return [e.id_cliente, typeof d.name === 'string' ? d.name.trim() : '']; }));
+    const nomes = new Map(exts.map((e) => { const d = dadosEfetivosDoCliente(e); return [e.id_cliente, typeof d.name === 'string' ? d.name.trim() : '']; }));
     for (const id of ids) {
       const viva = vivas.get(id);
       if (!viva) continue;

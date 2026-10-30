@@ -37,18 +37,20 @@ async function semanaDoTarologo(ex, tarotId) {
 }
 
 /**
- * `accounts` do front: a conta da taróloga (inativa ou bloqueada tira a taróloga da operação). As tabelas de acesso (`users`, `specialists`) ficam
- * FORA do executor da escrita (só `gf_*`), então a leitura é avulsa, em outra conexão, sem trava. Sem a fatia Contas ou sem essas tabelas, sem contas.
+ * `accounts` do front, o MÍNIMO (`[{ tarotId, active }]`, sem dados pessoais): a conta de cada taróloga (inativa ou bloqueada tira a taróloga da
+ * operação). As tabelas de acesso (`users`, `specialists`) ficam FORA do executor da escrita (só `gf_*`), então a leitura é avulsa, em outra
+ * conexão, sem trava. Sem a fatia Contas ou sem essas tabelas, sem contas. `tarotId` opcional filtra uma taróloga.
  */
-async function contasDoTarologo(tarotId) {
+async function contasDasTarologas(tarotId) {
   if (!ligado('GF_FATIA_CONTAS')) return [];
   try {
     const { sequelize } = require('../../../config/database');
     const { QueryTypes } = require('sequelize');
-    const linhas = await sequelize.query("SELECT u.is_active, u.blocked_at FROM gf_tarologos_perfil p JOIN specialists spec ON spec.slug = p.conta_slug AND spec.deleted_at IS NULL JOIN users u ON u.id = spec.user_id AND u.deleted_at IS NULL WHERE p.tarot_id = :tarotId AND u.role = 'TAROLOGA'", { type: QueryTypes.SELECT, replacements: { tarotId } });
-    return linhas.map((l) => ({ tarotId, role: 'tarologa', active: Boolean(l.is_active) && !l.blocked_at, access: 'Ativo' }));
+    const linhas = await sequelize.query(`SELECT p.tarot_id, u.is_active, u.blocked_at FROM gf_tarologos_perfil p JOIN specialists spec ON spec.slug = p.conta_slug AND spec.deleted_at IS NULL JOIN users u ON u.id = spec.user_id AND u.deleted_at IS NULL WHERE u.role = 'TAROLOGA' AND p.tarot_id IS NOT NULL${tarotId ? ' AND p.tarot_id = :tarotId' : ''} ORDER BY p.tarot_id`, { type: QueryTypes.SELECT, replacements: tarotId ? { tarotId } : {} });
+    return linhas.map((l) => ({ tarotId: String(l.tarot_id), active: Boolean(l.is_active) && !l.blocked_at }));
   } catch (_e) { return []; }
 }
+const contasDoTarologo = async (tarotId) => (await contasDasTarologas(tarotId)).map((c) => ({ tarotId: c.tarotId, role: 'tarologa', active: c.active, access: 'Ativo' }));
 
 async function restricoesDoTarologo(ex, tarotId) {
   if (!ligado('GF_FATIA_RESTRICOES')) return [];
@@ -72,4 +74,4 @@ async function carregarEntrada(ex, { tarotId, agora }) {
   return { agenda: registros.map((r) => r.item), consultations, profiles, accounts, overrides, intakeEvents, restrictions: await restricoesDoTarologo(ex, tarotId), date: data, now: agora, cadastro };
 }
 
-module.exports = { carregarEntrada, consultasDoPainel };
+module.exports = { carregarEntrada, consultasDoPainel, contasDasTarologas };

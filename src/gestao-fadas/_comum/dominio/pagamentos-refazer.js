@@ -11,6 +11,11 @@ const L = require('./pagamentos-livro');
 const { PagamentoInvalidoError, PagamentoNegadoError } = require('./pagamentos-regras');
 const { igual } = require('./pagamentos-igual');
 const { corrigirMovimento } = require('./pagamentos-correcao-movimento');
+const { registrarMovimento } = require('./pagamentos-movimento');
+const { devolverCreditoRestante } = require('./pagamentos-credito');
+const RO = require('./pagamentos-refazer-ocorrencias');
+const RC = require('./pagamentos-refazer-campos');
+const RL = require('./pagamentos-refazer-lancamento');
 
 const MSG_NAO_CONFERE = 'Não foi possível identificar esta alteração.';
 const recusa = (m = MSG_NAO_CONFERE) => { throw new PagamentoInvalidoError(m); };
@@ -37,16 +42,61 @@ function refazerCorrecaoDeMovimento(antes, depois, ator, agora, contexto) {
   return { tipo: 'movimento-corrigido', registro: gravado };
 }
 
-/**
- * `antes` é o guardado, `depois` o do navegador. Devolve `{ tipo, registro }` com o resultado refeito (carimbado pelo servidor) ou `null` quando a
- * revisão não é uma das operações refeitas aqui (segue pelas conferências de forma e de campos de `pagamentos.validacao.js`).
- */
-function refazerRevisao(antes, depois, ator, agora, contexto) {
-  if (antes.status === 'Cancelado') return null;
-  return refazerCorrecaoDeMovimento(antes, depois, ator, agora, contexto);
+/** Movimento NOVO direto (`payment-movements-dialog.tsx`: `recordPaymentMovement` ou `recordRemainingCreditRefund`): exatamente um no fim do histórico. */
+function movimentoNovo(antes, depois) {
+  const a = antes.movements || []; const d = depois.movements || [];
+  if (d.length !== a.length + 1 || a.some((m, i) => m.id !== d[i].id)) return null;
+  const m = d[d.length - 1];
+  return m.kind === 'balance-transfer' ? null : m;
 }
 
-/** A revisão mexe em movimento ou ocorrência (operações refeitas aqui). */
-const reconhece = (antes, depois) => antes.status !== 'Cancelado' && movimentoEditado(antes, depois) >= 0;
+/** A entrada do movimento = a assinatura que o front guardou (`operationSignature`) sem o autor. */
+function entradaDoMovimento(m) {
+  let a; try { a = JSON.parse(m.operationSignature); } catch { return recusa(); }
+  if (!a || typeof a !== 'object' || Array.isArray(a) || a.actor !== m.actor) return recusa();
+  const { actor: _autor, ...entrada } = a;
+  return entrada;
+}
 
-module.exports = { refazerRevisao, reconhece, MSG_NAO_CONFERE, movimentoEditado };
+function refazerMovimentoNovo(antes, depois, ator, agora, contexto) {
+  const m = movimentoNovo(antes, depois);
+  if (!m) return null;
+  if (!ator.p.canViewAllPayments) throw new PagamentoNegadoError();
+  const entrada = entradaDoMovimento(m);
+  const rodar = (nome, em) => {
+    if (m.creditSnapshot) {
+      const credito = { ...entrada, amount: entrada.creditAmount };
+      return devolverCreditoRestante(antes, credito, contexto, nome, m.id, em);
+    }
+    return registrarMovimento(antes, entrada, nome, m.id, em);
+  };
+  const conferido = rodar(depois.updatedBy, depois.updatedAt);
+  if (conferido === antes || !igual(conferido, depois)) recusa();
+  return { tipo: 'movimento-novo', registro: RO.comMotivos(rodar(ator.nome, agora), depois) };
+}
+
+/** Que família de operação a revisão representa (`null` se nenhuma das refeitas aqui). Ocorrência e transferência recusam se mexeram em mais de uma coisa. */
+function reconhece(antes, depois) {
+  if (antes.status === 'Cancelado') return null;
+  if (RO.pernasNovas(antes, depois).length) return 'transferencia';
+  if (RO.comandoDeOcorrencia(antes, depois)) return 'ocorrencia';
+  if (movimentoNovo(antes, depois)) return 'movimento-novo';
+  if (movimentoEditado(antes, depois) >= 0) return 'movimento';
+  if (RC.reconhece(antes, depois)) return 'campos';
+  return null;
+}
+
+/**
+ * `antes` é o guardado, `depois` o do navegador, `tipo` o de `reconhece`. Devolve `{ tipo, registro }` com o resultado refeito (carimbado pelo servidor).
+ * `contexto`: pagamentos, consultas, perfil e (transferência) perfis, nomes e valor do minuto regular, lidos do banco.
+ */
+function refazerRevisao(antes, depois, ator, agora, contexto, tipo = reconhece(antes, depois)) {
+  if (tipo === 'transferencia') return RO.refazerTransferencia(antes, depois, ator, agora, contexto);
+  if (tipo === 'ocorrencia') return RO.refazerOcorrencia(antes, depois, ator, agora, contexto);
+  if (tipo === 'movimento-novo') return refazerMovimentoNovo(antes, depois, ator, agora, contexto);
+  if (tipo === 'movimento') return refazerCorrecaoDeMovimento(antes, depois, ator, agora, contexto);
+  if (tipo === 'campos') return RC.refazerCampos(antes, depois, ator, agora, contexto);
+  return null;
+}
+
+module.exports = { refazerLancamento: RL.refazerLancamento, refazerRevisao, reconhece, MSG_NAO_CONFERE, movimentoEditado, pernasNovas: RO.pernasNovas, dadosDaTransferencia: RO.dadosDaTransferencia };

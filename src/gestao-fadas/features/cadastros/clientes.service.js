@@ -12,6 +12,8 @@ const { lendoNovo } = require('../../novo/leitura');
 const { novosDadosNoPostgres } = require('../../novo/modo');
 const c = require('./cadastros.comum');
 const { validarMudancas, aplicar, paraDto } = require('./clientes.validacao');
+const espelho = require('../../legado-escrita/entidades');
+const { dadosEfetivosDoCliente } = require('../../legado-escrita/fusao');
 
 let verificarCliente = async (id) => require('../clientes/clientes.service').clienteExiste(id);
 const definirVerificadorDeCliente = (f) => { verificarCliente = f; };
@@ -31,7 +33,8 @@ async function ler(req) {
   if (!ids.length || ids.length > 100) throw c.invalido('ids');
   ids.forEach(idCliente);
   const linhas = await lendoNovo((m) => m.GfClientesExt.findAll({ where: { id_cliente: ids } }));
-  return { readAt: new Date().toISOString(), extensions: Object.fromEntries(linhas.map((l) => [l.id_cliente, paraDto(l)])) };
+  // Fusão (Maturacao/45): campo já espelhado vem do legado, então a extensão não o repete.
+  return { readAt: new Date().toISOString(), extensions: Object.fromEntries(linhas.map((l) => [l.id_cliente, paraDto({ ...(typeof l.get === 'function' ? l.get({ plain: true }) : l), dados: dadosEfetivosDoCliente(l) })])) };
 }
 
 /** `PATCH /catalog/clients/:id`: `{ operationKey, expectedRevision, changes }`. */
@@ -62,6 +65,8 @@ async function gravar(req) {
         await ex.execute('INSERT INTO gf_clientes_ext (id_cliente, perfil_pagamento, perfil_pagamento_em, dados, revisao, atualizado_por, operation_key) VALUES (?, ?, ?, ?, 1, ?, ?)',
           [id, prox.perfil_pagamento, prox.perfil_pagamento_em, JSON.stringify(prox.dados), c.nomeDe(req), operationKey]);
       }
+      // Espelho no legado (Maturacao/45): INTENÇÃO na mesma transação (os campos mexidos); a escrita no legado vem depois do commit. Desligado, só anota.
+      await espelho.clientes.registrar(ex, id, Object.keys(mudancas).filter((k) => k !== 'paymentProfile'));
       const depois = paraDto({ ...prox, id_cliente: id, revisao: (atual ? Number(atual.revisao) : 0) + 1 });
       return { antes, depois, resposta: { readAt: new Date().toISOString(), clientId: id, extension: depois } };
     },

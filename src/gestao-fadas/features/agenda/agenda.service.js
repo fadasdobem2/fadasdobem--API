@@ -11,7 +11,7 @@
 const AppError = require('../../../utils/AppError');
 const { hojeOperacional } = require('../../_comum/dia-operacional');
 const { proximaPosicao } = require('../../_comum/dominio/agenda-contato');
-const { aplicarDelta } = require('../../_comum/dominio/agenda-delta');
+const { aplicarDelta, itemNovo } = require('../../_comum/dominio/agenda-delta');
 const { ErroDeRegra, ErroDeVersao } = require('../../_comum/dominio/agenda-regras');
 const { novosDadosNoPostgres } = require('../../novo/modo');
 const { lendoNovo } = require('../../novo/leitura');
@@ -62,16 +62,11 @@ async function criar(req) {
       await store.travarFila(ex, c.tarotId);
       if (await store.travar(ex, c.id)) throw comum.conflitoVersao('Este agendamento já existe.');
       const abertos = await store.abertosDe(ex, [c.tarotId]);
-      const agora = new Date().toISOString();
+      const agora = new Date();
       const numero = await store.proximoNumero(ex);
-      const base = {
-        id: c.id, publicNumber: numero, tarotId: c.tarotId, clientId: c.clientId, client: c.client, date: c.date, createdAt: agora, createdBy: a.nome,
-        response: 'Aguardando resposta', contact: { attempt: 1, date: c.date, tags: [] }, paymentPending: false,
-        position: proximaPosicao(abertos, c.tarotId, c.date, hojeOperacional()),
-      };
       let r;
-      try { r = aplicarDelta(base, { set: c.set, unset: c.unset, append: c.append }, 'agendamento', a); } catch (e) { throw traduzir(e); }
-      const item = { ...r.item, position: base.position };
+      try { r = itemNovo(c, a, { abertos, numero, agora, hoje: hojeOperacional() }); } catch (e) { throw traduzir(e); }
+      const item = r.item;
       await store.inserir(ex, item, numero, a.nome, c.operationKey);
       await store.inserirEvento(ex, { idAgenda: item.id, tipo: 'criacao', ref: null, a, dados: { tarotId: item.tarotId, clientId: item.clientId, date: item.date }, versao: 1, operationKey: c.operationKey });
       for (const e of r.eventos) await store.inserirEvento(ex, { idAgenda: item.id, tipo: e.tipo, ref: e.ref, a, dados: e.dados, versao: 1, operationKey: c.operationKey });

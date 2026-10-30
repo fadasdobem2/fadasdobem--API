@@ -18,6 +18,7 @@ const { novosDadosNoPostgres } = require('../../novo/modo');
 const { lendoNovo } = require('../../novo/leitura');
 const c = require('./cadastros.comum');
 const store = require('./tarologos.store');
+const espelho = require('../../legado-escrita/entidades');
 
 const COLUNAS_LEGADO = ['idTarologo', 'nmuTarologo', 'ativo'];
 
@@ -81,6 +82,20 @@ function corpoPerfil(corpo, ehTarologa) {
   return saida;
 }
 
+/** Bloqueia o usuário da A ligado ao slug (`specialists.slug`) e revoga os refresh tokens; devolve os ids bloqueados. */
+async function bloquearContaDoTarologo(ex, t, slug, ator) {
+  const { Specialist, User } = require('../../../models');
+  const esp = await Specialist.findOne({ where: { slug }, transaction: t });
+  if (!esp) return [];
+  const usuario = await User.findByPk(esp.user_id, { transaction: t, lock: t.LOCK.UPDATE });
+  if (!usuario) return [];
+  if (usuario.is_active) await usuario.update({ is_active: false, blocked_at: new Date() }, { transaction: t });
+  const contas = require('../contas/contas.store');
+  await contas.revogarSessoes(usuario.id, t);
+  await contas.gravarExt(ex, usuario.id, {}, ator);
+  return [usuario.id];
+}
+
 /** `PUT /catalog/tarologists/:tarotId/profile`. */
 async function gravarPerfil(req) {
   const tarotId = idCatalogo(req.params.tarotId);
@@ -90,7 +105,8 @@ async function gravarPerfil(req) {
   const corpo = corpoPerfil(req.body, q.perfil === 'tarologa');
   return c.gravar(req, {
     escopo: 'cadastros.tarologo.perfil', operationKey: corpo.operationKey, corpo: { ...corpo, tarotId }, entidade: 'tarologo-perfil', entidadeId: tarotId, acao: 'cadastros.tarologo.perfil',
-    producao: async (ex) => {
+    comContas: corpo.registrationActive === false,
+    producao: async (ex, t) => {
       const atual = await store.perfilTravado(ex, tarotId);
       if ((atual ? atual.revisao : 0) !== corpo.expectedRevision) throw c.conflitoVersao();
       // Inativar o cadastro com consulta em curso: a recusa do front (`prepareRegistrationChange`).
@@ -105,10 +121,16 @@ async function gravarPerfil(req) {
       } else if (idLegado !== null) legado = await fonteLegado.obter(Number(idLegado));
       const campos = aplicarEdicao(atual, { nome: corpo.nome, avatar: corpo.avatar, registrationActive: corpo.registrationActive, directory: corpo.directory });
       if (atual) await store.atualizar(ex, tarotId, campos, c.nomeDe(req), corpo.operationKey); else await store.inserir(ex, tarotId, idLegado, campos, c.nomeDe(req), corpo.operationKey);
+      // `prepareRegistrationChange`: inativar o cadastro bloqueia o acesso ligado (blockedAccountIds) e encerra as sessões, como `POST /accounts/:id/active`.
+      // Reativar o cadastro NÃO reativa a conta (o front devolve a lista vazia; a administradora libera em Contas).
+      let contasBloqueadas = [];
+      if (t && atual && atual.conta_slug) contasBloqueadas = await bloquearContaDoTarologo(ex, t, atual.conta_slug, require('../../_comum/conta').contaDaRequisicao(req));
+      // Espelho no legado (Maturacao/45): só nome e situação do cadastro têm casa em `tbl_tarologos`; intenção na mesma transação, escrita depois do commit.
+      await espelho.tarologos.registrar(ex, tarotId, [...(corpo.nome !== undefined ? ['nome'] : []), ...(corpo.registrationActive !== undefined ? ['cadastro_ativo'] : [])]);
       const depois = { ...(atual || { tarot_id: tarotId, id_legado: idLegado, conta_slug: null, registro_id: null, registro_revisao: null }), ...campos, revisao: (atual ? atual.revisao : 0) + 1 };
       const item = montarItem({ legado, perfil: depois, ext: null });
       const antes = atual ? { nome: atual.nome, cadastro_ativo: atual.cadastro_ativo, perfil: atual.perfil } : null;
-      return { antes, depois: { nome: campos.nome, cadastro_ativo: campos.cadastro_ativo, perfil: campos.perfil }, resposta: { readAt: new Date().toISOString(), revision: item.revision, tarologist: item } };
+      return { antes, depois: { nome: campos.nome, cadastro_ativo: campos.cadastro_ativo, perfil: campos.perfil, ...(contasBloqueadas.length ? { contasBloqueadas, sessoesEncerradas: true } : {}) }, resposta: { readAt: new Date().toISOString(), revision: item.revision, tarologist: item } };
     },
   });
 }

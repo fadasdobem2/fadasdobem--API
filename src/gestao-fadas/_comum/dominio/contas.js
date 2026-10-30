@@ -91,4 +91,14 @@ function removeUltimaAdmin(contas, id, novoPerfil, novoAtivo) {
   return !contas.some((c) => c.id !== id && c.role === 'administradora' && c.active);
 }
 
-module.exports = { PERFIS_EQUIPE, PAPEIS_DA_A, MSG, FOTO_MAX_CARACTERES, senhaForte, normalizarNome, validarEmail, emailChave, rotuloAcesso, paraConta, removeUltimaAdmin };
+/**
+ * `saveAccount` (shell/home-experience.tsx:1368-1369): com o cadastro da profissional na mão, outra conta já ligada a ele é recusada e a conta
+ * ligada continua `tarologa`. `contaDoCadastroId`: id da conta que já está ligada ao cadastro (ou null); `idEditando`: a conta que se edita.
+ */
+function conferirVinculo({ temCadastro, contaDoCadastroId, idEditando, papel }) {
+  if (temCadastro && contaDoCadastroId && contaDoCadastroId !== idEditando) return MSG.jaTemAcesso;
+  if (temCadastro && papel !== 'tarologa') return MSG.vinculada;
+  return null;
+}
+
+module.exports = { conferirVinculo, PERFIS_EQUIPE, PAPEIS_DA_A, MSG, FOTO_MAX_CARACTERES, senhaForte, normalizarNome, validarEmail, emailChave, rotuloAcesso, paraConta, removeUltimaAdmin };

@@ -9,6 +9,7 @@
 
 const { lendoNovo } = require('../../../novo/leitura');
 const { novosDadosNoPostgres } = require('../../../novo/modo');
+const { dadosEfetivosDoCliente } = require('../../../legado-escrita/fusao');
 
 const LIMITE_EXTENSOES = 5000;
 const ativa = () => `${process.env.GF_FATIA_FICHA || ''}`.trim().toLowerCase() === 'true' && novosDadosNoPostgres();
@@ -22,8 +23,9 @@ const nascimentoDoLegado = (texto) => {
 /** Extensões (`dados`) por id de cliente: as dos ids dados, ou todas (até o limite) quando `ids` é omitido. */
 async function extensoesPorId(ids) {
   if (!ativa() || (ids && ids.length === 0)) return new Map();
-  const linhas = await lendoNovo((m) => m.GfClientesExt.findAll({ attributes: ['id_cliente', 'dados'], ...(ids ? { where: { id_cliente: ids.map(String) } } : { limit: LIMITE_EXTENSOES }), raw: true }));
-  return new Map(linhas.map((l) => [String(l.id_cliente), typeof l.dados === 'string' ? JSON.parse(l.dados) : l.dados || {}]));
+  const linhas = await lendoNovo((m) => m.GfClientesExt.findAll({ attributes: ['id_cliente', 'dados', 'legado_estado', 'legado_pendentes'], ...(ids ? { where: { id_cliente: ids.map(String) } } : { limit: LIMITE_EXTENSOES }), raw: true }));
+  // Fusão (Maturacao/45): só os campos que o legado ainda não recebeu sobrepõem o legado; os espelhados vêm do próprio legado.
+  return new Map(linhas.map((l) => [String(l.id_cliente), dadosEfetivosDoCliente(l)]));
 }
 
 /** A linha de `usuarios` com os campos editados na ficha por cima (cópia; só nome_id, nome2, whats e datanascimento). */

@@ -17,7 +17,16 @@ class EspelhoLegadoError extends Error {
   constructor(codigo, detalhe) { super(detalhe); this.name = 'EspelhoLegadoError'; this.codigo = codigo; }
 }
 
-const espelhoLigado = (env = process.env) => `${env.GF_LEGADO_ESCRITA_ENABLED || ''}`.trim().toLowerCase() === 'true';
+const ligada = (env, nome) => `${env[nome] || ''}`.trim().toLowerCase() === 'true';
+
+/** Uma flag POR ENTIDADE, além do interruptor geral (`GF_LEGADO_ESCRITA_ENABLED`). Consulta segue só com o geral (comportamento de antes). Nenhuma é ligada no local. */
+const FLAGS_ENTIDADE = Object.freeze({ clientes: 'GF_LEGADO_CLIENTES', tarologos: 'GF_LEGADO_TAROLOGOS', pagamentos: 'GF_LEGADO_PAGAMENTOS' });
+
+function espelhoLigado(env = process.env, entidade) {
+  if (!ligada(env, 'GF_LEGADO_ESCRITA_ENABLED')) return false;
+  if (entidade === undefined) return true;
+  return FLAGS_ENTIDADE[entidade] ? ligada(env, FLAGS_ENTIDADE[entidade]) : false;
+}
 
 function configuracao(env = process.env) {
   const host = `${env.LEGADO_DB_HOST || ''}`.trim(); const database = `${env.LEGADO_DB_NAME || ''}`.trim(); const user = `${env.LEGADO_DB_USER || ''}`.trim();
@@ -61,9 +70,9 @@ async function abrir() {
   return conexao;
 }
 
-/** Espelho real: precisa de `GF_LEGADO_ESCRITA_ENABLED=true`. Confirma se terminar, desfaz se lançar. */
-async function emTransacao(trabalho) {
-  if (!espelhoLigado()) throw new EspelhoLegadoError('ESPELHO_DESLIGADO', 'O espelho no legado está desligado (GF_LEGADO_ESCRITA_ENABLED).');
+/** Espelho real: precisa de `GF_LEGADO_ESCRITA_ENABLED=true` (e da flag da entidade, quando `entidade` é dada). Confirma se terminar, desfaz se lançar. */
+async function emTransacao(trabalho, { entidade } = {}) {
+  if (!espelhoLigado(process.env, entidade)) throw new EspelhoLegadoError('ESPELHO_DESLIGADO', `O espelho no legado está desligado (GF_LEGADO_ESCRITA_ENABLED${entidade ? ` e ${FLAGS_ENTIDADE[entidade] || 'flag da entidade'}` : ''}).`);
   const conexao = await abrir();
   const ex = envolver(conexao);
   try {
@@ -72,43 +81,63 @@ async function emTransacao(trabalho) {
   } finally { conexao.release(); }
 }
 
+/** Só estas tabelas podem ser trocadas por cópia no ensaio (o nome entra no SQL: lista fixa, nunca texto livre). */
+const TABELAS_ENSAIO = Object.freeze(['tbl_consultas', 'usuarios', 'tbl_tarologos']);
+
 /**
- * Troca `tbl_consultas` por uma tabela TEMPORÁRIA InnoDB da mesma estrutura, SÓ nesta sessão. Motivo (achado de 29/10/2026): no legado
- * `tbl_consultas` é MyISAM, inclusive no banco de dev, e o ROLLBACK NÃO desfaz escrita em MyISAM. Sem a troca, o "ensaio com rollback"
- * gravaria de verdade. A DDL é uma única instrução `CREATE TEMPORARY TABLE` montada do `SHOW CREATE TABLE` (nunca um ALTER: se a
- * criação falhar, nada acontece com a tabela real) e some sozinha quando a conexão fecha.
+ * Troca cada tabela pedida por uma tabela TEMPORÁRIA InnoDB da mesma estrutura, SÓ nesta sessão. Motivo (achado de 29/10/2026): no legado
+ * `tbl_consultas` e `tbl_tarologos` são MyISAM, inclusive no banco de dev, e o ROLLBACK NÃO desfaz escrita em MyISAM. Sem a troca, o "ensaio com
+ * rollback" gravaria de verdade (`usuarios` é InnoDB, mas também é trocada: o ensaio nunca depende do engine). A DDL é uma única instrução
+ * `CREATE TEMPORARY TABLE` montada do `SHOW CREATE TABLE` (nunca um ALTER: se a criação falhar, nada acontece com a tabela real) e some sozinha
+ * quando a conexão fecha. `sementes` (`{ tabela: { coluna, valores } }`) copia para a cópia ALGUMAS linhas reais (leitura da real, antes da troca),
+ * para o ensaio poder fazer UPDATE; a cópia começa vazia quando não há semente.
  */
-async function isolarTabelaNoEnsaio(conexao) {
-  const [[linha]] = await conexao.query('SHOW CREATE TABLE tbl_consultas');
-  const ddl = String(linha['Create Table'] || '')
-    .replace(/^CREATE TABLE/i, 'CREATE TEMPORARY TABLE')
-    .replace(/\bENGINE=\w+/i, 'ENGINE=InnoDB')
-    .replace(/\bAUTO_INCREMENT=\d+/i, 'AUTO_INCREMENT=1')
-    .replace(/\s(PACK_KEYS|DELAY_KEY_WRITE|CHECKSUM)=\d+/gi, '');
-  if (!/^CREATE TEMPORARY TABLE `tbl_consultas`/.test(ddl) || !/ENGINE=InnoDB/.test(ddl)) throw new EspelhoLegadoError('ENSAIO_RECUSADO', 'Não foi possível montar a tabela temporária do ensaio.');
-  await conexao.query(ddl);
+async function isolarTabelasNoEnsaio(conexao, tabelas, sementes = {}) {
+  const ddls = {};
+  for (const t of tabelas) {
+    if (!TABELAS_ENSAIO.includes(t)) throw new EspelhoLegadoError('ENSAIO_RECUSADO', `Tabela fora da lista do ensaio: ${t}.`);
+    const [[linha]] = await conexao.query('SHOW CREATE TABLE ??', [t]);
+    const ddl = String(linha['Create Table'] || '')
+      .replace(/^CREATE TABLE/i, 'CREATE TEMPORARY TABLE')
+      .replace(/\bENGINE=\w+/i, 'ENGINE=InnoDB')
+      .replace(/\bAUTO_INCREMENT=\d+/i, 'AUTO_INCREMENT=1')
+      .replace(/\s(PACK_KEYS|DELAY_KEY_WRITE|CHECKSUM)=\d+/gi, '');
+    if (!new RegExp(`^CREATE TEMPORARY TABLE \`${t}\``).test(ddl) || !/ENGINE=InnoDB/.test(ddl)) throw new EspelhoLegadoError('ENSAIO_RECUSADO', `Não foi possível montar a tabela temporária do ensaio (${t}).`);
+    ddls[t] = ddl;
+    const s = sementes[t];
+    if (s) await conexao.query('CREATE TEMPORARY TABLE ?? AS SELECT * FROM ?? WHERE ?? IN (?)', [`__semente_${t}`, t, s.coluna, s.valores]);
+  }
+  for (const t of tabelas) {
+    await conexao.query(ddls[t]);
+    if (sementes[t]) await conexao.query('INSERT INTO ?? SELECT * FROM ??', [t, `__semente_${t}`]);
+  }
 }
 
 /**
- * ENSAIO: uma transação que NUNCA confirma, só em banco de desenvolvimento, sobre uma cópia TEMPORÁRIA InnoDB de `tbl_consultas`
- * (ver `isolarTabelaNoEnsaio`): a tabela de verdade não recebe nada, e o ROLLBACK é de verdade na cópia.
+ * ENSAIO: uma transação que NUNCA confirma, só em banco de desenvolvimento, sobre cópias TEMPORÁRIAS InnoDB das tabelas pedidas
+ * (`tabelas`, padrão `tbl_consultas`; ver `isolarTabelasNoEnsaio`): a tabela de verdade não recebe nada, e o ROLLBACK é de verdade na cópia.
  */
-async function emEnsaio(trabalho) {
+async function emEnsaio(trabalho, { tabelas = ['tbl_consultas'], sementes = {} } = {}) {
   const nome = configuracao().database;
   if (!bancoDeDev(nome)) throw new EspelhoLegadoError('ENSAIO_RECUSADO', `Ensaio só roda em banco de desenvolvimento (recebido: ${nome}).`);
   const conexao = await abrir();
   const ex = envolver(conexao);
   try {
-    await isolarTabelaNoEnsaio(conexao);
+    await isolarTabelasNoEnsaio(conexao, tabelas, sementes);
     await ex.query('START TRANSACTION');
-    return await trabalho(ex);
+    // `leitura`: SELECT puro (uma instrução) direto na conexão do ensaio, para o ensaio conferir linhas inteiras que a allowlist de escrita não lê. Nunca escreve.
+    const leitura = async (sql, valores) => {
+      if (!/^\s*SELECT\b/i.test(sql) || /;/.test(sql)) throw new EspelhoLegadoError('LEGADO_ESCRITA_RECUSADA', 'A leitura do ensaio só aceita um SELECT.');
+      return (await conexao.query(sql, valores))[0];
+    };
+    return await trabalho(ex, leitura);
   } finally {
     await conexao.query('ROLLBACK').catch(() => {});
-    // Destrói (não devolve ao pool): a conexão carrega a tabela temporária e não pode servir a mais ninguém.
+    // Destrói (não devolve ao pool): a conexão carrega as tabelas temporárias e não pode servir a mais ninguém.
     conexao.destroy();
   }
 }
 
 async function fechar() { if (pool) { await pool.end(); pool = null; } }
 
-module.exports = { MODO_SQL, EspelhoLegadoError, espelhoLigado, bancoDeDev, emTransacao, emEnsaio, fechar };
+module.exports = { MODO_SQL, EspelhoLegadoError, FLAGS_ENTIDADE, TABELAS_ENSAIO, espelhoLigado, bancoDeDev, emTransacao, emEnsaio, fechar };

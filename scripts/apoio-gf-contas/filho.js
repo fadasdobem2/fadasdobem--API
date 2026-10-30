@@ -17,7 +17,7 @@ const { raiz, passo, resumo, criarUsuario } = require('../apoio-gf-banco-novo/co
 const ORIGEM = 'http://127.0.0.1:5180';
 Object.assign(process.env, {
   GESTAO_FADAS_ESCRITA_ENABLED: 'true', FADAS_ENVIRONMENT: 'test', GF_NOVOS_DADOS: 'postgres', GESTAO_FADAS_ENABLED: 'true',
-  GF_FATIA_CONTAS: 'true', GF_FATIA_CONFIG: 'true', FADAS_ORIGIN: ORIGEM, JWT_SECRET: process.env.JWT_SECRET || 'segredo-de-teste-local',
+  GF_FATIA_CONTAS: 'true', GF_FATIA_CADASTROS: 'true', GF_FATIA_CONFIG: 'true', FADAS_ORIGIN: ORIGEM, JWT_SECRET: process.env.JWT_SECRET || 'segredo-de-teste-local',
 });
 const r = (p) => path.join(raiz, p);
 const SENHA = 'Teste!Fada#2026x'; // senha de teste do próprio filho, descartada com o banco
@@ -228,6 +228,27 @@ const LEGADO = [{ idTarologo: 9001, nmuTarologo: 'Tarólogo A', ativo: 1 }, { id
     assert.equal(nao.status, 422); assert.equal(nao.j.error.message, 'O cadastro desta profissional não foi encontrado.');
     const inativo = await chamar('POST', '/accounts', { operationKey: n(), name: 'Tarólogo C', email: `c.${Date.now()}@fadas.test`, role: 'tarologa', tarotId: '9003', password: SENHA });
     assert.equal(inativo.status, 200, inativo.t); assert.equal(inativo.j.account.active, false);
+  });
+
+  await passo('inativar o cadastro do tarólogo bloqueia a conta ligada e revoga a sessão aberta (Maturacao/44); reativar o cadastro não reativa a conta; idempotente', async () => {
+    const { randomUUID } = require('crypto');
+    const t = (await lerContas()).accounts.find((a) => a.tarotId === '9001');
+    await sequelize.query(`INSERT INTO refresh_tokens (id, user_id, jti, expires_at, created_at, updated_at) VALUES ('${randomUUID()}', '${t.id}', '${randomUUID().replace(/-/g, '')}', now() + interval '1 day', now(), now())`);
+    assert.equal((await um(`SELECT count(*)::int AS n FROM refresh_tokens WHERE user_id = '${t.id}' AND revoked_at IS NULL`))[0].n >= 1, true);
+    const rev = (await um("SELECT revisao FROM gf_tarologos_perfil WHERE tarot_id = '9001'"))[0].revisao;
+    const k = n();
+    const x = await chamar('PUT', '/catalog/tarologists/9001/profile', { operationKey: k, expectedRevision: rev, registrationActive: false });
+    assert.equal(x.status, 200, x.t);
+    assert.equal((await um(`SELECT is_active FROM users WHERE id = '${t.id}'`))[0].is_active, false, `apos inativar: ${x.t} slug=${JSON.stringify(await um("SELECT conta_slug FROM gf_tarologos_perfil WHERE tarot_id = '9001'"))}`);
+    assert.equal((await um(`SELECT count(*)::int AS n FROM refresh_tokens WHERE user_id = '${t.id}' AND revoked_at IS NULL`))[0].n, 0);
+    const aud = await um("SELECT depois FROM gf_auditoria WHERE acao = 'cadastros.tarologo.perfil' AND depois::text LIKE '%contasBloqueadas%' LIMIT 1");
+    assert.match(JSON.stringify(aud[0].depois), /contasBloqueadas/);
+    const rep = await chamar('PUT', '/catalog/tarologists/9001/profile', { operationKey: k, expectedRevision: rev, registrationActive: false });
+    assert.equal(rep.status, 200);
+    const rev2 = (await um("SELECT revisao FROM gf_tarologos_perfil WHERE tarot_id = '9001'"))[0].revisao;
+    const re = await chamar('PUT', '/catalog/tarologists/9001/profile', { operationKey: n(), expectedRevision: rev2, registrationActive: true });
+    assert.equal(re.status, 200, re.t);
+    assert.equal((await um(`SELECT is_active FROM users WHERE id = '${t.id}'`))[0].is_active, false);
   });
 
   console.log('Segredos');

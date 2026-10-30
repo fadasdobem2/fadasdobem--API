@@ -102,7 +102,7 @@ function corpoSolicitacao(c) {
   if (typeof r.id !== 'string' || !/^[A-Za-z0-9._:-]{1,64}$/.test(r.id)) throw invalido('request.id');
   if (typeof r.clientId !== 'string' || !/^[A-Za-z0-9._:-]{1,64}$/.test(r.clientId)) throw invalido('request.clientId');
   if (typeof r.client !== 'string' || !r.client.trim() || r.client.length > 160) throw invalido('request.client');
-  if (r.note !== undefined && (typeof r.note !== 'string' || r.note.length > 2000)) throw invalido('request.note');
+  if (r.note !== undefined && (typeof r.note !== 'string' || r.note.length > 500)) throw invalido('request.note'); // o campo da tela tem maxLength 500 (agenda-intake-context.tsx)
   return { operationKey: validar.chaveOperacao(c.operationKey), request: r };
 }
 

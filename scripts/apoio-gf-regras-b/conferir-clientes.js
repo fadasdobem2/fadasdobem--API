@@ -30,6 +30,12 @@ function conferir() {
     } else if (s.erro === c.esperado.erro) r.recusas += 1;
     else r.falhas.push(`#${i} ${JSON.stringify(c.mudancas)}: front "${c.esperado.erro}" servidor "${s.erro || 'aceitou'}"`);
   });
+  r.observacoes = 0;
+  const tf = require('../../src/gestao-fadas/_comum/dominio/texto-front');
+  for (const o of ouro.observacoes || []) {
+    let s; try { s = { ok: tf.validarObservacao(o.texto, 'Decisão da conferência', o.obrig) }; } catch (e) { s = { erro: e.message }; }
+    if ((s.ok !== undefined ? s.ok : s.erro) === (o.esperado.ok !== undefined ? o.esperado.ok : o.esperado.erro)) r.observacoes += 1; else r.falhas.push(`decisão ${JSON.stringify(o.texto).slice(0, 30)} obrig=${o.obrig}: front ${JSON.stringify(o.esperado)} servidor ${JSON.stringify(s).slice(0, 80)}`);
+  }
   return r;
 }
 

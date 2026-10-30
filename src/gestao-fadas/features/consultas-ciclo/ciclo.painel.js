@@ -13,6 +13,7 @@ const presenca = require('../presenca/presenca.service');
 const horarios = require('../horarios/horarios.service');
 const consultas = require('./ciclo.service');
 const comum = require('./ciclo.comum');
+const { contasDasTarologas } = require('../agenda/agenda-painel.contexto');
 const { hojeOperacional } = require('../../_comum/dia-operacional');
 
 const precosService = require('../financeiro-cliente/precos.service');
@@ -42,7 +43,7 @@ async function fontes(req) {
   return {
     readAt: new Date().toISOString(), today: hojeOperacional(), date: `${(req.query && req.query.date) || hojeOperacional()}`,
     agenda: ag.items, queueRevisions: ag.queueRevisions, consultations: co.items, profiles: pr.profiles, overrides: ho.overrides,
-    intakeEvents: ag.intakeEvents, requests: ag.requests, restrictions: restricoes || [], payments: pagamentos ? pagamentos.items : [], benefits: pagamentos ? pagamentos.benefits : [], pricing: preco, missing: falta, ...(recados ? { notes: recados.items } : {}), ...(divergencias ? { divergences: divergencias } : {}),
+    intakeEvents: ag.intakeEvents, requests: ag.requests, accounts: await contasDasTarologas(), restrictions: restricoes || [], payments: pagamentos ? pagamentos.items : [], benefits: pagamentos ? pagamentos.benefits : [], pricing: preco, missing: falta, ...(recados ? { notes: recados.items } : {}), ...(divergencias ? { divergences: divergencias } : {}),
   };
 }
 

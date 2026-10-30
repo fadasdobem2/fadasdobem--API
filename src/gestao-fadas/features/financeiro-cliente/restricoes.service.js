@@ -100,7 +100,18 @@ async function gravar(req) {
       await ex.execute('SELECT pg_advisory_xact_lock(hashtext(?))', [`gf_restricoes:${id}`]);
       const [linhas] = await ex.execute('SELECT id, item, version FROM gf_restricoes WHERE id = ? FOR UPDATE', [id]);
       const antes = linhas[0] ? comoItem(linhas[0]) : null;
-      if ((antes ? Number(linhas[0].version) : 0) !== expectedVersion) throw f.conflitoVersao('A restrição mudou. Atualize a tela e tente novamente.');
+      if ((antes ? Number(linhas[0].version) : 0) !== expectedVersion) {
+        // Repetição sem novidade (Maturacao/38): o front deriva a restrição da queixa (id `complaint-<consulta>`, sempre o mesmo) a partir da consulta e a reenvia como
+        // "nova" (versão 0) antes de a leitura chegar, em laço. Só vale para essa criação repetida; edição com versão velha segue 409. Se o registro NÃO traz evento além do que o servidor já tem (mesma cliente, taróloga e história),
+        // (o instante dos eventos que nascem da queixa muda quando o servidor carimba a consulta, por isso só ação e motivo contam) não há o que gravar nem o que conflitar: devolve o registro atual (e a versão) para a tela adotar e o laço parar.
+        const chave = (h) => h.map((e) => ({ action: e.action, reason: e.reason }));
+        const daQueixa = expectedVersion === 0 && /^complaint-/.test(id) && (pedido.complaintConsultationIds || []).length > 0;
+        const semNovidade = daQueixa && antes && pedido.history.length <= antes.history.length && igual(chave(pedido.history), chave(antes.history.slice(0, pedido.history.length)))
+          && antes.clientId === pedido.clientId && antes.tarotId === pedido.tarotId && dom.solicitante(antes) === dom.solicitante(pedido)
+          && igual(pedido.complaintConsultationIds || [], (antes.complaintConsultationIds || []).slice(0, (pedido.complaintConsultationIds || []).length));
+        if (semNovidade) return { antes: null, depois: { version: Number(linhas[0].version), repeticao: true }, resposta: { readAt: new Date().toISOString(), items: [antes], versions: { [id]: Number(linhas[0].version) } } };
+        throw f.conflitoVersao('A restrição mudou. Atualize a tela e tente novamente.');
+      }
       if (antes && (antes.clientId !== pedido.clientId || antes.tarotId !== pedido.tarotId || dom.solicitante(antes) !== dom.solicitante(pedido))) throw f.regra('Não foi possível identificar esta alteração.');
       conferirSequencia(antes, pedido);
       const novos = pedido.history.slice(antes ? antes.history.length : 0);

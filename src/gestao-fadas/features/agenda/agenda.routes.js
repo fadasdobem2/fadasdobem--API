@@ -29,5 +29,6 @@ module.exports = [
   { metodo: 'POST', caminho: '/agenda/:id/requested-wait', escrita: true, handler: c.prazo },
   { metodo: 'POST', caminho: '/agenda/:id/resolution', escrita: true, handler: c.resolucao },
   { metodo: 'POST', caminho: '/agenda/:id/route-general', escrita: true, handler: fila.encaminhar },
+  { metodo: 'POST', caminho: '/agenda/:id/schedule-general', escrita: true, handler: fila.agendar },
   { metodo: 'POST', caminho: '/agenda/:id/reservation/release', escrita: true, handler: fila.liberar },
 ];

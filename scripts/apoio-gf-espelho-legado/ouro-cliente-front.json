@@ -1,0 +1,556 @@
+{
+ "geradoDe": "features/integration/legacy-client-write.ts (legacyIdentityChanges)",
+ "casos": [
+  {
+   "mudancas": {
+    "name": "Ana Souza"
+   },
+   "legacy": {
+    "nome_id": "Ana Souza"
+   },
+   "extension": {},
+   "erro": null
+  },
+  {
+   "mudancas": {
+    "name": "  Ana  "
+   },
+   "legacy": {
+    "nome_id": "Ana"
+   },
+   "extension": {},
+   "erro": null
+  },
+  {
+   "mudancas": {
+    "name": ""
+   },
+   "legacy": null,
+   "extension": null,
+   "erro": "Nome de identificação: preencha este campo."
+  },
+  {
+   "mudancas": {
+    "name": "   "
+   },
+   "legacy": null,
+   "extension": null,
+   "erro": "Nome de identificação: preencha este campo."
+  },
+  {
+   "mudancas": {
+    "name": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+   },
+   "legacy": {
+    "nome_id": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+   },
+   "extension": {},
+   "erro": null
+  },
+  {
+   "mudancas": {
+    "name": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+   },
+   "legacy": null,
+   "extension": null,
+   "erro": "Nome de identificação: use no máximo 50 caracteres. O texto não foi cortado."
+  },
+  {
+   "mudancas": {
+    "name": "João Ação"
+   },
+   "legacy": {
+    "nome_id": "João Ação"
+   },
+   "extension": {},
+   "erro": null
+  },
+  {
+   "mudancas": {
+    "name": "a😀b"
+   },
+   "legacy": null,
+   "extension": null,
+   "erro": "Nome de identificação: este cadastro ainda não aceita emojis ou caracteres de quatro bytes. O texto não foi alterado."
+  },
+  {
+   "mudancas": {
+    "name": "a\u0001b"
+   },
+   "legacy": null,
+   "extension": null,
+   "erro": "Nome de identificação: há um caractere de controle inválido. Apague e digite novamente o trecho colado."
+  },
+  {
+   "mudancas": {
+    "name": "a\nb"
+   },
+   "legacy": null,
+   "extension": null,
+   "erro": "Nome de identificação: use uma única linha."
+  },
+  {
+   "mudancas": {
+    "name": "a\tb"
+   },
+   "legacy": null,
+   "extension": null,
+   "erro": "Nome de identificação: use uma única linha."
+  },
+  {
+   "mudancas": {
+    "name": "\ud800"
+   },
+   "legacy": null,
+   "extension": null,
+   "erro": "Nome de identificação: há um caractere incompleto. Apague e digite novamente o trecho colado."
+  },
+  {
+   "mudancas": {
+    "name": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx😀"
+   },
+   "legacy": null,
+   "extension": null,
+   "erro": "Nome de identificação: este cadastro ainda não aceita emojis ou caracteres de quatro bytes. O texto não foi alterado."
+  },
+  {
+   "mudancas": {
+    "name": "Zé"
+   },
+   "legacy": {
+    "nome_id": "Zé"
+   },
+   "extension": {},
+   "erro": null
+  },
+  {
+   "mudancas": {
+    "treatAs": "Aninha"
+   },
+   "legacy": {
+    "nome2": "Aninha"
+   },
+   "extension": {},
+   "erro": null
+  },
+  {
+   "mudancas": {
+    "treatAs": ""
+   },
+   "legacy": {
+    "nome2": ""
+   },
+   "extension": {},
+   "erro": null
+  },
+  {
+   "mudancas": {
+    "treatAs": "  "
+   },
+   "legacy": {
+    "nome2": ""
+   },
+   "extension": {},
+   "erro": null
+  },
+  {
+   "mudancas": {
+    "treatAs": "yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy"
+   },
+   "legacy": {
+    "nome2": "yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy"
+   },
+   "extension": {},
+   "erro": null
+  },
+  {
+   "mudancas": {
+    "treatAs": "yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy"
+   },
+   "legacy": null,
+   "extension": null,
+   "erro": "Tratar por: use no máximo 50 caracteres. O texto não foi cortado."
+  },
+  {
+   "mudancas": {
+    "treatAs": "oi 🔮"
+   },
+   "legacy": null,
+   "extension": null,
+   "erro": "Tratar por: este cadastro ainda não aceita emojis ou caracteres de quatro bytes. O texto não foi alterado."
+  },
+  {
+   "mudancas": {
+    "treatAs": "li\nnha"
+   },
+   "legacy": null,
+   "extension": null,
+   "erro": "Tratar por: use uma única linha."
+  },
+  {
+   "mudancas": {
+    "treatAs": "ç"
+   },
+   "legacy": {
+    "nome2": "ç"
+   },
+   "extension": {},
+   "erro": null
+  },
+  {
+   "mudancas": {
+    "whatsapp": "+55 11 98888-0000"
+   },
+   "legacy": {
+    "whats": "+55 11 98888-0000"
+   },
+   "extension": {},
+   "erro": null
+  },
+  {
+   "mudancas": {
+    "whatsapp": ""
+   },
+   "legacy": {
+    "whats": ""
+   },
+   "extension": {},
+   "erro": null
+  },
+  {
+   "mudancas": {
+    "whatsapp": "  "
+   },
+   "legacy": {
+    "whats": ""
+   },
+   "extension": {},
+   "erro": null
+  },
+  {
+   "mudancas": {
+    "whatsapp": "555555555555555555555555555555555555555555555"
+   },
+   "legacy": {
+    "whats": "555555555555555555555555555555555555555555555"
+   },
+   "extension": {},
+   "erro": null
+  },
+  {
+   "mudancas": {
+    "whatsapp": "5555555555555555555555555555555555555555555555"
+   },
+   "legacy": null,
+   "extension": null,
+   "erro": "WhatsApp: use no máximo 45 caracteres. O texto não foi cortado."
+  },
+  {
+   "mudancas": {
+    "whatsapp": "11 9 9999 🙂"
+   },
+   "legacy": null,
+   "extension": null,
+   "erro": "WhatsApp: este cadastro ainda não aceita emojis ou caracteres de quatro bytes. O texto não foi alterado."
+  },
+  {
+   "mudancas": {
+    "whatsapp": "a\u0007b"
+   },
+   "legacy": null,
+   "extension": null,
+   "erro": "WhatsApp: há um caractere de controle inválido. Apague e digite novamente o trecho colado."
+  },
+  {
+   "mudancas": {
+    "birthDate": "05/03/1980"
+   },
+   "legacy": {
+    "datanascimento": "1980-03-05 00:00:00"
+   },
+   "extension": {},
+   "erro": null
+  },
+  {
+   "mudancas": {
+    "birthDate": " 05/03/1980 "
+   },
+   "legacy": {
+    "datanascimento": "1980-03-05 00:00:00"
+   },
+   "extension": {},
+   "erro": null
+  },
+  {
+   "mudancas": {
+    "birthDate": "29/02/2000"
+   },
+   "legacy": {
+    "datanascimento": "2000-02-29 00:00:00"
+   },
+   "extension": {},
+   "erro": null
+  },
+  {
+   "mudancas": {
+    "birthDate": "29/02/1999"
+   },
+   "legacy": null,
+   "extension": null,
+   "erro": "Informe o nascimento no formato dd/mm/aaaa."
+  },
+  {
+   "mudancas": {
+    "birthDate": "31/04/1990"
+   },
+   "legacy": null,
+   "extension": null,
+   "erro": "Informe o nascimento no formato dd/mm/aaaa."
+  },
+  {
+   "mudancas": {
+    "birthDate": "00/01/1990"
+   },
+   "legacy": null,
+   "extension": null,
+   "erro": "Informe o nascimento no formato dd/mm/aaaa."
+  },
+  {
+   "mudancas": {
+    "birthDate": "01/13/1990"
+   },
+   "legacy": null,
+   "extension": null,
+   "erro": "Informe o nascimento no formato dd/mm/aaaa."
+  },
+  {
+   "mudancas": {
+    "birthDate": "01/01/0999"
+   },
+   "legacy": null,
+   "extension": null,
+   "erro": "Informe o nascimento no formato dd/mm/aaaa."
+  },
+  {
+   "mudancas": {
+    "birthDate": "01/01/1000"
+   },
+   "legacy": {
+    "datanascimento": "1000-01-01 00:00:00"
+   },
+   "extension": {},
+   "erro": null
+  },
+  {
+   "mudancas": {
+    "birthDate": "01/01/9999"
+   },
+   "legacy": {
+    "datanascimento": "9999-01-01 00:00:00"
+   },
+   "extension": {},
+   "erro": null
+  },
+  {
+   "mudancas": {
+    "birthDate": "1980-03-05"
+   },
+   "legacy": null,
+   "extension": null,
+   "erro": "Informe o nascimento no formato dd/mm/aaaa."
+  },
+  {
+   "mudancas": {
+    "birthDate": "5/3/1980"
+   },
+   "legacy": null,
+   "extension": null,
+   "erro": "Informe o nascimento no formato dd/mm/aaaa."
+  },
+  {
+   "mudancas": {
+    "birthDate": ""
+   },
+   "legacy": null,
+   "extension": null,
+   "erro": "A data de nascimento não pode ser apagada neste cadastro."
+  },
+  {
+   "mudancas": {
+    "birthDate": "  "
+   },
+   "legacy": null,
+   "extension": null,
+   "erro": "A data de nascimento não pode ser apagada neste cadastro."
+  },
+  {
+   "mudancas": {
+    "birthDate": "32/01/1990"
+   },
+   "legacy": null,
+   "extension": null,
+   "erro": "Informe o nascimento no formato dd/mm/aaaa."
+  },
+  {
+   "mudancas": {
+    "birthDate": "15/08/2026"
+   },
+   "legacy": {
+    "datanascimento": "2026-08-15 00:00:00"
+   },
+   "extension": {},
+   "erro": null
+  },
+  {
+   "mudancas": {
+    "paymentProfile": ""
+   },
+   "legacy": {},
+   "extension": {
+    "payment_profile": null
+   },
+   "erro": null
+  },
+  {
+   "mudancas": {
+    "paymentProfile": "Pré-pago"
+   },
+   "legacy": {},
+   "extension": {
+    "payment_profile": "Pré-pago"
+   },
+   "erro": null
+  },
+  {
+   "mudancas": {
+    "paymentProfile": "Pós-pago"
+   },
+   "legacy": {},
+   "extension": {
+    "payment_profile": "Pós-pago"
+   },
+   "erro": null
+  },
+  {
+   "mudancas": {
+    "paymentProfile": "Pré-paga"
+   },
+   "legacy": null,
+   "extension": null,
+   "erro": "Selecione Pré ou Pós."
+  },
+  {
+   "mudancas": {
+    "paymentProfile": "lixo"
+   },
+   "legacy": null,
+   "extension": null,
+   "erro": "Selecione Pré ou Pós."
+  },
+  {
+   "mudancas": {
+    "name": "Ana",
+    "treatAs": "Aninha",
+    "whatsapp": "+55 11 90000-0000",
+    "birthDate": "05/03/1980",
+    "paymentProfile": "Pré-pago"
+   },
+   "legacy": {
+    "nome_id": "Ana",
+    "nome2": "Aninha",
+    "whats": "+55 11 90000-0000",
+    "datanascimento": "1980-03-05 00:00:00"
+   },
+   "extension": {
+    "payment_profile": "Pré-pago"
+   },
+   "erro": null
+  },
+  {
+   "mudancas": {
+    "name": "Ana",
+    "whatsapp": ""
+   },
+   "legacy": {
+    "nome_id": "Ana",
+    "whats": ""
+   },
+   "extension": {},
+   "erro": null
+  },
+  {
+   "mudancas": {
+    "treatAs": "",
+    "birthDate": "29/02/2000"
+   },
+   "legacy": {
+    "nome2": "",
+    "datanascimento": "2000-02-29 00:00:00"
+   },
+   "extension": {},
+   "erro": null
+  },
+  {
+   "mudancas": {
+    "name": "",
+    "treatAs": "ok"
+   },
+   "legacy": null,
+   "extension": null,
+   "erro": "Nome de identificação: preencha este campo."
+  },
+  {
+   "mudancas": {},
+   "legacy": {},
+   "extension": {},
+   "erro": null
+  }
+ ],
+ "ids": [
+  {
+   "id": "1",
+   "ok": true,
+   "erro": null
+  },
+  {
+   "id": "900013",
+   "ok": true,
+   "erro": null
+  },
+  {
+   "id": "2147483647",
+   "ok": true,
+   "erro": null
+  },
+  {
+   "id": "2147483648",
+   "ok": false,
+   "erro": "ID da cliente: informe um número de 1 a 2147483647, sem cortar dígitos."
+  },
+  {
+   "id": "0",
+   "ok": false,
+   "erro": "ID da cliente: informe um número de 1 a 2147483647, sem cortar dígitos."
+  },
+  {
+   "id": "-1",
+   "ok": false,
+   "erro": "ID da cliente: informe um número de 1 a 2147483647, sem cortar dígitos."
+  },
+  {
+   "id": "abc",
+   "ok": false,
+   "erro": "ID da cliente: informe um número de 1 a 2147483647, sem cortar dígitos."
+  },
+  {
+   "id": "",
+   "ok": false,
+   "erro": "ID da cliente: informe um número de 1 a 2147483647, sem cortar dígitos."
+  },
+  {
+   "id": "01",
+   "ok": true,
+   "erro": null
+  }
+ ]
+}

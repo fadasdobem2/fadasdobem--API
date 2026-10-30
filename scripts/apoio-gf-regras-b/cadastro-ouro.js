@@ -66,7 +66,23 @@ async function gerar(ctx) {
     }
     const proj = await ctx.carregar('/features/professionals/registration-projection.ts');
     for (const a of aprovacoes) a.projecao = proj.approvedRegistrationProjection({ id: 'reg-1', data: a.data, status: 'approved', revision: 3, tarotId: 'luna-real', createdAt: 'x', updatedAt: 'x' });
-    return { hoje: HOJE, cenarios, aprovacoes };
+    // Diretório do tarólogo (edição do perfil, doc 44 #54): as listas e textos do `validateRegistrationData` REAL, um campo por vez, como o servidor os recebe em `directory`.
+    const DIR = ['definitions', 'oracles', 'techniques', 'spreads', 'channels', 'themes', 'biography', 'capabilityGroups', 'capabilityNone'];
+    const diretorio = [];
+    for (const campo of DIR) for (const [c2, vals] of MUTACOES) {
+      if (c2 !== campo) continue;
+      for (const v of vals.concat([['x'.repeat(160)], ['x'.repeat(161)], [' ', 'a', 'a'], [1], ['a\u0001'], undefined])) {
+        const e = valido(); e[campo] = v; if (v === undefined) delete e[campo];
+        const r = tentar(() => mod.validateRegistrationData(e, {}));
+        diretorio.push({ campo, valor: v === undefined ? null : v, ausente: v === undefined, esperado: r.ok ? { ok: r.ok[campo] } : { erro: r.erro } });
+      }
+    }
+    // Combinação que o front recusa só no conjunto.
+    for (const [g, n] of [[{ tarot: ['x'] }, ['tarot']], [{}, ['tarot']], [{ tarot: [] }, ['tarot']]]) {
+      const e = valido(); e.capabilityGroups = g; e.capabilityNone = n; const r = tentar(() => mod.validateRegistrationData(e, {}));
+      diretorio.push({ campo: 'grupos+nenhum', grupos: g, nenhum: n, esperado: r.ok ? { ok: true } : { erro: r.erro } });
+    }
+    return { hoje: HOJE, cenarios, aprovacoes, diretorio };
   } finally { globalThis.Date = RealDate; }
 }
 

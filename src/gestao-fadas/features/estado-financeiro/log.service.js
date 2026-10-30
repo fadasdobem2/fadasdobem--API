@@ -36,7 +36,7 @@ async function gravar(req) {
   try { eventos = dom.validar(b.events); } catch (e) { throw c.traduzir(e); }
   const conta = String(contaDaRequisicao(req));
   return f.gravar(req, {
-    escopo: 'estado-financeiro.log', operationKey, corpo: { events: eventos }, entidade: 'log_operacional', entidadeId: eventos[0].id.slice(0, 120), acao: 'estado-financeiro.log.registrar',
+    escopo: 'estado-financeiro.log', operationKey, corpo: { events: eventos }, entidade: 'log_operacional', entidadeId: eventos[0].id.slice(0, 64).trim(), acao: 'estado-financeiro.log.registrar',
     producao: async (ex) => {
       let gravados = 0;
       for (const e of eventos) {

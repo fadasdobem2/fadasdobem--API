@@ -213,7 +213,8 @@ const HOJE = () => require(r('src/gestao-fadas/_comum/dia-operacional')).hojeOpe
   await passo('acompanhamento de pagamento (serviceFollowUp): o navegador só acrescenta um evento; ator e instante são do servidor; história não se altera', async () => {
     require(r('src/gestao-fadas/features/financeiro-cliente/fin.contexto')).definirLeitorDePartida(async (ids) => new Map(ids.map((id) => [id, { centavos: 0, conhecido: true, nome: `Cliente ${id}` }])));
     require(r('src/gestao-fadas/features/financeiro-cliente/pagamentos.service')).definirVerificadorDeCliente(async () => true);
-    const rec = { id: 'pag-s1', clientId: '900040', client: 'Cliente 900040', amount: 44.4, method: 'PIX', bank: 'Itaú', payerName: 'Fulana de Tal', cashUnitValue: 2.96, status: 'Informado', paidAt: new Date(Date.now() - 600000).toISOString(), informedAt: AGORA(), informedBy: 'x', movements: [], audit: [{ id: 'au1', action: 'Pagamento informado', actor: 'x', createdAt: AGORA(), detail: 'x' }] };
+    const dom = (m) => require(r(`src/gestao-fadas/_comum/dominio/${m}`)); const ref = dom('pagamentos-preco').referenciaDePreco(44.4, '900040', new Date().toISOString(), dom('financeiro-base').PRECOS_PADRAO, { consultations: [], profiles: { 900040: { clientId: '900040', credit: 0, movements: [], minuteBenefits: [] } }, history: [] }, null, 'PIX');
+    const rec = dom('pagamentos-lancamento').criarPagamento({ method: 'PIX', amount: '44,40', bank: 'Itaú', payerName: 'Fulana de Tal', authorization: '', note: '', ...(ref.purchase ? { purchase: ref.purchase } : { cashUnitValue: ref.cashUnitValue }) }, { clientId: '900040', client: 'Cliente 900040' }, 'Khloe', new Date().toISOString(), 'pag-s1', undefined, require(r('src/gestao-fadas/_comum/dominio/financeiro-base')).PRECOS_PADRAO); // registro igual ao que o front produz (createPaymentRecord)
     const c = await chamar('POST', '/payments', { operationKey: n(), record: rec }); assert.equal(c.status, 200, c.t);
     const v = c.j.versions['pag-s1']; const base = c.j.items[0];
     const ev = { id: 'fu-1', action: 'asked', at: '2000-01-01T00:00:00.000Z', actor: 'Invasor', reason: 'x' };
@@ -225,6 +226,23 @@ const HOJE = () => require(r('src/gestao-fadas/_comum/dia-operacional')).hojeOpe
     assert.equal(alterada.status, 422, alterada.t); assert.match(alterada.j.error.message, /O acompanhamento do pagamento mudou/);
     const dupla = await chamar('POST', '/payments/pag-s1/revise', { operationKey: n(), expectedVersion: v2, record: { ...a.j.items[0], serviceFollowUp: { events: [e1[0], { id: 'fu-2', action: 'asked', at: AGORA(), actor: 'x', reason: 'x' }] } } });
     assert.equal(dupla.status, 200, `repetição: ${dupla.t}`); assert.equal(dupla.j.items[0].serviceFollowUp.events.length, 1, 'já perguntado: a repetição não grava');
+  });
+
+  await passo('agendar da fila geral pelo servidor (schedule-general): ele monta o agendamento (posição, cobertura, observação, plano) e recusa com a frase do front', async () => {
+    await criarNaFila('ag-q1', '900050');
+    const ver = () => chamar('GET', '/agenda').then((y) => y.j.versions['ag-q1']);
+    const base = { operationKey: n(), tarotId: 'osiris' };
+    const ruim = await chamar('POST', '/agenda/ag-q1/schedule-general', { ...base, expectedVersion: await ver(), details: { date: '2000-01-01', observation: 'x', position: 'last' } });
+    assert.equal(ruim.status, 422, ruim.t); assert.equal(ruim.j.error.message, 'Escolha hoje ou uma data futura.');
+    const plano = await chamar('POST', '/agenda/ag-q1/schedule-general', { operationKey: n(), tarotId: 'osiris', expectedVersion: await ver(), details: { date: hoje, observation: 'x', position: 'last', contactPlan: { who: 'staff', timing: 'exact', time: 'xx' } } });
+    assert.equal(plano.status, 422, plano.t); assert.equal(plano.j.error.message, 'Informe um horário válido, como 20:00.');
+    const velha = await chamar('POST', '/agenda/ag-q1/schedule-general', { operationKey: n(), tarotId: 'osiris', expectedVersion: 99, details: { date: hoje, observation: 'x', position: 'last' } });
+    assert.equal(velha.status, 409, velha.t);
+    const ok = await chamar('POST', '/agenda/ag-q1/schedule-general', { operationKey: n(), tarotId: 'osiris', expectedVersion: await ver(), details: { date: hoje, observation: '  Prefere à tarde  ', position: 'last', requestedTime: 'por volta das 15h' } });
+    assert.equal(ok.status, 200, ok.t); const it = ok.j.agenda.find((r) => r.id === 'ag-q1');
+    assert.equal(it.tarotId, 'osiris'); assert.equal(it.observation, 'Prefere à tarde'); assert.equal(it.paymentPending, true); assert.ok(it.position >= 2); assert.equal(it.scheduleHistory.length, 1); assert.equal(it.scheduleHistory[0].actor, 'Khloe'); assert.equal(it.requestedTime, 'por volta das 15h');
+    const de = await chamar('POST', '/agenda/ag-q1/schedule-general', { operationKey: n(), tarotId: 'osiris', expectedVersion: ok.j.versions['ag-q1'], details: { date: hoje, observation: 'x', position: 'last' } });
+    assert.equal(de.status, 422, de.t); assert.equal(de.j.error.message, 'Esta cliente não está mais disponível na Fila Geral.');
   });
 
   console.log('Relógio do servidor nos eventos da Agenda');

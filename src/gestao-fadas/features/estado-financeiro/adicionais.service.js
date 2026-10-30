@@ -116,7 +116,7 @@ async function gravar(req) {
   if (!loja.TIPOS[kind] || !f.ehObjeto(record[kind])) throw f.invalido('record');
   const pedido = record[kind]; const id = idDe(pedido.id); const chave = loja.chaveDe(kind, id);
   return f.gravar(req, {
-    escopo: 'estado-financeiro.adicionais', operationKey, corpo: { chave, expectedVersion, record }, entidade: 'adicional', entidadeId: chave.slice(0, 120), acao: `estado-financeiro.adicional.${kind}`,
+    escopo: 'estado-financeiro.adicionais', operationKey, corpo: { chave, expectedVersion, record }, entidade: 'adicional', entidadeId: chave.slice(0, 64).trim(), acao: `estado-financeiro.adicional.${kind}`,
     producao: async (ex) => {
       try {
         await ex.execute('SELECT pg_advisory_xact_lock(hashtext(?))', ['gf_adicionais_itens']);

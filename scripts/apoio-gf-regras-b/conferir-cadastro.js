@@ -26,6 +26,14 @@ function conferir() {
     const proj = dom.projecaoAprovada({ id: 'reg-1', revisao: 3, dados: a.data, tarotId: 'luna-real' });
     if (forma(pub) === forma(a.publico) && forma(proj) === forma(a.projecao)) r.aprovacoes += 1; else r.falhas.push('aprovação: perfil público ou projeção diferente do front');
   }
+  r.diretorio = 0;
+  const dir = require('../../src/gestao-fadas/_comum/dominio/catalogo-tarologos');
+  for (const d of ouro.diretorio || []) {
+    let o; try { o = { ok: d.campo === 'grupos+nenhum' ? dir.validarDiretorio({ capabilityGroups: d.grupos, capabilityNone: d.nenhum }) : dir.validarDiretorio(d.ausente ? {} : { [d.campo]: d.valor }) }; } catch (e) { o = { erro: e.message }; }
+    if (d.esperado.erro !== undefined) { if (o.erro === d.esperado.erro) r.diretorio += 1; else r.falhas.push(`diretório ${d.campo}=${JSON.stringify(d.valor).slice(0, 40)}: front "${d.esperado.erro}" servidor "${o.erro || 'aceitou'}"`); }
+    else if (o.erro) r.falhas.push(`diretório ${d.campo}=${JSON.stringify(d.valor).slice(0, 40)}: front aceita, servidor recusou "${o.erro}"`);
+    else if (d.campo !== 'grupos+nenhum' && !d.ausente && JSON.stringify(o.ok[d.campo]) !== JSON.stringify(d.esperado.ok)) r.falhas.push(`diretório ${d.campo}: valor ${JSON.stringify(o.ok[d.campo])} x ${JSON.stringify(d.esperado.ok)}`); else r.diretorio += 1;
+  }
   return r;
 }
 

@@ -141,4 +141,20 @@ function aplicarDelta(item, bruto, grupo, ator, agora = new Date()) {
   return { item: proximo, eventos };
 }
 
-module.exports = { aplicarDelta, conferirCampo, comRelogioDoServidor };
+/**
+ * O agendamento NOVO (`POST /agenda`): o servidor dá o número público, a posição, quem criou e quando; o resto é o comando do front
+ * (`createCommand` em integration/agenda/real-agenda-plan.ts, sobre o item de `agenda-experience.tsx`). Puro: o serviço e o ouro usam esta função.
+ * @param {{abertos:object[], numero:number, agora:Date, hoje:string}} servidor
+ */
+function itemNovo(c, ator, servidor) {
+  const { proximaPosicao } = require('./agenda-contato');
+  const base = {
+    id: c.id, publicNumber: servidor.numero, tarotId: c.tarotId, clientId: c.clientId, client: c.client, date: c.date, createdAt: servidor.agora.toISOString(), createdBy: ator.nome,
+    response: 'Aguardando resposta', contact: { attempt: 1, date: c.date, tags: [] }, paymentPending: false,
+    position: proximaPosicao(servidor.abertos, c.tarotId, c.date, servidor.hoje),
+  };
+  const r = aplicarDelta(base, { set: c.set, unset: c.unset, append: c.append }, 'agendamento', ator, servidor.agora);
+  return { item: { ...r.item, position: base.position }, eventos: r.eventos };
+}
+
+module.exports = { aplicarDelta, itemNovo, conferirCampo, comRelogioDoServidor };

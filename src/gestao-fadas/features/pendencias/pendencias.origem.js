@@ -18,6 +18,7 @@ const consultasResposta = require('../consultas-ciclo/ciclo.resposta');
 const agendaStore = require('../agenda/agenda.store');
 const contexto = require('../financeiro-cliente/fin.contexto');
 const adicionaisFonte = require('../estado-financeiro/adicionais.fonte');
+const { dadosEfetivosDoCliente } = require('../../legado-escrita/fusao');
 
 let leitor = null;
 /** Para os testes: lê as fontes de onde o teste mandar (o resto do caminho é o de produção). */
@@ -33,7 +34,7 @@ async function lerOrientacoes(m) {
   const pendentes = linhas.map((l) => l.id_cliente);
   if (!pendentes.length) return [];
   const [vivas, exts] = await Promise.all([contexto.partidaNoLegado(pendentes), m.GfClientesExt.findAll({ where: { id_cliente: pendentes } })]);
-  const editados = new Map(exts.map((e) => { const d = typeof e.dados === 'string' ? JSON.parse(e.dados) : e.dados || {}; return [e.id_cliente, typeof d.name === 'string' ? d.name.trim() : '']; }));
+  const editados = new Map(exts.map((e) => { const d = dadosEfetivosDoCliente(e); return [e.id_cliente, typeof d.name === 'string' ? d.name.trim() : '']; }));
   return linhas.filter((l) => vivas.get(l.id_cliente)).map((l) => ({ clientId: l.id_cliente, nome: (editados.get(l.id_cliente) || vivas.get(l.id_cliente).nome || '').trim() || `Cliente ${l.id_cliente}`, guidance: f.textoDe(l) }));
 }
 

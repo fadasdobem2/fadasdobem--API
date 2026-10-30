@@ -25,4 +25,16 @@ function reproduzir(antes, comandos, at) {
   } catch (e) { return { erro: e.message }; }
 }
 
-module.exports = { reproduzir, resumo, forma, GRUPO_DA_ROTA, ATOR };
+/** Campos que o servidor dá no agendamento novo (número público, posição): o ouro compara o resto. */
+const semServidor = (item) => { const { publicNumber, position, ...resto } = item; return resto; };
+
+/** `POST /agenda` sem banco: o comando do front sobre o item novo que `itemNovo` monta. */
+function criar(cmd, abertos, at) {
+  const { itemNovo } = require('../../src/gestao-fadas/_comum/dominio/agenda-delta');
+  try {
+    const c = { id: cmd.id, tarotId: cmd.tarotId, clientId: cmd.clientId, client: cmd.client, date: cmd.date, set: cmd.delta.set, unset: cmd.delta.unset, append: cmd.delta.append };
+    return { item: itemNovo(c, ATOR, { abertos, numero: 1, agora: new Date(at), hoje: '2026-11-10' }).item };
+  } catch (e) { return { erro: e.message }; }
+}
+
+module.exports = { criar, semServidor, reproduzir, resumo, forma, GRUPO_DA_ROTA, ATOR };

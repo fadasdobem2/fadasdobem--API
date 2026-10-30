@@ -150,6 +150,7 @@ function tarifaDeCredito(clientId, em, minutosPedidos, consultas, pagamentos, pe
     hasUnpricedOpening: disponiveis.some((l) => l.kind === 'opening' && !l.minutesKnown),
     availableLots: disponiveis.map((l) => ({ ...l })),
     paymentIds: [...new Set(usados.flatMap((l) => (l.paymentId ? [l.paymentId] : [])))],
+    sourceConsultationId: usados.length && usados.every((l) => l.sourceConsultationId === usados[0].sourceConsultationId) ? usados[0].sourceConsultationId : undefined,
   };
 }
 

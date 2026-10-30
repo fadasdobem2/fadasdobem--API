@@ -101,7 +101,7 @@ function rotaCadastro(provedor) {
       }
       return responder(res, await cadastro.receberEnvio(corpo));
     } catch (e) {
-      console.error(`[gate] cadastro de tarólogos indisponível: ${(e && e.name) || 'erro'}`);
+      console.error(`[gate] cadastro de tarólogos indisponível: ${(e && e.name) || 'erro'}`); if (process.env.GF_DEBUG_X) console.error(e);
       return erro(res, 503, 'Não foi possível salvar ou carregar o cadastro. Seu rascunho foi mantido. Tente novamente.');
     }
   };

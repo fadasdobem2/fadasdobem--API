@@ -120,4 +120,4 @@ function refazerTransferencia(antes, depois, ator, agora, contexto) {
   return { tipo: 'transferencia-saldo', registro: rodar(ator.nome, agora) };
 }
 
-module.exports = { refazerOcorrencia, refazerTransferencia, comandoDeOcorrencia, pernasNovas, dadosDaTransferencia };
+module.exports = { comMotivos, refazerOcorrencia, refazerTransferencia, comandoDeOcorrencia, pernasNovas, dadosDaTransferencia };

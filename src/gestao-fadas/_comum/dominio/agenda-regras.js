@@ -66,7 +66,7 @@ function eventoDeContato(e) {
 /**
  * O contato vigente novo precisa seguir o antigo e ser coerente como o front o produz (`toggleAgendaTag`, `removeAgendaTag`,
  * `restoreAgendaContact`, `applyAgendaContactPlan`; provado com ouro nos 7.856 comandos de Maturacao/44):
- * tentativa nunca volta e sobe no máximo 1 por evento (ou 1 sem evento), etiquetas conhecidas e sem repetição, dia válido;
+ * tentativa nunca volta e sobe no máximo 1 por evento mais 1 (a restauração do contato não grava evento; editar movendo a conta duas vezes), etiquetas conhecidas e sem repetição, dia válido;
  * `agendaOutcome` é Concluída/Cancelada exatamente quando a etiqueta está no contato (e então há `resolvedAt`);
  * "Em consulta" no fluxo só com a etiqueta; o `after` do último evento é o contato novo.
  */
@@ -74,7 +74,7 @@ function contatoNovo(antes, depois, eventos = []) {
   const alvo = depois.contact;
   const c = contatoDe({ ...antes, contact: alvo });
   const subiu = alvo && Number.isInteger(alvo.attempt) ? alvo.attempt - contatoDe(antes).attempt : -1;
-  if (!Number.isInteger(alvo && alvo.attempt) || subiu < 0 || subiu > Math.max(1, eventos.length) || !ehDataCivil(alvo.date) || !listaDeEtiquetas(alvo.tags) || c.tags.length > 12 || new Set(alvo.tags).size !== alvo.tags.length) throw regra('Não foi possível registrar o contato.');
+  if (!Number.isInteger(alvo && alvo.attempt) || subiu < 0 || subiu > eventos.length + 1 || !ehDataCivil(alvo.date) || !listaDeEtiquetas(alvo.tags) || c.tags.length > 12 || new Set(alvo.tags).size !== alvo.tags.length) throw regra('Não foi possível registrar o contato.');
   const desfecho = alvo.tags.includes('Concluída') ? 'Concluída' : alvo.tags.includes('Cancelada') ? 'Cancelada' : undefined;
   if (depois.agendaOutcome !== desfecho || (desfecho && !depois.resolvedAt) || (depois.workflowStatus === 'Em consulta') !== alvo.tags.includes('Em consulta')) throw regra('Não foi possível registrar o contato.');
   const ultimo = [...eventos].reverse().find((e) => e.tag !== 'Pediu estorno');

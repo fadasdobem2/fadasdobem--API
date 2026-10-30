@@ -9,10 +9,10 @@
 const fs = require('fs');
 const path = require('path');
 const { abrir } = require('./apoio-gf-regras-b/front');
-const { reproduzir, resumo } = require('./apoio-gf-regras-b/replay-agenda');
+const { reproduzir, resumo, criar, semServidor } = require('./apoio-gf-regras-b/replay-agenda');
 
 const arg = (n) => (process.argv.find((a) => a.startsWith(`--${n}=`)) || '').slice(n.length + 3);
-const GRUPOS = { agenda: './apoio-gf-regras-b/agenda-ouro', horarios: './apoio-gf-regras-b/horarios-ouro', cadastro: './apoio-gf-regras-b/cadastro-ouro', contas: './apoio-gf-regras-b/contas-ouro', clientes: './apoio-gf-regras-b/clientes-ouro', tarologos: './apoio-gf-regras-b/tarologos-ouro' };
+const GRUPOS = { agenda: './apoio-gf-regras-b/agenda-ouro', horarios: './apoio-gf-regras-b/horarios-ouro', cadastro: './apoio-gf-regras-b/cadastro-ouro', contas: './apoio-gf-regras-b/contas-ouro', clientes: './apoio-gf-regras-b/clientes-ouro', tarologos: './apoio-gf-regras-b/tarologos-ouro', permissoes: './apoio-gf-regras-b/permissoes-ouro', servico: './apoio-gf-regras-b/servico-ouro' };
 const escolhidos = (arg('grupo') || Object.keys(GRUPOS).join(',')).split(',').filter(Boolean);
 
 async function main() {
@@ -33,6 +33,15 @@ async function main() {
           c.resumo = resumo(c.depois); c.depoisCompleto = igual ? undefined : c.depois;
           delete c.depois;
         }
+        // Criações: o servidor monta o item (número, posição, autor, relógio) com `itemNovo` e aplica o comando do front.
+        let criacoesOk = 0; const criacoesFalhas = [];
+        for (const c of r.criacoes) {
+          const cmd = c.comandos[0]; const s = criar(cmd, c.abertos, c.at);
+          const igual = s.item && resumo(semServidor(s.item)) === resumo(semServidor(c.depois));
+          if (igual) criacoesOk += 1; else criacoesFalhas.push({ acao: c.acao, erro: s.erro });
+          c.resumo = resumo(semServidor(c.depois)); c.depoisCompleto = igual ? undefined : c.depois; delete c.depois;
+        }
+        console.log(`agenda criações: ${r.criacoes.length}; servidor igual ao front em ${criacoesOk}; divergências ${criacoesFalhas.length} ${JSON.stringify(criacoesFalhas.slice(0, 3))}`);
         const por = {}; for (const c of r.cenarios) por[c.tipo] = (por[c.tipo] || 0) + 1;
         console.log(`agenda: ${r.cenarios.length} cenários ${JSON.stringify(por)}; servidor igual ao front em ${ok}; divergências ${quebras.length}`);
         const porAcao = {}; for (const q of quebras) { const k = `${q.acao.split(':').slice(0, 2).join(':')} | ${q.erro || 'item diferente'}`; porAcao[k] = (porAcao[k] || 0) + 1; }

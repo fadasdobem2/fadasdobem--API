@@ -16,6 +16,7 @@ const { emTransacao, escritaHabilitada } = require('../../novo/escritor');
 const store = require('./cadastro-tarologo.store');
 const { nomeDe } = require('./cadastros.comum');
 const catalogo = require('./tarologos.store');
+const espelho = require('../../legado-escrita/entidades');
 const { montarItem } = require('../../_comum/dominio/catalogo-tarologos');
 
 const ID = /^[A-Za-z0-9_-]{1,100}$/;
@@ -91,6 +92,8 @@ async function projetarNoCatalogo(ex, { tarotId, registroId, revisao, publico, p
     await ex.execute('INSERT INTO gf_tarologos_perfil (tarot_id, id_legado, nome, avatar, cadastro_ativo, perfil, registro_id, registro_revisao, revisao, atualizado_por) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, ?)',
       [tarotId, idLegado, campos.nome, campos.avatar, true, JSON.stringify(campos.perfil), registroId, revisao, por]);
   }
+  // Espelho no legado (Maturacao/45): o nome aprovado é o do catálogo; só quem já existe em `tbl_tarologos` (`id_legado`) é espelhado. Criar tarólogo no legado: pergunta aberta.
+  await espelho.tarologos.registrar(ex, tarotId, ['nome']);
   return montarItem({ legado: null, perfil: { ...(atual || { tarot_id: tarotId, conta_slug: null }), ...campos, registro_id: registroId, registro_revisao: revisao, revisao: atual ? atual.revisao + 1 : 1 }, ext: null });
 }
 
@@ -113,7 +116,9 @@ async function salvar(req, payload, hoje = new Date()) {
   const aprovando = payload.status === 'approved';
   const publico = aprovando ? perfilPublico(dados, tarotId) : null;
   const privado = publico ? Object.fromEntries(Object.entries(dados).filter(([k]) => !(k in publico))) : null;
-  return emTransacao(async (ex) => {
+  const posteriores = []; // espelho no legado: depois do commit
+  const resposta = await emTransacao(async (ex) => {
+    ex.posCommit = posteriores;
     await store.travar(ex, `gf_cadastro:${id}`);
     const anterior = await store.porIdTravado(ex, id);
     if (anterior && anterior.tarot_id && anterior.tarot_id !== tarotId) return R({ error: 'O vínculo profissional desta ficha não pode ser substituído.' }, 409);
@@ -133,6 +138,8 @@ async function salvar(req, payload, hoje = new Date()) {
     const [linhas] = await ex.execute(`SELECT ${store.COLUNAS} FROM gf_cadastros_tarologo WHERE id = ?`, [id]);
     return R({ record: store.paraRegistro(linhas[0]), ...(publico ? { publicProfile: publico } : {}) });
   });
+  for (const tarefa of posteriores) { try { await tarefa(); } catch (e) { console.error('[gf-cadastro-tarologo] tarefa posterior falhou:', (e && e.message) || e); } }
+  return resposta;
 }
 
 /** POST action `create-update-link` (editor). */

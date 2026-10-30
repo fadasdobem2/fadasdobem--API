@@ -23,13 +23,14 @@ const SELECT_CONTAGEM = 'SELECT COUNT(*) AS n FROM tbl_consultas';
 const SELECT_ULTIMO_ID = 'SELECT LAST_INSERT_ID() AS id';
 
 const PERMITIDAS = new Set([INSERT_CONSULTA, UPDATE_CONSULTA, SELECT_CONSULTA, SELECT_TAROLOGO, SELECT_CANDIDATAS, SELECT_CONTAGEM, SELECT_ULTIMO_ID]);
+const entidades = require('./sql.entidades');
 const CONTROLE = /^(start\s+transaction|commit|rollback)$/i;
 
 /** Devolve `null` se a instrução é permitida, ou o motivo da recusa. */
 function motivoDeRecusa(sql) {
   const texto = String(sql).trim();
   if (CONTROLE.test(texto)) return null;
-  if (PERMITIDAS.has(texto)) return null;
+  if (PERMITIDAS.has(texto) || entidades.PERMITIDAS.has(texto)) return null;
   const palavra = (texto.split(/\s+/)[0] || '').toUpperCase();
   return `instrução fora da allowlist (${palavra || 'vazia'})`;
 }

@@ -17,7 +17,7 @@ const arg = (n) => (process.argv.find((a) => a.startsWith(`--${n}=`)) || '').sli
 const front = path.resolve(arg('front'));
 if (!arg('front') || !fs.existsSync(path.join(front, 'package.json'))) { console.error('Informe --front=<pasta do front>'); process.exit(2); }
 const req = createRequire(path.join(front, 'package.json'));
-const AREAS = ['movimento', 'ocorrencias', 'transferencia', 'planilha', 'compra', 'datas'];
+const AREAS = ['movimento', 'ocorrencias', 'transferencia', 'planilha', 'compra', 'datas', 'duplicidade'];
 const so = arg('so') ? arg('so').split(',') : AREAS;
 
 async function main() {

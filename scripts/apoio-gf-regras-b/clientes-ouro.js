@@ -28,7 +28,12 @@ async function gerar(ctx) {
     if (alea() < 0.4) m.birthDate = sorteio(NASC); if (alea() < 0.4) m.paymentProfile = sorteio(PERFIS);
     add(sorteio(IDS.slice(0, 2)), m);
   }
-  return { cenarios };
+  // Decisão da conferência da divergência (`validateObservation`): texto livre, mas com limite, controle e obrigatoriedade.
+  const iv = await ctx.carregar('/features/domain/input-validation.ts');
+  const textos = ['', '  ', 'Mantido.', 'linha 1\nlinha 2', 'a\tb', 'x'.repeat(4000), 'x'.repeat(4001), '😀'.repeat(4000), '😀'.repeat(4001), 'a\u0001b', 'a\u007fb', 'a\u0085b', 5, null, 'a\u2028b', ' x '];
+  const observacoes = [];
+  for (const t of textos) for (const obrig of [false, true]) { const r = tentar(() => iv.validateObservation(t, 'Decisão da conferência', obrig)); observacoes.push({ texto: t, obrig, esperado: r.ok !== undefined ? { ok: r.ok } : { erro: r.erro } }); }
+  return { cenarios, observacoes };
 }
 
 module.exports = { gerar };

@@ -75,6 +75,9 @@ function verificar() {
   });
   conferir('compensações lidas', compensados > 20, String(compensados));
 
+  // `readerRevisions` (extrato da taróloga) é acrescentado pelo front depois de cada alteração e não entra na comparação (achado no navegador real).
+  conferir('comparação ignora readerRevisions do front', comparavel({ id: 'a', audit: [], x: 1 }, 0) === comparavel({ id: 'a', audit: [], x: 1, readerRevisions: [{ id: 'r' }] }, 0));
+
   // 2. Encerramento pela equipe (transcrito do componente): estados e frases.
   const { variantesDaConferencia, ISO } = fabrica;
   const v = variantesDaConferencia()[1]; const k1 = v.consultas.find((x) => x.id === 'K1');

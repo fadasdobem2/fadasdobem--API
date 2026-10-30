@@ -65,7 +65,7 @@ Contas de teste do ambiente local: `src/dev/contas-teste.js`. A senha de teste *
 
 ## Fatias do Gestão Fadas (cada uma tem sua flag)
 
-`GF_FATIA_HORARIOS`, `GF_FATIA_PRESENCA`, `GF_FATIA_AGENDA`, `GF_FATIA_CONSULTA`, `GF_FATIA_CADASTROS`, `GF_FATIA_PRECOS`, `GF_FATIA_PAGAMENTOS`, `GF_FATIA_RESTRICOES`, `GF_FATIA_PAINEL`, `GF_FATIA_RECADOS`, `GF_FATIA_DIVERGENCIAS`, `GF_FATIA_CONTAS`, `GF_FATIA_CONFIG`, `GF_FATIA_PENDENCIAS`, `GF_FATIA_FICHA`, `GF_FATIA_CLIENTES`. Flag desligada: a rota responde 404 e a sessão não anuncia a funcionalidade. A tabela completa (migração, tabelas, rotas) está na documentação.
+`GF_FATIA_HORARIOS`, `GF_FATIA_PRESENCA`, `GF_FATIA_AGENDA`, `GF_FATIA_CONSULTA`, `GF_FATIA_CADASTROS`, `GF_FATIA_PRECOS`, `GF_FATIA_PAGAMENTOS`, `GF_FATIA_RESTRICOES`, `GF_FATIA_PAINEL`, `GF_FATIA_RECADOS`, `GF_FATIA_DIVERGENCIAS`, `GF_FATIA_CONTAS`, `GF_FATIA_CONFIG`, `GF_FATIA_PENDENCIAS`, `GF_FATIA_FICHA`, `GF_FATIA_CLIENTES`, `GF_FATIA_ESTADO_FINANCEIRO`. Também existem `GF_FINANCEIRO_REGRAS` (ligada por padrão) e as de escrita no legado `GF_LEGADO_ESCRITA_ENABLED`, `GF_LEGADO_CLIENTES`, `GF_LEGADO_TAROLOGOS` (todas desligadas por padrão). Flag desligada: a rota responde 404 e a sessão não anuncia a funcionalidade. A tabela completa (migração, tabelas, rotas) está na documentação.
 
 ## Verificação
 

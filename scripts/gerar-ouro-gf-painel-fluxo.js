@@ -123,6 +123,8 @@ async function main() {
   const dateNow = Date.now;
   try {
     const fl = await vite.ssrLoadModule('/features/painel/panel-flow-model.ts');
+    const aviso = await vite.ssrLoadModule('/features/agenda/schedule-availability-notice.ts');
+    let contador = 0; Object.defineProperty(globalThis.crypto, 'randomUUID', { value: () => `id-${++contador}`, configurable: true });
     const tentar = (fn) => { try { return { ok: fn() }; } catch (e) { return { erro: e instanceof Error ? e.message : String(e) }; } };
     const ids = (l) => (l || []).map((x) => x.id);
     const casos = []; let pulados = 0; const estat = { livre: 0, validacoesOk: 0, validacoesRecusa: 0, mutantes: 0, mutantesRecusados: 0 };
@@ -180,6 +182,19 @@ async function main() {
           agendar: tentar(() => { fl.validateGeneralScheduling(entrada, alvo.id, tarotId, dataAg, hora); return true; }) };
         for (const n of ['encaminhar', 'lancar', 'agendar']) { if (r[n].ok) estat.validacoesOk += 1; else estat.validacoesRecusa += 1; }
         caso.validacoes.push(r);
+      }
+      // agendar a partir da fila geral: o agendamento MONTADO pelo front (`scheduleGeneralMatch`) e o destino (`generalMatchDestination`)
+      caso.montagens = [];
+      for (const x of caso.validacoes) {
+        if (!x.agendar.ok || !chance(0.7)) continue;
+        const plano = chance(0.5) ? undefined : sorteio([{ who: 'staff', timing: 'none' }, { who: 'client', timing: 'none' }, { who: 'staff', timing: 'exact', time: '10:30', callback: true }, { who: 'staff', timing: 'after', time: '15:00' }, { who: 'staff', timing: 'shift', shift: { label: 'Tarde', start: '14:00', end: '18:00' } }, { who: 'staff', timing: 'approximate', time: '9h' }, { who: 'staff', timing: 'exact', time: 'xx' }, { who: 'staff', timing: 'shift', shift: { label: ' ', start: '14:00', end: '14:00' } }]);
+        const detalhes = { date: x.dataAg, time: chance(0.4) ? x.hora || undefined : undefined, requestedTime: chance(0.3) ? 'por volta das 10' : undefined, contactPlan: plano, observation: sorteio([' texto com espaços ', '', '   ', 'Cliente prefere à tarde.']), position: chance(0.5) ? 'last' : 1 + inteiro(4) };
+        const avisoReal = aviso.scheduleAvailabilityNotice({ profile: profiles.find((r) => r.id === x.tarotId), overrides, date: detalhes.date, time: plano && plano.timing === 'after' ? plano.time : plano && plano.timing === 'shift' ? plano.shift && plano.shift.start : detalhes.time, requestedTime: detalhes.requestedTime, timeKind: plano && plano.timing, now: agora, intakeEvents });
+        if (avisoReal && chance(0.7)) detalhes.availabilityConfirmation = avisoReal.key; else if (avisoReal && chance(0.5)) detalhes.availabilityConfirmation = 'chave-errada';
+        const perfilCliente = chance(0.5) ? undefined : { id: entrada.agenda.find((a) => a.id === x.item).clientId, name: 'Nome', credit: sorteio([0, 20, 44.4]), movements: [], ...(chance(0.3) ? { paymentProfile: 'Pós-pago' } : {}) };
+        contador = 0; const m = tentar(() => fl.scheduleGeneralMatch(entrada, x.item, x.tarotId, detalhes, perfilCliente, 'Equipe'));
+        const preferir = chance(0.3); contador = 0; const d = tentar(() => { const r = fl.generalMatchDestination(entrada, x.item, x.tarotId, perfilCliente, preferir); const { benefits, ...resto } = r; return resto; });
+        caso.montagens.push({ item: x.item, tarotId: x.tarotId, detalhes, preferir, perfilCliente: perfilCliente || null, resultado: m.erro ? m : { ok: JSON.parse(JSON.stringify(m.ok)) }, destino: d });
       }
       // mutantes: parte de um destino que o front ACEITA e o corrompe; o front passa a recusar e o servidor tem de recusar com a mesma frase
       caso.mutantes = [];

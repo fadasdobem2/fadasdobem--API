@@ -188,6 +188,8 @@ function classeDaEquipe(antes, depois, notas) {
   if (para === 'Resolvida') {
     if (!aberta(antes)) falha('Este relato foi atualizado. Reabra a divergência antes de aplicar a decisão.');
     if (!texto(depois.decision) || !depois.decision.trim() || !depois.resolvedBy || !depois.resolvedAt) falha('Informe a decisão da conferência.');
+    // `validateObservation(decision, "Decisão da conferência")` de divergence-detail-dialog.tsx:205: controle, surrogate e até 4.000 caracteres.
+    try { require('./texto-front').validarObservacao(depois.decision, 'Decisão da conferência'); } catch (e) { if (e instanceof require('./texto-front').TextoDoFrontError) falha(e.message); else throw e; }
     return 'resolucao';
   }
   return falha('Não foi possível identificar esta alteração.');

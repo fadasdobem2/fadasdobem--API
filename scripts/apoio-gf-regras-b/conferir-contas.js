@@ -50,6 +50,8 @@ function conferir() {
       else r.aceitos += 1;
     }
   });
+  r.vinculos = 0;
+  for (const v of ouro.vinculo || []) { const o = dom.conferirVinculo(v); if (o === v.esperado) r.vinculos += 1; else r.falhas.push(`vínculo ${JSON.stringify(v)}: front ${v.esperado} servidor ${o}`); }
   for (const x of ouro.senhas) { if (dom.senhaForte(x.s) === x.forte) r.senhas += 1; else r.falhas.push(`senha "${x.s}": front ${x.forte} servidor ${!x.forte}`); }
   return r;
 }

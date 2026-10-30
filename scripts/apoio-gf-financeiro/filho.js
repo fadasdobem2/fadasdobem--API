@@ -18,6 +18,8 @@ Object.assign(process.env, {
   GF_FATIA_CONSULTA: 'true', GF_FATIA_AGENDA: 'true', GF_FATIA_PRESENCA: 'true', GF_FATIA_PRECOS: 'true', GF_FATIA_PAGAMENTOS: 'true', GF_FATIA_RESTRICOES: 'true',
 });
 delete process.env.GF_LEGADO_ESCRITA_ENABLED;
+// Este filho prova as conferências de FORMA do doc 41 com registros simplificados (modo desligado explícito); as regras refeitas estão em apoio-gf-financeiro-regras/filho.js.
+process.env.GF_FINANCEIRO_REGRAS = 'false';
 const r = (p) => path.join(raiz, p);
 
 (async () => {

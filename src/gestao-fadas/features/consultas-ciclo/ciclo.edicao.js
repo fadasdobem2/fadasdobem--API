@@ -27,4 +27,22 @@ async function conferir(ex, { a, antes, pedido, agora }) {
   }
 }
 
-module.exports = { conferir, MSG_OCUPADA };
+const cobranca = require('../../_comum/dominio/consulta-edicao-cobranca');
+const { RegraConsultaError } = sessao;
+const comoItem = (l) => (typeof l.item === 'string' ? JSON.parse(l.item) : l.item);
+
+/**
+ * O SERVIDOR refaz `billing`, `minuteValue` e (na troca de cliente) o máximo no início gravado da edição, com a tabela de preços real
+ * (`gf_precos_versoes`), os pagamentos e as consultas reais da cliente. Devolve os campos refeitos (instante e autor do servidor) ou `null`
+ * quando não é uma gravação do formulário de edição (ou sem a fatia Pagamentos). Divergência do navegador = 422.
+ */
+async function refazerPreco(ex, { a, antes, pedido, agora }) {
+  if (!cobranca.ehEdicaoDeTela(antes, pedido)) return null;
+  const fin = await financeiro.contexto(ex, pedido);
+  if (!fin) return null;
+  const [linhas] = await ex.execute('SELECT id, item FROM gf_precos_versoes ORDER BY criado_em, id');
+  const ctx = { payments: fin.payments, consultations: [...fin.consultations.filter((i) => i.id !== antes.id), ...(antes.clientId === pedido.clientId ? [antes] : [])], profiles: { [pedido.clientId]: fin.profile }, history: linhas.map(comoItem) };
+  try { return cobranca.conferirECorrigir(antes, pedido, ctx, { em: agora, ator: a.nome }); } catch (e) { throw e instanceof RegraConsultaError ? e : new RegraConsultaError(cobranca.MENSAGEM); }
+}
+
+module.exports = { conferir, refazerPreco, MSG_OCUPADA };

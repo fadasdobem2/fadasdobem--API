@@ -37,7 +37,27 @@ async function gerar(ctx) {
     cenarios.push({ draft, resetting, esperado: pl.planAccountCommand(draft, CONTAS, resetting) });
   }
   const senhas = SENHAS.concat(['Abcdefghij1!', 'Abcdefghij1', 'abcdefghij1!', 'ABCDEFGHIJ1!', 'Abcdefghij!!', 'Abc1!', 'Ação#Forte1234', '12345678901!aA']).map((s) => ({ s, forte: dc.strongAccountPassword(s) }));
-  return { contas: CONTAS, cenarios, senhas };
+  return { contas: CONTAS, cenarios, senhas, vinculo: await module.exports.gerarVinculo(ctx) };
 }
 
 module.exports = { gerar };
+
+/** Vínculo conta x cadastro (saveAccount, home-experience.tsx:1368-1369, TRANSCRITO) com `professionalSettingsRows` e `accountBelongsToProfessional` REAIS. */
+async function gerarVinculo(ctx) {
+  const ps = await ctx.carregar('/features/admin/professional-settings-model.ts');
+  const perfil = (id, nome) => ({ id, name: nome, registrationActive: true, official: [], today: '', note: '', online: false, status: 'Pausa' });
+  const contaT = (id, tarotId, nome) => ({ id, tarotId, name: nome, email: `${id}@x.com`, role: 'tarologa', commission: '30%', access: 'x', active: true });
+  const cenarios = [];
+  for (const contas of [[], [contaT('u1', 't1', 'Ana')], [contaT('u2', undefined, 'Ana')], [contaT('u1', 't1', 'Ana'), contaT('u9', 't2', 'Bia')]]) {
+    for (const tarotId of ['t1', 't2', 't3']) for (const idEditando of [undefined, 'u1', 'u2', 'u9']) for (const papel of ['tarologa', 'atendente', 'administradora']) {
+      const linhas = ps.professionalSettingsRows([perfil('t1', 'Ana'), perfil('t2', 'Bia')], [], contas);
+      const registration = linhas.find((r) => r.id === tarotId);
+      let erro = null;
+      if (registration?.account && registration.account.id !== idEditando) erro = 'Esta profissional já possui acesso. Abra o cadastro existente.';
+      else if (registration && papel !== 'tarologa') erro = 'O acesso deve continuar vinculado à profissional.';
+      cenarios.push({ temCadastro: Boolean(registration), contaDoCadastroId: registration?.account?.id || null, idEditando, papel, esperado: erro });
+    }
+  }
+  return cenarios;
+}
+module.exports.gerarVinculo = gerarVinculo;

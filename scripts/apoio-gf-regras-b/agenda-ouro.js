@@ -146,10 +146,61 @@ async function gerar(ctx) {
     }
     registrar('saida:reschedule', item, tr.changeAgendaDestination(item, { ...item, date: AMANHA }, { action: 'reschedule', reason: 'Reagendou', actor: ATOR, at: AGORA, date: DIA }));
     registrar('saida:reschedule-remarcou', item, tr.changeAgendaDestination(item, { ...item, date: AMANHA }, { action: 'reschedule', reason: 'Remarcou amanhã', actor: ATOR, at: AGORA, date: DIA, incident: 'Lançamento errado' }));
+    // Resolução manual (agenda-experience.tsx:877, 909 e consultations-experience.tsx:952, TRANSCRITAS com `restoreAgendaContact` real).
+    const evento = (acao) => ({ id: `res-${acao}-${item.id}`, action: acao, consultationId: 'C-9', actor: ATOR, createdAt: AGORA, detail: `Decisão: ${acao}.` });
+    for (const acao of ['Agendamento mantido', 'Correspondência ignorada', 'Agendamento editado']) registrar(`resolucao:${acao}`, item, { ...item, resolutionHistory: [...(item.resolutionHistory || []), evento(acao)] });
+    registrar('resolucao:Restaurada na agenda', item, { ...ct.restoreAgendaContact(item), resolutionHistory: [...(item.resolutionHistory || []), evento('Restaurada na agenda')] });
+    registrar('resolucao:Correspondência invalidada', item, { ...item, dismissedConsultationIds: [...(item.dismissedConsultationIds || []), 'C-9'], resolutionHistory: [...(item.resolutionHistory || []), evento('Correspondência invalidada')] });
     registrar('saida:next-shift', item, tr.changeAgendaDestination(item, { ...item, date: AMANHA }, { action: 'next-shift', reason: 'Reagendou', actor: ATOR, at: AGORA, date: DIA }));
     void fechado;
   }
-  return { estados: [...unicos.keys()].map((k) => JSON.parse(k)), cenarios };
+  // Criar agendamento (agenda-experience.tsx:1194, TRANSCRITO) com `applyAgendaContactPlan`, `initialAgendaObservations` e `planAgendaCommands` REAIS.
+  const criacoes = [];
+  for (let i = 0; i < 160; i += 1) {
+    const dataNova = sorteio([DIA, AMANHA]); const tarotId = sorteio(['osiris', 'nyx', 'afila']);
+    const texto = sorteio(['', 'Prefere à noite.', '   ', 'Sem observações.', 'Pediu retorno às 20h']);
+    const plano = sorteio([...PLANOS.slice(0, 7), { who: 'staff', timing: 'none' }]);
+    const bruto = { id: `novo-${i}`, standbyDate: alea() < 0.2 ? DIA : undefined, tarotId, time: '10:00', createdAt: AGORA, createdBy: ATOR, clientId: `${700000 + i}`, client: `Nova ${i}`, date: dataNova,
+      scheduledTime: alea() < 0.4 ? '20:00' : undefined, requestedTime: alea() < 0.3 ? 'à noite' : undefined, channel: 'WhatsApp', ...ob.initialAgendaObservations(texto, ATOR, AGORA, `obs-${i}`),
+      response: 'Aguardando resposta', contact: { attempt: 1, date: dataNova, tags: [] }, paymentPending: false, position: i + 1 };
+    const r = tentar(() => pl.applyAgendaContactPlan(bruto, plano, { actor: ATOR, at: AGORA, date: dataNova }));
+    if (r.erro) continue;
+    const comandos = plan.planAgendaCommands([], [r.ok]);
+    criacoes.push({ acao: `criar:${tarotId}`, comandos, resumo: null, depois: r.ok, abertos: sorteio([[], [base(900, { tarotId, position: 3 })]]), at: AGORA });
+  }
+  // Edição geral (agenda-experience.tsx:1159-1185, TRANSCRITA): data, horário, observação reagendando com o combinado novo.
+  for (const item of estados.slice(0, 70)) {
+    if (ct.agendaIsClosed(item) || item.workflowStatus === 'Em consulta') continue;
+    const plano = sorteio(PLANOS.slice(0, 7));
+    const editado = { ...item, date: sorteio([DIA, AMANHA]), scheduledTime: sorteio(['20:00', undefined]), requestedTime: sorteio(['à noite', undefined]), standbyDate: sorteio([DIA, undefined]) };
+    const r = tentar(() => pl.applyAgendaContactPlan(editado, plano, { actor: ATOR, at: AGORA, date: editado.date, reschedule: true, releaseReservation: true }));
+    if (r.ok) registrar(`edicao:${plano.timing}`, item, r.ok);
+  }
+  // Editar MOVENDO (agenda-experience.tsx:1175-1185, TRANSCRITO): `changeAgendaDestination` e depois `applyAgendaContactPlan` com remarcar (a tentativa sobe nos dois).
+  for (const item of estados.slice(0, 90)) {
+    if (ct.agendaIsClosed(item) || item.workflowStatus === 'Em consulta') continue;
+    for (const acao of ['transfer', 'reschedule', 'next-shift']) {
+      const plano = sorteio(PLANOS.slice(0, 7)); const novo = { ...item, tarotId: acao === 'transfer' ? 'nyx' : item.tarotId, date: acao === 'transfer' ? item.date : AMANHA };
+      const movido = tr.changeAgendaDestination(item, novo, { action: acao, reason: acao === 'transfer' ? 'Pediu outro tarólogo' : 'Reagendou', actor: ATOR, at: AGORA, date: DIA });
+      const r = tentar(() => pl.applyAgendaContactPlan(movido, plano, { actor: ATOR, at: AGORA, date: novo.date, reschedule: true, releaseReservation: true }));
+      if (r.ok) registrar(`edicao-movendo:${acao}`, item, r.ok);
+    }
+  }
+  // Outros caminhos REAIS que gravam o contato: avisar (agenda-board-move.ts: "Avisar de novo" e "Avisada" em sequência) e retorno de contato (agenda-contact-return.ts).
+  const rc = await ctx.carregar('/features/agenda/agenda-contact-return.ts');
+  const AGORA_MS = Date.parse(AGORA);
+  for (const item of estados) {
+    if (ct.agendaIsClosed(item) || item.workflowStatus === 'Em consulta') continue;
+    let aviso = item;
+    if (ct.agendaHasPreviousContact(aviso)) aviso = ct.toggleAgendaTag(aviso, 'Avisar de novo', ATOR, AGORA, DIA, false, undefined, 'activate');
+    aviso = ct.toggleAgendaTag(aviso, 'Avisada', ATOR, AGORA, DIA, false, undefined, 'activate');
+    registrar('sequencia:avisar', item, aviso);
+    for (const escolha of [{ kind: 'minutes', minutes: 10 }, { kind: 'minutes', minutes: 30 }, { kind: 'none' }]) {
+      const r = tentar(() => rc.setAgendaContactReturn([item], item.id, escolha, ATOR, DIA, AGORA_MS, rc.agendaContactReturnSnapshot(item))[0]);
+      if (r.ok) registrar(`retorno:${escolha.kind}`, item, r.ok, { at: AGORA });
+    }
+  }
+  return { criacoes, estados: [...unicos.keys()].map((k) => JSON.parse(k)), cenarios };
 }
 
 module.exports = { gerar, base, DIA, AMANHA, AGORA, ATOR };

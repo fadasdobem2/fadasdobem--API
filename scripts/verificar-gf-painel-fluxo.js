@@ -16,6 +16,8 @@ const k = require('../src/gestao-fadas/_comum/dominio/painel-continuacao');
 const v = require('../src/gestao-fadas/_comum/dominio/painel-validacao');
 const { MUTANTES } = require('./apoio-gf-painel/mutantes-fluxo');
 const { resumoDoFluxo } = require('./apoio-gf-painel/resumo-fluxo');
+const ag = require('../src/gestao-fadas/_comum/dominio/painel-agendamento');
+let montagens = 0; let montagensRecusadas = 0;
 
 const originalNow = Date.now;
 Date.now = () => { throw new Error('Date.now() chamado dentro da regra: o relógio tem de ser injetado'); };
@@ -34,6 +36,14 @@ ouro.casos.forEach((caso, n) => {
   comparar(rot('continuacoes'), caso.continuacoes, k.reservasDeContinuacao({ agenda: e.agenda, consultations: e.consultations, now: e.now }).map((r) => [r.source.tarotId, r.source.id, r.item.id]).sort());
   comparar(rot('tempos'), caso.tempos, e.agenda.map((a) => { const t = q.temporizacao(a, e.date, e.now); return { id: a.id, requestedAt: t.requestedAt, enteredAt: t.enteredAt, future: t.future, waitingWindow: t.waitingWindow, active: t.active, status: t.status, waitMs: t.waitMs, label: t.label, grupo: q.grupo(a, e.date, e.now) }; }));
   livres += f.team.filter((r) => r.freeNow).length;
+  for (const mt of caso.montagens || []) {
+    let k = 0; const novoId = () => `id-${++k}`; const perfilCliente = mt.perfilCliente || undefined;
+    let res; try { res = { ok: JSON.parse(JSON.stringify(ag.montarAgendamento(e, mt.item, mt.tarotId, mt.detalhes, perfilCliente, 'Equipe', novoId))) }; } catch (x) { res = { erro: x.message }; }
+    montagens += 1; if (res.erro) montagensRecusadas += 1; comparar(rot(`montar ${mt.item}->${mt.tarotId}`), mt.resultado, res);
+    let dest; try { const r = ag.destinoDoAgendamento(e, mt.item, mt.tarotId, perfilCliente, mt.preferir); const { benefits: _b, ...resto } = r; dest = { ok: JSON.parse(JSON.stringify(resto)) }; } catch (x) { dest = { erro: x.message }; }
+    const esperadoDestino = mt.destino.ok ? { ok: Object.fromEntries(Object.entries(mt.destino.ok).filter(([c]) => c !== 'benefits')) } : mt.destino;
+    comparar(rot(`destino ${mt.item}->${mt.tarotId}`), esperadoDestino, dest);
+  }
   for (const m of caso.mutantes || []) {
     const mutada = MUTANTES[m.nome](e, { item: m.item, tarotId: m.tarotId });
     const obt = tentar(() => {
@@ -67,4 +77,4 @@ ouro.casos.forEach((caso, n) => {
 }
 Date.now = originalNow;
 if (falhas) { console.error(`FALHOU: ${falhas} divergências entre o servidor e o código real do front.`); process.exit(1); }
-console.log(`OK: ${ouro.casos.length} casos, ${livres} leitoras livres conferidas, ${validacoes} validações (${recusas} recusas com a frase do front) idênticas ao front; ${mutantes} mutantes (${mutantesRecusados} recusados com a frase do front) idênticos.`);
+console.log(`OK: ${ouro.casos.length} casos, ${livres} leitoras livres conferidas, ${validacoes} validações (${recusas} recusas com a frase do front) idênticas ao front; ${mutantes} mutantes (${mutantesRecusados} recusados com a frase do front) idênticos; ${montagens} agendamentos montados (${montagensRecusadas} recusas com a frase do front) iguais, com o destino.`);

@@ -44,14 +44,19 @@ const ehObjeto = (v) => typeof v === 'object' && v !== null && !Array.isArray(v)
 const traduzir = (e) => (e instanceof CadastroInvalidoError ? regra(e.message) : e);
 
 /** Gravação idempotente: efeito + auditoria + gf_operacoes numa transação. `producao(ex)` devolve `{ antes, depois, resposta }`. */
-async function gravar(req, { escopo, operationKey, corpo, entidade, entidadeId, acao, producao, semAuditoria = false }) {
+async function gravar(req, { escopo, operationKey, corpo, entidade, entidadeId, acao, producao, semAuditoria = false, comContas = false }) {
   if (!escritaHabilitada()) throw new AppError('Gravação desligada neste ambiente.', 503, { codigo: 'WRITE_DISABLED' }, true);
   const conta = contaDaRequisicao(req);
   const perfil = resolverPerfil(req);
   if (!conta || !perfil) throw indisponivel();
+  // Tarefas para DEPOIS do commit (espelho no legado, Maturacao/45): nunca dentro da transação do Postgres.
+  const posteriores = [];
   try {
-    const r = await emTransacao(async (ex) => umaVez(ex, { escopo, chave: operationKey, corpo: { ...corpo, usuario: conta } }, async () => {
-      const feito = await producao(ex);
+    // `comContas`: a mesma conexão também dá a transação das tabelas da A (`users`, `refresh_tokens`), como em Contas (contas.banco.js).
+    const rodar = comContas ? require('../contas/contas.banco').emTransacaoContas : (fn) => emTransacao((ex) => fn(ex));
+    const r = await rodar(async (ex, t) => umaVez(ex, { escopo, chave: operationKey, corpo: { ...corpo, usuario: conta } }, async () => {
+      ex.posCommit = posteriores;
+      const feito = await producao(ex, t);
       if (!semAuditoria) {
         await ex.execute(AUDIT_INSERT, linhaDeAuditoria(
           { actorUserId: conta, actorRole: perfil, action: acao, entity: entidade, entityId: entidadeId, before: feito.antes, after: feito.depois },
@@ -60,6 +65,7 @@ async function gravar(req, { escopo, operationKey, corpo, entidade, entidadeId, 
       }
       return feito.resposta;
     }));
+    if (!r.repetida) for (const tarefa of posteriores) { try { await tarefa(); } catch (e) { console.error('[gf-cadastros] tarefa posterior falhou:', (e && e.message) || e); } }
     return r.resposta;
   } catch (erro) {
     if (erro instanceof OperacaoConflitoError) throw new AppError('Esta operação já foi registrada com outros dados.', 409, { codigo: 'OPERATION_KEY_CONFLICT' }, true);

@@ -84,15 +84,12 @@ async function criar(req) {
   exigirAdministradora(req, true);
   const b = validar.corpoCriar(req.body);
   let item = null;
-  if (b.role === 'tarologa') {
+  if (b.role === 'tarologa' && b.tarotId) {
     item = (await tarologos.catalogo()).find((i) => i.id === b.tarotId);
     if (!item) throw c.regra(dom.MSG.semCadastro);
-    if (item.accountLinked) throw c.regra(dom.MSG.jaTemAcesso);
+    const vinculo = dom.conferirVinculo({ temCadastro: true, contaDoCadastroId: item.accountLinked ? 'ligada' : null, idEditando: undefined, papel: 'tarologa' });
+    if (vinculo) throw c.regra(vinculo);
   }
-  // Ordem do front (`planAccountCommand`): nome e e-mail, e-mail já cadastrado e só então a força da senha.
-  if (await store.emailEmUso(b.email)) throw c.regra(dom.MSG.emailEmUso);
-  validar.exigirSenhaForte(b.password);
-  if (b.role === 'tarologa' && !b.tarotId) throw c.regra(dom.MSG.semCadastro);
   const hash = await hashSenha(b.password);
   const corpo = { role: b.role, tarotId: b.tarotId, name: b.name, email: b.email, senha: marcaSenha(b.password), legacyId: b.legacyId, temFoto: Boolean(b.avatar) };
   return gravar(req, {
@@ -100,6 +97,9 @@ async function criar(req) {
     producao: async (ex, t, ator) => {
       const { User, Specialist } = require('../../../models');
       if (await store.emailEmUso(b.email, t)) throw c.regra(dom.MSG.emailEmUso);
+      // Ordem do front (`planAccountCommand`): nome e e-mail, e-mail já cadastrado, só então a força da senha e o vínculo da taróloga.
+      validar.exigirSenhaForte(b.password);
+      if (b.role === 'tarologa' && !b.tarotId) throw c.regra(dom.MSG.semCadastro);
       const tarologa = b.role === 'tarologa';
       const papeis = dom.PAPEIS_DA_A[b.role];
       const usuario = await User.create({ email: b.email, password_hash: hash, role: tarologa ? 'TAROLOGA' : papeis.produto, is_active: tarologa ? item.registrationActive !== false : true, email_verified_at: new Date() }, { transaction: t });
@@ -138,7 +138,7 @@ async function editar(req) {
       if ((await store.revisaoAtual(ex, id)) !== b.expectedRevision) throw conflitoConta();
       const contasAntes = (await store.lerLinhas(t)).map((l) => store.dto(l));
       if (b.role !== undefined && b.role !== antes.perfil) {
-        if (antes.perfil === 'tarologa' || b.role === 'tarologa') throw c.regra(dom.MSG.vinculada);
+        if (antes.perfil === 'tarologa' || b.role === 'tarologa') throw c.regra(dom.conferirVinculo({ temCadastro: true, contaDoCadastroId: id, idEditando: id, papel: b.role }) || dom.MSG.vinculada);
         if (dom.removeUltimaAdmin(contasAntes, id, b.role)) throw c.regra(dom.MSG.ultimaAdmin);
       }
       if (b.email !== undefined && b.email !== antes.email.toLocaleLowerCase('pt-BR') && await store.emailEmUso(b.email, t, id)) throw c.regra(dom.MSG.emailEmUso);

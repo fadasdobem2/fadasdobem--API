@@ -265,4 +265,19 @@ const CHECKS = {
   ],
 };
 
-module.exports = { CHECKS };
+/**
+ * CHECKs de colunas acrescentadas DEPOIS da criação da tabela (migração 20261128000000, espelho no legado). Ficam à parte de `CHECKS` porque as
+ * migrações antigas criam a tabela com `CHECKS[tabela]` ANTES de essas colunas existirem; a migração nova os aplica por ALTER e o `sync` dos
+ * models (`_definir.js`) os junta aos de `CHECKS`.
+ */
+const ESTADOS_ESPELHO = "('nao_espelhada', 'pendente', 'espelhada', 'sem_registro', 'erro')";
+const CHECKS_ESPELHO = {
+  gf_clientes_ext: [
+    ['chk_clientes_ext_legado_estado', `legado_estado IN ${ESTADOS_ESPELHO}`], ['chk_clientes_ext_legado_pendentes', "jsonb_typeof(legado_pendentes) = 'array'"],
+  ],
+  gf_tarologos_perfil: [
+    ['chk_tarologos_perfil_espelho_estado', `legado_estado IN ${ESTADOS_ESPELHO}`], ['chk_tarologos_perfil_espelho_pendentes', "jsonb_typeof(legado_pendentes) = 'array'"],
+  ],
+};
+
+module.exports = { CHECKS, CHECKS_ESPELHO };

@@ -103,7 +103,7 @@ const r = (p) => path.join(raiz, p);
     const x = await criar('ag-p1', { tarotId: 'estrela', set: { time: '11:00', channel: 'WhatsApp', response: 'Aguardando resposta', paymentPending: false, contact: { attempt: 1, date: '2026-11-10', tags: ['Chama depois'] }, contactPlan: { who: 'staff', timing: 'exact', time: '20h', callback: true }, scheduledTime: '20:00', observation: 'Chamar à noite', observations: [{ id: 'o-p1', text: 'Chamar à noite', createdAt: AGORA(), createdBy: 'x' }] }, append: { contactHistory: [evContato('c-p1', 'Chama depois', { before: [], after: ['Chama depois'] })] } });
     assert.equal(x.status, 200, x.t);
     const it = x.j.agenda[0];
-    assert.equal(it.contactPlan.time, '20:00'); assert.equal(it.contactHistory[0].actor, 'Khloe'); assert.equal(it.observations[0].text, 'Chamar à noite');
+    assert.equal(it.contactPlan.time, '20h'); /* guardado como o front o enviou (Maturacao/44) */ assert.equal(it.contactHistory[0].actor, 'Khloe'); assert.equal(it.observations[0].text, 'Chamar à noite');
   });
 
   console.log('Leitura devolve o que foi gravado');

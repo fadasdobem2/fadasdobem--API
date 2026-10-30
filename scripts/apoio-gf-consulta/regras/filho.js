@@ -14,7 +14,7 @@ const { raiz, passo, resumo, criarUsuario } = require('../../apoio-gf-banco-novo
 
 Object.assign(process.env, {
   GESTAO_FADAS_ESCRITA_ENABLED: 'true', FADAS_ENVIRONMENT: 'test', GF_NOVOS_DADOS: 'postgres', GESTAO_FADAS_ENABLED: 'true',
-  GF_FATIA_CONSULTA: 'true', GF_FATIA_AGENDA: 'true', GF_FATIA_PRESENCA: 'true', GF_FATIA_PAGAMENTOS: 'true', GF_FATIA_PRECOS: 'true',
+  GF_FATIA_CONSULTA: 'true', GF_FATIA_RESTRICOES: 'true', GF_FATIA_AGENDA: 'true', GF_FATIA_PRESENCA: 'true', GF_FATIA_PAGAMENTOS: 'true', GF_FATIA_PRECOS: 'true',
 });
 delete process.env.GF_LEGADO_ESCRITA_ENABLED;
 const r = (p) => path.join(raiz, p);
@@ -32,6 +32,7 @@ const clone = (x) => JSON.parse(JSON.stringify(x));
   ctx.definirLeitorDePartida(async () => new Map());
   const todos = async () => true;
   servico.definirVerificadorDeCliente(todos);
+  require(r('src/gestao-fadas/features/financeiro-cliente/restricoes.service')).definirVerificadorDeCliente(todos);
   const u = { atend: await criarUsuario('Atendente Regras'), adm: await criarUsuario('Administradora Regras'), sup: await criarUsuario('Supervisora Regras') };
   let sessao = { userId: u.atend, role: 'atendente', displayName: 'Khloe' };
   const app = express();
@@ -208,6 +209,36 @@ const clone = (x) => JSON.parse(JSON.stringify(x));
     const trocar = { ...clone(atual), tarotId: 'outro', tarot: 'Outro' };
     const b = await revisar(s.id, atual.updatedAt, trocar); assert.equal(b.status, 422, b.t); assert.match(b.j.error.message, /Só a administradora pode alterar cliente, tarólogo/);
     como('administradora'); const c = await revisar(s.id, atual.updatedAt, trocar, n()); assert.equal(c.status, 200, c.t);
+  });
+
+  console.log('Edição: cobrança refeita no servidor');
+  const ed = ouro('edicao');
+  const casoEd = ed.casos.findIndex((c) => c.t === 'cobranca' && c.r.ok && c.h === 0 && c.pedidoBase.clientId === c.antes.clientId && !c.pedidoBase.coverage && !c.antes.coverage && c.antes.status === 'Em curso' && !c.antes.minuteBenefits);
+  await passo('o registro da edição que o FRONT produziu é aceito e a cobrança gravada leva o instante do servidor; valor do minuto adulterado é 422', async () => {
+    assert.ok(casoEd >= 0, 'sem caso no ouro');
+    const c = ed.casos[casoEd]; como('atendente');
+    const s = await semear({ consultas: ed.cenarios[c.c].consultas, pagamentos: ed.cenarios[c.c].pagamentos, perfil: { ...ed.cenarios[c.c].perfil, minuteBenefits: undefined } }, c.antes);
+    const evento = { id: 'audit-1761825600000-abc999', action: 'Dados corrigidos', detail: 'canal: teste.', actor: 'Atendente Demo', createdAt: EM };
+    const pedido = s.renomear({ ...c.pedidoBase, ...c.r.ok, updatedAt: c.pedidoBase.updatedAt, audit: [...c.antes.audit, evento] });
+    pedido.billing = { ...pedido.billing, decidedBy: 'Atendente Demo', decidedAt: pedido.updatedAt };
+    const ruim = clone(pedido); ruim.minuteValue = (ruim.minuteValue || 2.96) + 0.5;
+    const r1 = await revisar(s.id, s.k1.updatedAt, ruim); assert.equal(r1.status, 422, r1.t); assert.match(r1.j.error.message, /Não foi possível conferir o valor desta edição/);
+    const r2 = await revisar(s.id, s.k1.updatedAt, pedido); assert.equal(r2.status, 200, r2.t);
+    const it = JSON.parse(JSON.stringify((await lerItem(s.id)).item));
+    assert.notEqual(it.billing.decidedAt, pedido.updatedAt, 'o instante da cobrança é do servidor'); assert.equal(it.billing.decidedBy, 'Khloe'); assert.equal(it.minuteValue, pedido.minuteValue);
+  });
+
+  console.log('Restrições da queixa (laço de 409)');
+  await passo('criar de novo a restrição da queixa que já existe devolve o registro atual (200) em vez de 409 em laço; evento novo e versão velha seguem 409', async () => {
+    como('atendente');
+    const rec = { id: 'complaint-CRG-LACO', clientId: '900013', tarotId: 'osiris', requestedBy: 'client', complaintConsultationIds: ['C-laco'], reason: 'Consulta C-laco cancelada por reclamação da cliente. Queixa registrada na consulta.', active: true, createdAt: EM, updatedAt: EM, createdBy: 'x', updatedBy: 'x', history: [{ action: 'created', at: EM, actor: 'x', reason: 'Consulta C-laco cancelada por reclamação da cliente. Queixa registrada na consulta.' }] };
+    await emTransacao(async (ex) => { await store.inserir(ex, { id: 'C-laco', clientId: '900013', client: 'X', tarotId: 'osiris', tarot: 'O', status: 'Cancelada', startedAt: EM, durationSeconds: 60, paymentProfile: 'Pós-paga', channel: 'WhatsApp', attendant: 'K', observation: '', updatedAt: EM, audit: [], commissionRate: 30, awaitingTarologistStart: false, cancellationReview: { status: 'pending' } }, 's', 'sem-laco'); });
+    const put = (id, v, record, chave = n()) => chamar('PUT', `/restrictions/${id}`, { operationKey: chave, expectedVersion: v, record });
+    const a = await put(rec.id, 0, rec); assert.equal(a.status, 200, a.t);
+    const b = await put(rec.id, 0, { ...rec, history: [{ ...rec.history[0], at: '2026-10-31T10:00:00.000Z' }], updatedAt: '2026-10-31T10:00:00.000Z' }); assert.equal(b.status, 200, `criar de novo: ${b.t}`); assert.equal(b.j.versions[rec.id], 1);
+    const c2 = await put(rec.id, 7, rec); assert.equal(c2.status, 409, `edição/versão velha segue 409: ${c2.t}`);
+    const nova = { ...rec, history: [...rec.history, { action: 'edited', at: EM, actor: 'x', reason: 'Outra coisa.' }] };
+    const d = await put(rec.id, 0, nova); assert.equal(d.status, 409, d.t);
   });
 
   console.log('Resumo');

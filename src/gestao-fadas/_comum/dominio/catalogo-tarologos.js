@@ -9,7 +9,8 @@
  * (`tarot-...`). A conta da taróloga se liga ao tarólogo por `conta_slug`; a sessão devolve esse id.
  */
 
-const { CadastroInvalidoError } = require('./cadastro-tarologo');
+const { CadastroInvalidoError, texto: textoDoCadastro, lista: listaDoCadastro, objeto: objetoDoCadastro, GRUPOS_SEM, GRUPOS_COMPETENCIA } = require('./cadastro-tarologo');
+const { campoDoPerfilVale } = require('../../legado-escrita/fusao');
 
 /** Campos do `TarologistDirectoryProfile` que a edição pode gravar (nome, id e situação do cadastro vão em colunas próprias). */
 const LISTAS = ['oracles', 'techniques', 'spreads', 'definitions', 'channels', 'themes', 'informedItems'];
@@ -19,10 +20,8 @@ const GRUPOS = ['definitions', 'tarot', 'cartomancy', 'astrology', 'numerology',
 const PRIVADOS = ['birthDate', 'realFirstName', 'personalWhatsapp', 'avatarWhatsapp'];
 
 const invalido = (m) => new CadastroInvalidoError(m);
-const lista = (v, campo) => {
-  if (!Array.isArray(v) || v.length > 200 || v.some((i) => typeof i !== 'string' || !i.trim() || i.length > 200)) throw invalido(`${campo}: seleção inválida.`);
-  return [...new Set(v.map((i) => i.trim()))];
-};
+/** As listas e textos do diretório seguem `validateRegistrationData` do front (registration-model.ts): mesmas frases, vazios saem, repetidos somem. */
+const lista = listaDoCadastro;
 
 /** Valida a parte `directory` de uma edição e devolve só os campos reconhecidos (campo ausente continua ausente). */
 function validarDiretorio(entrada) {
@@ -32,19 +31,25 @@ function validarDiretorio(entrada) {
   for (const k of LISTAS) if (entrada[k] !== undefined) saida[k] = lista(entrada[k], k);
   for (const [k, max] of Object.entries(TEXTOS)) {
     if (entrada[k] === undefined) continue;
-    if (typeof entrada[k] !== 'string' || entrada[k].length > max) throw invalido(`${k}: informe um texto de até ${max} caracteres.`);
-    saida[k] = entrada[k];
+    if (typeof entrada[k] !== 'string') throw invalido(`${k === 'biography' ? 'Apresentação' : k}: informe um texto.`);
+    saida[k] = k === 'biography' ? textoDoCadastro(entrada[k], 'Apresentação', max) : entrada[k];
+    if (k !== 'biography' && entrada[k].length > max) throw invalido(`${k}: informe um texto de até ${max} caracteres.`);
   }
   if (entrada.registrationRevision !== undefined) {
     if (!Number.isSafeInteger(entrada.registrationRevision) || entrada.registrationRevision < 0) throw invalido('registrationRevision inválido.');
     saida.registrationRevision = entrada.registrationRevision;
   }
   if (entrada.capabilityGroups !== undefined) {
-    const g = entrada.capabilityGroups;
-    if (!g || typeof g !== 'object' || Array.isArray(g) || Object.keys(g).some((k) => !GRUPOS.includes(k))) throw invalido('Grupo de competências inválido.');
+    const g = objetoDoCadastro(entrada.capabilityGroups, 'Grupos de competências');
+    if (Object.keys(g).some((k) => !GRUPOS_COMPETENCIA.includes(k))) throw invalido('Grupo de competências inválido.');
     saida.capabilityGroups = Object.fromEntries(Object.entries(g).map(([k, v]) => [k, lista(v, 'Competências')]));
   }
-  if (entrada.capabilityNone !== undefined) saida.capabilityNone = lista(entrada.capabilityNone, 'Competências não atendidas');
+  if (entrada.capabilityNone !== undefined) {
+    saida.capabilityNone = lista(entrada.capabilityNone, 'Competências não atendidas');
+    if (saida.capabilityNone.some((k) => !GRUPOS_SEM.includes(k))) throw invalido('Grupo de competências inválido.');
+    if (saida.capabilityNone.some((k) => saida.capabilityGroups && saida.capabilityGroups[k] && saida.capabilityGroups[k].length)) throw invalido('Confira as competências: uma categoria não pode estar vazia e selecionada ao mesmo tempo.');
+  }
+  if (saida.channels && saida.channels.some((c) => c !== 'Chat' && c !== 'Voz')) throw invalido('Os canais disponíveis são Chat e Voz.');
   return saida;
 }
 
@@ -65,8 +70,9 @@ function semPrivados(diretorio) {
 function montarItem({ legado, perfil, ext }) {
   const id = perfil ? perfil.tarot_id : String(legado.idTarologo);
   const ativoLegado = legado ? ativoDoLegado(legado.ativo) : null;
-  const nome = (perfil && perfil.nome) || (legado && nomeLegado(legado.nmuTarologo)) || (ext && ext.primeiro_nome_civil) || `Tarólogo ${id}`;
-  const cadastroAtivo = perfil && perfil.cadastro_ativo !== null && perfil.cadastro_ativo !== undefined ? perfil.cadastro_ativo : ativoLegado !== false;
+  // Fusão (Maturacao/45, legado-escrita/fusao.js): nome e situação já espelhados vêm do legado; o perfil só vale sobre ele enquanto o campo está pendente.
+  const nome = (perfil && perfil.nome && campoDoPerfilVale(perfil, 'nome', legado) && perfil.nome) || (legado && nomeLegado(legado.nmuTarologo)) || (perfil && perfil.nome) || (ext && ext.primeiro_nome_civil) || `Tarólogo ${id}`;
+  const cadastroAtivo = perfil && perfil.cadastro_ativo !== null && perfil.cadastro_ativo !== undefined && (campoDoPerfilVale(perfil, 'cadastro_ativo', legado) || ativoLegado === null) ? perfil.cadastro_ativo : ativoLegado !== false;
   const avatar = (perfil && perfil.avatar) || (ext && ext.foto_atual_ref) || undefined;
   const dados = (perfil && perfil.perfil) || {};
   const diretorio = {

@@ -203,7 +203,10 @@ async function revisar(req) {
       const refeito = novo ? novo.item : (kind === 'correcao-tempo' ? await correcao.refazer(ex, reg.item, pedido, c.expectedVersion, agora) : null);
       // Edição de dados: o que o front confere em `saveForm` (consulta com queixa, horário, bônus, saldo, continuação, autorização e ocupação).
       if (kind === 'edicao' && !novo) await edicao.conferir(ex, { a, antes: reg.item, pedido, agora });
+      // Edição pelo formulário: cobrança, valor do minuto e máximo no início gravado refeitos no servidor (`ciclo.edicao.js`).
+      const preco = novo ? null : await edicao.refazerPreco(ex, { a, antes: reg.item, pedido, agora });
       let item = carimbar(reg.item, refeito || pedido, agora, a);
+      if (preco) item = { ...item, ...preco };
       if (item.status === 'Em curso') item = { ...item, durationSeconds: reg.item.durationSeconds };
       const agendaRegs = item.status !== reg.item.status && item.status !== 'Em curso' && !item.tarologistFinishReport ? await agenda.resolver(ex, item, 'terminou', a, c.operationKey) : [];
       const tipo = { desfecho: 'desfecho', conferencia: 'conferencia', 'correcao-tempo': 'correcao', 'correcao-recusada': 'correcao', 'revisao-cancelamento': 'revisao', 'decisao-cancelamento': 'revisao', compensacao: 'compensacao', reabertura: 'reabertura', 'mais-tempo': 'mais_tempo', edicao: 'edicao' }[kind];

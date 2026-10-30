@@ -325,6 +325,9 @@ const LEGADO = [
     assert.notEqual(process.env.GF_LEGADO_ESCRITA_ENABLED, 'true');
   });
 
+  console.log('Serviço do cadastro (ouro do registration-service do front, Maturacao/44)');
+  await require('../apoio-gf-regras-b/servico-filho').rodarServico({ chamar, como, sequelize, passo, assert });
+
   srv.close();
   await sequelize.close();
   const { ok, falhas } = resumo();

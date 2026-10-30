@@ -207,5 +207,5 @@ function projecaoAprovada({ id, revisao, dados, tarotId }) {
 }
 
 module.exports = {
-  CadastroInvalidoError, foto, cadastroVazio, validarCadastro, perfilPublico, projecaoDoLink, projecaoAprovada, cpfValido, calendarioDePagamento, ORCAMENTO_FOTOS, dois,
+  texto, lista, objeto, GRUPOS_SEM, GRUPOS_COMPETENCIA, CadastroInvalidoError, foto, cadastroVazio, validarCadastro, perfilPublico, projecaoDoLink, projecaoAprovada, cpfValido, calendarioDePagamento, ORCAMENTO_FOTOS, dois,
 };

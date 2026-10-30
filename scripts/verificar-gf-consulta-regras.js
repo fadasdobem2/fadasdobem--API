@@ -39,6 +39,9 @@ async function offline() {
   await passo('autorização da supervisora no lançamento (clientFinancialLaunchError)', () => {
     const r = require('./apoio-gf-consulta/regras/ouro-autorizacao').verificar(); exigir(r); return `${r.ok} conferências, ${r.recusas} recusas`;
   });
+  await passo('cobrança da edição (resolveConsultationTariff, priceNewConsultation, repriceChangedComplement, maximumAtRecordedStart, billing, minuteValue)', () => {
+    const r = require('./apoio-gf-consulta/regras/ouro-edicao').verificar(); exigir(r); assert.ok(r.recusasDoMutante > 100); return `${r.ok} conferências, ${r.aceitas} aceitas, ${r.recusasDoMutante} mutantes recusados`;
+  });
   console.log('Comandos refeitos pelo servidor');
   await passo('regras sem banco (encerramento da equipe, edição, leitura do comando)', () => {
     const r = require('./apoio-gf-consulta/regras/unitarios').verificar(); exigir(r); return `${r.ok} conferências`;
