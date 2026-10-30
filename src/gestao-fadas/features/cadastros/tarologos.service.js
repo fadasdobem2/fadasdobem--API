@@ -19,6 +19,9 @@ const { lendoNovo } = require('../../novo/leitura');
 const c = require('./cadastros.comum');
 const store = require('./tarologos.store');
 const espelho = require('../../legado-escrita/entidades');
+const legadoEsc = require('../../legado-escrita');
+const lp = require('../../legado-escrita/legado-primeiro');
+const { MapeamentoError } = require('../../legado-escrita/mapeamento');
 
 const COLUNAS_LEGADO = ['idTarologo', 'nmuTarologo', 'ativo'];
 
@@ -120,17 +123,37 @@ async function gravarPerfil(req) {
         idLegado = Number(tarotId);
       } else if (idLegado !== null) legado = await fonteLegado.obter(Number(idLegado));
       const campos = aplicarEdicao(atual, { nome: corpo.nome, avatar: corpo.avatar, registrationActive: corpo.registrationActive, directory: corpo.directory });
+      // LEGADO PRIMEIRO (Maturacao/46): nome e situação do cadastro vão para `tbl_tarologos` ANTES do commit (só onde o tarólogo já existe no legado); o Postgres não guarda cópia.
+      // Nome que não cabe na coluna (mais de 35 caracteres; a tela aceita 120) NÃO é cortado: fica só no Postgres, como pendente com `erro` "recusada" (pergunta Q11).
+      const camposLegado = idLegado !== null && lp.ativo('tarologos') ? [...(corpo.nome !== undefined ? ['nome'] : []), ...(corpo.registrationActive !== undefined ? ['cadastro_ativo'] : [])] : [];
+      let escrito = null; let recusada = null; let legadoAtual = legado;
+      if (camposLegado.length) {
+        const partes = []; const perfilLeg = { nome: corpo.nome, cadastro_ativo: corpo.registrationActive };
+        for (const campo of camposLegado) { try { const l = legadoEsc.tarologos.linhaDoTarologo(perfilLeg, [campo]); if (l) partes.push(l); } catch (e) { if (!(e instanceof MapeamentoError)) throw e; recusada = e.message; } }
+        if (partes.length) {
+          const linha = { colunas: Object.assign({}, ...partes.map((l) => l.colunas)), campos: partes.flatMap((l) => l.campos) };
+          escrito = await espelho.tarologos.primeiro(ex, tarotId, idLegado, linha, { operationKey: corpo.operationKey, escopo: 'cadastros.tarologo.perfil' });
+          if (escrito.campos.includes('nome')) campos.nome = null;
+          if (escrito.campos.includes('cadastro_ativo')) campos.cadastro_ativo = null;
+          legadoAtual = { ...legado, ...(escrito.depois.nmuTarologo !== undefined ? { nmuTarologo: escrito.depois.nmuTarologo } : {}), ...(escrito.depois.ativo !== undefined ? { ativo: escrito.depois.ativo } : {}) };
+        }
+      }
       if (atual) await store.atualizar(ex, tarotId, campos, c.nomeDe(req), corpo.operationKey); else await store.inserir(ex, tarotId, idLegado, campos, c.nomeDe(req), corpo.operationKey);
+      let pendentesResposta;
+      if (camposLegado.length) {
+        pendentesResposta = ['nome', 'cadastro_ativo'].filter((k) => campos[k] !== null && campos[k] !== undefined);
+        await espelho.tarologos.marcar(ex, tarotId, recusada ? 'erro' : (pendentesResposta.length ? 'nao_espelhada' : 'espelhada'), recusada ? `recusada: ${recusada}` : (pendentesResposta.length ? 'campos antigos só no Postgres (carga pendente)' : 'legado primeiro'), pendentesResposta);
+      }
       // `prepareRegistrationChange`: inativar o cadastro bloqueia o acesso ligado (blockedAccountIds) e encerra as sessões, como `POST /accounts/:id/active`.
       // Reativar o cadastro NÃO reativa a conta (o front devolve a lista vazia; a administradora libera em Contas).
       let contasBloqueadas = [];
       if (t && atual && atual.conta_slug) contasBloqueadas = await bloquearContaDoTarologo(ex, t, atual.conta_slug, require('../../_comum/conta').contaDaRequisicao(req));
       // Espelho no legado (Maturacao/45): só nome e situação do cadastro têm casa em `tbl_tarologos`; intenção na mesma transação, escrita depois do commit.
-      await espelho.tarologos.registrar(ex, tarotId, [...(corpo.nome !== undefined ? ['nome'] : []), ...(corpo.registrationActive !== undefined ? ['cadastro_ativo'] : [])]);
-      const depois = { ...(atual || { tarot_id: tarotId, id_legado: idLegado, conta_slug: null, registro_id: null, registro_revisao: null }), ...campos, revisao: (atual ? atual.revisao : 0) + 1 };
-      const item = montarItem({ legado, perfil: depois, ext: null });
-      const antes = atual ? { nome: atual.nome, cadastro_ativo: atual.cadastro_ativo, perfil: atual.perfil } : null;
-      return { antes, depois: { nome: campos.nome, cadastro_ativo: campos.cadastro_ativo, perfil: campos.perfil, ...(contasBloqueadas.length ? { contasBloqueadas, sessoesEncerradas: true } : {}) }, resposta: { readAt: new Date().toISOString(), revision: item.revision, tarologist: item } };
+      if (!lp.ativo('tarologos')) await espelho.tarologos.registrar(ex, tarotId, [...(corpo.nome !== undefined ? ['nome'] : []), ...(corpo.registrationActive !== undefined ? ['cadastro_ativo'] : [])]);
+      const depois = { ...(atual || { tarot_id: tarotId, id_legado: idLegado, conta_slug: null, registro_id: null, registro_revisao: null }), ...campos, ...(pendentesResposta ? { legado_pendentes: pendentesResposta } : {}), revisao: (atual ? atual.revisao : 0) + 1 };
+      const item = montarItem({ legado: legadoAtual, perfil: depois, ext: null });
+      const antes = atual ? { nome: atual.nome, cadastro_ativo: atual.cadastro_ativo, perfil: atual.perfil, ...(escrito ? { legado: escrito.antes } : {}) } : (escrito ? { legado: escrito.antes } : null);
+      return { antes, depois: { nome: campos.nome, cadastro_ativo: campos.cadastro_ativo, perfil: campos.perfil, ...(escrito ? { legado: escrito.depois } : {}), ...(contasBloqueadas.length ? { contasBloqueadas, sessoesEncerradas: true } : {}) }, resposta: { readAt: new Date().toISOString(), revision: item.revision, tarologist: item } };
     },
   });
 }

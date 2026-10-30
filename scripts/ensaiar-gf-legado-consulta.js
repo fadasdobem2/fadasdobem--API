@@ -61,7 +61,10 @@ async function fotografia() {
   const itemAberto = base({ clientId: '900013', tarotId: String(antes.tarologo), observation: 'ensaio 🔮 nota interna', attendant: 'Atendente Ensaio', paymentProfile: 'Pré-paga' });
 
   let dentro = null;
-  await legado.emEnsaio(async (ex) => {
+  // Doc 47: o catálogo REAL do dev (tbl_formaconsulta 1-3, tbl_opcaopagto 1-4) não tem os ids 6 e 8 que o mapeamento usa, então a validação de catálogo
+  // (recusa de verdade, provada no verificador e pelo 503/422 no navegador) é apresentada aqui como "existe", para o ensaio continuar provando só a FORMA do SQL.
+  await legado.emEnsaio(async (exReal) => {
+    const ex = { query: exReal.query, execute: async (q, v) => ([legado.sql.SELECT_FORMA_CONSULTA, legado.sql.SELECT_FORMA_PAGTO].includes(q) ? [[{ id: v[0] }]] : exReal.execute(q, v)) };
     const estrutura = (await ex.execute('SELECT COUNT(*) AS n FROM tbl_consultas', []))[0][0].n;
     await passo('o ensaio roda numa cópia TEMPORÁRIA InnoDB vazia (a tabela de verdade é MyISAM e não desfaria o rollback)', async () => {
       assert.equal(Number(estrutura), 0, 'a cópia deveria começar vazia');
@@ -77,7 +80,7 @@ async function fotografia() {
       id = await legado.consultas.inserir(ex, itemAberto, antes.tarologo, agora);
       const l = await legado.consultas.ler(ex, id);
       assert.equal(l.idUsuario, 900013); assert.equal(l.idTarologo, antes.tarologo); assert.equal(l.fimConsulta, '0000-00-00 00:00:00'); assert.equal(Number(l.tmpConsulta), 0);
-      assert.equal(Number(l.vlDesconto), 0); assert.equal(Number(l.vlBonus), 0); assert.equal(Number(l.idFormaPagto), 8); assert.equal(Number(l.idFormaConsulta), 6);
+      assert.equal(Number(l.vlDesconto), 0); assert.equal(Number(l.vlBonus), 0); assert.equal(Number(l.idFormaPagto), 8); assert.equal(Number(l.idFormaConsulta), 4);
       assert.equal(l.obsConsulta, 'ensaio  nota interna'); assert.equal(l.nmuAtendente, 'Atendente Ensaio'); assert.equal(l.valor_consulta, '0.00'); assert.equal(Number(l.IDProdutoConsulta), 1);
       assert.match(l.iniConsulta, /^2026-11-10 11:00:00$/); return `idConsulta ${id}`;
     });
@@ -103,9 +106,9 @@ async function fotografia() {
       await legado.consultas.atualizar(ex, id, corrigida, antes.tarologo, agora);
       const l = await legado.consultas.ler(ex, id); assert.equal(Number(l.tmpConsulta), 25); assert.equal(l.fimConsulta, '2026-11-10 11:27:00'); assert.equal(l.valor_consulta, '77.50');
     });
-    await passo('Devolvida: fecha a linha com 0 minutos e marca [Devolvida] na observação (o legado não tem coluna de situação)', async () => {
+    await passo('Devolvida: fecha a linha com 0 minutos e NÃO marca nada na observação (como o ASP já faz)', async () => {
       const dev = await legado.consultas.inserir(ex, base({ id: 'c-ensaio-2', clientId: '900013', tarotId: String(antes.tarologo), observation: 'x', status: 'Devolvida', awaitingTarologistStart: false, endedAt: T(5), durationSeconds: 120 }), antes.tarologo, agora);
-      const l = await legado.consultas.ler(ex, dev); assert.equal(Number(l.tmpConsulta), 0); assert.equal(l.obsConsulta, '[Devolvida] x'); assert.notEqual(l.fimConsulta, '0000-00-00 00:00:00');
+      const l = await legado.consultas.ler(ex, dev); assert.equal(Number(l.tmpConsulta), 0); assert.equal(l.obsConsulta, 'x'); assert.notEqual(l.fimConsulta, '0000-00-00 00:00:00');
     });
     await passo('UPDATE de outra cliente não acha a linha (WHERE idConsulta E idUsuario): 0 linhas mudadas', async () => {
       assert.equal(await legado.consultas.atualizar(ex, id, { ...itemAberto, clientId: '900014' }, antes.tarologo, agora), 0);

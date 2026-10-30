@@ -8,6 +8,7 @@
 
 module.exports = {
   ...require('./executor'), consultas: require('./consultas'), mapeamento: require('./mapeamento'), sql: require('./sql'), chave: require('./chave'),
-  clientes: require('./clientes'), tarologos: require('./tarologos'), sqlEntidades: require('./sql.entidades'), fusao: require('./fusao'),
+  clientes: require('./clientes'), pagamentos: require('./pagamentos'), notas: require('./notas'), tarologoStatus: require('./tarologo-status'), provisorio: require('./provisorio'), tarologos: require('./tarologos'), sqlEntidades: require('./sql.entidades'), fusao: require('./fusao'),
+  legadoPrimeiro: require('./legado-primeiro'), get intencoes() { return require('./intencoes'); },
   get entidades() { return require('./entidades'); }, get reconciliacao() { return require('./reconciliacao'); },
 };

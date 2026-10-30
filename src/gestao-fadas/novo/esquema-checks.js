@@ -263,6 +263,18 @@ const CHECKS = {
     ['chk_log_operacional_item', "jsonb_typeof(item) = 'object'"], ['chk_log_operacional_por', nt('registrado_por')], ['chk_log_operacional_conta', nv('conta_id')],
     ['chk_log_operacional_operation_key', nv('operation_key')],
   ],
+  // Legado como fonte (Maturacao/46): uma linha por escrita no legado (antes/depois só das colunas do legado) + as recusas da trava de banco.
+  gf_legado_intencoes: [
+    ['chk_legado_intencoes_id', nv('id')], ['chk_legado_intencoes_entidade', "entidade IN ('clientes', 'tarologos', 'consultas', 'pagamentos', 'trava')"],
+    ['chk_legado_intencoes_estado', "estado IN ('iniciada', 'concluida', 'revertida', 'divergente', 'recusada')"],
+    ['chk_legado_intencoes_antes', "antes IS NULL OR jsonb_typeof(antes) = 'object'"], ['chk_legado_intencoes_depois', "depois IS NULL OR jsonb_typeof(depois) = 'object'"],
+  ],
+  // Trava da ficha do ASP (Maturacao/53): conferências pós-gravação de cada campo do legado (cliente: nome_id, nome2, datanascimento; tarólogo: nmuTarologo).
+  gf_legado_verificacoes: [
+    ['chk_legado_verificacoes_id', nv('id')], ['chk_legado_verificacoes_intencao', nv('intencao_id')], ['chk_legado_verificacoes_entidade', "entidade IN ('clientes', 'tarologos')"],
+    ['chk_legado_verificacoes_coluna', "coluna IN ('nome_id', 'nome2', 'datanascimento', 'nmuTarologo')"],
+    ['chk_legado_verificacoes_estado', "estado IN ('pendente', 'ok', 'reaplicada', 'divergente', 'encerrada')"], ['chk_legado_verificacoes_etapa', 'etapa >= 0'],
+  ],
 };
 
 /**
@@ -270,10 +282,17 @@ const CHECKS = {
  * migrações antigas criam a tabela com `CHECKS[tabela]` ANTES de essas colunas existirem; a migração nova os aplica por ALTER e o `sync` dos
  * models (`_definir.js`) os junta aos de `CHECKS`.
  */
-const ESTADOS_ESPELHO = "('nao_espelhada', 'pendente', 'espelhada', 'sem_registro', 'erro')";
+const ESTADOS_ESPELHO = "('nao_espelhada', 'pendente', 'espelhada', 'sem_registro', 'erro', 'reaplicada', 'divergente')";
+const ESTADOS_PAGTO_NOTA = "('nao_espelhada', 'espelhada', 'recusada', 'desatualizada', 'erro')";
 const CHECKS_ESPELHO = {
   gf_clientes_ext: [
     ['chk_clientes_ext_legado_estado', `legado_estado IN ${ESTADOS_ESPELHO}`], ['chk_clientes_ext_legado_pendentes', "jsonb_typeof(legado_pendentes) = 'array'"],
+  ],
+  gf_pagamentos: [
+    ['chk_pagamentos_legado_id', "legado_id IS NULL OR legado_id ~ '^[0-9]{1,10}$'"], ['chk_pagamentos_legado_estado', `legado_estado IN ${ESTADOS_PAGTO_NOTA}`],
+  ],
+  gf_clientes_notas: [
+    ['chk_clientes_notas_legado_id', "legado_id IS NULL OR legado_id ~ '^[0-9]{1,10}$'"], ['chk_clientes_notas_legado_estado', `legado_estado IN ${ESTADOS_PAGTO_NOTA}`],
   ],
   gf_tarologos_perfil: [
     ['chk_tarologos_perfil_espelho_estado', `legado_estado IN ${ESTADOS_ESPELHO}`], ['chk_tarologos_perfil_espelho_pendentes', "jsonb_typeof(legado_pendentes) = 'array'"],

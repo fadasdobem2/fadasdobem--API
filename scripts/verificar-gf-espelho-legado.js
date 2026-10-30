@@ -71,8 +71,8 @@ async function offline() {
 
   console.log('Allowlist (os únicos SQLs de escrita das entidades)');
   const se = legado.sqlEntidades;
-  await passo('15 UPDATEs de cliente + 3 de tarólogo + 2 leituras, nada mais; todos com `?`, coluna explícita, WHERE por id (cliente também nivel = 0); nenhum INSERT/DELETE', () => {
-    assert.equal(se.UPDATES_CLIENTE.size, 15); assert.equal(se.UPDATES_TAROLOGO.size, 3); assert.equal(se.PERMITIDAS.size, 20);
+  await passo('15 UPDATEs de cliente + 3 de tarólogo + 3 leituras, nada mais; todos com `?`, coluna explícita, WHERE por id (cliente também nivel = 0); nenhum INSERT/DELETE', () => {
+    assert.equal(se.UPDATES_CLIENTE.size, 15); assert.equal(se.UPDATES_TAROLOGO.size, 3); assert.equal(se.PERMITIDAS.size, 21);
     for (const q of [...se.UPDATES_CLIENTE.values()]) { assert.match(q, /^UPDATE usuarios SET [a-z0-9_]+ = \?(, [a-z0-9_]+ = \?)* WHERE id = \? AND nivel = 0$/); assert.equal(legado.sql.motivoDeRecusa(q), null); assert.ok(!/senha|login|cpf|saldo|valorAPagar/i.test(q)); }
     for (const q of [...se.UPDATES_TAROLOGO.values()]) { assert.match(q, /^UPDATE tbl_tarologos SET [a-zA-Z]+ = \?(, [a-zA-Z]+ = \?)* WHERE idTarologo = \?$/); assert.equal(legado.sql.motivoDeRecusa(q), null); assert.ok(!/nmcTarologo|pass|status|exibir/.test(q)); }
     assert.ok([...se.PERMITIDAS].every((q) => !/^(INSERT|DELETE|DROP|ALTER|CREATE|TRUNCATE)/i.test(q)));
@@ -89,7 +89,7 @@ async function offline() {
     assert.equal(se.updateCliente(['whats', 'nome_id']), se.updateCliente(['nome_id', 'whats']), 'ordem das colunas é a da tabela, não a do pedido');
   });
   await passo('o adaptador passa os valores como parâmetros, na ordem das colunas, e não aceita coluna fora da lista', async () => {
-    const vistos = []; const ex = { execute: async (q, v) => { vistos.push([q, v]); return [{ affectedRows: 1 }]; } };
+    const vistos = []; const ex = { execute: async (q, v) => { if (q === se.SELECT_NOME_ID_DUP) return [[]]; vistos.push([q, v]); return [{ affectedRows: 1 }]; } };
     assert.equal(await legado.clientes.atualizar(ex, '900013', { whats: '1', nome_id: 'A' }), 1);
     assert.deepEqual(vistos[0], [se.updateCliente(['nome_id', 'whats']), ['A', '1', 900013]]);
     await assert.rejects(() => legado.clientes.atualizar(ex, '900013', { saldo: '9' }), legado.mapeamento.MapeamentoError);
@@ -111,17 +111,20 @@ async function offline() {
     try { await assert.rejects(() => legado.emTransacao(async () => 1, { entidade: 'clientes' }), (x) => x.codigo === 'ESPELHO_DESLIGADO'); } finally { delete process.env.GF_LEGADO_ESCRITA_ENABLED; }
   });
   await passo('o ENSAIO só roda em banco de dev (recusa fadasdobem, fadasdobem02) e só troca tabelas da lista fixa', async () => {
-    assert.deepEqual([...legado.TABELAS_ENSAIO].sort(), ['tbl_consultas', 'tbl_tarologos', 'usuarios']);
+    assert.deepEqual([...legado.TABELAS_ENSAIO].sort(), ['obs_liberacao_consulta', 'tbl_consultas', 'tbl_pagtoinformado', 'tbl_tarologos', 'usuarios']);
     for (const [nome, dev] of [['fadasdobem', false], ['fadasdobem02', false], ['fadasdobem01', true], ['x_dev', true], ['x_teste', true]]) assert.equal(legado.bancoDeDev(nome), dev, nome);
     const salvo = { ...process.env };
     Object.assign(process.env, { LEGADO_DB_HOST: 'h', LEGADO_DB_NAME: 'fadasdobem', LEGADO_DB_USER: 'u' });
     try { await assert.rejects(() => legado.emEnsaio(async () => 1, { tabelas: ['usuarios'] }), (x) => x.codigo === 'ENSAIO_RECUSADO'); } finally { for (const k of ['LEGADO_DB_HOST', 'LEGADO_DB_NAME', 'LEGADO_DB_USER']) { if (salvo[k] === undefined) delete process.env[k]; else process.env[k] = salvo[k]; } }
   });
-  await passo('nenhum env local (.local-dev/api.env, .env.example) liga o espelho no legado, geral ou por entidade', () => {
+  await passo('envs locais: a trava de banco (GF_LEGADO_ESCRITA_BANCOS) existe quando há flag GF_LEGADO_* ligada e NUNCA contém produção (fadasdobem) nem fadasdobem02 (Maturacao/46; só o dev fadasdobem01 foi autorizado)', () => {
     for (const rel of ['.local-dev/api.env', '.env', '.env.example', '.env.local']) {
       const f = path.join(raiz, rel); if (!fs.existsSync(f)) continue;
-      const ligadas = fs.readFileSync(f, 'utf8').split('\n').filter((l) => /^\s*GF_LEGADO_[A-Z_]*\s*=\s*"?true"?\s*$/i.test(l));
-      assert.equal(ligadas.length, 0, `${rel} liga ${ligadas.map((l) => l.split('=')[0].trim()).join(', ')}`);
+      const linhas = fs.readFileSync(f, 'utf8').split('\n').filter((l) => !l.trim().startsWith('#'));
+      const ligadas = linhas.filter((l) => /^\s*GF_LEGADO_[A-Z_]*\s*=\s*"?true"?\s*$/i.test(l));
+      const bancos = linhas.filter((l) => /^\s*GF_LEGADO_ESCRITA_BANCOS\s*=/.test(l)).flatMap((l) => l.split('=').slice(1).join('=').replace(/["']/g, '').split(',').map((b) => b.trim().toLowerCase()).filter(Boolean));
+      assert.ok(!bancos.includes('fadasdobem') && !bancos.includes('fadasdobem02'), `${rel} lista banco proibido`);
+      if (ligadas.length) assert.ok(bancos.length > 0 && bancos.every((b) => /(01|dev|teste)$/.test(b)), `${rel} liga ${ligadas.map((l) => l.split('=')[0].trim()).join(', ')} sem a trava de banco só com dev`);
     }
   });
 
@@ -156,7 +159,7 @@ async function offline() {
     try { const y = await rec.reconciliarTudo({ env: { GF_LEGADO_ESCRITA_ENABLED: 'true' }, consultasRec }); assert.equal(y.desligado, false); assert.equal(chamadas, 1); assert.equal(y.clientes.desligado, true); assert.equal(y.tarologos.desligado, true); assert.equal(y.clientes.examinadas, 0); } finally { if (salvo === undefined) delete process.env.GF_LEGADO_ESCRITA_ENABLED; else process.env.GF_LEGADO_ESCRITA_ENABLED = salvo; }
   });
   await passo('o app.js NÃO liga o job de reconciliação nem importa o espelho', () => {
-    const app = fs.readFileSync(path.join(raiz, 'app.js'), 'utf8');
+    const app = fs.readFileSync(path.join(raiz, 'app.js'), 'utf8').split('\n').filter((l) => !/verificacao\.job/.test(l)).join('\n'); // o job da trava da ficha do ASP (Maturacao/53) é o único registrado
     assert.ok(!/legado-escrita|reconciliacao|reconciliarTudo/.test(app));
   });
 }

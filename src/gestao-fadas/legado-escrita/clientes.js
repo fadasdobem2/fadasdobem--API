@@ -66,6 +66,12 @@ async function atualizar(ex, id, colunas) {
   if (!texto_) throw new MapeamentoError('Nenhuma coluna espelhável.');
   const idNum = Number(id);
   if (!Number.isInteger(idNum) || idNum < 1 || idNum > 2147483647) throw new MapeamentoError('Cliente fora do intervalo do legado.');
+  if (colunas.nome_id !== undefined) {
+    // Doc 47: o ASP exige `nome_id` único (sem diferenciar maiúscula; a coluna do legado tem collation case-insensitive) e `nome_id` igual ao id significa "sem identificação".
+    if (String(colunas.nome_id) === String(idNum)) throw new MapeamentoError('name: o nome de identificação não pode ser igual ao ID.');
+    const [dup] = await ex.execute(sql.SELECT_NOME_ID_DUP, [colunas.nome_id, idNum]);
+    if (dup.length) throw new MapeamentoError('name: já existe outra cliente com este nome de identificação no sistema antigo.');
+  }
   const [r] = await ex.execute(texto_, [...nomes.map((c) => colunas[c]), idNum]);
   return Number(r && r.affectedRows) || 0;
 }

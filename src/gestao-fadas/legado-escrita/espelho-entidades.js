@@ -13,6 +13,7 @@
  */
 
 const { emTransacao: emPostgres } = require('../novo/escritor');
+const AppError = require('../../utils/AppError');
 const { MapeamentoError } = require('./mapeamento');
 const { pendentesDe } = require('./fusao');
 
@@ -26,6 +27,7 @@ const parar = (texto) => String(texto).slice(0, 300);
 function criar(d) {
   const colunas = `${d.coluna}, legado_estado, legado_detalhe, legado_pendentes${d.extras ? `, ${d.extras}` : ''}`;
   const travar = async (pg, id) => { const [l] = await pg.execute(`SELECT ${colunas} FROM ${d.tabela} WHERE ${d.coluna} = ? FOR UPDATE`, [id]); return l[0] || null; };
+  const marcar_ = (pg, id, estado, detalhe, pendentes) => marcar(pg, id, estado, detalhe, pendentes);
   const marcar = (pg, id, estado, detalhe, pendentes) => pg.execute(
     `UPDATE ${d.tabela} SET legado_estado = ?, legado_detalhe = ?, legado_pendentes = ?, legado_atualizado_em = CURRENT_TIMESTAMP WHERE ${d.coluna} = ?`,
     [estado, detalhe ? parar(detalhe) : null, JSON.stringify(pendentes), id],
@@ -110,7 +112,47 @@ function criar(d) {
     });
   }
 
-  return { entidade: d.entidade, registrar, sincronizar, candidatas, reconciliar, resumo };
+  /**
+   * LEGADO PRIMEIRO (Maturacao/46): escreve `linha.colunas` no legado DENTRO do pedido, antes do commit do Postgres. Falha do legado -> 503 e o Postgres
+   * desfaz tudo (o pedido lança). Sucesso -> registra a intenção `concluida` na transação do pedido e deixa em `pg.compensacoes` o desfazer, que o
+   * `gravar` do pedido roda se o Postgres falhar DEPOIS (revertendo o legado ao valor anterior, se ele ainda tem o que escrevemos).
+   * Idempotente: é UPDATE de linha que já existe; repetir grava os mesmos valores (o `operationKey` repetido nem chega aqui: devolve a resposta guardada).
+   */
+  async function primeiro(pg, id, idLegado, linha, { operationKey, escopo } = {}) {
+    const lp = require('./legado-primeiro'); const intencoes = require('./intencoes');
+    let intencao = null; let antes = null;
+    try {
+      await legado().emTransacao(async (lx) => {
+        const atual = await d.ler(lx, idLegado);
+        if (!atual) throw new AppError(`${d.rotulo[0].toUpperCase()}${d.rotulo.slice(1)} não encontrado no sistema antigo.`, 404, { codigo: 'NOT_FOUND' }, true);
+        antes = Object.fromEntries(Object.keys(linha.colunas).map((c) => [c, atual[c] === undefined ? null : atual[c]]));
+        intencao = await intencoes.abrir({ entidade: d.entidade, entidadeId: id, escopo, operationKey, legadoId: idLegado, antes, depois: linha.colunas });
+        if (!(await d.escrever(lx, idLegado, linha.colunas))) throw new Error(`${d.rotulo} não aceitou a atualização no legado`);
+      }, { entidade: d.entidade });
+    } catch (e) {
+      if (intencao) await intencoes.marcar(intencao, 'revertida', `o legado não gravou: ${(e && (e.codigo || e.code)) || 'erro'}`);
+      throw lp.falhaDoLegado(e);
+    }
+    await intencoes.concluirNaTransacao(pg, intencao, idLegado);
+    // Trava da ficha do ASP (Maturacao/53): agenda a conferência pós-gravação NA MESMA transação (desligada = 0 linhas, nada acontece).
+    await require('./verificacao').agendar(pg, { entidade: d.entidade, entidadeId: id, legadoId: idLegado, intencao, antes, depois: linha.colunas });
+    if (Array.isArray(pg.compensacoes)) {
+      pg.compensacoes.push(async () => {
+        try {
+          const r = await lp.desfazer({ entidade: d.entidade, ler: d.ler, escrever: d.escrever, idLegado, antes, depois: linha.colunas });
+          await intencoes.marcar(intencao, r === 'divergente' ? 'divergente' : 'revertida', r === 'divergente' ? 'o Postgres falhou e o legado mudou depois: decisão humana' : 'o Postgres falhou; legado devolvido ao valor anterior');
+        } catch (e) { await intencoes.marcar(intencao, 'divergente', `o Postgres falhou e o legado não pôde ser desfeito: ${(e && (e.codigo || e.code)) || 'erro'}`); }
+      });
+    }
+    return { antes, depois: linha.colunas, campos: linha.campos, intencao };
+  }
+
+  /** Reverte uma intenção `iniciada` antiga (reconciliação). Devolve 'revertida' | 'divergente' | 'nada'. */
+  async function reverter({ legado_id: idLegado, antes, depois }) {
+    return require('./legado-primeiro').desfazer({ entidade: d.entidade, ler: d.ler, escrever: d.escrever, idLegado, antes, depois });
+  }
+
+  return { entidade: d.entidade, registrar, sincronizar, candidatas, reconciliar, resumo, primeiro, reverter, marcar: marcar_ };
 }
 
 module.exports = { criar };

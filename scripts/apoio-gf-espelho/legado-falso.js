@@ -12,6 +12,7 @@ function criar() {
   const estado = { linhas: [], proximo: 100, tarologos: { osiris: 11, nyx: 12 }, falharInsert: null, inserts: 0 };
   const ex = {
     execute: async (q, v) => {
+      if (q === sql.SELECT_FORMA_CONSULTA || q === sql.SELECT_FORMA_PAGTO) return [estado.catalogoAusente === v[0] ? [] : [{ id: v[0] }]];
       if (q === sql.SELECT_TAROLOGO) { const id = estado.tarologos[v[0]]; return [id ? [{ idTarologo: id }] : []]; }
       if (q === sql.INSERT_CONSULTA) {
         if (estado.falharInsert) { const e = new Error('conexão caiu antes do INSERT'); e.codigo = 'ECONN'; throw e; }

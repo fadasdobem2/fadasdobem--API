@@ -60,6 +60,21 @@ const resumir = (f) => TABELAS.map((t) => `${t}: ${f[t].linhas} linhas, maior id
   console.log(`Banco de dev ${cfg.database}. ANTES:\n       ${resumir(antes)}`);
   for (const t of TABELAS) assert.ok(antes[t].linhas > 0);
 
+  // TRAVA DE BANCO (Maturacao/46) contra a conexão REAL do dev: só os caminhos de RECUSA são exercitados aqui (o de escrita permitida nunca roda na tabela real neste ensaio).
+  const salvoEnv = { ...process.env };
+  Object.assign(process.env, { GF_LEGADO_ESCRITA_ENABLED: 'true', GF_LEGADO_CLIENTES: 'true', GF_LEGADO_TAROLOGOS: 'true' });
+  for (const [rotulo, lista] of [['lista vazia', ''], ['banco fora da lista', 'banco_que_nao_existe'], ['produção listada por engano', 'fadasdobem,fadasdobem02,banco_que_nao_existe']]) {
+    await passo(`trava (${rotulo}): a escrita no banco ${cfg.database} é RECUSADA antes de qualquer UPDATE, para cliente e tarólogo`, async () => {
+      process.env.GF_LEGADO_ESCRITA_BANCOS = lista; const salvoErro = console.error; console.error = () => {};
+      try {
+        await assert.rejects(() => legado.emTransacao((lx) => legado.clientes.atualizar(lx, '900014', { nome_id: 'Intruso' }), { entidade: 'clientes' }), (e) => e.codigo === 'BANCO_NAO_AUTORIZADO');
+        await assert.rejects(() => legado.emTransacao((lx) => legado.tarologos.atualizar(lx, '9001', { ativo: 0 }), { entidade: 'tarologos' }), (e) => e.codigo === 'BANCO_NAO_AUTORIZADO');
+      } finally { console.error = salvoErro; }
+    });
+  }
+  for (const k of ['GF_LEGADO_ESCRITA_ENABLED', 'GF_LEGADO_CLIENTES', 'GF_LEGADO_TAROLOGOS', 'GF_LEGADO_ESCRITA_BANCOS']) { if (salvoEnv[k] === undefined) delete process.env[k]; else process.env[k] = salvoEnv[k]; }
+  await legado.fechar();
+
   await legado.emEnsaio(async (ex, leitura) => {
     const completa = async (tabela, chave, id) => (await leitura(`SELECT * FROM ${tabela} WHERE ${chave} = ${Number(id)}`))[0];
     await passo('o ensaio roda em cópias TEMPORÁRIAS InnoDB só com as linhas-semente; a segunda conexão não vê nada do ensaio', async () => {

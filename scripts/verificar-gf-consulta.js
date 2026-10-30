@@ -174,15 +174,15 @@ async function offline() {
     assert.equal(mp.dataDoLegado('2026-11-10T14:05:09.000Z', 'x'), '2026-11-10 11:05:09');
     for (const ruim of ['0000-00-00 00:00:00', 'abc', '1970-01-01T00:00:00.000Z', '2999-01-01T00:00:00.000Z', null]) assert.throws(() => mp.dataDoLegado(ruim, 'campo'), mp.MapeamentoError);
   });
-  await passo('armadilhas: aberta = fim zero; minutos inteiros; sem 4 bytes; varchar(25); pré-paga 8, pós-paga 6; Devolvida marca a observação', () => {
+  await passo('armadilhas: aberta = fim zero; minutos inteiros; sem 4 bytes; varchar(25); pré-paga 8, pós-paga 1 (provisório); Devolvida marca a observação', () => {
     const aberta = mp.linhaDoLegado(iniciada({ observation: 'oi 🔮 ok', attendant: 'Atendente Com Nome Bem Comprido Demais' }), 7, new Date(T(5)));
     assert.equal(aberta.colunas.fimConsulta, mp.ABERTA); assert.equal(aberta.fechada, false); assert.equal(aberta.colunas.tmpConsulta, 0);
     assert.equal(aberta.colunas.obsConsulta, 'oi  ok'); assert.equal(aberta.colunas.nmuAtendente.length, 25); assert.equal(aberta.colunas.vlDesconto, 0);
-    assert.equal(aberta.colunas.idFormaPagto, 6); assert.equal(mp.linhaDoLegado(iniciada({ paymentProfile: 'Pré-paga' }), 7, new Date(T(5))).colunas.idFormaPagto, 8);
+    assert.equal(aberta.colunas.idFormaPagto, 1); assert.equal(mp.linhaDoLegado(iniciada({ paymentProfile: 'Pré-paga' }), 7, new Date(T(5))).colunas.idFormaPagto, 8);
     const fechada = mp.linhaDoLegado(iniciada({ status: 'Concluída', endedAt: T(32), durationSeconds: 1801, minuteValue: 2.5 }), 7, new Date(T(40)));
     assert.equal(fechada.fechada, true); assert.equal(fechada.colunas.tmpConsulta, 31); assert.equal(fechada.total, '77.50'); assert.equal(fechada.colunas.fimConsulta, '2026-11-10 11:32:00');
     const dev = mp.linhaDoLegado(iniciada({ status: 'Devolvida', endedAt: T(32), durationSeconds: 1800, observation: 'n' }), 7, new Date(T(40)));
-    assert.equal(dev.colunas.tmpConsulta, 0); assert.equal(dev.colunas.obsConsulta, '[Devolvida] n'); assert.equal(dev.total, null);
+    assert.equal(dev.colunas.tmpConsulta, 0); assert.equal(dev.colunas.obsConsulta, 'n'); assert.equal(dev.total, null);
     const finalizada = mp.linhaDoLegado(iniciada({ status: 'Finalizada pelo tarólogo', endedAt: T(32), durationSeconds: 1800 }), 7, new Date(T(40)));
     assert.equal(finalizada.fechada, false); assert.equal(finalizada.colunas.fimConsulta, mp.ABERTA);
     assert.throws(() => mp.linhaDoLegado(iniciada({ clientId: '0' }), 7), mp.MapeamentoError);

@@ -14,7 +14,7 @@ const express = require('express');
 const { raiz, passo, resumo, criarUsuario } = require('../apoio-gf-banco-novo/comum');
 
 Object.assign(process.env, { GESTAO_FADAS_ESCRITA_ENABLED: 'true', FADAS_ENVIRONMENT: 'test', GF_NOVOS_DADOS: 'postgres', GESTAO_FADAS_ENABLED: 'true', GF_FATIA_CONSULTA: 'true', GF_FATIA_AGENDA: 'true', GF_FATIA_PRESENCA: 'true' });
-delete process.env.GF_LEGADO_ESCRITA_ENABLED;
+delete process.env.GF_LEGADO_ESCRITA_ENABLED; process.env.GF_LEGADO_MODO = 'copia'; // estes testes são do modo anterior (escrita DEPOIS do commit); o legado primeiro tem o seu (verificar-gf-legado-fonte)
 const r = (p) => path.join(raiz, p);
 
 (async () => {

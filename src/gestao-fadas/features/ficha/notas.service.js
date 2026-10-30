@@ -10,6 +10,7 @@
 const { lendoNovo } = require('../../novo/leitura');
 const { novosDadosNoPostgres } = require('../../novo/modo');
 const dom = require('../../_comum/dominio/nota-cliente');
+const espelho = require('./notas.espelho');
 const { f, exigirCliente, traduzir, atorDe } = require('./ficha.comum');
 
 const CONFERIR_ANTES = 'Esta observação mudou. Atualize a ficha e tente novamente.';
@@ -47,7 +48,9 @@ async function gravar(req) {
         let versao = versaoAtual;
         if (!atual) {
           versao = 1;
+          const legado = await espelho.nova(ex, req, nova, operationKey); // legado primeiro (GF_LEGADO_NOTAS): só nota NOVA
           await ex.execute('INSERT INTO gf_clientes_notas (id, id_cliente, item, version, criado_por, operation_key) VALUES (?, ?, ?, 1, ?, ?)', [nova.id, nova.clientId, JSON.stringify(nova), a.nome, operationKey]);
+          await espelho.marcar(ex, nova.id, legado);
         } else if (nova !== atual) {
           versao = versaoAtual + 1;
           await ex.execute('UPDATE gf_clientes_notas SET item = ?, version = ?, atualizado_em = CURRENT_TIMESTAMP WHERE id = ?', [JSON.stringify(nova), versao, nova.id]);

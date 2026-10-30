@@ -13,7 +13,7 @@ const { criar } = require('./legado-falso');
 const { T, base } = require('../apoio-gf-consulta/cenarios');
 
 Object.assign(process.env, { GESTAO_FADAS_ESCRITA_ENABLED: 'true', FADAS_ENVIRONMENT: 'test', GF_NOVOS_DADOS: 'postgres' });
-delete process.env.GF_LEGADO_ESCRITA_ENABLED;
+delete process.env.GF_LEGADO_ESCRITA_ENABLED; process.env.GF_LEGADO_MODO = 'copia'; // estes testes são do modo anterior (escrita DEPOIS do commit); o legado primeiro tem o seu (verificar-gf-legado-fonte)
 const r = (p) => path.join(raiz, p);
 
 (async () => {

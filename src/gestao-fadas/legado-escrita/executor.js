@@ -20,7 +20,7 @@ class EspelhoLegadoError extends Error {
 const ligada = (env, nome) => `${env[nome] || ''}`.trim().toLowerCase() === 'true';
 
 /** Uma flag POR ENTIDADE, além do interruptor geral (`GF_LEGADO_ESCRITA_ENABLED`). Consulta segue só com o geral (comportamento de antes). Nenhuma é ligada no local. */
-const FLAGS_ENTIDADE = Object.freeze({ clientes: 'GF_LEGADO_CLIENTES', tarologos: 'GF_LEGADO_TAROLOGOS', pagamentos: 'GF_LEGADO_PAGAMENTOS' });
+const FLAGS_ENTIDADE = Object.freeze({ clientes: 'GF_LEGADO_CLIENTES', tarologos: 'GF_LEGADO_TAROLOGOS', consultas: 'GF_LEGADO_CONSULTAS', pagamentos: 'GF_LEGADO_PAGAMENTOS', notas: 'GF_LEGADO_NOTAS', statusTarologo: 'GF_LEGADO_STATUS_TAROLOGO' });
 
 function espelhoLigado(env = process.env, entidade) {
   if (!ligada(env, 'GF_LEGADO_ESCRITA_ENABLED')) return false;
@@ -44,12 +44,42 @@ function obterPool() {
   return pool;
 }
 
-/** Interface `execute(sql, valores) -> [linhas]`, com a allowlist na frente. */
-function envolver(conexao) {
+/**
+ * TRAVA DE BANCO (`GF_LEGADO_ESCRITA_BANCOS`, Maturacao/46): lista de NOMES de banco onde a escrita no legado é permitida. Padrão VAZIO = nenhuma
+ * escrita. Conferida a CADA instrução de escrita (INSERT/UPDATE/DELETE) contra o nome REAL do banco conectado (`SELECT DATABASE()`), nunca contra a
+ * configuração. Defesa a mais: `fadasdobem` (produção) e `fadasdobem02` NUNCA valem, mesmo se alguém os puser na lista.
+ */
+const BANCOS_NUNCA = Object.freeze(['fadasdobem', 'fadasdobem02']);
+const bancosPermitidos = (env = process.env) => `${env.GF_LEGADO_ESCRITA_BANCOS || ''}`.split(',').map((b) => b.trim().toLowerCase()).filter(Boolean);
+const ehEscrita = (sql) => /^\s*(INSERT|UPDATE|DELETE|REPLACE)\b/i.test(sql);
+
+/** Ponto único de auditoria da recusa (o `intencoes.js` grava no Postgres; falha de auditoria nunca vira escrita). */
+async function auditarRecusa(info) {
+  console.error('[gf-legado.trava] escrita recusada:', JSON.stringify(info));
+  try { await require('./intencoes').registrarRecusa(info); } catch (_) { /* sem Postgres (teste offline): o log acima basta */ }
+}
+
+async function conferirBanco(conexao, sql, env = process.env) {
+  const [[linha]] = await conexao.query('SELECT DATABASE() AS banco');
+  const banco = `${(linha && linha.banco) || ''}`;
+  const nome = banco.toLowerCase();
+  const lista = bancosPermitidos(env);
+  const motivo = !lista.length ? 'GF_LEGADO_ESCRITA_BANCOS está vazia (nenhuma escrita é permitida)'
+    : BANCOS_NUNCA.includes(nome) ? `o banco ${banco} é de produção/proibido e nunca recebe escrita`
+      : !banco ? 'não foi possível conferir o banco conectado'
+        : !lista.includes(nome) ? `o banco conectado (${banco}) não está em GF_LEGADO_ESCRITA_BANCOS` : null;
+  if (!motivo) return banco;
+  await auditarRecusa({ banco, motivo, instrucao: `${sql}`.trim().split(/\s+/).slice(0, 2).join(' ').toUpperCase() });
+  throw new EspelhoLegadoError('BANCO_NAO_AUTORIZADO', `Escrita no legado recusada pela trava de banco: ${motivo}.`);
+}
+
+/** Interface `execute(sql, valores) -> [linhas]`, com a allowlist e (fora do ensaio) a trava de banco na frente. */
+function envolver(conexao, { trava = true } = {}) {
   return {
     execute: async (sql, valores) => {
       const motivo = motivoDeRecusa(sql);
       if (motivo) throw new EspelhoLegadoError('LEGADO_ESCRITA_RECUSADA', `Escrita recusada: ${motivo}`);
+      if (trava && ehEscrita(sql)) await conferirBanco(conexao, sql);
       return conexao.execute(sql, valores);
     },
     // `query` só para o controle da transação (também passa pela allowlist).
@@ -82,7 +112,7 @@ async function emTransacao(trabalho, { entidade } = {}) {
 }
 
 /** Só estas tabelas podem ser trocadas por cópia no ensaio (o nome entra no SQL: lista fixa, nunca texto livre). */
-const TABELAS_ENSAIO = Object.freeze(['tbl_consultas', 'usuarios', 'tbl_tarologos']);
+const TABELAS_ENSAIO = Object.freeze(['tbl_consultas', 'usuarios', 'tbl_tarologos', 'tbl_pagtoinformado', 'obs_liberacao_consulta']);
 
 /**
  * Troca cada tabela pedida por uma tabela TEMPORÁRIA InnoDB da mesma estrutura, SÓ nesta sessão. Motivo (achado de 29/10/2026): no legado
@@ -121,7 +151,7 @@ async function emEnsaio(trabalho, { tabelas = ['tbl_consultas'], sementes = {} }
   const nome = configuracao().database;
   if (!bancoDeDev(nome)) throw new EspelhoLegadoError('ENSAIO_RECUSADO', `Ensaio só roda em banco de desenvolvimento (recebido: ${nome}).`);
   const conexao = await abrir();
-  const ex = envolver(conexao);
+  const ex = envolver(conexao, { trava: false }); // o ensaio só escreve em cópias TEMPORÁRIAS e já exige banco de dev (bancoDeDev)
   try {
     await isolarTabelasNoEnsaio(conexao, tabelas, sementes);
     await ex.query('START TRANSACTION');
@@ -140,4 +170,4 @@ async function emEnsaio(trabalho, { tabelas = ['tbl_consultas'], sementes = {} }
 
 async function fechar() { if (pool) { await pool.end(); pool = null; } }
 
-module.exports = { MODO_SQL, EspelhoLegadoError, FLAGS_ENTIDADE, TABELAS_ENSAIO, espelhoLigado, bancoDeDev, emTransacao, emEnsaio, fechar };
+module.exports = { MODO_SQL, EspelhoLegadoError, FLAGS_ENTIDADE, TABELAS_ENSAIO, BANCOS_NUNCA, bancosPermitidos, conferirBanco, envolver, espelhoLigado, bancoDeDev, emTransacao, emEnsaio, fechar };

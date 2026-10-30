@@ -343,6 +343,8 @@ async function start() {
       attachWorkerIfEnabled();
       // Gestão Fadas, fatia Presença: vence a confirmação 60+5 no servidor (só com GF_FATIA_PRESENCA=true e escrita habilitada).
       if (process.env.GESTAO_FADAS_ENABLED === 'true') require('./src/gestao-fadas/features/presenca/presenca.job').agendar();
+      // Gestão Fadas, trava da ficha do ASP (Maturacao/53): confere o que o painel gravou no legado (só com GF_LEGADO_VERIFICACAO=true).
+      if (process.env.GESTAO_FADAS_ENABLED === 'true') require('./src/gestao-fadas/legado-escrita/verificacao.job').agendar();
     });
   } catch (err) {
     console.error('Falha ao iniciar a API:', err);

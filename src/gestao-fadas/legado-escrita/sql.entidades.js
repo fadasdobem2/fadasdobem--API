@@ -25,7 +25,10 @@ const UPDATES_TAROLOGO = new Map(subconjuntos(CAMPOS_TAROLOGO).map(montar('tbl_t
 const SELECT_CLIENTE = `SELECT id, ${CAMPOS_CLIENTE.join(', ')} FROM usuarios WHERE id = ? AND nivel = 0`;
 const SELECT_TAROLOGO_ID = `SELECT idTarologo, ${CAMPOS_TAROLOGO.join(', ')} FROM tbl_tarologos WHERE idTarologo = ?`;
 
-const PERMITIDAS = new Set([SELECT_CLIENTE, SELECT_TAROLOGO_ID, ...UPDATES_CLIENTE.values(), ...UPDATES_TAROLOGO.values()]);
+// Doc 47 (ASP): `nome_id` é único entre clientes sem diferenciar maiúscula; conferido antes de gravar.
+const SELECT_NOME_ID_DUP = 'SELECT id FROM usuarios WHERE nome_id = ? AND id <> ? AND nivel = 0 LIMIT 1';
+
+const PERMITIDAS = new Set([SELECT_NOME_ID_DUP, SELECT_CLIENTE, SELECT_TAROLOGO_ID, ...UPDATES_CLIENTE.values(), ...UPDATES_TAROLOGO.values()]);
 
 /** SQL fixo do UPDATE para as colunas dadas (qualquer ordem); `null` se alguma coluna não é espelhável. */
 function updateDe(mapa, campos, colunas) {
@@ -35,4 +38,4 @@ function updateDe(mapa, campos, colunas) {
 const updateCliente = (campos) => updateDe(UPDATES_CLIENTE, campos, CAMPOS_CLIENTE);
 const updateTarologo = (campos) => updateDe(UPDATES_TAROLOGO, campos, CAMPOS_TAROLOGO);
 
-module.exports = { CAMPOS_CLIENTE, CAMPOS_TAROLOGO, SELECT_CLIENTE, SELECT_TAROLOGO_ID, PERMITIDAS, UPDATES_CLIENTE, UPDATES_TAROLOGO, updateCliente, updateTarologo };
+module.exports = { SELECT_NOME_ID_DUP, CAMPOS_CLIENTE, CAMPOS_TAROLOGO, SELECT_CLIENTE, SELECT_TAROLOGO_ID, PERMITIDAS, UPDATES_CLIENTE, UPDATES_TAROLOGO, updateCliente, updateTarologo };

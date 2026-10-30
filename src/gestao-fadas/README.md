@@ -232,7 +232,7 @@ features/<recurso>/                   rotas -> controller -> service de cada rec
   e anuncia `realFeatures.consultation`; desligada responde 404 e a sessão não anuncia nada. Código: `features/consultas-ciclo/`, domínio puro em `_comum/dominio/consulta-*.js`
   (porte do front, ouro em `scripts/apoio-gf-consulta/ouro-consulta-front.json` gerado do código real por `scripts/gerar-ouro-gf-consulta.js`), tabelas `gf_consultas_ext` e
   `gf_consultas_eventos` (migração `20261111000000`). Prova: `npm run verificar:gf-consulta` (a parte offline entra em `verificar:legado`).
-- **Espelho em `tbl_consultas` (DADOS, nunca estrutura):** `legado-escrita/`. DESLIGADO por padrão (`GF_LEGADO_ESCRITA_ENABLED=false`); nunca ligar no ambiente local. Allowlist de SQL só com
+- **Espelho em `tbl_consultas` (DADOS, nunca estrutura):** `legado-escrita/`. DESLIGADO por padrão (`GF_LEGADO_ESCRITA_ENABLED=false`); só o DEV `fadasdobem01` foi autorizado a ligar (30/10/2026), sempre com a trava `GF_LEGADO_ESCRITA_BANCOS`; ver Maturacao/46. Allowlist de SQL só com
   INSERT e UPDATE de `tbl_consultas` (colunas fixas) e leituras fixas; vínculo e estado ficam no Postgres (`gf_consultas_ext.id_consulta_legado`, `legado_estado`).
   `tbl_consultas` é MyISAM (inclusive no dev): ROLLBACK não desfaz. Prova só no dev, `npm run ensaiar:gf-legado-consulta -- --cnf=<.cnf> --secao=client-dev`, que troca a tabela por uma
   cópia temporária InnoDB na sessão (a de verdade não recebe nada) e confere contagem, maior id e AUTO_INCREMENT antes e depois.

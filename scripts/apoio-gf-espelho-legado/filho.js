@@ -14,7 +14,7 @@ const { raiz, passo, resumo, criarUsuario } = require('../apoio-gf-banco-novo/co
 const { criar } = require('./legado-falso');
 
 Object.assign(process.env, { GESTAO_FADAS_ESCRITA_ENABLED: 'true', FADAS_ENVIRONMENT: 'test', GF_NOVOS_DADOS: 'postgres', GESTAO_FADAS_ENABLED: 'true', GF_FATIA_CADASTROS: 'true', GF_FATIA_FICHA: 'true' });
-delete process.env.FADAS_ORIGIN; delete process.env.GF_LEGADO_ESCRITA_ENABLED;
+delete process.env.FADAS_ORIGIN; delete process.env.GF_LEGADO_ESCRITA_ENABLED; process.env.GF_LEGADO_MODO = 'copia'; // estes testes são do modo anterior (escrita DEPOIS do commit); o legado primeiro tem o seu (verificar-gf-legado-fonte)
 const r = (p) => path.join(raiz, p);
 
 const LEGADO = [{ idTarologo: 9001, nmuTarologo: 'Tarólogo Fictício A', ativo: 1 }, { idTarologo: 9002, nmuTarologo: 'Tarólogo Fictício B', ativo: 1 }];

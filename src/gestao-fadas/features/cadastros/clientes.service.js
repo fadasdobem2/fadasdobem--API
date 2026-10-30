@@ -13,6 +13,10 @@ const { novosDadosNoPostgres } = require('../../novo/modo');
 const c = require('./cadastros.comum');
 const { validarMudancas, aplicar, paraDto } = require('./clientes.validacao');
 const espelho = require('../../legado-escrita/entidades');
+const legado = require('../../legado-escrita');
+const lp = require('../../legado-escrita/legado-primeiro');
+
+const CAMPOS_LEGADO = ['name', 'treatAs', 'whatsapp', 'birthDate'];
 const { dadosEfetivosDoCliente } = require('../../legado-escrita/fusao');
 
 let verificarCliente = async (id) => require('../clientes/clientes.service').clienteExiste(id);
@@ -57,7 +61,16 @@ async function gravar(req) {
       const atual = linhas[0] || null;
       if ((atual ? Number(atual.revisao) : 0) !== expectedRevision) throw c.conflitoVersao('Este cadastro mudou. Feche e abra novamente para conferir.');
       const antes = atual ? paraDto(atual) : null;
-      const prox = aplicar(atual, mudancas, new Date().toISOString());
+      const completo = aplicar(atual, mudancas, new Date().toISOString());
+      const camposLegado = lp.ativo('clientes') ? CAMPOS_LEGADO.filter((k) => mudancas[k] !== undefined) : [];
+      let escrito = null; let prox = completo;
+      if (camposLegado.length) {
+        // LEGADO PRIMEIRO (Maturacao/46): nome, tratar por, WhatsApp e nascimento são gravados em `usuarios` ANTES do commit; o Postgres NÃO guarda cópia.
+        let linha; try { linha = legado.clientes.linhaDoCliente(mudancas, camposLegado); } catch (e) { throw lp.falhaDoLegado(e); }
+        escrito = await espelho.clientes.primeiro(ex, id, Number(id), linha, { operationKey, escopo: 'cadastros.cliente.editar' });
+        prox = aplicar(atual, Object.fromEntries(Object.entries(mudancas).filter(([k]) => !escrito.campos.includes(k))), new Date().toISOString());
+        for (const k of escrito.campos) delete prox.dados[k]; // inclusive o valor antigo só do Postgres: o campo agora vive no legado
+      }
       if (atual) {
         await ex.execute('UPDATE gf_clientes_ext SET perfil_pagamento = ?, perfil_pagamento_em = ?, dados = ?, revisao = revisao + 1, atualizado_em = CURRENT_TIMESTAMP, atualizado_por = ?, operation_key = ? WHERE id_cliente = ?',
           [prox.perfil_pagamento, prox.perfil_pagamento_em, JSON.stringify(prox.dados), c.nomeDe(req), operationKey, id]);
@@ -65,9 +78,16 @@ async function gravar(req) {
         await ex.execute('INSERT INTO gf_clientes_ext (id_cliente, perfil_pagamento, perfil_pagamento_em, dados, revisao, atualizado_por, operation_key) VALUES (?, ?, ?, ?, 1, ?, ?)',
           [id, prox.perfil_pagamento, prox.perfil_pagamento_em, JSON.stringify(prox.dados), c.nomeDe(req), operationKey]);
       }
-      // Espelho no legado (Maturacao/45): INTENÇÃO na mesma transação (os campos mexidos); a escrita no legado vem depois do commit. Desligado, só anota.
-      await espelho.clientes.registrar(ex, id, Object.keys(mudancas).filter((k) => k !== 'paymentProfile'));
-      const depois = paraDto({ ...prox, id_cliente: id, revisao: (atual ? Number(atual.revisao) : 0) + 1 });
+      if (escrito) {
+        // O que sobrou de campo do legado em `dados` (edição antiga só no Postgres, ainda não enviada pela carga) segue pendente e legível como fallback.
+        const sobra = CAMPOS_LEGADO.filter((k) => prox.dados[k] !== undefined);
+        await espelho.clientes.marcar(ex, id, sobra.length ? 'nao_espelhada' : 'espelhada', sobra.length ? 'campos antigos só no Postgres (carga pendente)' : 'legado primeiro', sobra);
+      } else {
+        // Espelho no legado (Maturacao/45, modo `copia`): INTENÇÃO na mesma transação (os campos mexidos); a escrita no legado vem depois do commit. Desligado, só anota.
+        await espelho.clientes.registrar(ex, id, Object.keys(mudancas).filter((k) => k !== 'paymentProfile'));
+      }
+      const depois = paraDto({ ...completo, id_cliente: id, revisao: (atual ? Number(atual.revisao) : 0) + 1 });
+      if (escrito) return { antes: { ...antes, legado: escrito.antes }, depois: { ...depois, legado: escrito.depois }, resposta: { readAt: new Date().toISOString(), clientId: id, extension: depois } };
       return { antes, depois, resposta: { readAt: new Date().toISOString(), clientId: id, extension: depois } };
     },
   });

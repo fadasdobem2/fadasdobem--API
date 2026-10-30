@@ -51,11 +51,13 @@ async function gravar(req, { escopo, operationKey, corpo, entidade, entidadeId, 
   if (!conta || !perfil) throw indisponivel();
   // Tarefas para DEPOIS do commit (espelho no legado, Maturacao/45): nunca dentro da transação do Postgres.
   const posteriores = [];
+  // Desfazer do legado (Maturacao/46): se o Postgres falhar DEPOIS de o legado ter recebido a escrita (legado primeiro), estas tarefas devolvem o legado ao valor anterior.
+  const compensacoes = [];
   try {
     // `comContas`: a mesma conexão também dá a transação das tabelas da A (`users`, `refresh_tokens`), como em Contas (contas.banco.js).
     const rodar = comContas ? require('../contas/contas.banco').emTransacaoContas : (fn) => emTransacao((ex) => fn(ex));
     const r = await rodar(async (ex, t) => umaVez(ex, { escopo, chave: operationKey, corpo: { ...corpo, usuario: conta } }, async () => {
-      ex.posCommit = posteriores;
+      ex.posCommit = posteriores; ex.compensacoes = compensacoes;
       const feito = await producao(ex, t);
       if (!semAuditoria) {
         await ex.execute(AUDIT_INSERT, linhaDeAuditoria(
@@ -68,6 +70,7 @@ async function gravar(req, { escopo, operationKey, corpo, entidade, entidadeId, 
     if (!r.repetida) for (const tarefa of posteriores) { try { await tarefa(); } catch (e) { console.error('[gf-cadastros] tarefa posterior falhou:', (e && e.message) || e); } }
     return r.resposta;
   } catch (erro) {
+    for (const desfazer of compensacoes) { try { await desfazer(); } catch (e) { console.error('[gf-cadastros] desfazer do legado falhou:', (e && e.message) || e); } }
     if (erro instanceof OperacaoConflitoError) throw new AppError('Esta operação já foi registrada com outros dados.', 409, { codigo: 'OPERATION_KEY_CONFLICT' }, true);
     if (erro && (erro.errno === 1062 || erro.code === 'ER_DUP_ENTRY' || erro.code === '23505')) throw conflitoVersao();
     throw erro;

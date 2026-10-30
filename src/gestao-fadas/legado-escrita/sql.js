@@ -19,20 +19,24 @@ const SELECT_CONSULTA = `SELECT idConsulta, ${['idUsuario', ...COLUNAS_INSERT.sl
 const SELECT_TAROLOGO = 'SELECT idTarologo FROM tbl_tarologos WHERE nmcTarologo = ? OR idTarologo = ? LIMIT 3';
 // Reconciliação: procura (leitura) a linha que já corresponde à intenção de espelho (chave natural), antes de reinserir.
 const SELECT_CANDIDATAS = 'SELECT idConsulta FROM tbl_consultas WHERE idUsuario = ? AND idTarologo = ? AND dtConsulta = ? AND iniConsulta = ? ORDER BY idConsulta LIMIT 5';
+// Doc 47 (ASP): as telas fazem INNER JOIN com estes catálogos; id fora deles faz a linha SUMIR do ASP. Conferido antes de gravar.
+const SELECT_FORMA_CONSULTA = 'SELECT idFormaConsulta FROM tbl_formaconsulta WHERE idFormaConsulta = ?';
+const SELECT_FORMA_PAGTO = 'SELECT idOpcaoPagto FROM tbl_opcaopagto WHERE idOpcaoPagto = ?';
 const SELECT_CONTAGEM = 'SELECT COUNT(*) AS n FROM tbl_consultas';
 const SELECT_ULTIMO_ID = 'SELECT LAST_INSERT_ID() AS id';
 
-const PERMITIDAS = new Set([INSERT_CONSULTA, UPDATE_CONSULTA, SELECT_CONSULTA, SELECT_TAROLOGO, SELECT_CANDIDATAS, SELECT_CONTAGEM, SELECT_ULTIMO_ID]);
+const PERMITIDAS = new Set([INSERT_CONSULTA, UPDATE_CONSULTA, SELECT_CONSULTA, SELECT_TAROLOGO, SELECT_CANDIDATAS, SELECT_CONTAGEM, SELECT_ULTIMO_ID, SELECT_FORMA_CONSULTA, SELECT_FORMA_PAGTO]);
 const entidades = require('./sql.entidades');
+const financeiro = require('./sql.financeiro');
 const CONTROLE = /^(start\s+transaction|commit|rollback)$/i;
 
 /** Devolve `null` se a instrução é permitida, ou o motivo da recusa. */
 function motivoDeRecusa(sql) {
   const texto = String(sql).trim();
   if (CONTROLE.test(texto)) return null;
-  if (PERMITIDAS.has(texto) || entidades.PERMITIDAS.has(texto)) return null;
+  if (PERMITIDAS.has(texto) || entidades.PERMITIDAS.has(texto) || financeiro.PERMITIDAS.has(texto)) return null;
   const palavra = (texto.split(/\s+/)[0] || '').toUpperCase();
   return `instrução fora da allowlist (${palavra || 'vazia'})`;
 }
 
-module.exports = { COLUNAS_INSERT, COLUNAS_UPDATE, INSERT_CONSULTA, UPDATE_CONSULTA, SELECT_CONSULTA, SELECT_TAROLOGO, SELECT_CANDIDATAS, SELECT_CONTAGEM, SELECT_ULTIMO_ID, motivoDeRecusa };
+module.exports = { COLUNAS_INSERT, COLUNAS_UPDATE, INSERT_CONSULTA, UPDATE_CONSULTA, SELECT_CONSULTA, SELECT_TAROLOGO, SELECT_CANDIDATAS, SELECT_CONTAGEM, SELECT_ULTIMO_ID, SELECT_FORMA_CONSULTA, SELECT_FORMA_PAGTO, motivoDeRecusa };

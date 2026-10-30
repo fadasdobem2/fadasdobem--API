@@ -9,11 +9,10 @@
  *     PERCENTUAL inteiro (int(3)), nunca dinheiro: o espelho não calcula desconto, grava 0;
  *   - `valor_consulta` é o TOTAL cobrado e não se recalcula depois: só viaja quando o servidor o tem (senão `null` mantém o do legado);
  *   - `nmuAtendente` e `atendenteFinalizou` são varchar(25); tudo sem 4 bytes (as colunas são utf8, 3 bytes: emoji quebraria);
- *   - `idFormaPagto`: só o 8 prova pré-pago; pós-paga NÃO se infere de 9 a 12, grava 6 ("Indefinido");
- *   - `idFormaConsulta`: PABX=1, Telefone=5, as demais modalidades de WhatsApp não têm código no catálogo antigo: 6 ("Indefinida");
+ *   - `idFormaPagto` e `idFormaConsulta`: mapeamento PROVISÓRIO de `provisorio.js` (pré-paga 8, pós-paga 1; WhatsApp 4, PABX 1, Telefone 5, resto 6), pendente da Nice;
  *   - "Finalizada pelo tarólogo" NÃO fecha a consulta no legado (sem repasse até a conferência, pergunta 8.2 do contrato): segue aberta.
  *   - o legado não tem coluna de situação: Devolvida, Não houve, Anulada e Erro fecham a linha com 0 minutos e o estado entra em
- *     `obsConsulta` como `[Devolvida] ...`, para quem ainda lê no sistema antigo.
+ *     `obsConsulta` sem marca nenhuma (o ASP já fecha com 0 minuto e sem texto); a situação real fica só no sistema novo.
  */
 
 const ABERTA = '0000-00-00 00:00:00';
@@ -42,11 +41,7 @@ function textoUtf8Basico(valor, max) {
   return max ? Array.from(limpo).slice(0, max).join('') : limpo;
 }
 
-function canalDoLegado(canal) {
-  if (canal === 'PABX') return 1;
-  if (canal === 'Telefone') return 5;
-  return 6;
-}
+const { formaDeConsulta: canalDoLegado, formaDePagamentoDaConsulta } = require('./provisorio'); // PROVISÓRIO, pendente da Nice
 
 const minutosInteiros = (segundos) => {
   const s = Number(segundos);
@@ -74,15 +69,16 @@ function linhaDoLegado(item, idTarologoLegado, agora = new Date()) {
   const fecha = (FECHAM_COM_MINUTOS.has(item.status) || FECHAM_SEM_MINUTOS.has(item.status)) && item.endedAt;
   const minutos = FECHAM_COM_MINUTOS.has(item.status) ? minutosInteiros(item.durationSeconds) : 0;
   const fim = fecha ? dataDoLegado(item.endedAt, 'fimConsulta', agora) : ABERTA;
-  const marca = FECHAM_SEM_MINUTOS.has(item.status) ? `[${item.status}] ` : '';
-  const obs = textoUtf8Basico(`${marca}${item.observation || ''}`).slice(0, 60000);
+  // Sem marca na observação: o ASP já registra consulta que não aconteceu como fechada com 0 minuto, sem texto nenhum (1.562 em 12 meses).
+  // A situação real (Devolvida, Anulada, Erro, Não houve) fica só no sistema novo. Decisão do Patrick, 30/10/2026.
+  const obs = textoUtf8Basico(item.observation || '').slice(0, 60000);
   const finalizou = fecha ? textoUtf8Basico((item.finishReview && item.finishReview.by) || (item.tarologistFinishReport && item.tarologistFinishReport.reporterName) || item.attendant || '', 25) : '';
   return {
     fechada: Boolean(fecha),
     total: totalDecimal(item, minutos),
     colunas: {
       idUsuario, idTarologo: idTarologoLegado, dtConsulta: dataDoLegado(item.sentToTarologistAt || item.startedAt, 'dtConsulta', agora), iniConsulta: inicio, fimConsulta: fim,
-      tmpConsulta: minutos, idFormaConsulta: canalDoLegado(item.channel), idFormaPagto: item.paymentProfile === 'Pré-paga' ? 8 : 6, obsConsulta: obs,
+      tmpConsulta: minutos, idFormaConsulta: canalDoLegado(item.channel), idFormaPagto: formaDePagamentoDaConsulta(item.paymentProfile), obsConsulta: obs,
       dtVencto: inicio, vlDesconto: 0, vlBonus: item.bonusGrant && Number.isInteger(item.bonusGrant.minutes) ? Math.min(999, Math.max(0, item.bonusGrant.minutes)) : 0,
       nmuAtendente: textoUtf8Basico(item.attendant || '', 25), atendenteFinalizou: finalizou, IDProdutoConsulta: 1, valor_consulta: '0.00',
     },

@@ -1,0 +1,64 @@
+# Trecho para colocar DENTRO do bloco `server { ... }` de https://gestao.fadasdobem.com.br
+# (e, no ensaio, de https://gestao-dev.fadasdobem.com.br). NÃO é um arquivo completo.
+# O front (esteira gf-ops do Lucas) continua atendendo `/`; aqui só entram a API A e o Socket.IO.
+# Antes de recarregar: sudo nginx -t   |   depois: sudo systemctl reload nginx
+# ATENÇÃO: confira com o Lucas se o bloco do front já usa `location /api`. Se usar, a API A
+# precisa ocupar esse caminho (o front chama /api/...) e o destino antigo deve sair.
+
+# ---- API REST + gate do Gestão Fadas -------------------------------------------------
+location /api/ {
+    proxy_pass http://127.0.0.1:4010;
+    proxy_http_version 1.1;
+
+    # Cabeçalhos para a API ver o IP e o protocolo reais (a API liga TRUST_PROXY=true).
+    proxy_set_header Host              $host;
+    proxy_set_header X-Real-IP         $remote_addr;
+    proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_set_header X-Forwarded-Host  $host;
+
+    # Respostas longas (exportações) e consultas lentas do legado.
+    proxy_connect_timeout 10s;
+    proxy_send_timeout    60s;
+    proxy_read_timeout    120s;
+
+    # Foto de perfil das contas viaja em data URL (a API aceita até 6 MB); sobra margem.
+    client_max_body_size 8m;
+
+    # Respostas da API nunca devem ser guardadas em cache de proxy.
+    proxy_no_cache 1;
+    proxy_cache_bypass 1;
+}
+
+# ---- Socket.IO (WebSocket) ----------------------------------------------------------
+location /socket.io/ {
+    proxy_pass http://127.0.0.1:4010;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade    $http_upgrade;
+    proxy_set_header Connection "upgrade";
+    proxy_set_header Host              $host;
+    proxy_set_header X-Real-IP         $remote_addr;
+    proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    # Conexão longa: não derrubar por silêncio.
+    proxy_read_timeout 3600s;
+    proxy_send_timeout 3600s;
+}
+
+# ---- Verificação de saúde da API (leitura) ------------------------------------------
+# /api/ops/health já passa pelo bloco /api/. Não é preciso nada a mais.
+
+# ---- O que NUNCA deve ser exposto ---------------------------------------------------
+# A página de dados de teste mostra senha de teste. Ela só existe com DADOS_TESTE_ENABLED=true
+# (que deve ficar false), e mesmo assim este bloco recusa o caminho no Nginx.
+location ^~ /dados-teste {
+    return 404;
+}
+# Arquivos estáticos e uploads da plataforma completa não fazem parte do painel.
+location ^~ /uploads/ {
+    return 404;
+}
+# Saúde crua da plataforma (/health, /ping) fica só no servidor (127.0.0.1:4010).
+location ~ ^/(health|ping)$ {
+    return 404;
+}

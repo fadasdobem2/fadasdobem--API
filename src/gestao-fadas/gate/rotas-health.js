@@ -12,10 +12,21 @@
 const { Router } = require('express');
 const { enviarJson } = require('./http');
 
-/** Tabelas que as leituras do gate exigem (`gf_auditoria` também, para exportação e histórico). */
-const TABELAS_EXIGIDAS = Object.freeze([
-  'usuarios', 'tbl_consultas', 'tbl_tarologos', 'tbl_pagtoinformado', 'tbl_pagtoconfirmado', 'tbl_pagtonaolocalizado', 'gf_auditoria',
+/** Tabelas do LEGADO que as leituras do gate exigem. */
+const TABELAS_LEGADO = Object.freeze([
+  'usuarios', 'tbl_consultas', 'tbl_tarologos', 'tbl_pagtoinformado', 'tbl_pagtoconfirmado', 'tbl_pagtonaolocalizado',
 ]);
+
+/**
+ * `gf_auditoria` (exportação e histórico) mora no PostgreSQL da A no modo padrão (`GF_NOVOS_DADOS=postgres`); só no modo `mysql` ela
+ * precisa existir no legado. Em produção o legado só tem as `gf_auth_*` da B, então exigi-la ali daria 503 com a API boa.
+ */
+const tabelasExigidasNoLegado = (env = process.env) => (require('../novo/modo').novosDadosNoPostgres(env) ? TABELAS_LEGADO : [...TABELAS_LEGADO, 'gf_auditoria']);
+
+async function auditoriaNoPostgres() {
+  const [linhas] = await require('../../config/database').sequelize.query("SELECT to_regclass('gf_auditoria') AS t");
+  return Boolean(linhas && linhas[0] && linhas[0].t);
+}
 
 /** Estado do legado: 'ok' | 'database-unavailable' | 'schema-incompatible' | 'configuration-unavailable'. */
 async function estadoPadrao() {
@@ -26,7 +37,9 @@ async function estadoPadrao() {
   if (!s.conectado) return 'database-unavailable';
   const [linhas] = await getLegadoSequelize().query('SELECT TABLE_NAME AS t FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE()');
   const existentes = new Set(linhas.map((l) => String(l.t || l.TABLE_NAME).toLowerCase()));
-  return TABELAS_EXIGIDAS.every((t) => existentes.has(t)) ? 'ok' : 'schema-incompatible';
+  if (!tabelasExigidasNoLegado().every((t) => existentes.has(t))) return 'schema-incompatible';
+  if (require('../novo/modo').novosDadosNoPostgres() && !(await auditoriaNoPostgres())) return 'schema-incompatible';
+  return 'ok';
 }
 
 /** Identidade do build como a B publica; se faltar ou for inválida, null. */
@@ -71,4 +84,4 @@ function criarRotaHealth({ estadoDoBanco = estadoPadrao, verificarLegado, agora 
   return router;
 }
 
-module.exports = { criarRotaHealth, identidadeDoBuild, TABELAS_EXIGIDAS };
+module.exports = { criarRotaHealth, identidadeDoBuild, TABELAS_EXIGIDAS: TABELAS_LEGADO, TABELAS_LEGADO, tabelasExigidasNoLegado };

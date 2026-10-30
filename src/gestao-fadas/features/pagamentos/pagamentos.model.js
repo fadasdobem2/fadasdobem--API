@@ -73,7 +73,7 @@ function legacyClientLabel(clientId, identification) {
  * situação sai da concordância dos sinais presentes. Uma cópia em tbl_pagtoconfirmado diz confirmado; texto vazio
  * não diz nada. Mudar esta tabela é decisão registrada da Laya.
  */
-const NUMERIC_STATUS_SIGNALS = new Map([['2', 'confirmado'], ['1', 'informado']]);
+const NUMERIC_STATUS_SIGNALS = new Map([['2', 'confirmado'], ['1', 'informado'], ['0', 'informado']]);
 const TEXT_STATUS_SIGNALS = new Map([['confirmado', 'confirmado'], ['informado', 'informado']]);
 
 /** Uma linha de tbl_pagtoinformado, com ou sem o gêmeo em tbl_pagtoconfirmado. Valor desconhecido é nomeado primeiro. */

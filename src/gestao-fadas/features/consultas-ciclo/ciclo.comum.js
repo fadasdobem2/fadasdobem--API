@@ -54,9 +54,10 @@ async function gravar(req, a, { escopo, operationKey, corpo, acao, producao }) {
   let r;
   // Tarefas para DEPOIS do commit (o espelho no legado): nunca dentro da transação do Postgres, para um rollback não deixar sobra lá.
   const posteriores = [];
+  const compensacoes = []; // legado primeiro (Maturacao/46): o que desfazer no legado se o Postgres falhar depois de ele ter recebido a escrita
   try {
     r = await emTransacao(async (ex) => umaVez(ex, { escopo, chave: operationKey, corpo: { ...corpo, usuario: a.id } }, async () => {
-      ex.posCommit = posteriores;
+      ex.posCommit = posteriores; ex.compensacoes = compensacoes;
       const feito = await producao(ex);
       await ex.execute(AUDIT_INSERT, linhaDeAuditoria(
         { actorUserId: a.id, actorRole: a.perfil, action: acao, entity: 'consulta', entityId: feito.entidadeId, before: feito.antes, after: feito.depois },
@@ -65,6 +66,7 @@ async function gravar(req, a, { escopo, operationKey, corpo, acao, producao }) {
       return feito.resposta;
     }));
   } catch (erro) {
+    for (const desfazer of compensacoes) { try { await desfazer(); } catch (e) { console.error('[gf-consulta] desfazer do legado falhou:', (e && e.message) || e); } }
     if (erro instanceof OperacaoConflitoError) throw new AppError('Esta operação já foi registrada com outros dados.', 409, { codigo: 'OPERATION_KEY_CONFLICT' }, true);
     if (erro && (erro.errno === 1062 || erro.code === 'ER_DUP_ENTRY')) throw conflitoVersao();
     throw traduzir(erro);

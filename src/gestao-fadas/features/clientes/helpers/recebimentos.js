@@ -39,7 +39,7 @@ function readLegacyPayment(row, table, catalogs = {}) {
 }
 
 // Tabela R5 (revista em 2026-10-26, D4): o que cada sinal diz. Nenhum sinal tem precedência; a situação vem da concordância.
-const NUMERIC_STATUS_SIGNALS = new Map([['2', 'confirmado'], ['1', 'informado']]);
+const NUMERIC_STATUS_SIGNALS = new Map([['2', 'confirmado'], ['1', 'informado'], ['0', 'informado']]);
 const TEXT_STATUS_SIGNALS = new Map([['confirmado', 'confirmado'], ['informado', 'informado']]);
 
 function informedReading(row, withTwin) {

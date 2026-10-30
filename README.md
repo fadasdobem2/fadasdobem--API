@@ -80,6 +80,16 @@ npm run verificar:gf-pagamentos       # idem: -painel -recados -divergencias -cl
 npm run verificar:financeiro
 ```
 
+## Implantação em produção
+
+Runbook, unidade systemd, trecho do Nginx, exemplo de variáveis (só nomes), scripts de backup e smoke test: [deploy/README.md](deploy/README.md). Roteiro de ligação por etapas: `Maturacao/54_ROTEIRO_DE_LIGACAO.md` (repositório de documentação). Três comandos novos:
+
+```bash
+npm run contas:equipe -- <contas.json|csv> --saida=<credenciais.csv>   # cria as contas de login da equipe (ensaio por padrão; --executar grava)
+npm run verificar:gf-contas-equipe                                     # prova o comando acima em PostgreSQL descartável
+npm run checar:implantacao -- --etapa=0 --base=<URL>                   # smoke test pós-implantação, só leitura
+```
+
 ## Segurança, em uma linha
 
 Sessão por JWT em cookie, CSRF, rate limit, auditoria na mesma transação de cada gravação, idempotência por `operationKey`, revisão otimista (`409 VERSION_CHANGED`), webhooks autenticados e nenhuma credencial do legado modelada. Detalhes na documentação completa.

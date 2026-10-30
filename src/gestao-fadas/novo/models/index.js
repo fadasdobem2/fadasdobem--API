@@ -55,6 +55,8 @@ const fabricas = [
   require('./gf_motivos_financeiros.model'),
   require('./gf_adicionais_itens.model'),
   require('./gf_log_operacional.model'),
+  require('./gf_legado_intencoes.model'),
+  require('./gf_legado_verificacoes.model'),
 ];
 
 function registrar(sequelize) {

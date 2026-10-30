@@ -27,6 +27,7 @@ function criar() {
   };
   const ex = {
     execute: async (q, v) => {
+      if (q === se.SELECT_NOME_ID_DUP) { const d = [...estado.usuarios.values()].find((l) => l.nivel === 0 && String(l.nome_id).toLowerCase() === String(v[0]).toLowerCase() && l.id !== v[1]); return [d ? [{ id: d.id }] : []]; }
       if (q === se.SELECT_CLIENTE) { const l = estado.usuarios.get(v[0]); return [l && l.nivel === 0 ? [{ id: l.id, nome_id: l.nome_id, nome2: l.nome2, whats: l.whats, datanascimento: l.datanascimento }] : []]; }
       if (q === se.SELECT_TAROLOGO_ID) { const l = estado.tarologos.get(v[0]); return [l ? [{ idTarologo: l.idTarologo, nmuTarologo: l.nmuTarologo, ativo: l.ativo }] : []]; }
       if (UPD_CLIENTE.has(q) || UPD_TAROLOGO.has(q)) {

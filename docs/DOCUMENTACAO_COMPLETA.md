@@ -140,6 +140,9 @@ Código em `src/gestao-fadas/legado-escrita/`. Regras:
 - **Achado crítico:** `tbl_consultas` é **MyISAM**, inclusive no DEV, então `ROLLBACK` não desfaz a escrita. Por isso o ensaio troca, só na sessão, a tabela real por uma cópia **temporária InnoDB** e destrói a conexão no fim. Provado em DEV: a tabela real fica com a mesma contagem de linhas, maior id e `AUTO_INCREMENT` antes e depois.
 - **Não atômico em produção.** Para reduzir a janela de linha órfã: a intenção (`legado_estado=pendente` com uma chave natural) é gravada no PostgreSQL na mesma transação da consulta, antes de qualquer `INSERT` no legado; antes de inserir, procura-se no legado uma linha que já corresponda (uma livre: adota; nenhuma: insere; duas ou mais: erro "órfã ambígua", decisão humana); uma rotina de reconciliação refaz as pendentes antigas.
 - **Entidades além de consultas** (`GF_LEGADO_CLIENTES`, `GF_LEGADO_TAROLOGOS`, desligadas): cliente (`usuarios`: `nome_id`, `nome2`, `whats`, `datanascimento`, sempre com `nivel = 0`) e tarólogo (`tbl_tarologos`: nome com no máximo 35 caracteres e situação). Mesma segurança do espelho de consultas: lista permitida de `UPDATE` (nunca `INSERT`, `DELETE` ou DDL), só os campos alterados são enviados, intenção pendente gravada na transação do PostgreSQL, escrita depois do commit, reconciliação e ensaio em cópia temporária. A leitura combinada usa o legado como fonte do campo espelhado e a extensão `gf_*` só para campo ainda pendente.
+- **Legado primeiro** (`Maturacao/46`): para os campos que têm casa no legado, o pedido grava no legado e só depois o PostgreSQL guarda o que é novo, o vínculo e a auditoria. Se o legado falha, nada é salvo. Flags por entidade: `GF_LEGADO_CLIENTES`, `GF_LEGADO_TAROLOGOS`, `GF_LEGADO_CONSULTAS`, `GF_LEGADO_PAGAMENTOS`, `GF_LEGADO_NOTAS`, `GF_LEGADO_STATUS_TAROLOGO`, todas desligadas por padrão. A **trava de banco** `GF_LEGADO_ESCRITA_BANCOS` (vazia = nenhuma escrita) confere o banco conectado a cada escrita; o código recusa `fadasdobem` (produção) e `fadasdobem02` mesmo se listados. Mapeamento de canais para ids existentes do legado fica num único lugar (`legado-escrita/provisorio.js`) e é provisório.
+- **Verificação pós-gravação** (`GF_LEGADO_VERIFICACAO`, `Maturacao/53`): a ficha de cliente do ASP regrava dezenas de colunas de uma vez e pode desfazer uma edição. Depois de gravar `nome_id`, `nome2` ou `datanascimento`, o sistema confere de novo em 2 min, 15 min e 2 h: se voltou exatamente ao valor antigo, reaplica uma vez; se mudou para outro valor, só registra a divergência.
+- **Saldo inicial calculado do legado** (`Maturacao/52`): `usuarios.saldo` e `valorAPagar` valem 0 em produção, então a abertura de cada cliente é calculada dos pagamentos (status 0 do Mercado Pago, 1 e 2) e das consultas do ASP, por lote FIFO, com a tabela de tarifa do front. Congela na primeira movimentação nova do cliente.
 - **Sem casa no legado** (ficam só no PostgreSQL): Pré/Pós, orientação financeira, comissão, preços, restrições, agenda, horários, presença, recados, divergências, pendências, repasse e contas. **Dependem de resposta da Nice**: lançar, confirmar, corrigir e cancelar pagamento, Bônus e Cortesia, saldo e `valorAPagar`, notas da ficha, foto e biografia, tarólogo novo e atendente (15 perguntas, mais as 4 de `tbl_consultas`).
 - Mapeamentos ainda a confirmar com a Nice: valor de WhatsApp em `idFormaConsulta`, `idFormaPagto` da pós-paga, tratamento de Devolvida/Anulada/Erro/Não houve, PABX e Telefone.
 
@@ -282,6 +285,16 @@ Limites técnicos:
 - Parte da conferência ainda é feita só por forma. A matriz com o que é paridade provada e o que não é é mantida junto à documentação de maturação do projeto.
 - Contagens e listas longas (recados, pagamentos) aceitam paginação opcional; sem parâmetros o comportamento é o anterior.
 - Dados de teste ficam no banco local e a API não os apaga.
+
+---
+
+## 11.1 Implantação em produção
+
+A API A entra na VPS de produção da KingHost (`<vps-producao>`, domínio `https://gestao.fadasdobem.com.br`) como um serviço novo e separado, atrás do Nginx, ao lado da esteira `gf-ops` do Lucas (que continua cuidando do front). A ligação é feita em **etapas** (0: só leitura; 1: cliente e tarólogo; 2: consultas; 3: pagamentos), com backup antes de cada uma.
+
+- **Como instalar** (usuário de serviço, PostgreSQL, Redis, migrações, systemd, Nginx, verificação, logs, atualização, reversão): [deploy/README.md](../deploy/README.md), com `fadasdobem-api.service`, `nginx-api.conf.snippet`, `api.env.example` (só nomes), `gerar-segredos.sh`, `backup-legado.sh`, `backup-postgres.sh`, `restaurar-teste.md` e o smoke test `deploy/checar-implantacao.js` (`npm run checar:implantacao -- --etapa=0`).
+- **Como ligar, verificar e reverter cada etapa**, o passo de liberação da trava de banco em produção (hoje o código recusa `fadasdobem` mesmo se listado), a janela, a comunicação à equipe e a tabela de riscos: `Maturacao/54_ROTEIRO_DE_LIGACAO.md` do repositório de documentação.
+- **Contas de login da equipe** (a B em produção tem 1 só): `npm run contas:equipe` (`scripts/criar-contas-equipe.js`), ensaio por padrão; verificado por `npm run verificar:gf-contas-equipe`.
 
 ---
 

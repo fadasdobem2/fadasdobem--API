@@ -2,7 +2,8 @@
 
 /**
  * Contexto financeiro de UMA cliente no servidor (Maturacao/29 seção 10): pagamentos, consultas, benefícios concedidos e o SALDO DE PARTIDA.
- * Saldo de partida = `usuarios.saldo - usuarios.valorAPagar` do legado (SÓ LEITURA), CONGELADO em `gf_saldos_partida` na primeira vez que a
+ * Saldo de partida = CALCULADO do histórico do legado (pagamentos 0/1/2 menos consumo das consultas, por lote FIFO; SÓ LEITURA, Maturacao/52,
+ * `fin.saldo-legado.js`), CONGELADO em `gf_saldos_partida` na primeira vez que a
  * cliente recebe um movimento novo (pagamento, benefício, consulta). Depois do congelamento só os movimentos do Postgres mexem no saldo
  * (decisão em aberto com a Nice: Maturacao/29 seção 10.4). Duas fontes com a mesma forma: o executor (dentro de uma transação) e os models
  * (leitura sem escrita, que funciona com a escrita desligada).
@@ -10,24 +11,22 @@
 
 const { Op, literal } = require('sequelize');
 const { lendo } = require('../../_comum/legado');
-const { moneyToCents } = require('../pagamentos/helpers/dinheiro');
-const { legacyMoney } = require('../pagamentos/helpers/valores-legado');
+const { saldosCalculados } = require('./fin.saldo-legado');
 const saldo = require('../../_comum/dominio/financeiro-saldo');
 
-const FONTE_PARTIDA = 'legado.saldo-menos-valorAPagar';
+const FONTE_PARTIDA = 'legado.calculado-pagamentos-menos-consumo';
 const comoItem = (l) => ({ ...(typeof l.item === 'string' ? JSON.parse(l.item) : l.item), id: l.id });
 const reais = (centavos) => Number(centavos) / 100;
 const filtroTransferencia = (id) => JSON.stringify({ movements: [{ balanceTransfer: { targetClientId: id } }] });
 
-/** `saldo - valorAPagar` das clientes (nível 0) pedidas, em centavos; `conhecido` é falso se o legado não informa o saldo (null não é zero). */
+/** Saldo de abertura CALCULADO das clientes (nível 0) pedidas, em centavos; `conhecido` é falso só quando a cliente não existe no legado. */
 async function partidaNoLegadoReal(ids) {
   if (!ids.length) return new Map();
-  const linhas = await lendo((m) => m.LegadoUsuario.findAll({ attributes: ['id', 'nome_id', 'saldo', 'valorAPagar'], where: { nivel: 0, id: ids.map(Number) }, raw: true }));
-  return new Map(linhas.map((l) => {
-    const credito = legacyMoney(l.saldo); const aPagar = legacyMoney(l.valorAPagar);
-    const centavos = (credito === null ? 0n : moneyToCents(credito)) - (aPagar === null ? 0n : moneyToCents(aPagar));
-    return [String(l.id), { centavos: Number(centavos), conhecido: credito !== null && aPagar !== null, nome: `${l.nome_id || ''}`.trim() }];
-  }));
+  const [linhas, calculados] = await Promise.all([
+    lendo((m) => m.LegadoUsuario.findAll({ attributes: ['id', 'nome_id'], where: { nivel: 0, id: ids.map(Number) }, raw: true })),
+    saldosCalculados(ids),
+  ]);
+  return new Map(linhas.map((l) => [String(l.id), { centavos: calculados.get(String(l.id)).centavos, conhecido: true, nome: `${l.nome_id || ''}`.trim() }]));
 }
 
 let leitorDePartida = partidaNoLegadoReal;

@@ -60,7 +60,10 @@ test('tabela R5 revista para o informado: a situação sai da concordância dos 
     assert.deepEqual(sit(s, n), ['conferir-origem', 'texto-nao-previsto'], `${n}/${s}`);
   }
   // Número fora de 1 e 2 é nomeado primeiro, mesmo com texto também inesperado.
-  for (const [s, n] of [[null, 3], [null, null], [null, 0], ['confirmado', 3], ['bloqueado', 7]]) assert.deepEqual(sit(s, n), ['conferir-origem', 'numero-nao-previsto'], `${n}/${s}`);
+  // Número 0 = fluxo automático (Mercado Pago): Informado; 1 = Informado; 2 = Confirmado.
+  for (const s of [null, '', 'informado']) assert.deepEqual(sit(s, 0), ['informado', null], `0/${s}`);
+  assert.deepEqual(sit('confirmado', 0), ['conferir-origem', 'situacao-divergente']);
+  for (const [s, n] of [[null, 3], [null, null], ['confirmado', 3], ['bloqueado', 7]]) assert.deepEqual(sit(s, n), ['conferir-origem', 'numero-nao-previsto'], `${n}/${s}`);
 });
 
 test('totais confirmado e informado à parte; conferir a origem e não localizado fora dos dois, sem os nomes antigos', () => {

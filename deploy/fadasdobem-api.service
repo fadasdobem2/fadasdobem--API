@@ -1,0 +1,57 @@
+# /etc/systemd/system/fadasdobem-api.service
+# API A (Fadas do Bem / Gestão Fadas). Sobe atrás do Nginx em 127.0.0.1:4010.
+# Instalação: ver deploy/README.md. Não coloque segredos neste arquivo: eles ficam no EnvironmentFile.
+[Unit]
+Description=Fadas do Bem - API A (Gestão Fadas)
+Documentation=file:///opt/fadasdobem-api/current/deploy/README.md
+After=network-online.target postgresql.service redis-server.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=fadasdobem-api
+Group=fadasdobem-api
+WorkingDirectory=/opt/fadasdobem-api/current
+# Arquivo de ambiente FORA do repositório (root:fadasdobem-api, modo 640).
+EnvironmentFile=/etc/fadasdobem-api/api.env
+ExecStart=/usr/bin/node app.js
+# A API trata SIGTERM com shutdown gracioso (até ~28 s); damos folga.
+TimeoutStopSec=40
+KillSignal=SIGTERM
+Restart=on-failure
+RestartSec=5
+# Evita laço de reinício se a configuração estiver errada.
+StartLimitIntervalSec=120
+StartLimitBurst=5
+
+# Endurecimento básico
+NoNewPrivileges=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+RestrictRealtime=true
+LockPersonality=true
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+SystemCallArchitectures=native
+CapabilityBoundingSet=
+AmbientCapabilities=
+UMask=0027
+# Único lugar com escrita: envios (uploads) que a plataforma guarda em disco.
+ReadWritePaths=/var/lib/fadasdobem-api
+
+# Limites
+LimitNOFILE=16384
+MemoryMax=1G
+
+# Logs vão para o journal (journalctl -u fadasdobem-api).
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=fadasdobem-api
+
+[Install]
+WantedBy=multi-user.target

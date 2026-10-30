@@ -36,7 +36,7 @@ function carregarDoArquivo() {
   const { sequelize } = require(path.join(raiz, 'src/config/database'));
   try {
     const [consultas] = await sequelize.query('SELECT legado_estado AS estado, COUNT(*) AS n FROM gf_consultas_ext GROUP BY 1 ORDER BY 1');
-    const resumo = { consultas: Object.fromEntries(consultas.map((l) => [l.estado, Number(l.n)])), clientes: await legado.entidades.clientes.resumo(), tarologos: await legado.entidades.tarologos.resumo() };
+    const resumo = { consultas: Object.fromEntries(consultas.map((l) => [l.estado, Number(l.n)])), clientes: await legado.entidades.clientes.resumo(), intencoes: await legado.intencoes.resumo().catch(() => ({ indisponivel: true })), tarologos: await legado.entidades.tarologos.resumo() };
     console.log('Estado do espelho (Postgres):', JSON.stringify(resumo));
     if (!tem('executar')) { console.log('Nada foi escrito (use --executar para uma passada; exige as flags de escrita ligadas).'); return; }
     const r = await legado.reconciliacao.reconciliarTudo({ idadeMinutos: Number(arg('idade-min')) || 10, limite: Number(arg('limite')) || 50, incluirNaoEspelhadas: tem('incluir-nao-espelhadas') });

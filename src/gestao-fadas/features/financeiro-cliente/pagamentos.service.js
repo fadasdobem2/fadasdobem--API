@@ -21,6 +21,7 @@ const { dadosEfetivosDoCliente } = require('../../legado-escrita/fusao');
 const refazer = require('../../_comum/dominio/pagamentos-refazer');
 const acompanhamento = require('../../_comum/dominio/painel-pagamentos');
 const ctx = require('./fin.contexto');
+const espelho = require('./pagamentos.espelho');
 const { contextoParaRefazer, contextoDoLancamento } = require('./pagamentos.contexto');
 
 /**
@@ -79,7 +80,10 @@ async function lancar(req) {
       const reg = estrito() ? refazer.refazerLancamento(r, a, agora, await contextoDoLancamento(ex, r.clientId)) : v.carimbarNovo(r, a, agora);
       delete reg.serviceFollowUp; // acompanhamento nasce depois do recebimento, por revisão
       const { id: _id, ...resto } = reg;
+      // Legado primeiro (flag GF_LEGADO_PAGAMENTOS): o INSERT em tbl_pagtoinformado vem ANTES de gravar aqui; canal sem casa no legado fica só no Postgres, marcado.
+      const legado = await espelho.lancamento(ex, reg, a.nome, operationKey);
       await ex.execute(`INSERT INTO gf_pagamentos (${COLUNAS_INSERT}) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?)`, [reg.id, reg.clientId, reg.status, reg.confirmation ?? null, Math.round(reg.amount * 100), reg.method, reg.linkedConsultationId ?? null, reg.informedAt, JSON.stringify(resto), a.nome, operationKey]);
+      await espelho.marcar(ex, reg.id, legado);
       await inserirEvento(ex, reg.id, 'lancamento', a, { clientId: reg.clientId, amountCents: Math.round(reg.amount * 100), status: reg.status }, 1, operationKey);
       return { antes: null, depois: { clientId: reg.clientId, amountCents: Math.round(reg.amount * 100), status: reg.status }, resposta: { readAt: agora, items: [reg], versions: { [reg.id]: 1 } } };
     },
@@ -99,7 +103,7 @@ async function revisar(req) {
   return f.gravar(req, {
     escopo: 'pagamentos.revisar', operationKey, corpo: { id, expectedVersion, record: pedido }, entidade: 'pagamento', entidadeId: id, acao: 'pagamentos.revisar',
     producao: async (ex) => {
-      const [linhas] = await ex.execute('SELECT id, item, version, id_cliente FROM gf_pagamentos WHERE id = ? FOR UPDATE', [id]);
+      const [linhas] = await ex.execute('SELECT id, item, version, id_cliente, legado_id, legado_estado FROM gf_pagamentos WHERE id = ? FOR UPDATE', [id]);
       if (!linhas[0]) throw f.naoEncontrado();
       if (Number(linhas[0].version) !== expectedVersion) throw f.conflitoVersao(COPIA_VERSAO);
       const antes = comoItem(linhas[0]);
@@ -123,6 +127,8 @@ async function revisar(req) {
       const { id: _semId, ...semId } = reg;
       await ex.execute('UPDATE gf_pagamentos SET id_cliente = ?, status = ?, confirmacao = ?, valor_centavos = ?, metodo = ?, id_consulta = ?, informado_em = ?, item = ?, version = ?, atualizado_em = CURRENT_TIMESTAMP WHERE id = ?',
         [reg.clientId, reg.status, reg.confirmation ?? null, Math.round(reg.amount * 100), reg.method, reg.linkedConsultationId ?? null, reg.informedAt, JSON.stringify(semId), versao, id]);
+      const doLegado = await espelho.revisao(ex, linhas[0], antes, reg, operationKey);
+      if (doLegado) await espelho.marcar(ex, id, doLegado);
       // O tipo do evento é um dos 7 do CHECK; o detalhe (movimento-corrigido, ocorrencia-registrar, transferencia-saldo, planilha-minutes...) vai em `dados.tipo`.
       const tipo = refeito ? refeito.tipo : v.classificar(antes, reg);
       const tipoDoEvento = refeito ? (/^(movimento|ocorrencia|transferencia)/.test(tipo) ? 'movimento' : 'correcao') : tipo;

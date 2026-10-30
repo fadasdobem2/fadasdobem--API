@@ -7,7 +7,15 @@
  */
 
 const sql = require('./sql');
-const { linhaDoLegado } = require('./mapeamento');
+const { linhaDoLegado, MapeamentoError } = require('./mapeamento');
+
+/** Doc 47: forma de consulta e de pagamento têm de existir nos catálogos do legado (senão o ASP esconde a linha). Recusa, nunca grava por palpite. */
+async function exigirCatalogos(ex, colunas) {
+  const [f] = await ex.execute(sql.SELECT_FORMA_CONSULTA, [colunas.idFormaConsulta]);
+  if (!f.length) throw new MapeamentoError(`idFormaConsulta ${colunas.idFormaConsulta} não existe em tbl_formaconsulta do legado (o ASP esconderia a consulta).`);
+  const [p] = await ex.execute(sql.SELECT_FORMA_PAGTO, [colunas.idFormaPagto]);
+  if (colunas.idFormaPagto !== undefined && !p.length) throw new MapeamentoError(`idFormaPagto ${colunas.idFormaPagto} não existe em tbl_opcaopagto do legado (o ASP esconderia a consulta).`);
+}
 
 /** `tarotId` do front (login, ex.: `osiris`) ou código numérico -> `idTarologo` do legado. `null` se não achar ou for ambíguo. */
 async function resolverTarologo(ex, tarotId) {
@@ -20,6 +28,7 @@ async function resolverTarologo(ex, tarotId) {
 /** INSERT da linha aberta. Devolve o `idConsulta` novo. */
 async function inserir(ex, item, idTarologoLegado, agora) {
   const { colunas } = linhaDoLegado(item, idTarologoLegado, agora);
+  await exigirCatalogos(ex, colunas);
   const [r] = await ex.execute(sql.INSERT_CONSULTA, sql.COLUNAS_INSERT.map((c) => colunas[c]));
   if (r && r.insertId) return String(r.insertId);
   const [[u]] = await ex.execute(sql.SELECT_ULTIMO_ID, []);
@@ -29,6 +38,7 @@ async function inserir(ex, item, idTarologoLegado, agora) {
 /** UPDATE da linha já espelhada. Devolve quantas linhas mudaram (0 se a linha não é desta cliente ou não existe). */
 async function atualizar(ex, idConsultaLegado, item, idTarologoLegado, agora) {
   const { colunas, total } = linhaDoLegado(item, idTarologoLegado, agora);
+  await exigirCatalogos(ex, colunas);
   const [r] = await ex.execute(sql.UPDATE_CONSULTA, [...sql.COLUNAS_UPDATE.map((c) => colunas[c]), total, Number(idConsultaLegado), colunas.idUsuario]);
   return Number(r && r.affectedRows) || 0;
 }

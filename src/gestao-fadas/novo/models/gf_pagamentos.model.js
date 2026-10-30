@@ -23,6 +23,10 @@ module.exports = definir({
     atualizado_em: { type: DataTypes.DATE, allowNull: false, defaultValue: literal('CURRENT_TIMESTAMP') },
     criado_por: { type: DataTypes.STRING(120), allowNull: false },
     operation_key: { type: DataTypes.STRING(128), allowNull: false },
+    legado_id: { type: DataTypes.STRING(10), allowNull: true },
+    legado_estado: { type: DataTypes.STRING(16), allowNull: false, defaultValue: 'nao_espelhada' },
+    legado_detalhe: { type: DataTypes.STRING(300), allowNull: true },
+    legado_atualizado_em: { type: DataTypes.DATE, allowNull: true },
   },
   indexes: [
     { name: 'gf_pagamentos_cliente', fields: ['id_cliente', 'informado_em'] },
