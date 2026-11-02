@@ -1,0 +1,3 @@
+# /etc/cron.d/fadasdobem-backup  (arquivo de cron do sistema; usuário root; modo 644)
+# Backup diário do banco NOVO (PostgreSQL) às 03:30, mantendo os 14 mais recentes. O backup do legado (mysqldump) é à parte e só em produção.
+30 3 * * * root /opt/fadasdobem-api/current/deploy/backup-postgres.sh --banco=fadasdobem_api --destino=/var/backups/fadasdobem/postgres --manter=14 --via-postgres >> /var/log/fadasdobem-backup.log 2>&1

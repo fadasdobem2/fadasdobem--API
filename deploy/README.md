@@ -217,6 +217,14 @@ node /opt/fadasdobem-api/current/deploy/checar-implantacao.js --etapa=<etapa atu
 
 Mantenha as 3 últimas pastas em `releases/`; apague as mais antigas.
 
+## 11.2 Endurecimento e rotina mínima (feito na dev em 02/11/2026)
+
+- `LISTEN_HOST=127.0.0.1` no `api.env`: a API escuta só em localhost (sem isso escuta em todas as interfaces e só o firewall protege).
+- Cabeçalhos de segurança do front: `deploy/nginx-front-seguranca.conf.snippet` dentro do `location /` (a API já manda os dela).
+- Backup diário do Postgres: `deploy/cron-backup-postgres.example` em `/etc/cron.d/fadasdobem-backup`; confira que o arquivo apareceu em `/var/backups/fadasdobem/postgres` e teste a restauração (`restaurar-teste.md`).
+- Mantenha poucos releases (`ls -1dt /opt/fadasdobem-api/releases/*/ | tail -n +4 | xargs -r rm -rf`) e cópias de ambiente só em pasta de root com modo 600.
+- `certbot renew --dry-run` prova a renovação do certificado.
+
 ## 12. Backups (agendar)
 
 ```bash

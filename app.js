@@ -25,6 +25,8 @@ require('./src/models');
 const app = express();
 const server = http.createServer(app);
 const port = process.env.PORT || 3000;
+// Atrás do Nginx a API só precisa de 127.0.0.1 (LISTEN_HOST=127.0.0.1); sem a variável escuta em todas as interfaces, como sempre.
+const listenHost = `${process.env.LISTEN_HOST || ''}`.trim();
 
 function setupGracefulShutdown(httpServer) {
   let exiting = false;
@@ -327,8 +329,8 @@ async function start() {
     const { warmDisposableBlocklist } = require('./src/config/disposableEmails.config');
     await warmDisposableBlocklist();
 
-    server.listen(port, () => {
-      console.log(`API escutando na porta ${port}`);
+    server.listen(...(listenHost ? [port, listenHost] : [port]), () => {
+      console.log(`API escutando na porta ${port}${listenHost ? ` (${listenHost})` : ''}`);
       const {
         scheduleEmailPendingReviewJob,
       } = require('./src/features/auth/auth.emailPending.job');
