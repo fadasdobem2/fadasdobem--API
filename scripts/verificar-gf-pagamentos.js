@@ -53,9 +53,10 @@ const totals = (r) => [r.summary.confirmedTotal, r.summary.informedTotal];
 const toReversed = (a) => [...a].reverse();
 
 test('tabela R5 revista para o informado: a situação sai da concordância dos sinais, e texto vazio não conta', () => {
-  for (const s of [null, '', '   ', 'Confirmado', ' CONFIRMADO ']) assert.deepEqual(sit(s, 2), ['confirmado', null], `2/${s}`);
+  // Decisão da Laya (02/11/2026): número 2 com o texto padrão "informado" do ASP é Confirmado (o ASP só grava o número).
+  for (const s of [null, '', '   ', 'Confirmado', ' CONFIRMADO ', 'informado', 'Informado', ' informado ']) assert.deepEqual(sit(s, 2), ['confirmado', null], `2/${s}`);
   for (const s of [null, '', 'Informado', 'informado ']) assert.deepEqual(sit(s, 1), ['informado', null], `1/${s}`);
-  for (const [s, n] of [['informado', 2], ['Informado', 2], ['confirmado', 1]]) assert.deepEqual(sit(s, n), ['conferir-origem', 'situacao-divergente'], `${n}/${s}`);
+  for (const [s, n] of [['confirmado', 1]]) assert.deepEqual(sit(s, n), ['conferir-origem', 'situacao-divergente'], `${n}/${s}`);
   for (const [s, n] of [['bloqueado', 1], ['bloqueado', 2], ['Pendente', 2], ['Pendente', 1], ['pago', 2], ['constructor', 2], ['toString', 1]]) {
     assert.deepEqual(sit(s, n), ['conferir-origem', 'texto-nao-previsto'], `${n}/${s}`);
   }
@@ -68,7 +69,7 @@ test('tabela R5 revista para o informado: a situação sai da concordância dos 
 
 test('totais confirmado e informado à parte; conferir a origem e não localizado fora dos dois, sem os nomes antigos', () => {
   const r = run({
-    informed: [inf(1, { status: 'bloqueado', id_status_pagto: 1 }), inf(2, { vlPagtoInformado: '40.00' }), inf(3, { id_status_pagto: 1, vlPagtoInformado: '7.50' }), inf(4, { status: 'informado' })],
+    informed: [inf(1, { status: 'bloqueado', id_status_pagto: 1 }), inf(2, { vlPagtoInformado: '40.00' }), inf(3, { id_status_pagto: 1, vlPagtoInformado: '7.50' }), inf(4, { status: 'confirmado', id_status_pagto: 1 })],
     confirmed: [conf(5, { vlPagtoInformado: '0.05' })],
     notFound: [nl(6)],
   });
@@ -86,7 +87,7 @@ test('par com mesmo ID, cliente, valor e data é uma operação com as duas orig
   assert.deepEqual(totals(r), ['50.00', '0.00']);
   assert.equal(r.summary.counts.confirmado, 1);
   for (const [over, reason] of [[{ id_status_pagto: 1 }, 'situacao-divergente'], [{ id_status_pagto: 1, status: 'informado' }, 'situacao-divergente'],
-    [{ status: 'informado' }, 'situacao-divergente'], [{ status: 'Pendente' }, 'texto-nao-previsto'], [{ id_status_pagto: 4 }, 'numero-nao-previsto']]) {
+    [{ status: 'Pendente' }, 'texto-nao-previsto'], [{ id_status_pagto: 4 }, 'numero-nao-previsto']]) {
     const d = run({ informed: [inf(8, over)], confirmed: [conf(8)] });
     assert.equal(d.receipts.length, 1, JSON.stringify(over));
     assert.deepEqual([d.receipts[0].situation, d.receipts[0].reviewReason, d.receipts[0].origins.length], ['conferir-origem', reason, 2], JSON.stringify(over));

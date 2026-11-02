@@ -72,6 +72,8 @@ function legacyClientLabel(clientId, identification) {
  * Tabela R5, revista em 2026-10-26 (D4): o que cada sinal de uma operação diz. Nenhum sinal tem precedência: a
  * situação sai da concordância dos sinais presentes. Uma cópia em tbl_pagtoconfirmado diz confirmado; texto vazio
  * não diz nada. Mudar esta tabela é decisão registrada da Laya.
+ * Decisão da Laya (02/11/2026): a rotina de salvar do ASP grava o número e deixa o texto no padrão "informado"; então o
+ * número 2 com o texto "informado" é Confirmado, não divergência (198 mil linhas em produção).
  */
 const NUMERIC_STATUS_SIGNALS = new Map([['2', 'confirmado'], ['1', 'informado'], ['0', 'informado']]);
 const TEXT_STATUS_SIGNALS = new Map([['confirmado', 'confirmado'], ['informado', 'informado']]);
@@ -83,7 +85,8 @@ function informedReading(row, withTwin) {
   const text = (row.textStatus ?? '').trim().toLocaleLowerCase('pt-BR');
   const textSignal = TEXT_STATUS_SIGNALS.get(text);
   if (text !== '' && !textSignal) return { situation: 'conferir-origem', reviewReason: 'texto-nao-previsto' };
-  const disagree = (textSignal !== undefined && textSignal !== number) || (withTwin && number !== 'confirmado');
+  const staleDefaultText = number === 'confirmado' && textSignal === 'informado';
+  const disagree = (textSignal !== undefined && textSignal !== number && !staleDefaultText) || (withTwin && number !== 'confirmado');
   if (disagree) return { situation: 'conferir-origem', reviewReason: 'situacao-divergente' };
   return { situation: number, reviewReason: null };
 }

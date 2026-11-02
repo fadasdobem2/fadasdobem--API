@@ -48,7 +48,9 @@ function informedReading(row, withTwin) {
   const text = (row.textStatus ?? '').trim().toLocaleLowerCase('pt-BR');
   const textSignal = TEXT_STATUS_SIGNALS.get(text);
   if (text !== '' && !textSignal) return { situation: 'conferir-origem', reviewReason: 'texto-nao-previsto' };
-  const disagree = (textSignal !== undefined && textSignal !== number) || (withTwin && number !== 'confirmado');
+  // Decisão da Laya (02/11/2026): número 2 com o texto padrão "informado" do ASP é Confirmado, não divergência.
+  const staleDefaultText = number === 'confirmado' && textSignal === 'informado';
+  const disagree = (textSignal !== undefined && textSignal !== number && !staleDefaultText) || (withTwin && number !== 'confirmado');
   if (disagree) return { situation: 'conferir-origem', reviewReason: 'situacao-divergente' };
   return { situation: number, reviewReason: null };
 }
