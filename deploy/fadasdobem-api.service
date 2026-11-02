@@ -6,6 +6,9 @@ Description=Fadas do Bem - API A (Gestão Fadas)
 Documentation=file:///opt/fadasdobem-api/current/deploy/README.md
 After=network-online.target postgresql.service redis-server.service
 Wants=network-online.target
+# Evita laço de reinício se a configuração estiver errada (essas chaves valem na seção [Unit]).
+StartLimitIntervalSec=120
+StartLimitBurst=5
 
 [Service]
 Type=simple
@@ -14,15 +17,13 @@ Group=fadasdobem-api
 WorkingDirectory=/opt/fadasdobem-api/current
 # Arquivo de ambiente FORA do repositório (root:fadasdobem-api, modo 640).
 EnvironmentFile=/etc/fadasdobem-api/api.env
-ExecStart=/usr/bin/node app.js
+# Caminho do Node: /usr/bin/node (pacote do sistema) ou /usr/local/bin/node (tarball oficial do nodejs.org). Confira com `command -v node`.
+ExecStart=/usr/local/bin/node app.js
 # A API trata SIGTERM com shutdown gracioso (até ~28 s); damos folga.
 TimeoutStopSec=40
 KillSignal=SIGTERM
 Restart=on-failure
 RestartSec=5
-# Evita laço de reinício se a configuração estiver errada.
-StartLimitIntervalSec=120
-StartLimitBurst=5
 
 # Endurecimento básico
 NoNewPrivileges=true
