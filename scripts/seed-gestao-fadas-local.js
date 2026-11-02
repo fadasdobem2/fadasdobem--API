@@ -9,7 +9,7 @@
 const path = require('path');
 const bcrypt = require('bcryptjs');
 require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
-const { SENHA_PADRAO, CONTAS, EMAILS_ANTIGOS } = require('../src/dev/contas-teste');
+const { lerSenhaTeste, CONTAS, EMAILS_ANTIGOS } = require('../src/dev/contas-teste');
 
 (async () => {
   if (!['127.0.0.1', 'localhost', '::1'].includes(`${process.env.DB_HOST || ''}`.trim())) throw new Error('Recusado: o banco não é local.');
@@ -19,7 +19,7 @@ const { SENHA_PADRAO, CONTAS, EMAILS_ANTIGOS } = require('../src/dev/contas-test
   const { seedAccessCatalog } = require('../src/rbac/rbac.seed');
   await sequelize.authenticate();
   await seedAccessCatalog({});
-  const hash = await bcrypt.hash(SENHA_PADRAO, 10);
+  const hash = await bcrypt.hash(lerSenhaTeste(), 10);
 
   for (const email of EMAILS_ANTIGOS) {
     const velho = await User.findOne({ where: { email } });

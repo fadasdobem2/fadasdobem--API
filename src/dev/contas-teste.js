@@ -23,9 +23,6 @@ function lerSenhaTeste() {
   throw new Error('Defina SEED_LOCAL_SENHA ou crie .local-dev/senha-teste.txt com a senha de teste local (fora do git).');
 }
 
-/** Senha única das contas de teste (12+ caracteres, com maiúscula, minúscula, número e símbolo). */
-const SENHA_PADRAO = lerSenhaTeste();
-
 /**
  * `usuarioMock`: o usuário do mock do front (login "laya" / "osiris"); `perfil`: o perfil da B que o gate devolve;
  * `rbac`/`produto`: o que a A grava; `tarot`: slug da taróloga no mock; `ativa: false` espelha a conta inativa do mock.
@@ -44,4 +41,5 @@ const CONTAS = [
 /** Contas genéricas criadas antes por perfil; o seed as remove para não duplicar. */
 const EMAILS_ANTIGOS = ['administradora', 'assistente', 'supervisora', 'atendente'].map((p) => `${p}@fadasdobem.test`).filter((e) => !CONTAS.some((c) => c.email === e));
 
-module.exports = { SENHA_PADRAO, CONTAS, EMAILS_ANTIGOS };
+// A senha só é lida quando alguém precisa dela (página de dados de teste, seed local): carregar este módulo nunca exige a senha.
+module.exports = { lerSenhaTeste, CONTAS, EMAILS_ANTIGOS };

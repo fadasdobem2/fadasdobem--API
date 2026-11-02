@@ -7,7 +7,7 @@
  */
 
 const { Router } = require('express');
-const { SENHA_PADRAO, CONTAS } = require('./contas-teste');
+const { lerSenhaTeste, CONTAS } = require('./contas-teste');
 
 const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
@@ -20,6 +20,7 @@ const VISAO = {
 };
 
 function pagina(env) {
+  const SENHA_PADRAO = lerSenhaTeste();
   const porta = env.PORT || '4010';
   const api = `http://127.0.0.1:${porta}`;
   const front = env.FADAS_ORIGIN || 'http://127.0.0.1:5180';
