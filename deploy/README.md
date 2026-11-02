@@ -130,6 +130,18 @@ sudo -u fadasdobem-api bash -c '
 '
 ```
 
+**Primeira administradora (ambiente novo, sem nenhuma conta).** O `contas:equipe` exige uma administradora ativa para assinar, e o `seed:access` só atribui o papel a quem já existe. Crie a primeira assim (ensaio por padrão; recusa se já houver administradora ativa):
+
+```bash
+sudo -u fadasdobem-api bash -c '
+  set -a; . /etc/fadasdobem-api/api.env; set +a
+  cd /opt/fadasdobem-api/current
+  node scripts/criar-primeira-administradora.js --nome="<Nome>" --email=<e-mail> \
+    --saida=/var/lib/fadasdobem-api/credenciais-primeira.csv --confirmo-producao            # ensaio
+  # confira e repita com --executar; leia a senha temporária só no arquivo de saída (modo 600) e apague-o depois
+'
+```
+
 Faça `deploy/backup-postgres.sh` ANTES de qualquer migração em produção depois da primeira instalação (ver seção 12).
 
 ## 7. Serviço systemd

@@ -38,6 +38,7 @@
     "comparar:models-migracoes": "node scripts/comparar-models-migracoes.js",
     "ensaiar:baseline-banco-existente": "node scripts/ensaiar-baseline-banco-existente.js",
     "verificar:gf-contas": "node scripts/verificar-gf-contas.js",
+    "contas:primeira": "node scripts/criar-primeira-administradora.js",
     "contas:equipe": "node scripts/criar-contas-equipe.js",
     "verificar:gf-contas-equipe": "node scripts/verificar-gf-contas-equipe.js",
     "checar:implantacao": "node deploy/checar-implantacao.js",
