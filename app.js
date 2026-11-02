@@ -142,7 +142,9 @@ app.use(
 );
 
 // `rawBody` guarda os bytes originais: a assinatura dos webhooks (Chatwoot, Agora) é calculada sobre eles.
-app.use(express.json({ limit: '1mb', verify: (req, _res, buf) => { req.rawBody = buf; } }));
+const jsonGlobal = express.json({ limit: '1mb', verify: (req, _res, buf) => { req.rawBody = buf; } });
+// Lote de migração por planilha (Maturacao/55): o corpo passa de 1 MB, então o gate (limite próprio de 40 MB) lê esta rota sozinho.
+app.use((req, res, next) => (req.method === 'POST' && req.path === '/api/migration/apply' && process.env.GESTAO_FADAS_ENABLED === 'true' && process.env.GF_FATIA_MIGRACAO === 'true' ? next() : jsonGlobal(req, res, next)));
 app.use(cookieParser());
 app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 

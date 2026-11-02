@@ -31,10 +31,12 @@ const r = (p) => path.join(raiz, p);
   const restricoes = require(r('src/gestao-fadas/features/financeiro-cliente/restricoes.service'));
   const contexto = require(r('src/gestao-fadas/features/financeiro-cliente/fin.contexto'));
 
-  // Legado falso: saldo de partida (centavos) por cliente. 900013 = 50,00; 900014 = -30,00 (a pagar); 900016 = 200,00; demais = 0,00.
+  // Planilha semeada (e legado falso só para existência/nome): abertura em centavos por cliente. 900013 = 50,00; 900014 = -30,00 (a pagar); 900016 = 200,00; demais = 0,00.
   const PARTIDA = { 900013: 5000, 900014: -3000, 900016: 20000, 900017: 0, 900018: 0, 900019: 0 };
   const EXISTE = new Set(Object.keys(PARTIDA));
   contexto.definirLeitorDePartida(async (ids) => new Map(ids.filter((id) => EXISTE.has(id)).map((id) => [id, { centavos: PARTIDA[id], conhecido: true, nome: `Cliente ${id}` }])));
+  // Desde 31/10/2026 a abertura vem da PLANILHA (Maturacao/55): semeia o histórico (corte em 2000) com os mesmos valores. O leitor do legado fica só para existência e nome.
+  await require('../apoio-gf-migracao/semear').semear(sequelize, Object.fromEntries(Object.entries(PARTIDA).filter(([, v]) => v !== 0)));
   const existe = async (id) => EXISTE.has(id);
   pagamentos.definirVerificadorDeCliente(existe); restricoes.definirVerificadorDeCliente(existe); ciclo.definirVerificadorDeCliente(existe); agendaServico.definirVerificadorDeCliente(existe);
 
@@ -136,7 +138,7 @@ const r = (p) => path.join(raiz, p);
   const lancarPag = (record, operationKey = n()) => chamar('POST', '/payments', { operationKey, record });
   const revisarPag = (id, expectedVersion, record, operationKey = n()) => chamar('POST', `/payments/${id}/revise`, { operationKey, expectedVersion, record });
   const conta = async (id) => (await chamar('GET', `/payments/accounts?ids=${id}`)).j.accounts[id];
-  await passo('GET vazio; antes de qualquer movimento a conta usa o saldo de partida VIVO do legado e não congela', async () => {
+  await passo('GET vazio; antes de qualquer movimento a conta usa a abertura da PLANILHA e não congela', async () => {
     const x = await chamar('GET', '/payments'); assert.equal(x.status, 200, x.t); assert.deepEqual(x.j.items, []); assert.deepEqual(x.j.benefits, []);
     const c = await conta('900013'); assert.equal(c.openingCents, 5000); assert.equal(c.openingFrozen, false); assert.equal(c.balanceCents, 5000); assert.equal(c.name, 'Cliente 900013');
     assert.equal(await contar('SELECT COUNT(*) AS n FROM gf_saldos_partida'), 0);
@@ -151,7 +153,7 @@ const r = (p) => path.join(raiz, p);
     const c = await conta('900013'); assert.equal(c.openingFrozen, true); assert.equal(c.balanceCents, 5000 + 8880); assert.equal(c.receivedCents, 8880);
     assert.equal(c.availableMinutes, 46, 'abertura de 50,00 a 2,96 (16,89 min) + pacote de 30 min = 46 minutos inteiros (domínio do front)');
   });
-  await passo('o saldo de partida fica CONGELADO: mudar o legado depois não muda a conta', async () => {
+  await passo('a abertura é da planilha: mudar o saldo calculado do legado depois não muda a conta', async () => {
     PARTIDA[900013] = 999999;
     const c = await conta('900013'); assert.equal(c.openingCents, 5000); assert.equal(c.balanceCents, 5000 + 8880);
     PARTIDA[900013] = 5000;

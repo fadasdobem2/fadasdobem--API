@@ -31,6 +31,8 @@ const r = (p) => path.join(raiz, p);
   const PARTIDA = { 900013: 5000, 900014: -3000 };
   const EXISTE = new Set(Object.keys(PARTIDA));
   contexto.definirLeitorDePartida(async (ids) => new Map(ids.filter((id) => EXISTE.has(id)).map((id) => [id, { centavos: PARTIDA[id], conhecido: true, nome: `Cliente ${id}` }])));
+  // Desde 31/10/2026 a abertura vem da PLANILHA (Maturacao/55): semeia o histórico (corte em 2000) com os mesmos valores. O leitor do legado fica só para existência e nome.
+  await require('../apoio-gf-migracao/semear').semear(sequelize, Object.fromEntries(Object.entries(PARTIDA).filter(([, v]) => v !== 0)));
   const existe = async (id) => EXISTE.has(id);
   pagamentos.definirVerificadorDeCliente(existe); restricoes.definirVerificadorDeCliente(existe); ciclo.definirVerificadorDeCliente(existe); clientes.definirVerificadorDeCliente(existe);
 
@@ -54,9 +56,9 @@ const r = (p) => path.join(raiz, p);
 
   console.log('Edição do cadastro pela ficha (cada perfil de equipe)');
   como('atendente');
-  await passo('antes de editar: saldo traz o nome do legado e Pré/Pós vazio', async () => {
+  await passo('antes de editar: saldo traz o nome do legado e o Pré/Pós da planilha (Pré-pago)', async () => {
     const a = await chamar('GET', '/payments/accounts?ids=900013'); assert.equal(a.status, 200, a.t);
-    assert.equal(a.j.accounts['900013'].name, 'Cliente 900013'); assert.equal(a.j.accounts['900013'].paymentProfile, '');
+    assert.equal(a.j.accounts['900013'].name, 'Cliente 900013'); assert.equal(a.j.accounts['900013'].paymentProfile, 'Pré-pago');
     assert.equal(a.j.accounts['900013'].balanceCents, 5000);
   });
   await passo('atendente edita Pré/Pós, tratar por e WhatsApp (revisão 0 -> 1); resposta traz a extensão', async () => {

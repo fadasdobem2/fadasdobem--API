@@ -33,7 +33,7 @@ async function lerOrientacoes(m) {
   const linhas = await m.GfClientesOrientacoes.findAll({ order: [['id_cliente', 'ASC']] });
   const pendentes = linhas.map((l) => l.id_cliente);
   if (!pendentes.length) return [];
-  const [vivas, exts] = await Promise.all([contexto.partidaNoLegado(pendentes), m.GfClientesExt.findAll({ where: { id_cliente: pendentes } })]);
+  const [vivas, exts] = await Promise.all([contexto.clientesNoLegado(pendentes), m.GfClientesExt.findAll({ where: { id_cliente: pendentes } })]);
   const editados = new Map(exts.map((e) => { const d = dadosEfetivosDoCliente(e); return [e.id_cliente, typeof d.name === 'string' ? d.name.trim() : '']; }));
   return linhas.filter((l) => vivas.get(l.id_cliente)).map((l) => ({ clientId: l.id_cliente, nome: (editados.get(l.id_cliente) || vivas.get(l.id_cliente).nome || '').trim() || `Cliente ${l.id_cliente}`, guidance: f.textoDe(l) }));
 }

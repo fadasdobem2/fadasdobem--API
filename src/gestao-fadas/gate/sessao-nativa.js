@@ -37,6 +37,7 @@ const { contasLigado } = require('./rotas-contas');
 const { configLigado } = require('./rotas-config');
 const { recadosLigado } = require('./rotas-recados');
 const { divergenciasLigado } = require('./rotas-divergencias');
+const { migracaoLigada } = require('./rotas-migracao');
 const { pendenciasLigado } = require('./rotas-pendencias');
 const { fichaLigada } = require('./rotas-ficha');
 const { estadoFinanceiroLigado } = require('./rotas-estado-financeiro');
@@ -155,7 +156,7 @@ function criarProvedorNativo({ servicos, env = process.env } = {}) {
     if (r.status === 'invalid') return erro('SESSION_INVALID');
     if (r.status === 'access-unavailable') return erro('ACCOUNT_ACCESS_UNAVAILABLE');
     if (r.status !== 'identity') return erro('SERVICE_UNAVAILABLE');
-    return ok(200, { identity: publico(r.identity), realFeatures: { payouts: payoutsLigado(env), ...(horariosLigado(env) ? { schedules: true } : {}), ...(agendaLigada(env) ? { agenda: true } : {}), ...(presencaLigada(env) ? { presence: true } : {}), ...(consultaLigada(env) ? { consultation: true } : {}), ...(cadastrosLigado(env) ? { cadastros: true } : {}), ...(precosLigado(env) ? { pricing: true } : {}), ...(pagamentosLigado(env) ? { payments: true } : {}), ...(restricoesLigado(env) ? { restrictions: true } : {}), ...(recadosLigado(env) ? { notes: true } : {}), ...(divergenciasLigado(env) ? { divergences: true } : {}), ...(pendenciasLigado(env) ? { pending: true } : {}), ...(contasLigado(env) ? { accounts: true } : {}), ...(configLigado(env) ? { config: true } : {}), ...(painelLigado(env) ? { panel: true } : {}), ...(clientesLigado(env) ? { clients: true } : {}), ...(fichaLigada(env) ? { clientFile: true } : {}), ...(estadoFinanceiroLigado(env) ? { financialState: true } : {}) } });
+    return ok(200, { identity: publico(r.identity), realFeatures: { payouts: payoutsLigado(env), ...(horariosLigado(env) ? { schedules: true } : {}), ...(agendaLigada(env) ? { agenda: true } : {}), ...(presencaLigada(env) ? { presence: true } : {}), ...(consultaLigada(env) ? { consultation: true } : {}), ...(cadastrosLigado(env) ? { cadastros: true } : {}), ...(precosLigado(env) ? { pricing: true } : {}), ...(pagamentosLigado(env) ? { payments: true } : {}), ...(restricoesLigado(env) ? { restrictions: true } : {}), ...(recadosLigado(env) ? { notes: true } : {}), ...(divergenciasLigado(env) ? { divergences: true } : {}), ...(pendenciasLigado(env) ? { pending: true } : {}), ...(contasLigado(env) ? { accounts: true } : {}), ...(configLigado(env) ? { config: true } : {}), ...(painelLigado(env) ? { panel: true } : {}), ...(clientesLigado(env) ? { clients: true } : {}), ...(fichaLigada(env) ? { clientFile: true } : {}), ...(estadoFinanceiroLigado(env) ? { financialState: true } : {}), ...(migracaoLigada(env) ? { migration: true } : {}) } });
   }
 
   async function login(req) {

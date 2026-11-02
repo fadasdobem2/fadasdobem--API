@@ -142,7 +142,7 @@ Código em `src/gestao-fadas/legado-escrita/`. Regras:
 - **Entidades além de consultas** (`GF_LEGADO_CLIENTES`, `GF_LEGADO_TAROLOGOS`, desligadas): cliente (`usuarios`: `nome_id`, `nome2`, `whats`, `datanascimento`, sempre com `nivel = 0`) e tarólogo (`tbl_tarologos`: nome com no máximo 35 caracteres e situação). Mesma segurança do espelho de consultas: lista permitida de `UPDATE` (nunca `INSERT`, `DELETE` ou DDL), só os campos alterados são enviados, intenção pendente gravada na transação do PostgreSQL, escrita depois do commit, reconciliação e ensaio em cópia temporária. A leitura combinada usa o legado como fonte do campo espelhado e a extensão `gf_*` só para campo ainda pendente.
 - **Legado primeiro** (`Maturacao/46`): para os campos que têm casa no legado, o pedido grava no legado e só depois o PostgreSQL guarda o que é novo, o vínculo e a auditoria. Se o legado falha, nada é salvo. Flags por entidade: `GF_LEGADO_CLIENTES`, `GF_LEGADO_TAROLOGOS`, `GF_LEGADO_CONSULTAS`, `GF_LEGADO_PAGAMENTOS`, `GF_LEGADO_NOTAS`, `GF_LEGADO_STATUS_TAROLOGO`, todas desligadas por padrão. A **trava de banco** `GF_LEGADO_ESCRITA_BANCOS` (vazia = nenhuma escrita) confere o banco conectado a cada escrita; o código recusa `fadasdobem` (produção) e `fadasdobem02` mesmo se listados. Mapeamento de canais para ids existentes do legado fica num único lugar (`legado-escrita/provisorio.js`) e é provisório.
 - **Verificação pós-gravação** (`GF_LEGADO_VERIFICACAO`, `Maturacao/53`): a ficha de cliente do ASP regrava dezenas de colunas de uma vez e pode desfazer uma edição. Depois de gravar `nome_id`, `nome2` ou `datanascimento`, o sistema confere de novo em 2 min, 15 min e 2 h: se voltou exatamente ao valor antigo, reaplica uma vez; se mudou para outro valor, só registra a divergência.
-- **Saldo inicial calculado do legado** (`Maturacao/52`): `usuarios.saldo` e `valorAPagar` valem 0 em produção, então a abertura de cada cliente é calculada dos pagamentos (status 0 do Mercado Pago, 1 e 2) e das consultas do ASP, por lote FIFO, com a tabela de tarifa do front. Congela na primeira movimentação nova do cliente.
+- **Saldo calculado do legado** (`Maturacao/52`): `usuarios.saldo` e `valorAPagar` valem 0 em produção; o cálculo a partir dos pagamentos (status 0, 1 e 2) e das consultas do ASP existe, mas desde 31/10/2026 é só CONFERÊNCIA. O saldo de abertura vem da planilha de migração (`Maturacao/55`).
 - **Sem casa no legado** (ficam só no PostgreSQL): Pré/Pós, orientação financeira, comissão, preços, restrições, agenda, horários, presença, recados, divergências, pendências, repasse e contas. **Dependem de resposta da Nice**: lançar, confirmar, corrigir e cancelar pagamento, Bônus e Cortesia, saldo e `valorAPagar`, notas da ficha, foto e biografia, tarólogo novo e atendente (15 perguntas, mais as 4 de `tbl_consultas`).
 - Mapeamentos ainda a confirmar com a Nice: valor de WhatsApp em `idFormaConsulta`, `idFormaPagto` da pós-paga, tratamento de Devolvida/Anulada/Erro/Não houve, PABX e Telefone.
 
@@ -182,6 +182,7 @@ Cada fatia tem flag, migração, tabelas e rotas. Todas respondem `404` com a fl
 | Pendências | `GF_FATIA_PENDENCIAS` | `20261119000000` | `gf_pendencias_encaminhamentos` | `GET /pending-routing`, `GET /pending-routing/derived`, `PUT /pending-routing` |
 | Ficha da cliente | `GF_FATIA_FICHA`, `GF_FATIA_CLIENTES` | `20261121000000` | `gf_clientes_orientacoes`, `gf_clientes_notas` | `/client-guidance`, `/client-notes`, `PATCH /catalog/clients/:id` |
 | Estado financeiro | `GF_FATIA_ESTADO_FINANCEIRO` | `20261125000000` | `gf_motivos_financeiros`, `gf_adicionais_itens`, `gf_log_operacional` | `GET/PUT /financial-reasons`, `GET/PUT /payout-additions`, `GET/POST /operation-audit` |
+| Migração por planilha | `GF_FATIA_MIGRACAO` (anuncia `realFeatures.migration`) | `20261202000000` | `gf_migracao_historicos` (só acrescenta; gatilho barra UPDATE e DELETE) | `GET /migration/histories`, `GET /migration/histories/:id`, `POST /migration/apply`, `GET /migration/reconciliation`, `GET /migration/without-sheet` (detalhes em `Maturacao/55`) |
 | Espelho de cadastros no legado | `GF_LEGADO_CLIENTES`, `GF_LEGADO_TAROLOGOS` (desligadas) | `20261128000000` | colunas `legado_*` em `gf_clientes_ext` e `gf_tarologos_perfil` | sem rota própria: acompanha as gravações de cadastros |
 
 Particularidades de negócio que o servidor impõe:
@@ -191,7 +192,7 @@ Particularidades de negócio que o servidor impõe:
 - **Comissão** capturada por consulta no lançamento: percentual vigente em `gf_repasse_percentuais`, senão 30. A continuação herda a da consulta de origem.
 - **Término informado uma vez**, garantido também por índice único no banco.
 - **Consulta iniciada impede pausa** de presença; o job de presença usa as consultas reais.
-- **Saldo de partida** do cliente: lido do legado e **congelado** em `gf_saldos_partida` na primeira movimentação nova; depois soma só os movimentos do PostgreSQL.
+- **Saldo de abertura** do cliente: vem da PLANILHA de migração (`gf_migracao_historicos`, revisão vigente): crédito menos o débito só se for "cobrar", mais os movimentos DEPOIS do corte individual. Cliente sem planilha abre em ZERO. `gf_saldos_partida` só registra a origem na primeira movimentação (`planilha-migracao` ou `sem-planilha-zero`). O saldo calculado do legado serve só de conferência (`GET /migration/reconciliation`).
 
 ---
 
@@ -241,7 +242,7 @@ As flags `GF_FATIA_*` e o modo `GATE_SESSAO=nativa` ficam em `.local-dev/api.env
 
 ### 8.1 Variáveis de ambiente (nomes)
 
-Ver `.env.example`. Principais grupos: servidor (`PORT`, `NODE_ENV`), PostgreSQL (`DB_*`), segredos (`JWT_SECRET`, `CSRF_SECRET`), CORS e proxy, Chatwoot e Agora, e o Gestão Fadas: `GESTAO_FADAS_ENABLED`, `GESTAO_FADAS_GATE_ENABLED`, `GESTAO_FADAS_ESCRITA_ENABLED`, `GF_NOVOS_DADOS`, `GATE_SESSAO`, `GATE_B_ORIGEM`, `FADAS_ENVIRONMENT`, `FADAS_ORIGIN`, `LEGADO_DB_*`, `GF_LEGADO_ESCRITA_ENABLED`, `DADOS_TESTE_ENABLED` e as `GF_FATIA_*`.
+Ver `.env.example`. Principais grupos: servidor (`PORT`, `NODE_ENV`), PostgreSQL (`DB_*`), segredos (`JWT_SECRET`, `CSRF_SECRET`), CORS e proxy, Chatwoot e Agora, e o Gestão Fadas: `GESTAO_FADAS_ENABLED`, `GESTAO_FADAS_GATE_ENABLED`, `GESTAO_FADAS_ESCRITA_ENABLED`, `GF_NOVOS_DADOS`, `GATE_SESSAO`, `GATE_B_ORIGEM`, `FADAS_ENVIRONMENT`, `FADAS_ORIGIN`, `LEGADO_DB_*`, `GF_LEGADO_ESCRITA_ENABLED`, `DADOS_TESTE_ENABLED`, as `GF_FATIA_*` e `GF_MIGRACAO_LIMITE_CONFERENCIA_CENTAVOS` (limite da conferência da migração, padrão 5000).
 
 ---
 
@@ -274,6 +275,7 @@ Em `migrations/`, em ordem de nome. As anteriores a `20261029` pertencem à plat
 
 Para a Nice decidir:
 
+- Migração por planilha (`Maturacao/55`): confirmar se o corte individual é por lote (como o front faz hoje) ou por linha; o que fazer com cliente sem planilha que já tinha movimento.
 - Mapeamentos do espelho de consultas no legado (WhatsApp, pós-paga, desfechos, PABX e Telefone).
 - Se e quando ligar o espelho no legado em produção (hoje desligado; em produção não é atômico).
 - Parâmetros financeiros: taxa do Mercado Pago, divisão 70/30, sobra de pacote, arredondamento de minutos e validade de crédito (o front não tem validade).

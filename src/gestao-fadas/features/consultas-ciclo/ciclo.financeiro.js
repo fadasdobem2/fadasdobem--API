@@ -16,8 +16,7 @@ const pagamentosLigado = (env = process.env) => `${env.GF_FATIA_PAGAMENTOS || ''
 async function contexto(ex, item) {
   if (!pagamentosLigado()) return undefined;
   const [ext] = await ex.execute('SELECT perfil_pagamento FROM gf_clientes_ext WHERE id_cliente = ?', [item.clientId]);
-  const viva = (await ctx.partidaNoLegado([item.clientId])).get(item.clientId);
-  const c = await ctx.carregar(ctx.porExecutor(ex), item.clientId, { perfilPagamento: (ext[0] && ext[0].perfil_pagamento) || '', partidaViva: viva });
+  const c = await ctx.carregar(ctx.porExecutor(ex), item.clientId, { perfilPagamento: (ext[0] && ext[0].perfil_pagamento) || '' });
   return { payments: c.payments, consultations: c.consultations, profile: c.profile };
 }
 

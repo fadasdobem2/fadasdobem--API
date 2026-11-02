@@ -36,6 +36,8 @@ const D = (m) => require(r(`src/gestao-fadas/_comum/dominio/${m}`));
   const PARTIDA = { 900013: 5000, 900014: -3000, 900016: 20000, 900017: 0, 900018: 0, 900019: 0 };
   const EXISTE = new Set(Object.keys(PARTIDA));
   contexto.definirLeitorDePartida(async (ids) => new Map(ids.filter((id) => EXISTE.has(id)).map((id) => [id, { centavos: PARTIDA[id], conhecido: true, nome: `Cliente ${id}` }])));
+  // Desde 31/10/2026 a abertura vem da PLANILHA (Maturacao/55): semeia o histórico (corte em 2000) com os mesmos valores. O leitor do legado fica só para existência e nome.
+  await require('../apoio-gf-migracao/semear').semear(sequelize, Object.fromEntries(Object.entries(PARTIDA).filter(([, v]) => v !== 0)));
   const existe = async (id) => EXISTE.has(id);
   pagamentos.definirVerificadorDeCliente(existe); restricoes.definirVerificadorDeCliente(existe); ciclo.definirVerificadorDeCliente(existe); agendaServico.definirVerificadorDeCliente(existe);
 

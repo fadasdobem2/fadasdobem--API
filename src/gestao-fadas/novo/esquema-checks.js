@@ -231,6 +231,12 @@ const CHECKS = {
     ['chk_divergencias_pagamento', 'id_pagamento IS NULL OR ' + nv('id_pagamento')], ['chk_divergencias_item', "jsonb_typeof(item) = 'object'"],
     ['chk_divergencias_versao', 'version >= 1'], ['chk_divergencias_criado_por', nt('criado_por')], ['chk_divergencias_operation_key', nv('operation_key')],
   ],
+  gf_migracao_historicos: [
+    ['chk_migracao_historicos_id', nv('id')], ['chk_migracao_historicos_cliente', "id_cliente ~ '^[1-9][0-9]{0,9}$'"], ['chk_migracao_historicos_seq', 'seq >= 1'],
+    ['chk_migracao_historicos_source_key', nv('source_key')], ['chk_migracao_historicos_source_hash', "source_hash ~ '^[0-9a-f]{64}$'"], ['chk_migracao_historicos_batch', nv('batch_id')], ['chk_migracao_historicos_corte', nt('corte_em')],
+    ['chk_migracao_historicos_credito', 'credito_centavos >= 0'], ['chk_migracao_historicos_debito', 'debito_centavos >= 0'],
+    ['chk_migracao_historicos_item', "jsonb_typeof(item) = 'object'"], ['chk_migracao_historicos_criado_por', nt('criado_por')], ['chk_migracao_historicos_operation_key', nv('operation_key')],
+  ],
   gf_operacoes: [['chk_operacoes_chave', nv('chave')], ['chk_operacoes_escopo', nv('escopo')], ['chk_operacoes_hash', "hash_corpo ~ '^[0-9a-f]{64}$'"]],
   gf_welcome: [['chk_welcome_id', nv('id')], ['chk_welcome_revisao', 'revisao >= 1']],
   gf_contas_ext: [

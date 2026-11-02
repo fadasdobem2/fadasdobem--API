@@ -29,6 +29,7 @@ const { criarRotasCadastros } = require('./rotas-cadastros');
 const { criarRotasFinanceiro } = require('./rotas-financeiro');
 const { criarRotasRecados } = require('./rotas-recados');
 const { criarRotasDivergencias } = require('./rotas-divergencias');
+const { criarRotasMigracao } = require('./rotas-migracao');
 const { criarRotasPendencias } = require('./rotas-pendencias');
 const { criarRotasFicha } = require('./rotas-ficha');
 const { criarRotasEstadoFinanceiro } = require('./rotas-estado-financeiro');
@@ -64,6 +65,7 @@ function criarGate({ provedorDeSessao, verificarLegado, extras = rotasExtras } =
   router.use(criarRotasFinanceiro(provedor));
   router.use(criarRotasRecados(provedor));
   router.use(criarRotasDivergencias(provedor));
+  router.use(criarRotasMigracao(provedor));
   router.use(criarRotasPendencias(provedor));
   router.use(criarRotasFicha(provedor));
   router.use(criarRotasEstadoFinanceiro(provedor));

@@ -7,7 +7,7 @@
  *     (`canManageConsultations`); movimentos de saída são do Financeiro (administradora e assistente). O servidor carimba autor e instante,
  *     confere a FORMA e as invariantes (`pagamentos.validacao.js`), a revisão (`expectedVersion`, 409 `VERSION_CHANGED`), a idempotência
  *     (`operationKey`) e grava auditoria + evento + `gf_operacoes` na MESMA transação;
- *   - o saldo é do domínio portado (`financeiro-saldo.js`): saldo de partida do legado (só leitura, congelado) mais os movimentos do Postgres.
+ *   - o saldo é do domínio portado (`financeiro-saldo.js`): abertura da PLANILHA DE MIGRAÇÃO (Maturacao/55; sem planilha, zero) mais os movimentos do Postgres depois do corte.
  */
 
 const { randomUUID } = require('crypto');
@@ -168,7 +168,7 @@ async function contas(req) {
   const ids = [...new Set(`${(req.query && req.query.ids) || ''}`.split(',').map((s) => s.trim()).filter(Boolean))];
   if (!ids.length || ids.length > 30) throw f.invalido('ids');
   ids.forEach((id) => f.idCliente(id, 'ids'));
-  const vivas = await ctx.partidaNoLegado(ids);
+  const vivas = await ctx.clientesNoLegado(ids);
   const saida = {};
   const agora = new Date().toISOString();
   await lendoNovo(async (m) => {
@@ -179,8 +179,8 @@ async function contas(req) {
     for (const id of ids) {
       const viva = vivas.get(id);
       if (!viva) continue;
-      const contexto = await ctx.carregar(ctx.porModelos(m), id, { perfilPagamento: perfis.get(id) || '', partidaViva: viva });
-      saida[id] = { name: nomes.get(id) || viva.nome, paymentProfile: perfis.get(id) || '', openingKnown: viva.conhecido, ...ctx.resumir(contexto, agora) };
+      const contexto = await ctx.carregar(ctx.porModelos(m), id, { perfilPagamento: perfis.get(id) || '' });
+      saida[id] = { name: nomes.get(id) || viva.nome, paymentProfile: contexto.profile.paymentProfile || '', openingKnown: viva.conhecido, ...ctx.resumir(contexto, agora) };
     }
   });
   return { readAt: agora, accounts: saida };

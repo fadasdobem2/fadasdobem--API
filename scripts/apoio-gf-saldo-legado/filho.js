@@ -3,8 +3,8 @@
 /**
  * FILHO de scripts/verificar-gf-saldo-legado.js: Postgres DESCARTÁVEL (fdb_sal_*) já migrado; o legado MySQL NÃO é configurado. O leitor de
  * partida é o REAL (`fin.contexto`), só que com o histórico do legado trocado por linhas de mentira (mesmo formato do SELECT), de modo que
- * o cálculo de verdade roda: abertura calculada, congelada em `gf_saldos_partida` na primeira movimentação (corte por cliente) e depois
- * só movimentos do Postgres mexem no saldo.
+ * o cálculo de verdade roda, mas desde 31/10/2026 ele é só CONFERÊNCIA (Maturacao/55): a conta da cliente sem planilha abre em zero e a
+ * primeira movimentação nova registra a origem em `gf_saldos_partida` (`sem-planilha-zero`).
  */
 
 const path = require('path');
@@ -63,31 +63,33 @@ const r = (p) => path.join(raiz, p);
   const pag = (id, extra = {}) => ({ id, clientId: '900013', client: 'Cliente 900013', amount: 88.8, method: 'PIX', bank: 'Mercado Pago', payerName: 'Cliente 900013', informedAt: '2000-01-01T00:00:00.000Z', informedBy: 'x', status: 'Informado',
     purchase: { minutes: 30, amount: 88.8, table: 'regular', priceVersionId: 'VAL-001' }, audit: [{ id: `${id}-a1`, action: 'Pagamento informado', detail: 'x', actor: 'x', createdAt: '2000-01-01T00:00:00.000Z' }], ...extra });
 
-  console.log('Saldo de abertura calculado, congelado e depois só movimentos novos');
-  await passo('antes de qualquer movimento a conta mostra a abertura CALCULADA do legado e não congela nada', async () => {
-    const a = await conta('900013'); assert.equal(a.openingCents, 5330); assert.equal(a.balanceCents, 5330); assert.equal(a.openingFrozen, false);
-    const b = await conta('900014'); assert.equal(b.openingCents, -5920); assert.equal(b.balanceCents, -5920);
-    const c = await conta('900016'); assert.equal(c.openingCents, 7040);
-    assert.equal((await conta('900017')).openingCents, 0);
+  console.log('O saldo calculado do legado é só CONFERÊNCIA: a abertura da cliente sem planilha é zero (Maturacao/55)');
+  await passo('antes de qualquer movimento a conta abre em ZERO (sem planilha), mesmo com saldo calculado no legado; o cálculo segue disponível para conferir', async () => {
+    const a = await conta('900013'); assert.equal(a.openingCents, 0); assert.equal(a.balanceCents, 0); assert.equal(a.openingFrozen, false); assert.equal(a.openingSource, 'sem-planilha-zero');
+    const b = await conta('900014'); assert.equal(b.openingCents, 0); assert.equal(b.balanceCents, 0);
+    assert.equal((await conta('900016')).openingCents, 0); assert.equal((await conta('900017')).openingCents, 0);
     assert.equal(await contar('SELECT COUNT(*) AS n FROM gf_saldos_partida'), 0);
+    const conferencia = await contexto.partidaNoLegado(['900013', '900014', '900016']);
+    assert.equal(conferencia.get('900013').centavos, 5330); assert.equal(conferencia.get('900014').centavos, -5920); assert.equal(conferencia.get('900016').centavos, 7040);
   });
-  await passo('a primeira movimentação nova congela a abertura calculada (fonte registrada) e soma o pagamento', async () => {
+  await passo('a primeira movimentação nova registra a origem (sem-planilha-zero, 0) e o saldo é só o pagamento', async () => {
     const x = await chamar('POST', '/payments', { operationKey: 'op-saldo-legado-0001', record: pag('pag-sal-1') });
     assert.equal(x.status, 200, x.t);
     const [[l]] = await sequelize.query("SELECT centavos, fonte FROM gf_saldos_partida WHERE id_cliente = '900013'");
-    assert.equal(Number(l.centavos), 5330); assert.equal(l.fonte, contexto.FONTE_PARTIDA);
-    const c = await conta('900013'); assert.equal(c.openingFrozen, true); assert.equal(c.balanceCents, 5330 + 8880);
+    assert.equal(Number(l.centavos), 0); assert.equal(l.fonte, contexto.FONTE_SEM_PLANILHA);
+    const c = await conta('900013'); assert.equal(c.openingFrozen, true); assert.equal(c.balanceCents, 8880);
   });
-  await passo('corte por cliente: o legado mudar depois (novo pagamento do Mercado Pago, nova consulta) NÃO mexe na conta congelada, mas mexe nas ainda não congeladas', async () => {
+  await passo('o legado mudar depois (novo pagamento do Mercado Pago, nova consulta) não mexe em nenhuma conta: o calculado só aparece na conferência', async () => {
     HISTORICO[900013].push(P('2026-10-01', '500.00', 0), C('2026-10-02', 90));
     HISTORICO[900016].push(P('2026-10-01', '88.80', 0));
-    const c = await conta('900013'); assert.equal(c.openingCents, 5330); assert.equal(c.balanceCents, 5330 + 8880);
-    const d = await conta('900016'); assert.equal(d.openingCents, 7040 + 8880); assert.equal(d.openingFrozen, false);
+    const c = await conta('900013'); assert.equal(c.openingCents, 0); assert.equal(c.balanceCents, 8880);
+    const d = await conta('900016'); assert.equal(d.openingCents, 0); assert.equal(d.openingFrozen, false);
+    assert.notEqual((await contexto.partidaNoLegado(['900016'])).get('900016').centavos, 7040, 'a conferência enxerga o legado novo');
   });
-  await passo('cliente que nasce negativa: a cobertura usa a dívida; um pagamento novo congela -59,20 e a quita primeiro', async () => {
+  await passo('cliente que no legado calcula NEGATIVA: não herda a dívida; o pagamento novo soma sobre zero', async () => {
     const x = await chamar('POST', '/payments', { operationKey: 'op-saldo-legado-0002', record: pag('pag-sal-2', { clientId: '900014', client: 'Cliente 900014' }) });
     assert.equal(x.status, 200, x.t);
-    const c = await conta('900014'); assert.equal(c.openingCents, -5920); assert.equal(c.openingFrozen, true); assert.equal(c.balanceCents, -5920 + 8880);
+    const c = await conta('900014'); assert.equal(c.openingCents, 0); assert.equal(c.openingFrozen, true); assert.equal(c.balanceCents, 8880);
   });
   await passo('leitura em lote: uma chamada ao leitor para várias clientes', async () => {
     const antes = chamadas; const x = await chamar('GET', '/payments/accounts?ids=900017,900018,900019'); assert.equal(x.status, 200, x.t);

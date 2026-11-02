@@ -39,8 +39,7 @@ function corpo(c) {
 /** Financeiro da cliente (pagamentos, consultas e perfil com saldo de partida), do banco novo, para a cobertura do agendamento. */
 async function financeiroDaCliente(ex, clientId) {
   const [linhas] = await ex.execute('SELECT perfil_pagamento FROM gf_clientes_ext WHERE id_cliente = ?', [clientId]);
-  let viva; try { viva = (await fin.partidaNoLegado([clientId])).get(clientId); } catch (_e) { viva = undefined; }
-  return fin.carregar(fin.porExecutor(ex), clientId, { perfilPagamento: (linhas[0] && linhas[0].perfil_pagamento) || '', partidaViva: viva });
+  return fin.carregar(fin.porExecutor(ex), clientId, { perfilPagamento: (linhas[0] && linhas[0].perfil_pagamento) || '' });
 }
 
 async function agendar(req) {

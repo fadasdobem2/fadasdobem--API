@@ -226,6 +226,13 @@ features/<recurso>/                   rotas -> controller -> service de cada rec
   sem DELETE nem DDL; o ensaio roda numa transação que nunca confirma (SAVEPOINT por operação). Duplicidade (Postgres 23505) chega como `errno 1062`.
 - **Prova:** `npm run verificar:gf-banco-novo` (Postgres local descartável `fdb_gf_*`, apagado no fim).
 
+## Migração por planilha (Maturacao/55)
+
+- **Flag:** `GF_FATIA_MIGRACAO=true` liga `GET /api/migration/histories[/:id]`, `POST /api/migration/apply`, `GET /api/migration/reconciliation` e `GET /api/migration/without-sheet` e anuncia `realFeatures.migration`; desligada responde 404.
+  Código: `features/migracao/`, domínio `_comum/dominio/migracao-planilha.js` (porte de `client-migration-history-model.ts`, ouro do código real do front em `scripts/apoio-gf-migracao/ouro-migracao-front.json`, gerado por `scripts/gerar-ouro-gf-migracao.js`), tabela `gf_migracao_historicos` (só acrescenta; migração `20261202000000`).
+- **A planilha manda no saldo de abertura** (decisão da Nice): crédito menos o débito só se "cobrar", com corte individual. Cliente sem planilha abre em zero. O saldo calculado do legado (Maturacao/52) é só conferência.
+- **Prova:** `npm run verificar:gf-migracao` (a parte offline roda sem banco com `--offline`).
+
 ## Ciclo da consulta (fatias 5 a 7) e espelho no legado
 
 - **Flag:** `GF_FATIA_CONSULTA=true` liga `GET|POST /api/consultations` (e `/:id/{start,pause,resume,finish,finish-by-staff,cancel-by-reader,more-time,finish/correction-request,revise}`)
