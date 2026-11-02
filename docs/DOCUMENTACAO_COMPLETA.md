@@ -281,6 +281,11 @@ Para a Nice decidir:
 - Parâmetros financeiros: taxa do Mercado Pago, divisão 70/30, sobra de pacote, arredondamento de minutos e validade de crédito (o front não tem validade).
 - Convite de acesso: o front não tem convite, token de uso único nem expiração.
 - Criar cliente novo: o id nasce no legado e depende da decisão sobre escrita no legado.
+- Foto do tarólogo do legado (`tbl_tarologos.avatar`, arquivo em `/info_tarologo/images/avatar/`): o catálogo ainda não a entrega, porque a base da URL pública não está definida (o caminho não responde em `fadasdobem.com.br`). Precisa da Nice dizer onde o arquivo é servido (`Maturacao/56`).
+
+Catálogo de tarólogos (`GET /catalog/tarologists`, `Maturacao/56`): lê do legado, só com SELECT, `status` (2 = "Em consulta", demais = "Disponível"; é situação cadastral e nunca liga online/presença, que continua do banco novo) e os oráculos (`tarologo_oraculos` + `oraculos`, nomes sem repetição, na ordem do cadastro). Os oráculos do legado só entram em `directory.oracles` enquanto o perfil novo não tiver os seus; tabela ausente = sem oráculos, sem erro.
+
+Consultas e Configuração (`Maturacao/56`, seção "Consultas e Configuração"): o leitor do legado normaliza dado sujo. Tarólogo com `nmuTarologo` vazio vira `Tarólogo NNN` (lista de tarólogos, linha de consulta e ficha); consulta que cruza a meia-noite tem o fim corrigido para o dia seguinte quando a diferença das datas bate com `tmpConsulta` (tolerância de 1 min); `tmpConsulta = -1` deriva a duração das datas quando coerentes. Pendências da Nice: valor R$ 0,00 e consultas de 0 min, as 2 abertas com início no ano 0 (não exibidas) e `nome_id` com nome civil.
 
 Limites técnicos:
 

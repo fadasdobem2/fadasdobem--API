@@ -52,6 +52,43 @@ function dataHoraLegado(valor) {
   return `${ano}-${mes}-${dia}T${hora}:${minuto}:${segundo}${fracao}`;
 }
 
+/** Diferença em minutos (inteira) entre dois textos `YYYY-MM-DDTHH:mm:ss` de relógio de parede (lidos como UTC, sem fuso). */
+function minutosEntre(inicioLocal, fimLocal) {
+  return Math.floor((Date.parse(`${fimLocal}Z`) - Date.parse(`${inicioLocal}Z`)) / 60000);
+}
+
+/** Soma um dia a um texto `YYYY-MM-DDTHH:mm:ss[.fff]` de relógio de parede. */
+function maisUmDia(local) {
+  const t = new Date(Date.parse(`${local.slice(0, 19)}Z`) + 86400000).toISOString().slice(0, 19);
+  return `${t}${local.slice(19)}`;
+}
+
+/** Tolerância (minutos) entre a duração gravada e a diferença das datas para aceitar a correção de virada de dia. */
+const TOLERANCIA_VIRADA_MIN = 1;
+
+/**
+ * HEURÍSTICA DA VIRADA DE DIA (auditoria 02/11/2026). O legado grava `fimConsulta` com a DATA DO INÍCIO mesmo quando a
+ * consulta cruza a meia-noite (fim < início); `tmpConsulta` fica certo. Se somar 1 dia ao fim faz a diferença bater com
+ * `tmpConsulta` (±1 min), o fim é o do dia seguinte e o texto é corrigido. Fora disso (diferença não bate) nada muda e
+ * a consulta continua marcada "fim antes do início". Prova em produção: 2026 tem 1.340 casos de fim < início, 1.235
+ * batem exatamente; o resto não bate e fica marcado.
+ */
+function fimCorrigidoPorVirada(inicio, fim, minutos) {
+  if (!inicio || !fim || minutos === null || fim >= inicio) return null;
+  const candidato = maisUmDia(fim);
+  return Math.abs(minutosEntre(inicio, candidato) - minutos) <= TOLERANCIA_VIRADA_MIN ? candidato : null;
+}
+
+/**
+ * `tmpConsulta = -1` (9 consultas de set/2011) é "sem duração gravada", não aberta: com início e fim válidos e coerentes
+ * (fim >= início, menos de 24 h) a duração sai das datas; senão continua sem minutagem (e, pela R4, em aberto).
+ */
+function minutosDasDatas(inicio, fim) {
+  if (!inicio || !fim || fim < inicio) return null;
+  const minutos = minutosEntre(inicio, fim);
+  return minutos < 1440 ? minutos : null;
+}
+
 function textoLegado(valor) {
   return typeof valor === 'string' && valor.trim() ? valor : null;
 }
@@ -72,9 +109,11 @@ function valorDeCatalogo(codigo, rotulos) {
  */
 function lerConsultaLegado(linha, catalogos = {}) {
   const id = exigirIdLegado(linha.idConsulta, 'tbl_consultas.idConsulta');
-  const recordedMinutes = minutosLegado(linha.tmpConsulta);
   const startedAtLocal = dataHoraLegado(linha.iniConsulta);
-  const endedAtLocal = dataHoraLegado(linha.fimConsulta);
+  const fimGravado = dataHoraLegado(linha.fimConsulta);
+  const semDuracaoGravada = Number(linha.tmpConsulta) === -1;
+  const recordedMinutes = semDuracaoGravada ? minutosDasDatas(startedAtLocal, fimGravado) : minutosLegado(linha.tmpConsulta);
+  const endedAtLocal = fimCorrigidoPorVirada(startedAtLocal, fimGravado, recordedMinutes) ?? fimGravado;
   const recordedAmount = valorLegado(linha.valor_consulta);
   const issues = [];
   if (!idLegadoTexto(linha.idUsuario)) issues.push('Referência da cliente ausente ou inválida');
@@ -87,7 +126,7 @@ function lerConsultaLegado(linha, catalogos = {}) {
   return {
     origin: 'legacy', sourceTable: 'tbl_consultas', readOnly: true, id,
     clientId: idLegadoTexto(linha.idUsuario), tarotId: idLegadoTexto(linha.idTarologo),
-    clientIdentification: textoLegado(linha.nome_id), tarotName: textoLegado(linha.nmuTarologo),
+    clientIdentification: textoLegado(linha.nome_id), tarotName: rotuloTarologo(idLegadoTexto(linha.idTarologo), linha.nmuTarologo),
     consultationDateLocal: dataHoraLegado(linha.dtConsulta), startedAtLocal, endedAtLocal,
     recordedMinutes, durationSeconds: recordedMinutes === null ? null : recordedMinutes * 60,
     recordedAmount, unitValue: null, commissionRate: null, commissionAmount: null,
@@ -105,6 +144,11 @@ function lerConsultaLegado(linha, catalogos = {}) {
   };
 }
 
+/** Nome do tarólogo de `nmuTarologo`; vazio vira "Tarólogo NNN" (como o catálogo), nunca null quando há id. */
+function rotuloTarologo(id, nome) {
+  return textoLegado(nome) ?? (id ? `Tarólogo ${id}` : null);
+}
+
 /** Rótulo da cliente a partir de `usuarios.nome_id`, senão "Cliente {id}"; nunca o nome civil. */
 function rotuloCliente(clientId, identification) {
   const label = identification?.trim() || null;
@@ -113,5 +157,5 @@ function rotuloCliente(clientId, identification) {
 
 module.exports = {
   ENDED_BEFORE_START, idLegadoTexto, exigirIdLegado, valorLegado, minutosLegado, dataHoraLegado, textoLegado, notaLegado,
-  valorDeCatalogo, lerConsultaLegado, rotuloCliente,
+  valorDeCatalogo, lerConsultaLegado, rotuloCliente, rotuloTarologo, fimCorrigidoPorVirada, minutosDasDatas,
 };

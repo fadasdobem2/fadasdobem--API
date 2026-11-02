@@ -54,6 +54,9 @@ function validarDiretorio(entrada) {
 }
 
 const ativoDoLegado = (v) => (String(v) === '1' ? true : String(v) === '0' ? false : null);
+/** `tbl_tarologos.status`: 2 = em consulta, 1 (ou ausente) = disponível. É só a situação cadastral: NUNCA vira online/presença. */
+const statusDoLegado = (v) => (String(v) === '2' ? 'Em consulta' : 'Disponível');
+const oraculosDoLegado = (l) => (l && Array.isArray(l.oraculos) ? l.oraculos.filter((o) => typeof o === 'string' && o.trim()) : []);
 const nomeLegado = (v) => (typeof v === 'string' && v.trim() ? v.trim() : null);
 
 /** Sem os campos privados do diretório (para quem não gere o cadastro). */
@@ -64,7 +67,7 @@ function semPrivados(diretorio) {
 }
 
 /**
- * Uma linha do catálogo. `legado`: `{ idTarologo, nmuTarologo, ativo }` ou null; `perfil`: linha de `gf_tarologos_perfil` ou null;
+ * Uma linha do catálogo. `legado`: `{ idTarologo, nmuTarologo, ativo, status?, oraculos? }` ou null; `perfil`: linha de `gf_tarologos_perfil` ou null;
  * `ext`: linha de `gf_tarologos_ext` ou null (só preenche o que o perfil não tem).
  */
 function montarItem({ legado, perfil, ext }) {
@@ -82,9 +85,11 @@ function montarItem({ legado, perfil, ext }) {
     ...(ext && ext.personal_whatsapp && dados.personalWhatsapp === undefined ? { personalWhatsapp: ext.personal_whatsapp } : {}),
     ...(ext && ext.avatar_whatsapp && dados.avatarWhatsapp === undefined ? { avatarWhatsapp: ext.avatar_whatsapp } : {}),
   };
+  // Oráculos do legado só entram enquanto o perfil novo não tem os seus (lista vazia = ainda não editado).
+  if (!Array.isArray(dados.oracles) || !dados.oracles.length) diretorio.oracles = oraculosDoLegado(legado);
   const operacional = {
     id, name: nome, registrationActive: cadastroAtivo, official: Array.isArray(dados.official) ? dados.official : [], today: '', note: '',
-    status: 'Disponível', online: false,
+    status: statusDoLegado(legado && legado.status), online: false,
     ...(avatar ? { avatar } : {}),
     ...(perfil && perfil.registro_id ? { registrationId: perfil.registro_id, registrationRevision: perfil.registro_revisao || 0 } : {}),
   };
@@ -112,4 +117,4 @@ function conferirInativacao(ativoNovo, consultasDoTarologo) {
   return !ativoNovo && consultasDoTarologo.some((c) => c.status === 'Em curso') ? MSG_INATIVAR_COM_CONSULTA : null;
 }
 
-module.exports = { conferirInativacao, MSG_INATIVAR_COM_CONSULTA, validarDiretorio, montarItem, aplicarEdicao, semPrivados, ativoDoLegado, nomeLegado, PRIVADOS, LISTAS };
+module.exports = { statusDoLegado, conferirInativacao, MSG_INATIVAR_COM_CONSULTA, validarDiretorio, montarItem, aplicarEdicao, semPrivados, ativoDoLegado, nomeLegado, PRIVADOS, LISTAS };

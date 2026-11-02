@@ -11,6 +11,9 @@ const {
   legacyId, legacyLocalDateTime, legacyMinutes, legacyMoney, legacyNoteText, legacyText, localOperationalDateKey, requireLegacyId, sumMoney,
 } = require('./valores');
 
+// Mesmas correções do leitor de Consultas (virada de dia, tmpConsulta -1, tarólogo sem nome); ver leitura-legado.js.
+const { fimCorrigidoPorVirada, minutosDasDatas, rotuloTarologo } = require('../../consultas/helpers/leitura-legado');
+
 /** A consulta cujo fim vem antes do início; a tela de Consultas procura essa pendência. */
 const ENDED_BEFORE_START = 'Encerramento anterior ao início registrado';
 
@@ -34,9 +37,10 @@ function legacyClientLabel(clientId, identification) {
 /** Modelo histórico independente de uma linha de tbl_consultas. `catalogs` = { channels, paymentOptions, banks } (id -> rótulo). */
 function readLegacyConsultation(row, catalogs = {}) {
   const id = requireLegacyId(row.idConsulta, 'tbl_consultas.idConsulta');
-  const recordedMinutes = legacyMinutes(row.tmpConsulta);
   const startedAtLocal = legacyLocalDateTime(row.iniConsulta);
-  const endedAtLocal = legacyLocalDateTime(row.fimConsulta);
+  const fimGravado = legacyLocalDateTime(row.fimConsulta);
+  const recordedMinutes = Number(row.tmpConsulta) === -1 ? minutosDasDatas(startedAtLocal, fimGravado) : legacyMinutes(row.tmpConsulta);
+  const endedAtLocal = fimCorrigidoPorVirada(startedAtLocal, fimGravado, recordedMinutes) ?? fimGravado;
   const recordedAmount = legacyMoney(row.valor_consulta);
   const issues = [];
   if (!legacyId(row.idUsuario)) issues.push('Referência da cliente ausente ou inválida');
@@ -49,7 +53,7 @@ function readLegacyConsultation(row, catalogs = {}) {
   return {
     origin: 'legacy', sourceTable: 'tbl_consultas', readOnly: true, id,
     clientId: legacyId(row.idUsuario), tarotId: legacyId(row.idTarologo),
-    clientIdentification: legacyText(row.nome_id), tarotName: legacyText(row.nmuTarologo),
+    clientIdentification: legacyText(row.nome_id), tarotName: rotuloTarologo(legacyId(row.idTarologo), row.nmuTarologo),
     consultationDateLocal: legacyLocalDateTime(row.dtConsulta), startedAtLocal, endedAtLocal,
     recordedMinutes, durationSeconds: recordedMinutes === null ? null : recordedMinutes * 60,
     recordedAmount, unitValue: null, commissionRate: null, commissionAmount: null,

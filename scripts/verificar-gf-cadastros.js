@@ -92,6 +92,17 @@ async function offline() {
     assert.equal(cat.montarItem({ legado: { idTarologo: 9002, nmuTarologo: 'B', ativo: 0 }, perfil: null, ext: null }).registrationActive, false);
     assert.equal(cat.montarItem({ legado: { idTarologo: 9003, nmuTarologo: null, ativo: null }, perfil: null, ext: null }).name, 'Tarólogo 9003');
   });
+  await passo('status do legado (2 = em consulta) vira a situação do cadastro, NUNCA online; oráculos do legado entram só enquanto o perfil novo não tem os seus', () => {
+    const base = { idTarologo: 9004, nmuTarologo: 'C', ativo: 1 };
+    const livre = cat.montarItem({ legado: { ...base, status: 1, oraculos: ['Tarot Mitológico', 'Búzios'] }, perfil: null, ext: null });
+    assert.equal(livre.profile.status, 'Disponível'); assert.equal(livre.profile.online, false);
+    assert.deepEqual(livre.directory.oracles, ['Tarot Mitológico', 'Búzios']);
+    const ocupado = cat.montarItem({ legado: { ...base, status: '2' }, perfil: null, ext: null });
+    assert.equal(ocupado.profile.status, 'Em consulta'); assert.equal(ocupado.profile.online, false); assert.deepEqual(ocupado.directory.oracles, []);
+    assert.equal(cat.montarItem({ legado: { ...base, status: null }, perfil: null, ext: null }).profile.status, 'Disponível');
+    const editado = cat.montarItem({ legado: { ...base, oraculos: ['Runas'] }, perfil: { tarot_id: '9004', nome: null, avatar: null, cadastro_ativo: null, perfil: { oracles: ['Pêndulo'] }, revisao: 1 }, ext: null });
+    assert.deepEqual(editado.directory.oracles, ['Pêndulo']);
+  });
   await passo('perfil editado vence o legado; extensão antiga só completa o que falta; privados saem do recorte da equipe', () => {
     const it = cat.montarItem({
       legado: { idTarologo: 9001, nmuTarologo: 'Ana', ativo: 1 },

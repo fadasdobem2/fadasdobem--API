@@ -235,8 +235,8 @@ const rodar = (mw, r) => new Promise((resolve) => mw(r, {}, (err) => resolve(err
   /* --- Tarólogos: DTO da B --- */
   assert.deepStrictEqual(tarologos.paraDto({ idTarologo: 7, nmuTarologo: 'Ana', ativo: 1 }), { id: '7', name: 'Ana', active: true });
   assert.deepStrictEqual(tarologos.paraDto({ idTarologo: '8', nmuTarologo: 'Bia', ativo: '0' }), { id: '8', name: 'Bia', active: false });
-  assert.deepStrictEqual(tarologos.paraDto({ idTarologo: '9', nmuTarologo: '   ', ativo: null }), { id: '9', name: null, active: null });
-  assert.deepStrictEqual(tarologos.paraDto({ idTarologo: '10', nmuTarologo: null, ativo: 2 }), { id: '10', name: null, active: null });
+  assert.deepStrictEqual(tarologos.paraDto({ idTarologo: '9', nmuTarologo: '   ', ativo: null }), { id: '9', name: 'Tarólogo 9', active: null });
+  assert.deepStrictEqual(tarologos.paraDto({ idTarologo: '10', nmuTarologo: null, ativo: 2 }), { id: '10', name: 'Tarólogo 10', active: null });
   assert.deepStrictEqual(Object.keys(tarologos.paraDto({ idTarologo: 1, nmuTarologo: 'x', ativo: 1 })), ['id', 'name', 'active']);
   assert.strictEqual(tarologos.paraDto({ idTarologo: 1, nmuTarologo: ' Ana ', ativo: 1 }).name, ' Ana '); // texto como está (legacyText)
   for (const ruim of [0, '0', -1, 'abc', null, undefined, '2147483648', 1.5]) assert.throws(() => tarologos.paraDto({ idTarologo: ruim, nmuTarologo: 'x', ativo: 1 }), (e) => e.statusCode === 503, String(ruim));

@@ -66,8 +66,8 @@ function montarRecorteConsultas(entrada) {
   const earlier = [];
 
   for (const linha of entrada.rows) {
-    if (!linha.startedAtLocal) continue;
     if (entrada.tarotId !== undefined && linha.tarotId !== entrada.tarotId) continue;
+    if (!linha.startedAtLocal) continue; // sem início válido não há dia operacional: de fora (regra da B; 2 abertas com ano 0, pendência P8)
     const day = chaveDiaOperacional(linha.startedAtLocal);
     const open = linha.endedAtLocal === null || linha.recordedMinutes === null;
     if (day >= range.start && day <= range.end) {

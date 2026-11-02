@@ -23,14 +23,39 @@ const legadoEsc = require('../../legado-escrita');
 const lp = require('../../legado-escrita/legado-primeiro');
 const { MapeamentoError } = require('../../legado-escrita/mapeamento');
 
-const COLUNAS_LEGADO = ['idTarologo', 'nmuTarologo', 'ativo'];
+const COLUNAS_LEGADO = ['idTarologo', 'nmuTarologo', 'ativo', 'status'];
+
+/** Oráculos do legado (`tarologo_oraculos` + `oraculos`), só SELECT: `Map<idTarologo, nomes[]>`. Tabela ausente = sem oráculos (não derruba o catálogo). */
+const SQL_ORACULOS = 'SELECT t.idTarologo AS idTarologo, o.nome AS nome FROM tarologo_oraculos t JOIN oraculos o ON o.id_oraculo = t.id_oraculo ORDER BY t.idTarologo, t.ordem, o.nome';
+async function oraculosDoLegado(m) {
+  let linhas;
+  try {
+    [linhas] = await m.LegadoTarologo.sequelize.query(SQL_ORACULOS);
+  } catch (e) {
+    if (e && e.original && e.original.code === 'ER_NO_SUCH_TABLE') return new Map();
+    throw e;
+  }
+  const porId = new Map();
+  for (const l of linhas) {
+    const nome = typeof l.nome === 'string' ? l.nome.trim() : '';
+    if (!nome) continue;
+    const lista = porId.get(Number(l.idTarologo)) || [];
+    if (!lista.includes(nome)) lista.push(nome);
+    porId.set(Number(l.idTarologo), lista);
+  }
+  return porId;
+}
 
 /** Fonte do legado (somente leitura). O teste troca por uma lista fixa (`definirFonteLegado`). */
 let fonteLegado = {
-  listar: () => lendo(async (m) => (await m.LegadoTarologo.findAll({ attributes: COLUNAS_LEGADO, order: [['nmuTarologo', 'ASC'], ['idTarologo', 'ASC']] })).map((l) => l.get({ plain: true }))),
+  listar: () => lendo(async (m) => {
+    const [linhas, oraculos] = await Promise.all([m.LegadoTarologo.findAll({ attributes: COLUNAS_LEGADO, order: [['nmuTarologo', 'ASC'], ['idTarologo', 'ASC']] }), oraculosDoLegado(m)]);
+    return linhas.map((l) => ({ ...l.get({ plain: true }), oraculos: oraculos.get(Number(l.idTarologo)) || [] }));
+  }),
   obter: (id) => lendo(async (m) => {
     const l = await m.LegadoTarologo.findOne({ attributes: COLUNAS_LEGADO, where: { idTarologo: id } });
-    return l ? l.get({ plain: true }) : null;
+    if (!l) return null;
+    return { ...l.get({ plain: true }), oraculos: (await oraculosDoLegado(m)).get(Number(id)) || [] };
   }),
 };
 const definirFonteLegado = (f) => { fonteLegado = f; };

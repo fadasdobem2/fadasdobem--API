@@ -5,7 +5,7 @@
  * `readRealTarologists` (legacy-operations.server.ts) do suspiro/B.
  *
  * DTO da B: `{ id, name, active }`. `active` é true/false só para '1'/'0'; qualquer outro valor é null ("não
- * informado"), nunca falso. `name` é o texto como está no legado, ou null se vazio/em branco.
+ * informado"), nunca falso. `name` é o texto como está no legado; vazio/em branco vira "Tarólogo NNN" (mesmo rótulo do catálogo; o front recusa a lista inteira se um nome não for texto, caso real de 10 inativos, auditoria 02/11/2026).
  */
 
 const AppError = require('../../../utils/AppError');
@@ -38,7 +38,7 @@ const situacaoCadastro = (ativo) => (String(ativo) === '1' ? true : String(ativo
 
 /** Linha de `tbl_tarologos` -> DTO da B. */
 function paraDto(linha) {
-  return { id: exigirId(linha.idTarologo), name: legacyText(linha.nmuTarologo), active: situacaoCadastro(linha.ativo) };
+  return { id: exigirId(linha.idTarologo), name: legacyText(linha.nmuTarologo) ?? `Tarólogo ${exigirId(linha.idTarologo)}`, active: situacaoCadastro(linha.ativo) };
 }
 
 /**

@@ -59,6 +59,7 @@
     "reconciliar:gf-espelho-legado": "node scripts/reconciliar-gf-espelho-legado.js",
     "gerar:ouro-gf-espelho-legado": "node scripts/gerar-ouro-gf-espelho-legado.js",
     "gerar:ouro-gf-recados": "node scripts/gerar-ouro-gf-recados.js",
+    "verificar:gf-legado-leitura": "node scripts/verificar-gf-legado-leitura.js",
     "verificar:gf-pagamentos-regras": "node scripts/verificar-gf-pagamentos-regras.js",
     "gerar:ouro-gf-pagamentos-regras": "node scripts/gerar-ouro-gf-pagamentos-regras.js",
     "verificar:gf-financeiro-regras": "node scripts/verificar-gf-financeiro-regras.js",

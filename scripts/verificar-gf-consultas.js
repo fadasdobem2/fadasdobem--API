@@ -267,5 +267,33 @@ teste('exportação: mesmos itens, na ordem da planilha da B', () => {
   assert.deepEqual(itens.map((i) => [i.group, i.item.id]), [['running', emCurso.id], ['open-in-cut', emCursoOutroDia.id], ['open-before', antes.id], ['finished', fim.id]]);
 });
 
+teste('virada de dia: fim gravado com a data do início e duração que bate vira o dia seguinte; senão continua marcado', () => {
+  const vira = read({ iniConsulta: '2026-10-20 23:33:00', fimConsulta: '2026-10-20 00:08:00', tmpConsulta: 35 });
+  assert.equal(vira.endedAtLocal, '2026-10-21T00:08:00');
+  assert.ok(!vira.issues.includes(modelo.ENDED_BEFORE_START));
+  assert.equal(vira.rawTiming.end, '2026-10-20 00:08:00');
+  const naoBate = read({ iniConsulta: '2026-10-20 23:33:00', fimConsulta: '2026-10-20 00:08:00', tmpConsulta: 50 });
+  assert.equal(naoBate.endedAtLocal, '2026-10-20T00:08:00');
+  assert.ok(naoBate.issues.includes(modelo.ENDED_BEFORE_START));
+  const normal = read();
+  assert.equal(normal.endedAtLocal, '2026-10-21T10:20:00');
+});
+
+teste('tmpConsulta -1 com datas coerentes: duração das datas, finalizada; sem fim válido continua aberta', () => {
+  const r = read({ iniConsulta: '2011-09-10 00:18:00', fimConsulta: '2011-09-10 00:18:00', tmpConsulta: -1 });
+  assert.equal(r.recordedMinutes, 0);
+  const d = read({ iniConsulta: '2011-09-10 00:18:00', fimConsulta: '2011-09-10 00:48:00', tmpConsulta: -1 });
+  assert.equal(d.recordedMinutes, 30);
+  const sem = read({ fimConsulta: null, tmpConsulta: -1 });
+  assert.equal(sem.recordedMinutes, null);
+  const incoerente = read({ iniConsulta: '2011-09-10 10:00:00', fimConsulta: '2011-09-10 09:00:00', tmpConsulta: -1 });
+  assert.equal(incoerente.recordedMinutes, null);
+});
+
+teste('tarólogo sem nome: rótulo "Tarólogo NNN" na linha da consulta', () => {
+  assert.equal(read({ nmuTarologo: '  ' }).tarotName, 'Tarólogo 27');
+  assert.equal(read({ nmuTarologo: null, idTarologo: null }).tarotName, null);
+});
+
 console.log(`\n${ok} verificações passaram, ${falhas} falharam.`);
 process.exit(falhas === 0 ? 0 : 1);

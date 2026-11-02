@@ -38,12 +38,36 @@ function traduzirErro(e) {
   return e;
 }
 
-/** Executa uma função de leitura traduzindo os erros do legado. */
+/**
+ * Falha ao ABRIR/obter a conexão (rede, reset, pool): transitória, vale uma nova tentativa. Erro de consulta
+ * (`SequelizeDatabaseError`) e tempo esgotado de consulta (`SequelizeTimeoutError`) NÃO se repetem, para não dobrar carga.
+ */
+function falhaDeConexao(e) {
+  const nome = `${e && e.name}`;
+  const codigo = `${(e && (e.code || (e.original && e.original.code))) || ''}`;
+  return nome.startsWith('SequelizeConnection') || CODIGOS_REDE.has(codigo);
+}
+
+const espera = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/**
+ * Executa uma função de leitura traduzindo os erros do legado. O pool fecha conexões ociosas e o servidor compartilhado
+ * da KingHost às vezes recusa a reabertura: a primeira leitura depois de um tempo parado ganhava 503. Só leitura: uma nova
+ * tentativa é segura. O motivo real vai ao log (nome e código, nunca dado).
+ */
 async function lendo(fn) {
-  try {
-    return await fn(modelos());
-  } catch (e) {
-    throw traduzirErro(e);
+  for (let tentativa = 0; ; tentativa += 1) {
+    try {
+      return await fn(modelos());
+    } catch (e) {
+      if (tentativa === 0 && falhaDeConexao(e)) {
+        console.warn(`[legado] falha de conexão na leitura (${e.name}/${(e.original && e.original.code) || e.code || '-'}); repetindo uma vez.`);
+        await espera(300);
+        continue;
+      }
+      if (e && !(e instanceof AppError)) console.warn(`[legado] leitura recusada (${e.name}/${(e.original && e.original.code) || e.code || '-'}).`);
+      throw traduzirErro(e);
+    }
   }
 }
 
