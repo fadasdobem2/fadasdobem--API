@@ -11,7 +11,7 @@
 
 const AppError = require('../../../utils/AppError');
 const { foto, CadastroInvalidoError } = require('../../_comum/dominio/cadastro-tarologo');
-const { validarDiretorio, montarItem, aplicarEdicao, semPrivados, conferirInativacao } = require('../../_comum/dominio/catalogo-tarologos');
+const { validarDiretorio, montarItem, aplicarEdicao, semPrivados, conferirInativacao, emailDoLegado } = require('../../_comum/dominio/catalogo-tarologos');
 const ciclo = require('../consultas-ciclo/ciclo.store');
 const { lendo } = require('../../_comum/legado');
 const { novosDadosNoPostgres } = require('../../novo/modo');
@@ -23,7 +23,9 @@ const legadoEsc = require('../../legado-escrita');
 const lp = require('../../legado-escrita/legado-primeiro');
 const { MapeamentoError } = require('../../legado-escrita/mapeamento');
 
-const COLUNAS_LEGADO = ['idTarologo', 'nmuTarologo', 'ativo', 'status'];
+const COLUNAS_LEGADO = ['idTarologo', 'nmuTarologo', 'ativo', 'status', 'meus_horarios'];
+// Só o DETALHE para a administradora lê o e-mail de contato. `pass` (senha do sistema antigo) nunca é selecionada.
+const COLUNAS_CONTATO = [...COLUNAS_LEGADO, 'email'];
 
 /** Oráculos do legado (`tarologo_oraculos` + `oraculos`), só SELECT: `Map<idTarologo, nomes[]>`. Tabela ausente = sem oráculos (não derruba o catálogo). */
 const SQL_ORACULOS = 'SELECT t.idTarologo AS idTarologo, o.nome AS nome FROM tarologo_oraculos t JOIN oraculos o ON o.id_oraculo = t.id_oraculo ORDER BY t.idTarologo, t.ordem, o.nome';
@@ -58,7 +60,13 @@ let fonteLegado = {
     return { ...l.get({ plain: true }), oraculos: (await oraculosDoLegado(m)).get(Number(id)) || [] };
   }),
 };
+fonteLegado.obterComContato = (id) => lendo(async (m) => {
+  const l = await m.LegadoTarologo.findOne({ attributes: COLUNAS_CONTATO, where: { idTarologo: id } });
+  return l ? l.get({ plain: true }) : null;
+});
 const definirFonteLegado = (f) => { fonteLegado = f; };
+/** Fonte do detalhe: a de contato (padrão) ou, na fonte trocada pelo teste, o `obter` dela. */
+const obterParaDetalhe = (id) => (typeof fonteLegado.obterComContato === 'function' ? fonteLegado.obterComContato(id) : fonteLegado.obter(id));
 
 const idCatalogo = (v) => {
   if (typeof v !== 'string' || !/^[A-Za-z0-9_-]{1,64}$/.test(v)) throw c.invalido('tarotId');
@@ -89,6 +97,28 @@ async function ler(req) {
   const privados = q.perfil === 'tarologa' || Boolean(q.p.canEditProfessionalProfile);
   const tarologists = itens.map((i) => recorte(i, privados));
   return { readAt: new Date().toISOString(), tarologists, revisions: Object.fromEntries(itens.map((i) => [i.id, i.revision])) };
+}
+
+/**
+ * `GET /catalog/tarologists/:tarotId`: um tarólogo. Igual à lista, e SÓ a administradora recebe `directory.contactEmail` (e-mail de contato do
+ * legado, que a lista de 343 nunca leva). Os demais perfis recebem o mesmo recorte da lista, sem o campo. A taróloga só vê o próprio.
+ */
+async function obter(req) {
+  if (!novosDadosNoPostgres()) throw c.indisponivel();
+  const tarotId = idCatalogo(req.params.tarotId);
+  const q = c.quem(req);
+  if (q.perfil === 'tarologa' ? !q.proprio : !q.p.canViewTarologists) throw c.negado(false);
+  if (q.perfil === 'tarologa' && q.proprio !== tarotId) throw c.naoEncontrado();
+  const item = (await catalogo()).find((i) => i.id === tarotId);
+  if (!item) throw c.naoEncontrado();
+  const privados = q.perfil === 'tarologa' || Boolean(q.p.canEditProfessionalProfile);
+  let saida = recorte(item, privados);
+  if (q.perfil === 'administradora' && item.legacyId !== null) {
+    const legado = await obterParaDetalhe(Number(item.legacyId));
+    const email = emailDoLegado(legado && legado.email);
+    if (email) saida = { ...saida, directory: { ...saida.directory, contactEmail: email } };
+  }
+  return { readAt: new Date().toISOString(), tarologist: saida };
 }
 
 function corpoPerfil(corpo, ehTarologa) {
@@ -217,4 +247,4 @@ async function vincularConta(req) {
   });
 }
 
-module.exports = { ler, gravarPerfil, vincularConta, definirFonteLegado, catalogo, AppError };
+module.exports = { ler, obter, gravarPerfil, vincularConta, definirFonteLegado, catalogo, AppError };

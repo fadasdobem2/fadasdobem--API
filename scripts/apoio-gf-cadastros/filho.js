@@ -17,8 +17,8 @@ delete process.env.FADAS_ORIGIN;
 const r = (p) => path.join(raiz, p);
 
 const LEGADO = [
-  { idTarologo: 9001, nmuTarologo: 'Tarólogo A', ativo: 1 }, { idTarologo: 9002, nmuTarologo: 'Tarólogo B', ativo: 1 },
-  { idTarologo: 9003, nmuTarologo: 'Tarólogo C', ativo: 0 }, { idTarologo: 9005, nmuTarologo: 'Tarólogo E', ativo: 1 },
+  { idTarologo: 9001, nmuTarologo: 'Tarólogo A', ativo: 1, meus_horarios: '\r\n\t<div><b>Seg a Sex:</b> 10h as 18h<br>Sab: 9h&nbsp;as 12h</div>\r\n\t', email: 'contato.a@exemplo.com' }, { idTarologo: 9002, nmuTarologo: 'Tarólogo B', ativo: 1 },
+  { idTarologo: 9003, nmuTarologo: 'Tarólogo C', ativo: 0, meus_horarios: '\r\n\t\t\r\n', email: 'sem-arroba' }, { idTarologo: 9005, nmuTarologo: 'Tarólogo E', ativo: 1 },
 ];
 
 (async () => {
@@ -84,6 +84,43 @@ const LEGADO = [
     como('tarologa', { tarotId: '4242' });
     assert.deepEqual((await lerCatalogo()).j.tarologists, []);
     como('administradora');
+  });
+
+  console.log('Catálogo de tarólogos: horários da semana e e-mail de contato');
+  await passo('meus_horarios do legado (HTML) vira linhas de texto em profile.official; só espaço em branco vira lista vazia', async () => {
+    const a = await lerCatalogo();
+    assert.deepEqual(item(a, '9001').profile.official, ['Seg a Sex: 10h as 18h', 'Sab: 9h as 12h']);
+    assert.deepEqual(item(a, '9003').profile.official, []); assert.deepEqual(item(a, '9002').profile.official, []);
+  });
+  await passo('a LISTA nunca leva o e-mail (administradora, atendente, supervisora, taróloga), mesmo com o legado tendo', async () => {
+    for (const [perfil, extra] of [['administradora'], ['assistente'], ['supervisora'], ['atendente'], ['tarologa', { tarotId: '9001' }]]) {
+      como(perfil, extra);
+      const l = await lerCatalogo();
+      assert.equal(l.status, 200, `${perfil}: ${l.t}`);
+      assert.ok(!JSON.stringify(l.j).includes('contactEmail') && !JSON.stringify(l.j).includes('contato.a@'), `${perfil} vazou e-mail na lista`);
+    }
+    como('administradora');
+  });
+  await passo('DETALHE: só a administradora recebe contactEmail; os demais recebem o tarólogo sem o campo; nunca pass', async () => {
+    const adm = await chamar('GET', '/catalog/tarologists/9001');
+    assert.equal(adm.status, 200, adm.t);
+    assert.equal(adm.j.tarologist.id, '9001'); assert.equal(adm.j.tarologist.directory.contactEmail, 'contato.a@exemplo.com');
+    assert.deepEqual(adm.j.tarologist.profile.official, ['Seg a Sex: 10h as 18h', 'Sab: 9h as 12h']);
+    assert.ok(!/"pass"/i.test(adm.t) && !/senha/i.test(JSON.stringify(adm.j)));
+    assert.equal(adm.h.get('cache-control'), 'no-store');
+    for (const [perfil, extra] of [['assistente'], ['supervisora'], ['atendente'], ['tarologa', { tarotId: '9001' }]]) {
+      como(perfil, extra);
+      const r = await chamar('GET', '/catalog/tarologists/9001');
+      assert.equal(r.status, 200, `${perfil}: ${r.t}`);
+      assert.ok(!('contactEmail' in r.j.tarologist.directory), `${perfil} recebeu o e-mail`);
+      assert.ok(!JSON.stringify(r.j).includes('contato.a@'), `${perfil} vazou o e-mail`);
+    }
+    como('tarologa', { tarotId: '9002' });
+    assert.equal((await chamar('GET', '/catalog/tarologists/9001')).status, 404, 'taróloga não lê outro tarólogo');
+    como('administradora');
+    assert.equal((await chamar('GET', '/catalog/tarologists/9003')).j.tarologist.directory.contactEmail, undefined, 'sem forma de e-mail: não vai');
+    assert.equal((await chamar('GET', '/catalog/tarologists/777777')).status, 404);
+    assert.equal((await chamar('GET', '/catalog/tarologists/a%20b')).status >= 400, true);
   });
 
   console.log('Catálogo de tarólogos: gravação');

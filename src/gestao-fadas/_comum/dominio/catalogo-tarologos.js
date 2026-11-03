@@ -17,7 +17,26 @@ const LISTAS = ['oracles', 'techniques', 'spreads', 'definitions', 'channels', '
 const TEXTOS = { birthDate: 40, realFirstName: 120, personalWhatsapp: 45, avatarWhatsapp: 45, biography: 10000, profileCommandId: 100, registrationId: 100 };
 const GRUPOS = ['definitions', 'tarot', 'cartomancy', 'astrology', 'numerology', 'oracles', 'spreads', 'practices'];
 /** Campos que só a ficha pública do diretório não mostra (privados): saem para quem não é da gestão do cadastro. */
-const PRIVADOS = ['birthDate', 'realFirstName', 'personalWhatsapp', 'avatarWhatsapp'];
+const PRIVADOS = ['birthDate', 'realFirstName', 'personalWhatsapp', 'avatarWhatsapp', 'contactEmail'];
+
+/**
+ * `tbl_tarologos.meus_horarios` é HTML solto do sistema antigo (`<div>`, `<br>`, `<b>`, quebras e tabs). O front lê `profile.official` como
+ * LINHAS de texto: cada bloco vira uma linha, as marcas somem, o texto das palavras não muda e linhas vazias saem.
+ */
+const ENTIDADES = { '&nbsp;': ' ', '&amp;': '&', '&lt;': '<', '&gt;': '>', '&quot;': '"', '&#39;': "'" };
+function horariosDoLegado(bruto) {
+  if (typeof bruto !== 'string' || !bruto.trim()) return [];
+  const linhas = bruto
+    .replace(/<\s*(br|\/div|\/p|\/li|\/tr)\b[^>]*>/gi, '\n')
+    .replace(/<[^>]*>/g, '')
+    .replace(/&(?:nbsp|amp|lt|gt|quot|#39);/g, (e) => ENTIDADES[e])
+    .split(/\r?\n/)
+    .map((l) => l.replace(/\s+/g, ' ').trim())
+    .filter(Boolean);
+  return linhas.slice(0, 40).map((l) => l.slice(0, 300));
+}
+/** E-mail de contato do legado: só se tiver forma de e-mail (um `@`, sem espaço, até 100); senão não vai. */
+const emailDoLegado = (v) => (typeof v === 'string' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim()) && v.trim().length <= 100 ? v.trim() : null);
 
 const invalido = (m) => new CadastroInvalidoError(m);
 /** As listas e textos do diretório seguem `validateRegistrationData` do front (registration-model.ts): mesmas frases, vazios saem, repetidos somem. */
@@ -69,6 +88,7 @@ function semPrivados(diretorio) {
 /**
  * Uma linha do catálogo. `legado`: `{ idTarologo, nmuTarologo, ativo, status?, oraculos? }` ou null; `perfil`: linha de `gf_tarologos_perfil` ou null;
  * `ext`: linha de `gf_tarologos_ext` ou null (só preenche o que o perfil não tem).
+ * O e-mail de contato do legado NUNCA entra aqui: só a rota de detalhe, para a administradora, o acrescenta (`emailDoLegado`).
  */
 function montarItem({ legado, perfil, ext }) {
   const id = perfil ? perfil.tarot_id : String(legado.idTarologo);
@@ -87,8 +107,10 @@ function montarItem({ legado, perfil, ext }) {
   };
   // Oráculos do legado só entram enquanto o perfil novo não tem os seus (lista vazia = ainda não editado).
   if (!Array.isArray(dados.oracles) || !dados.oracles.length) diretorio.oracles = oraculosDoLegado(legado);
+  // Horários da semana: o perfil novo vale quando tem linhas; senão o texto do legado (`meus_horarios`), só leitura.
+  const oficial = Array.isArray(dados.official) && dados.official.length ? dados.official : horariosDoLegado(legado && legado.meus_horarios);
   const operacional = {
-    id, name: nome, registrationActive: cadastroAtivo, official: Array.isArray(dados.official) ? dados.official : [], today: '', note: '',
+    id, name: nome, registrationActive: cadastroAtivo, official: oficial, today: '', note: '',
     status: statusDoLegado(legado && legado.status), online: false,
     ...(avatar ? { avatar } : {}),
     ...(perfil && perfil.registro_id ? { registrationId: perfil.registro_id, registrationRevision: perfil.registro_revisao || 0 } : {}),
@@ -117,4 +139,4 @@ function conferirInativacao(ativoNovo, consultasDoTarologo) {
   return !ativoNovo && consultasDoTarologo.some((c) => c.status === 'Em curso') ? MSG_INATIVAR_COM_CONSULTA : null;
 }
 
-module.exports = { statusDoLegado, conferirInativacao, MSG_INATIVAR_COM_CONSULTA, validarDiretorio, montarItem, aplicarEdicao, semPrivados, ativoDoLegado, nomeLegado, PRIVADOS, LISTAS };
+module.exports = { horariosDoLegado, emailDoLegado, statusDoLegado, conferirInativacao, MSG_INATIVAR_COM_CONSULTA, validarDiretorio, montarItem, aplicarEdicao, semPrivados, ativoDoLegado, nomeLegado, PRIVADOS, LISTAS };

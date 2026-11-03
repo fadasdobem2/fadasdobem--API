@@ -14,6 +14,7 @@ const h = (fn, msg) => catchAsyncRoute(async (req, res) => responderSucesso(res,
 
 module.exports = [
   { metodo: 'GET', caminho: '/catalog/tarologists', escrita: false, handler: h(tarologos.ler, 'Catálogo de tarólogos.') },
+  { metodo: 'GET', caminho: '/catalog/tarologists/:tarotId', escrita: false, handler: h(tarologos.obter, 'Tarólogo do catálogo.') },
   { metodo: 'PUT', caminho: '/catalog/tarologists/:tarotId/profile', escrita: true, handler: h(tarologos.gravarPerfil, 'Perfil registrado.') },
   { metodo: 'PUT', caminho: '/catalog/tarologists/:tarotId/account', escrita: true, handler: h(tarologos.vincularConta, 'Conta vinculada.') },
   { metodo: 'GET', caminho: '/catalog/clients', escrita: false, handler: h(clientes.ler, 'Extensões de cliente.') },

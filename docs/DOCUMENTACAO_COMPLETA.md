@@ -285,6 +285,8 @@ Para a Nice decidir:
 
 Catálogo de tarólogos (`GET /catalog/tarologists`, `Maturacao/56`): lê do legado, só com SELECT, `status` (2 = "Em consulta", demais = "Disponível"; é situação cadastral e nunca liga online/presença, que continua do banco novo) e os oráculos (`tarologo_oraculos` + `oraculos`, nomes sem repetição, na ordem do cadastro). Os oráculos do legado só entram em `directory.oracles` enquanto o perfil novo não tiver os seus; tabela ausente = sem oráculos, sem erro.
 
+Tarólogo: cadastro e campos (`Maturacao/56`, seção "Tarólogo: cadastro e campos"): o catálogo também lê `meus_horarios` (HTML do legado, vira linhas de texto em `profile.official`; só 6 dos 56 ativos têm conteúdo). O e-mail de contato (`tbl_tarologos.email`) nunca vai na lista: a rota `GET /catalog/tarologists/:tarotId` o entrega em `directory.contactEmail` só à administradora (decisão no servidor); os demais perfis recebem o tarólogo sem o campo, e a taróloga só lê o próprio. `pass` nunca é selecionada. A rota usa `canViewTarologists` como a lista (taróloga: só o próprio id, 404 nos outros).
+
 Consultas e Configuração (`Maturacao/56`, seção "Consultas e Configuração"): o leitor do legado normaliza dado sujo. Tarólogo com `nmuTarologo` vazio vira `Tarólogo NNN` (lista de tarólogos, linha de consulta e ficha); consulta que cruza a meia-noite tem o fim corrigido para o dia seguinte quando a diferença das datas bate com `tmpConsulta` (tolerância de 1 min); `tmpConsulta = -1` deriva a duração das datas quando coerentes. Pendências da Nice: valor R$ 0,00 e consultas de 0 min, as 2 abertas com início no ano 0 (não exibidas) e `nome_id` com nome civil.
 
 Limites técnicos:
