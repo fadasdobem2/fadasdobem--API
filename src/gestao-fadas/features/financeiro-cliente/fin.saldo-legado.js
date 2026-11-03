@@ -33,12 +33,13 @@ function agrupar(linhas, ids) {
   return por;
 }
 
-/** Saldo de abertura calculado (centavos e detalhes) das clientes pedidas: `Map(id -> resultado do cálculo)`. Uma ida ao legado. */
-async function saldosCalculados(ids) {
+/** Saldo de abertura calculado (centavos e detalhes) das clientes pedidas: `Map(id -> resultado do cálculo)`. Uma ida ao legado.
+ *  `cortes` (opcional, `Map(id -> 'YYYY-MM-DD HH:MM:SS')`): calcula só até o corte de cada cliente (conferência da migração, Maturacao/55). */
+async function saldosCalculados(ids, { cortes } = {}) {
   const numericos = [...new Set(ids.map(Number).filter((n) => Number.isInteger(n) && n > 0))];
   if (!numericos.length) return new Map();
   const linhas = await lendo((m) => m.LegadoUsuario.sequelize.query(SQL, { replacements: { ids: numericos }, type: QueryTypes.SELECT }));
-  return new Map([...agrupar(linhas, numericos)].map(([id, h]) => [id, calculo.saldoDaAbertura(h)]));
+  return new Map([...agrupar(linhas, numericos)].map(([id, h]) => [id, calculo.saldoDaAbertura(h, cortes && cortes.get(id) ? { ate: cortes.get(id) } : {})]));
 }
 
 module.exports = { SQL, agrupar, saldosCalculados };

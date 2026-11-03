@@ -139,22 +139,40 @@ function estavel(v) {
  * Erros iguais aos do front: inválido, mesmo `sourceKey` com outros dados, e "superada por abertura mais recente".
  */
 function aplicarLote(existentes, historicos) {
+  const r = processarLote(existentes, historicos, false);
+  return { novos: r.novos, repetidos: r.repetidos };
+}
+
+/**
+ * Mesma regra de `aplicarLote`, mas sem parar no primeiro problema: devolve TODOS os erros do lote (`erros: [{ indice, clientId, tipo, message }]`),
+ * para o servidor dizer qual cliente falhou. A atomicidade continua do chamador: com `erros` não vazio nada é gravado.
+ */
+function conferirLote(existentes, historicos) {
+  return processarLote(existentes, historicos, true);
+}
+
+function processarLote(existentes, historicos, coletar) {
   const atual = {};
   for (const [id, linhas] of Object.entries(existentes || {})) atual[id] = [...linhas];
-  const novos = []; const repetidos = [];
-  for (const h of historicos) {
-    if (!historicoValido(h)) throw new MigracaoInvalidaError(MENSAGEM_INVALIDA, 'invalido');
+  const novos = []; const repetidos = []; const erros = [];
+  const falhar = (indice, h, tipo, mensagem) => {
+    if (!coletar) throw new MigracaoInvalidaError(mensagem, tipo);
+    erros.push({ indice, clientId: h && typeof h.clientId === 'string' ? h.clientId : null, tipo, message: mensagem });
+  };
+  historicos.forEach((h, indice) => {
+    if (!historicoValido(h)) return falhar(indice, h, 'invalido', MENSAGEM_INVALIDA);
     const atuais = atual[h.clientId] || [];
     const anterior = atuais.find((x) => x.sourceKey === h.sourceKey);
     if (anterior) {
-      if (!igualEstavel(anterior, h)) throw new MigracaoInvalidaError(MENSAGEM_OUTROS_DADOS, 'outros-dados');
-      if (anterior !== atuais[atuais.length - 1]) throw new MigracaoInvalidaError(MENSAGEM_SUPERADA, 'superada');
+      if (!igualEstavel(anterior, h)) return falhar(indice, h, 'outros-dados', MENSAGEM_OUTROS_DADOS);
+      if (anterior !== atuais[atuais.length - 1]) return falhar(indice, h, 'superada', MENSAGEM_SUPERADA);
       repetidos.push(h.sourceKey);
-      continue;
+      return undefined;
     }
     atual[h.clientId] = [...atuais, h]; novos.push(h);
-  }
-  return { novos, repetidos };
+    return undefined;
+  });
+  return { novos, repetidos, erros };
 }
 
 /** `latestMigrationPostpaidCredit`: uma abertura só de saldo não apaga as condições de um lote anterior. */
@@ -165,5 +183,5 @@ function ultimoCreditoPosPago(historicos, clientId) {
 
 module.exports = {
   MigracaoInvalidaError, MENSAGEM_INVALIDA, MENSAGEM_OUTROS_DADOS, MENSAGEM_SUPERADA, parseMigrationDate, creditoPosPagoValido, historicoValido,
-  aberturaEmCentavos, depoisDoCorte, linhasDaConta, offsetDaAbertura, aplicarLote, ultimoCreditoPosPago, estavel,
+  aberturaEmCentavos, depoisDoCorte, linhasDaConta, offsetDaAbertura, aplicarLote, conferirLote, ultimoCreditoPosPago, estavel,
 };

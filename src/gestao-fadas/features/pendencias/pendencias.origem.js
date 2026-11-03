@@ -3,7 +3,7 @@
 /**
  * Pendências: lê no servidor as FONTES que o front usa para derivar (consultas, agenda, pagamentos, divergências) e aplica o porte
  * `_comum/dominio/pendencias-origem.js`. Lê com o recorte da equipe inteira (o front deriva com o papel da administradora e só depois filtra
- * por `pendingVisible`), com as MESMAS janelas das leituras que o navegador faz (consultas: abertas, do dia e das últimas 24 h; agenda:
+ * por `pendingVisible`), com as MESMAS janelas das leituras que o navegador faz (consultas: abertas, do dia e dos últimos 7 dias, como `READ_WINDOW_DAYS` do front; agenda:
  * abertas e dos últimos 7 dias). Sem a fatia de Pagamentos ou de Divergências ligada, o servidor NÃO tem as fontes e devolve `null`
  * (a conferência de origem não roda; segue a de forma e de filas). `addition:` (Maturacao/43) só entra com `GF_FATIA_ESTADO_FINANCEIRO=true` e o catálogo de tarólogos lido.
  */
@@ -19,6 +19,9 @@ const agendaStore = require('../agenda/agenda.store');
 const contexto = require('../financeiro-cliente/fin.contexto');
 const adicionaisFonte = require('../estado-financeiro/adicionais.fonte');
 const { dadosEfetivosDoCliente } = require('../../legado-escrita/fusao');
+
+/** Janela de leitura das consultas: a MESMA do front (`READ_WINDOW_DAYS = 7` em `use-real-consultations.ts`; `GET /consultations?from=hoje-7`). */
+const JANELA_CONSULTAS_DIAS = 7;
 
 let leitor = null;
 /** Para os testes: lê as fontes de onde o teste mandar (o resto do caminho é o de produção). */
@@ -42,7 +45,7 @@ async function carregarFontes() {
   const hoje = hojeOperacional();
   return lendoNovo(async (m) => {
     const [cons, ag, pag, div, orientacoes, adicionais] = await Promise.all([
-      consultasStore.lerRegistros(m, { desde: somarDias(hoje, -1) }),
+      consultasStore.lerRegistros(m, { desde: somarDias(hoje, -JANELA_CONSULTAS_DIAS) }),
       agendaStore.lerItens(m, { desde: somarDias(hoje, -7) }),
       m.GfPagamentos.findAll({ order: [['informado_em', 'ASC'], ['id', 'ASC']] }),
       m.GfDivergencias.findAll({ order: [['criado_em', 'DESC'], ['id', 'DESC']] }),
@@ -66,4 +69,4 @@ async function derivar(registros, extras = []) {
   return { ...resultado, hoje };
 }
 
-module.exports = { derivar, temFontes, definirLeitorDeFontes };
+module.exports = { derivar, temFontes, definirLeitorDeFontes, carregarFontes, JANELA_CONSULTAS_DIAS };

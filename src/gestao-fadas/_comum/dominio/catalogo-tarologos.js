@@ -24,10 +24,12 @@ const PRIVADOS = ['birthDate', 'realFirstName', 'personalWhatsapp', 'avatarWhats
  * LINHAS de texto: cada bloco vira uma linha, as marcas somem, o texto das palavras não muda e linhas vazias saem.
  */
 const ENTIDADES = { '&nbsp;': ' ', '&amp;': '&', '&lt;': '<', '&gt;': '>', '&quot;': '"', '&#39;': "'" };
+/** Limites de bloco (abre ou fecha): quebram linha. Marcas de texto (`b`, `span`, `font`...) só somem. Onda 2 (E1.4): antes só os fechamentos quebravam e saía "22h à 00hSábado". */
+const BLOCOS = /<\/?\s*(?:br|hr|div|p|li|ul|ol|tr|td|th|table|tbody|thead|tfoot|caption|h[1-6]|section|article|header|footer|blockquote|pre|dl|dt|dd|center)\b[^>]*>/gi;
 function horariosDoLegado(bruto) {
   if (typeof bruto !== 'string' || !bruto.trim()) return [];
   const linhas = bruto
-    .replace(/<\s*(br|\/div|\/p|\/li|\/tr)\b[^>]*>/gi, '\n')
+    .replace(BLOCOS, '\n')
     .replace(/<[^>]*>/g, '')
     .replace(/&(?:nbsp|amp|lt|gt|quot|#39);/g, (e) => ENTIDADES[e])
     .split(/\r?\n/)

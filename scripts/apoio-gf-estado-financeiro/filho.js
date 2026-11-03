@@ -265,12 +265,23 @@ const r = (p) => path.join(raiz, p);
     como('administradora'); const x = await chamar('GET', '/operation-audit'); assert.equal(x.status, 200, x.t); assert.equal(x.j.items.length, 5); assert.equal(x.j.truncated, false);
     assert.deepEqual(x.j.items.find((i) => i.id === 'log-1').after, { valor: 10 });
   });
-  await passo('forma ruim: categoria fora da lista, id repetido na mesma lista, lista vazia ou com mais de 200 (400); nada é gravado', async () => {
+  await passo('forma ruim: categoria fora da lista, id repetido na mesma lista, lista vazia ou com mais de 100, o lote do front (400); nada é gravado', async () => {
     como('atendente');
-    for (const ruim of [[ev('b-1', { category: 'outra' })], [ev('b-2'), ev('b-2')], [], Array.from({ length: 201 }, (_, i) => ev(`b-${i}-x`)), [ev('b-3', { origin: 'x' })], 'texto']) {
+    for (const ruim of [[ev('b-1', { category: 'outra' })], [ev('b-2'), ev('b-2')], [], Array.from({ length: 101 }, (_, i) => ev(`b-${i}-x`)), [ev('b-3', { origin: 'x' })], 'texto']) {
       const x = await gravarLog(ruim); assert.equal(x.status, 400, JSON.stringify(ruim).slice(0, 60));
     }
     assert.equal(await contar('SELECT COUNT(*) AS n FROM gf_log_operacional'), 5);
+  });
+  await passo('autoria pela sessão (E1.2): autor, papel e tipo forjados no corpo são ignorados; a taróloga não entrega evento de outro perfil (403)', async () => {
+    como('atendente'); let x = await gravarLog([ev('forja-1', { actorId: 'FORJADO', actorName: 'Laya', actorRole: 'administradora', actorKind: 'system' })]); assert.equal(x.status, 200, x.t);
+    como('tarologa'); x = await gravarLog([ev('forja-2', { category: 'consulta', tarotId: '9001', actorName: 'Laya', actorRole: 'administradora' })]); assert.equal(x.status, 200, x.t);
+    x = await gravarLog([ev('forja-3', { category: 'consulta', tarotId: '9002' })]); assert.equal(x.status, 403, x.t);
+    como('administradora'); x = await chamar('GET', '/operation-audit'); assert.equal(x.status, 200, x.t);
+    const a = x.j.items.find((i) => i.id === 'forja-1'), b = x.j.items.find((i) => i.id === 'forja-2');
+    assert.deepEqual([a.actorName, a.actorRole, a.actorKind, a.actorId === 'FORJADO'], ['Khloe', 'atendente', 'person', false]);
+    assert.deepEqual([b.actorName, b.actorRole, b.actorKind], ['Osíris', 'tarologa', 'person']);
+    assert.ok(!x.j.items.some((i) => i.id === 'forja-3'));
+    assert.equal((await contar("SELECT COUNT(*) AS n FROM gf_log_operacional WHERE id = 'forja-1' AND registrado_por = 'Khloe'")), 1);
   });
 
   console.log('Auditoria, escrita desligada e legado');

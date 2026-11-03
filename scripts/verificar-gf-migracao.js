@@ -88,6 +88,21 @@ async function offline() {
     assert.throws(() => limiteDaConferencia({ thresholdCents: '-1' }, {}));
     assert.equal(classificar(0, { centavos: 5000 }, 5000).status, 'confere'); assert.equal(classificar(0, { centavos: 5001 }, 5000).status, 'diferenca'); assert.equal(classificar(0, undefined, 5000).status, 'fora-do-legado');
   });
+  await passo('conferência no mesmo ponto: `saldoDaAbertura` com `ate` ignora o que veio depois do corte; "não cobrar" compara só o crédito; resumo de chave é estável', () => {
+    const leg = r('src/gestao-fadas/_comum/dominio/saldo-legado');
+    const { classificar, corteComoInstante } = r('src/gestao-fadas/features/migracao/migracao.conferencia');
+    const hist2 = { pagamentos: [{ pagoEm: '2019-12-01 10:00:00', valor: '100.00', numero: 1, texto: 'informado' }, { pagoEm: '2020-06-01 10:00:00', valor: '50.00', numero: 1, texto: 'informado' }], consultas: [{ fim: '2020-07-01 10:00:00', minutos: 10, bonus: 0 }] };
+    assert.equal(corteComoInstante('2020-01-01T00:00:00'), '2020-01-01 00:00:00'); assert.equal(corteComoInstante('01/01/2020'), '2020-01-01 00:00:00'); assert.equal(corteComoInstante('xx'), null);
+    const ate = leg.saldoDaAbertura(hist2, { ate: '2020-01-01 00:00:00' });
+    assert.equal(ate.centavos, 10000); assert.deepEqual(ate.depoisDoCorte, { pagamentos: 1, consultas: 1 });
+    assert.notEqual(leg.saldoDaAbertura(hist2).centavos, 10000); assert.equal(leg.saldoDaAbertura(hist2).depoisDoCorte, undefined);
+    assert.equal(classificar(10000, ate, 5000).status, 'confere');
+    const divida = { centavos: -11840, dividaCentavos: 11840 };
+    assert.equal(classificar(0, divida, 5000, { cobrarDebito: false }).status, 'confere'); assert.equal(classificar(0, divida, 5000, { cobrarDebito: true }).status, 'diferenca');
+    assert.equal(classificar(30000, ate, 5000).status, 'diferenca'); assert.equal(classificar(30000, ate, 5000).reason.code, 'diferenca-no-corte');
+    const { resumoDaChave } = r('src/gestao-fadas/features/migracao/migracao.service');
+    assert.equal(resumoDaChave('abc'), 'sha256:ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad');
+  });
   await passo('os status numéricos dos pagamentos no legado seguem como estavam: 1 = Não Confirmado, 2 = Confirmado, 0 = automático (Mercado Pago, nunca escrito)', () => {
     const p = r('src/gestao-fadas/legado-escrita/provisorio');
     assert.equal(p.STATUS_PAGTO_NOVO, 1); assert.equal(p.STATUS_PAGTO_CONFIRMADO, 2);

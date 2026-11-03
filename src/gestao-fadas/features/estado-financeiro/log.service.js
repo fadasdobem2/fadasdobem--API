@@ -3,8 +3,11 @@
 /**
  * Trilha operacional (Maturacao/43), a aba Logs de Configurações. O navegador deriva cada evento (`OperationalAuditEvent`) da diferença entre dois estados;
  * o servidor só o GUARDA, sem refazê-lo, e acrescenta quem o entregou e quando (`registrado_por`, `registrado_em`, `conta_id`).
- *   - gravação (`POST /operation-audit`): `{ operationKey, events: [...] }` (1 a 200). Qualquer pessoa com sessão entrega os eventos das ações dela
+ *   - gravação (`POST /operation-audit`): `{ operationKey, events: [...] }` (1 a 100, o lote do front). Qualquer pessoa com sessão entrega os eventos das ações dela
  *     (inclusive a taróloga); só ACRESCENTA: o evento de mesmo id já guardado vence (mesmo id e corpo diferente não regrava nem dá erro);
+
+ *   - AUTORIA (onda 2, E1.2): o servidor carimba `actorId`/`actorName`/`actorRole` pela SESSÃO e ignora o que o navegador mandar nesses campos; a taróloga só
+ *     entrega eventos do próprio perfil (`tarotId` do evento, se houver, é o dela), senão 403 como nas outras rotas;
  *   - leitura (`GET /operation-audit`): só a administradora (`canView` do front); os últimos 5.000 eventos, do mais antigo ao mais novo;
  *   - auditoria e `gf_operacoes` na MESMA transação. Limite honesto: o conteúdo (antes/depois) é o que o navegador viu; o servidor não o reconstrói.
  */
@@ -34,7 +37,9 @@ async function gravar(req) {
   const operationKey = f.chaveOperacao(b.operationKey);
   let eventos;
   try { eventos = dom.validar(b.events); } catch (e) { throw c.traduzir(e); }
+  if (a.tarologa && eventos.some((e) => e.tarotId !== undefined && `${e.tarotId}` !== a.proprio)) throw f.negado(true);
   const conta = String(contaDaRequisicao(req));
+  eventos = dom.carimbarAutor(eventos, { id: conta, nome: a.nome, papel: a.perfil });
   return f.gravar(req, {
     escopo: 'estado-financeiro.log', operationKey, corpo: { events: eventos }, entidade: 'log_operacional', entidadeId: eventos[0].id.slice(0, 64).trim(), acao: 'estado-financeiro.log.registrar',
     producao: async (ex) => {

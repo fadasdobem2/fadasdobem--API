@@ -6,6 +6,7 @@ const { idLegado } = require('../../_comum/validacao');
 const { COLUNAS, paraDto, paraExtensao } = require('./tarologos.model');
 const { novosDadosNoPostgres } = require('../../novo/modo');
 const { modelosNovos } = require('../../novo/leitura');
+const { ehPerfilDeSistema } = require('../../_comum/dominio/catalogo-tarologos');
 
 /**
  * Tarólogos = `tbl_tarologos` (legado, somente leitura). Equivale a `GET /api/operations/tarologists` da B:
@@ -13,6 +14,8 @@ const { modelosNovos } = require('../../novo/leitura');
  *
  * Extensão da A (não existe na B): com `incluir=extensao` cada item ganha o campo `extensao`
  * (`gf_tarologos_ext`), separado do DTO. Sem o parâmetro o DTO é exatamente o da B.
+ *
+ * Onda 2 (E1.1): perfis de SISTEMA (hoje o 347 "AFila", `PERFIS_DE_SISTEMA`) ficam fora da lista, como no catálogo; inativos continuam (A pagar precisa deles).
  */
 const querComExtensao = (query) => `${(query && query.incluir) || ''}`.split(',').map((s) => s.trim()).includes('extensao');
 
@@ -40,7 +43,7 @@ async function listar(query = {}) {
       order: [['nmuTarologo', 'ASC'], ['idTarologo', 'ASC']],
     });
     const extensoes = comExtensao && novosDadosNoPostgres() ? await extensoesDoBancoNovo(linhas.map((l) => Number(l.idTarologo))) : null;
-    return linhas.map((l) => montar(l, comExtensao, extensoes));
+    return linhas.filter((l) => !ehPerfilDeSistema(l)).map((l) => montar(l, comExtensao, extensoes));
   });
 }
 

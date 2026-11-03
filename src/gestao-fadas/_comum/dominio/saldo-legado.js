@@ -55,16 +55,23 @@ function minutosCobrados({ minutos, bonus }) {
  * @param {{pagamentos: Array<{pagoEm?:string, criadoEm?:string, valor:string, numero:*, texto:*}>, consultas: Array<{fim?:string, ini?:string, dia?:string, minutos:*, bonus:*}>}} historico
  * @returns {{centavos:number, creditosCentavos:number, consumoCentavos:number, minutosConsumidos:number, pagamentos:number, consultas:number, dividaCentavos:number}}
  */
-function saldoDaAbertura({ pagamentos = [], consultas = [] }) {
+function saldoDaAbertura({ pagamentos = [], consultas = [] }, { ate } = {}) {
   const eventos = [];
   let ordem = 0;
+  // `ate` (conferência da migração): só entra o que aconteceu até o corte da cliente (instante de parede `YYYY-MM-DD HH:MM:SS`, inclusive). Instante ilegível fica dentro, como sempre.
+  const depois = { pagamentos: 0, consultas: 0 };
+  const apos = (t) => Boolean(ate) && t !== '' && t > ate;
   for (const p of pagamentos) {
     const centavos = contaComoCredito({ numero: p.numero, texto: p.texto }) ? centavosDe(p.valor) : null;
-    if (centavos) eventos.push({ t: instanteValido(p.pagoEm) || instanteValido(p.criadoEm) || '', rank: 0, ordem: ordem++, centavos });
+    const t = instanteValido(p.pagoEm) || instanteValido(p.criadoEm) || '';
+    if (centavos && apos(t)) { depois.pagamentos += 1; continue; }
+    if (centavos) eventos.push({ t, rank: 0, ordem: ordem++, centavos });
   }
   for (const k of consultas) {
     const minutos = minutosCobrados({ minutos: k.minutos, bonus: k.bonus });
-    if (Number(k.minutos) > 0) eventos.push({ t: instanteValido(k.fim) || instanteValido(k.ini) || instanteValido(k.dia) || '', rank: 1, ordem: ordem++, minutos });
+    const t = instanteValido(k.fim) || instanteValido(k.ini) || instanteValido(k.dia) || '';
+    if (Number(k.minutos) > 0 && apos(t)) { depois.consultas += 1; continue; }
+    if (Number(k.minutos) > 0) eventos.push({ t, rank: 1, ordem: ordem++, minutos });
   }
   eventos.sort((x, y) => (x.t < y.t ? -1 : x.t > y.t ? 1 : x.rank - y.rank || x.ordem - y.ordem));
 
@@ -89,7 +96,7 @@ function saldoDaAbertura({ pagamentos = [], consultas = [] }) {
     if (falta > EPS) { const d = Math.round(falta * TARIFA_REGULAR * 100); divida += d; consumo += d; }
   }
   const saldo = lotes.reduce((s, l) => s + l.cents, 0) - divida;
-  return { centavos: saldo, creditosCentavos: creditos, consumoCentavos: consumo, minutosConsumidos, pagamentos: nPag, consultas: nCons, dividaCentavos: divida };
+  return { centavos: saldo, creditosCentavos: creditos, consumoCentavos: consumo, minutosConsumidos, pagamentos: nPag, consultas: nCons, dividaCentavos: divida, ...(ate ? { depoisDoCorte: depois } : {}) };
 }
 
 module.exports = { TARIFA_REGULAR, contaComoCredito, loteDaCompra, minutosCobrados, centavosDe, saldoDaAbertura };

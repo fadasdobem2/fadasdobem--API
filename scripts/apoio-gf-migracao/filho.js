@@ -30,9 +30,32 @@ const r = (p) => path.join(raiz, p);
   const contexto = require(r('src/gestao-fadas/features/financeiro-cliente/fin.contexto'));
 
   // Legado falso: saldo CALCULADO (conferência, nunca decide). 900201 = 100,00; 900202 = 200,00; 900203 = -80,00; 900204 = 55,30; 900206 = 53,30 (sem planilha).
-  const CALCULADO = { 900201: 10000, 900202: 20000, 900203: -8000, 900204: 5530, 900205: 0, 900206: 5330, 900207: 5330, 900208: 0 };
+  const CALCULADO = { 900201: 10000, 900202: 20000, 900203: -8000, 900204: 5530, 900205: 0, 900206: 5330, 900207: 5330, 900208: 0, 900501: 0, 900502: 0, 900503: 0, 900504: 0, 900505: 0 };
+  // 900501-900503: histórico bruto do legado, calculado pelo DOMÍNIO REAL com o corte pedido (conferência no mesmo ponto).
+  const calculo = require(r('src/gestao-fadas/_comum/dominio/saldo-legado'));
+  const PAG = (quando, valor) => ({ pagoEm: quando, criadoEm: null, valor, numero: 1, texto: 'informado' });
+  const CONS = (quando, minutos) => ({ fim: quando, ini: quando, dia: quando, minutos, bonus: 0 });
+  const BRUTO = {
+    900501: { pagamentos: [PAG('2019-12-01 10:00:00', '100.00'), PAG('2020-06-01 10:00:00', '150.00')], consultas: [CONS('2020-07-01 10:00:00', 10)] },
+    900502: { pagamentos: [], consultas: [CONS('2019-11-01 10:00:00', 40)] },
+    900503: { pagamentos: [PAG('2019-12-01 10:00:00', '100.00')], consultas: [] },
+  };
   const EXISTE = new Set(Object.keys(CALCULADO));
-  contexto.definirLeitorDePartida(async (ids) => new Map(ids.filter((id) => EXISTE.has(id)).map((id) => [id, { centavos: CALCULADO[id], conhecido: true, nome: `Cliente ${id}` }])));
+  contexto.definirLeitorDePartida(async (ids, opcoes = {}) => new Map(ids.filter((id) => EXISTE.has(id)).map((id) => {
+    if (!BRUTO[id]) return [id, { centavos: CALCULADO[id], conhecido: true, nome: `Cliente ${id}` }];
+    const c = calculo.saldoDaAbertura(BRUTO[id], opcoes.cortes && opcoes.cortes.get(id) ? { ate: opcoes.cortes.get(id) } : {});
+    return [id, { centavos: c.centavos, dividaCentavos: c.dividaCentavos, depoisDoCorte: c.depoisDoCorte, conhecido: true, nome: `Cliente ${id}` }];
+  })));
+  // Legado de "sem planilha": 900204/900207 (já no banco novo), 900401-900403 (SÓ no legado, com movimento) e as que têm planilha.
+  const LEGADO_COM_MOVIMENTO = { 900201: [1, 10000, 3], 900204: [2, 5530, 4], 900207: [1, 5330, 0], 900401: [3, 26640, 12], 900402: [0, 0, 5], 900403: [1, 8880, 0] };
+  const semPlanilhaLegado = require(r('src/gestao-fadas/features/migracao/migracao.legado-sem-planilha'));
+  const leituras = { candidatas: 0, agregados: 0 };
+  semPlanilhaLegado.definirLeitorDoLegado({
+    async candidatas(depois, limite) { leituras.candidatas += 1; return Object.keys(LEGADO_COM_MOVIMENTO).filter((id) => Number(id) > depois).slice(0, limite); },
+    async total() { return Object.keys(LEGADO_COM_MOVIMENTO).length; },
+    async comMovimento(ids) { return new Set(ids.filter((id) => id in LEGADO_COM_MOVIMENTO)); },
+    async agregados(ids) { leituras.agregados += 1; return new Map(ids.map((id) => { const [p, c, k] = LEGADO_COM_MOVIMENTO[id] || [0, 0, 0]; return [id, { pagamentos: p, pagamentosCentavos: c, consultas: k }]; })); },
+  });
   pagamentos.definirVerificadorDeCliente(async (id) => EXISTE.has(id));
   migracao.definirVerificadorDeClientes(async (ids) => new Set(ids.filter((id) => EXISTE.has(id))));
 
@@ -151,14 +174,14 @@ const r = (p) => path.join(raiz, p);
   });
   await passo('mesmo sourceKey com dados diferentes: 422 com a frase do front, e nada do lote entra (lote atômico)', async () => {
     const D = hist('900204', PASSADO, { credito: 5000 });
-    const x = await aplicar([D, { ...A, note: 'Outro texto.' }]); assert.equal(x.status, 422, x.t); assert.equal(x.j.error.message, 'Esta conferência já foi aplicada com outros dados. Revise o lote antes de aplicar novamente.');
+    const x = await aplicar([D, { ...A, note: 'Outro texto.' }]); assert.equal(x.status, 422, x.t); assert.ok(x.j.error.message.endsWith('Esta conferência já foi aplicada com outros dados. Revise o lote antes de aplicar novamente.') && x.j.error.message.includes(`Cliente ${A.clientId}`));
     assert.equal(await contar("SELECT COUNT(*) AS n FROM gf_migracao_historicos WHERE id_cliente = '900204'"), 0);
   });
   await passo('abertura mais recente: a nova revisão entra (seq 2) e a antiga reaplicada é "superada"', async () => {
     const A2 = hist('900201', '2026-10-12T12:00:00', { credito: 7000, sourceKey: 'A-2' });
     const x = await aplicar([A2], { 900201: A.sourceKey }); assert.equal(x.status, 200, x.t); assert.equal(x.j.entries[0].seq, 2);
     assert.equal((await conta('900201')).balanceCents, 7000, 'a revisão vigente é a última');
-    const y = await aplicar([A]); assert.equal(y.status, 422); assert.equal(y.j.error.message, 'Esta conferência foi superada por uma abertura mais recente. Faça uma nova revisão antes de aplicar à ficha.');
+    const y = await aplicar([A]); assert.equal(y.status, 422); assert.ok(y.j.error.message.endsWith('Esta conferência foi superada por uma abertura mais recente. Faça uma nova revisão antes de aplicar à ficha.'));
     const z = await aplicar([A2]); assert.equal(z.status, 200); assert.equal(z.j.repeated, 1);
   });
   await passo('revisão esperada velha: 409 VERSION_CHANGED (a abertura mudou em outra aba) e nada entra', async () => {
@@ -168,8 +191,9 @@ const r = (p) => path.join(raiz, p);
     assert.equal(await contar("SELECT COUNT(*) AS n FROM gf_migracao_historicos WHERE source_key = 'A-3'"), 0);
   });
   await passo('histórico inválido, cliente inexistente e exemplo de demonstração são recusados; corpo sem lote é 400', async () => {
-    const x = await aplicar([{ ...A, sourceKey: 'Z-1', note: '' }]); assert.equal(x.status, 422); assert.equal(x.j.error.message, 'Confira a composição, o corte e os dados da abertura antes de aplicar à ficha.');
-    assert.equal((await aplicar([hist('999999', PASSADO, { credito: 1 })])).status, 404);
+    const x = await aplicar([{ ...A, sourceKey: 'Z-1', note: '' }]); assert.equal(x.status, 422); assert.ok(x.j.error.message.startsWith('Cliente 900201, chave ') && x.j.error.message.endsWith('Confira a composição, o corte e os dados da abertura antes de aplicar à ficha.'));
+    const inexistente = await aplicar([hist('999999', PASSADO, { credito: 1 })]);
+    assert.equal(inexistente.status, 422, inexistente.t); assert.ok(inexistente.j.error.message.startsWith('Cliente 999999, chave ') && inexistente.j.error.message.includes('Cadastro de cliente não encontrado.'));
     assert.equal((await aplicar([{ ...hist('900204', PASSADO, { credito: 1 }), example: true }])).status, 422);
     assert.equal((await chamar('POST', '/migration/apply', { operationKey: n(), histories: [] })).status, 400);
     assert.equal((await chamar('POST', '/migration/apply', { histories: [A] })).status, 400);
@@ -179,6 +203,33 @@ const r = (p) => path.join(raiz, p);
     const x = await aplicar([longa]); assert.equal(x.status, 200, x.t); assert.equal(x.j.applied, 1);
     const y = await aplicar([longa]); assert.equal(y.j.applied, 0); assert.equal(y.j.repeated, 1);
     assert.equal(await contar("SELECT COUNT(*) AS n FROM gf_migracao_historicos WHERE id_cliente = '900208' AND char_length(source_key) > 6000"), 1);
+  });
+  await passo('chave GRANDE (cliente com milhares de consultas): acima de 100 mil caracteres é aceita, a coluna guarda o resumo SHA-256, o histórico guarda a chave original e a idempotência segue', async () => {
+    const grande = JSON.stringify({ lote: 'L', consultas: Array.from({ length: 4300 }, (_, i) => ({ id: `K${i}`, d: '2019-01-01', t: 'Osiris', m: 10, o: 2960 })) });
+    assert.ok(grande.length > 100000 && grande.length < 2000000, `chave de ${grande.length} caracteres`);
+    const L = hist('900504', PASSADO, { credito: 100, sourceKey: grande });
+    const x = await aplicar([L]); assert.equal(x.status, 200, x.t); assert.equal(x.j.applied, 1);
+    const resumo = require('crypto').createHash('sha256').update(grande, 'utf8').digest('hex');
+    assert.equal(x.j.entries[0].sourceKey, `sha256:${resumo}`);
+    assert.equal(x.j.items[0].sourceKey, grande, 'o histórico devolvido ao front mantém a chave original (o front compara com ela)');
+    assert.equal(await contar(`SELECT COUNT(*) AS n FROM gf_migracao_historicos WHERE id_cliente = '900504' AND source_key = 'sha256:${resumo}' AND source_hash = '${resumo}'`), 1);
+    const y = await aplicar([L]); assert.equal(y.status, 200); assert.equal(y.j.applied, 0); assert.equal(y.j.repeated, 1);
+    const z = await aplicar([{ ...L, note: 'Outro texto.' }]); assert.equal(z.status, 422); assert.ok(z.j.error.message.includes('Cliente 900504, chave ') && z.j.error.message.endsWith('Revise o lote antes de aplicar novamente.'));
+    const lida = await chamar('GET', '/migration/histories?clientId=900504'); assert.equal(lida.j.items[0].sourceKey, grande);
+    const enorme = hist('900505', PASSADO, { credito: 1, sourceKey: 'k'.repeat(2000001) });
+    const w = await aplicar([enorme]); assert.equal(w.status, 422); assert.ok(w.j.error.message.startsWith('Cliente 900505, chave ') && w.j.error.message.includes('grande demais'));
+  });
+  await passo('lote com vários problemas: nada entra e TODOS os erros dizem a cliente (ID com letras, inexistente, inválido, exemplo) sem nome civil', async () => {
+    const antes = await contar('SELECT COUNT(*) AS n FROM gf_migracao_historicos');
+    const lote = [hist('900505', PASSADO, { credito: 1, sourceKey: 'OK-1' }), hist('EX-001', PASSADO, { credito: 1, sourceKey: 'LET-1' }), hist('999998', PASSADO, { credito: 1, sourceKey: 'INEX-1' }),
+      { ...hist('900204', PASSADO, { credito: 1, sourceKey: 'INV-1' }), note: '' }, { ...hist('900206', PASSADO, { credito: 1, sourceKey: 'EXE-1' }), example: true }];
+    const x = await aplicar(lote); assert.equal(x.status, 422, x.t);
+    const m = x.j.error.message;
+    assert.ok(m.startsWith('Cliente EX-001, chave ') && m.includes('O ID da cliente precisa ser numérico'), m);
+    for (const c of ['999998', '900204', '900206']) assert.ok(m.includes(`Cliente ${c}, chave `), `${c} em: ${m}`);
+    assert.ok(m.includes('Outros 3 problema(s) no lote') && !m.includes('Cliente Teste') && !/clientName/.test(m));
+    assert.equal(await contar('SELECT COUNT(*) AS n FROM gf_migracao_historicos'), antes, 'lote atômico: nada entrou');
+    assert.equal((await aplicar([lote[0]])).status, 200);
   });
   await passo('corrida: dois lotes iguais com chaves diferentes ao mesmo tempo gravam UMA vez só', async () => {
     const E = hist('900208', PASSADO, { credito: 2500, sourceKey: 'E-1' });
@@ -227,6 +278,43 @@ const r = (p) => path.join(raiz, p);
     assert.ok(ids.includes('900207') && ids.includes('900204')); assert.ok(!ids.includes('900206') && !ids.includes('900201') && !ids.includes('900205'));
     const g = x.j.clients.find((c) => c.clientId === '900207'); assert.equal(g.hasMovements, true); assert.equal(g.openingSource, 'legado.calculado-pagamentos-menos-consumo');
     assert.equal(x.j.openingCents, 0); assert.ok(!/Cliente Teste|nome/i.test(JSON.stringify(x.j)));
+  });
+
+  await passo('conferência NO MESMO PONTO: movimento depois do corte não vira diferença; "não cobrar" compara só o crédito; diferença real continua', async () => {
+    const corte = '2020-01-01T00:00:00';
+    const ok = await aplicar([hist('900501', corte, { credito: 10000, cobrar: true, sourceKey: 'R-501' }), hist('900502', corte, { debito: 12000, sourceKey: 'R-502' }), hist('900503', corte, { credito: 30000, cobrar: true, sourceKey: 'R-503' })]);
+    assert.equal(ok.status, 200, ok.t);
+    const x = await chamar('GET', '/migration/reconciliation'); assert.equal(x.status, 200, x.t);
+    const por = Object.fromEntries(x.j.clients.map((c) => [c.clientId, c]));
+    // 900501: no corte o legado dá 100,00; depois entraram 150,00 e 10 min de consulta (hoje o saldo seria outro) -> confere.
+    assert.equal(por['900501'].status, 'confere'); assert.equal(por['900501'].legacyCents, 10000); assert.deepEqual(por['900501'].legacyAfterCutoff, { payments: 1, consultations: 1 });
+    assert.ok(por['900501'].notes.some((t) => t.includes('depois do corte')));
+    // 900502: "não cobrar" (débito 120,00 fora): abertura 0; o legado até o corte é -118,40 (dívida), só o crédito (0) é comparado -> confere.
+    assert.equal(por['900502'].sheetOpeningCents, 0); assert.equal(por['900502'].status, 'confere'); assert.equal(por['900502'].comparison, 'credito-ate-o-corte'); assert.equal(por['900502'].legacyCents, 0);
+    assert.ok(por['900502'].notes.some((t) => t.includes('não cobrar')));
+    // 900503: planilha 300,00 x legado 100,00 no corte -> diferença real, com o motivo.
+    assert.equal(por['900503'].status, 'diferenca'); assert.equal(por['900503'].differenceCents, 20000); assert.equal(por['900503'].comparison, 'saldo-ate-o-corte'); assert.equal(por['900503'].reason.code, 'diferenca-no-corte'); assert.ok(por['900503'].reason.text.includes('R$ 300,00'));
+    // Contraprova: sem o corte (o jeito antigo) 900501 e 900502 acusariam diferença.
+    const hoje = (await contexto.partidaNoLegado(['900501', '900502'])).get('900501');
+    assert.ok(Math.abs(10000 - hoje.centavos) > 5000, 'sem corte, o saldo de hoje do 900501 difere (era o falso positivo)');
+    const antigo502 = (await contexto.partidaNoLegado(['900502'])).get('900502'); assert.ok(Math.abs(0 - antigo502.centavos) > 5000);
+  });
+  await passo('"sem planilha" cobre o LEGADO: clientes só do legado com movimento aparecem com contagens, paginação por cursor, total e sem nome civil', async () => {
+    const todas = await chamar('GET', '/migration/without-sheet?limit=500'); assert.equal(todas.status, 200, todas.t);
+    const por = Object.fromEntries(todas.j.clients.map((c) => [c.clientId, c]));
+    for (const id of ['900401', '900402', '900403']) assert.ok(por[id], `${id} só no legado`);
+    assert.equal(por['900401'].knownToNewBase, false); assert.equal(por['900401'].hasMovements, true);
+    assert.equal(por['900401'].legacyPaymentCount, 3); assert.equal(por['900401'].legacyPaymentCents, 26640); assert.equal(por['900401'].legacyConsultationCount, 12);
+    assert.ok(!por['900201'] && !por['900501'], 'quem tem planilha não entra'); assert.equal(todas.j.legacy.available, true); assert.equal(todas.j.legacy.totalWithMovement, 6);
+    assert.equal(todas.j.legacy.withSheetAndMovement, 1); assert.equal(todas.j.legacy.withoutSheetWithMovement, 5);
+    assert.equal(todas.j.total, todas.j.clients.length, 'total = tudo que a lista traz quando cabe numa página'); assert.equal(todas.j.nextCursor, null);
+    // paginação por cursor: duas por vez, sem repetir, a união é a lista inteira.
+    const vistos = []; let cursor; let paginas = 0;
+    do { const p = await chamar('GET', `/migration/without-sheet?limit=2${cursor ? `&after=${cursor}` : ''}`); assert.equal(p.status, 200, p.t); vistos.push(...p.j.clients.map((c) => c.clientId)); cursor = p.j.nextCursor; paginas += 1; } while (cursor);
+    assert.deepEqual(vistos, todas.j.clients.map((c) => c.clientId)); assert.ok(paginas >= 2);
+    assert.equal((await chamar('GET', '/migration/without-sheet?after=abc')).status, 400);
+    assert.ok(!/Cliente Teste|nome/i.test(JSON.stringify(todas.j)));
+    assert.ok(leituras.agregados >= 1 && leituras.candidatas >= 1);
   });
 
   console.log('Sempre acrescenta');

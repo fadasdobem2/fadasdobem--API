@@ -13,7 +13,8 @@ class LogInvalidoError extends Error {
 
 const CATEGORIAS = ['agenda', 'cliente', 'consulta', 'mais-tempo', 'pagamento', 'profissional'];
 const ORIGENS = ['captured', 'existing'];
-const MAX_EVENTOS = 200;
+/** Lote máximo: o do front (`AUDIT_BATCH = 100` em `real-audit-api.ts`; o navegador nunca manda mais que isso por chamada). */
+const MAX_EVENTOS = 100;
 const MAX_TEXTO = 20000;
 const conhecido = (at) => typeof at === 'string' && Number.isFinite(Date.parse(at));
 const objeto = (v) => v !== null && typeof v === 'object' && !Array.isArray(v);
@@ -32,4 +33,15 @@ function validar(eventos) {
   return eventos;
 }
 
-module.exports = { LogInvalidoError, CATEGORIAS, MAX_EVENTOS, eventoValido, validar };
+/**
+ * A AUTORIA é da sessão (onda 2, E1.2): `actorId`, `actorName`, `actorRole` e `actorKind` que o navegador mandar são descartados e substituídos pela conta
+ * autenticada (`{ id, nome, papel }`). Os demais campos seguem como vieram. Não muda o original.
+ */
+function carimbarAutor(eventos, { id, nome, papel }) {
+  return eventos.map((e) => {
+    const { actorId, actorName, actorRole, actorKind, ...resto } = e;
+    return { ...resto, actorId: id, actorName: nome, actorRole: papel, actorKind: 'person' };
+  });
+}
+
+module.exports = { LogInvalidoError, CATEGORIAS, MAX_EVENTOS, eventoValido, validar, carimbarAutor };

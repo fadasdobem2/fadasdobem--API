@@ -72,15 +72,49 @@ async function obter(req) {
   return { readAt: new Date().toISOString(), item: comoItem(l), entry: entrada(l) };
 }
 
+/** Tetos: o corpo da rota aceita 40 MB; uma `sourceKey` (carrega as consultas da cliente até o corte) pode chegar a 2 MB (cliente com 4.261 consultas ~ 0,5 MB). */
+const LIMITE_CHAVE = 2000000;
+/** Até este tamanho a coluna `source_key` guarda a chave como veio; acima, guarda o resumo estável (`sha256:<hex>`). O `item` (JSON) e a comparação usam a chave original. */
+const LIMITE_CHAVE_NA_COLUNA = 100000;
+const sha256 = (t) => createHash('sha256').update(t, 'utf8').digest('hex');
+/** Resumo estável da chave: SHA-256 do texto original. */
+const resumoDaChave = (chave) => `sha256:${sha256(chave)}`;
+const chaveDaColuna = (chave) => (chave.length > LIMITE_CHAVE_NA_COLUNA ? resumoDaChave(chave) : chave);
+/** Identificação do problema SEM dado pessoal: ID da cliente (cortado) e 12 primeiros caracteres do resumo da chave. */
+const rotuloDe = (h) => {
+  const id = h && typeof h.clientId === 'string' ? h.clientId.replace(/[^A-Za-z0-9._-]/g, '?').slice(0, 20) : '?';
+  const chave = h && typeof h.sourceKey === 'string' && h.sourceKey ? `, chave ${sha256(h.sourceKey).slice(0, 12)}` : '';
+  return `Cliente ${id}${chave}`;
+};
+
+/** Junta TODOS os erros do lote numa frase só (o front mostra uma mensagem): primeiro erro por extenso e os demais resumidos. Nunca nomes civis. */
+function mensagemDosErros(erros) {
+  const [primeiro, ...resto] = erros;
+  const base = `${primeiro.rotulo}: ${primeiro.message}`;
+  if (!resto.length) return base;
+  const mais = resto.slice(0, 9).map((e) => e.rotulo).join('; ');
+  return `${base} Outros ${resto.length} problema(s) no lote: ${mais}${resto.length > 9 ? '; ...' : ''}.`;
+}
+const erroDoLote = (erros) => f.regra(mensagemDosErros(erros));
+
+/** Forma do corpo (400) e, por histórico, os problemas de formato/validade (todos de uma vez, cada um com a cliente). */
 function conferirForma(b) {
   if (!f.ehObjeto(b)) throw f.invalido('corpo');
   if (!Array.isArray(b.histories) || !b.histories.length || b.histories.length > MAX_LOTE) throw f.invalido('histories');
   if (b.expectedLatest !== undefined && !f.ehObjeto(b.expectedLatest)) throw f.invalido('expectedLatest');
-  for (const h of b.histories) {
-    // Exemplo da demonstração nunca entra no banco real; ids e chaves fora do formato têm a mesma recusa do front.
-    if (!h || typeof h !== 'object' || h.example === true) throw new dom.MigracaoInvalidaError(dom.MENSAGEM_INVALIDA, 'invalido');
-    if (typeof h.clientId !== 'string' || !ID_CLIENTE.test(h.clientId) || (typeof h.sourceKey === 'string' && h.sourceKey.length > 100000) || (typeof h.batchId === 'string' && h.batchId.length > 160)) throw new dom.MigracaoInvalidaError(dom.MENSAGEM_INVALIDA, 'invalido');
-  }
+  const erros = [];
+  b.histories.forEach((h, indice) => {
+    const falha = (message) => erros.push({ indice, rotulo: rotuloDe(h), clientId: h && typeof h.clientId === 'string' ? h.clientId : null, message });
+    // Exemplo da demonstração nunca entra no banco real.
+    if (!h || typeof h !== 'object') return falha(dom.MENSAGEM_INVALIDA);
+    if (h.example === true) return falha('Este lote é de exemplo (demonstração) e não pode ser aplicado ao sistema real.');
+    if (typeof h.clientId !== 'string' || !ID_CLIENTE.test(h.clientId) || Number(h.clientId) > 2147483647) return falha('O ID da cliente precisa ser numérico (o mesmo código do cadastro).');
+    if (typeof h.sourceKey === 'string' && h.sourceKey.length > LIMITE_CHAVE) return falha('A conferência desta cliente é grande demais para ser aplicada. Divida a planilha de atendimentos dela.');
+    if (typeof h.batchId === 'string' && h.batchId.length > 160) return falha(dom.MENSAGEM_INVALIDA);
+    if (!dom.historicoValido(h)) return falha(dom.MENSAGEM_INVALIDA);
+    return undefined;
+  });
+  return erros;
 }
 
 const SQL_EXISTENTES = (n) => `SELECT id, id_cliente, seq, item FROM gf_migracao_historicos WHERE id_cliente IN (${Array(n).fill('?').join(', ')}) ORDER BY id_cliente, seq`;
@@ -91,10 +125,15 @@ async function aplicar(req) {
   const a = aplicadora(req, true);
   const b = req.body;
   const operationKey = f.chaveOperacao(b && b.operationKey);
-  try { conferirForma(b); } catch (e) { throw traduzir(e); }
-  const clientes = [...new Set(b.histories.map((h) => h.clientId))];
-  const existentes = await verificarClientes(clientes);
-  if (clientes.some((id) => !existentes.has(id))) throw new (require('../../../utils/AppError'))('Cadastro de cliente não encontrado.', 404, { codigo: 'CLIENT_NOT_FOUND' }, true);
+  const erros = conferirForma(b);
+  const clientes = [...new Set(b.histories.map((h) => h && h.clientId).filter((id) => typeof id === 'string' && ID_CLIENTE.test(id)))];
+  const existentes = clientes.length ? await verificarClientes(clientes) : new Set();
+  b.histories.forEach((h, indice) => {
+    if (h && typeof h.clientId === 'string' && ID_CLIENTE.test(h.clientId) && !existentes.has(h.clientId) && !erros.some((e) => e.indice === indice)) {
+      erros.push({ indice, rotulo: rotuloDe(h), clientId: h.clientId, message: 'Cadastro de cliente não encontrado.' });
+    }
+  });
+  if (erros.length) throw erroDoLote(erros.sort((x, y) => x.indice - y.indice));
   return f.gravar(req, {
     escopo: 'migracao.aplicar', operationKey, corpo: { expectedLatest: b.expectedLatest ?? null, histories: b.histories }, entidade: 'migracao', entidadeId: `lote:${b.histories[0].batchId}`.slice(0, 64), acao: 'migracao.aplicar',
     producao: async (ex) => {
@@ -110,14 +149,16 @@ async function aplicar(req) {
             if (!(h.clientId in b.expectedLatest) || vigente !== b.expectedLatest[h.clientId]) throw f.conflitoVersao(`A abertura da cliente ${h.clientId} mudou em outra aba. Nenhuma abertura deste lote foi aplicada. Confira a ficha e abra novamente a confirmação.`);
           }
         }
-        const { novos, repetidos } = dom.aplicarLote(porCliente, b.histories);
+        const conferido = dom.conferirLote(porCliente, b.histories);
+        if (conferido.erros.length) throw erroDoLote(conferido.erros.map((e) => ({ ...e, rotulo: rotuloDe(b.histories[e.indice]) })));
+        const { novos, repetidos } = conferido;
         const gravados = [];
         for (const h of novos) {
           contagem[h.clientId] = (contagem[h.clientId] || 0) + 1;
           const id = randomUUID();
           await ex.execute(`INSERT INTO gf_migracao_historicos (${COLUNAS}) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-            [id, h.clientId, contagem[h.clientId], h.sourceKey, createHash('sha256').update(h.sourceKey, 'utf8').digest('hex'), h.batchId, h.cutoffAt, h.importedCreditCents, h.importedDebitCents, h.collectDebt, h.postpaid, new Date(h.approvedAt).toISOString(), JSON.stringify(h), a.nome, operationKey]);
-          gravados.push({ id, clientId: h.clientId, seq: contagem[h.clientId], sourceKey: h.sourceKey });
+            [id, h.clientId, contagem[h.clientId], chaveDaColuna(h.sourceKey), sha256(h.sourceKey), h.batchId, h.cutoffAt, h.importedCreditCents, h.importedDebitCents, h.collectDebt, h.postpaid, new Date(h.approvedAt).toISOString(), JSON.stringify(h), a.nome, operationKey]);
+          gravados.push({ id, clientId: h.clientId, seq: contagem[h.clientId], sourceKey: chaveDaColuna(h.sourceKey) });
         }
         const agora = new Date().toISOString();
         // Auditoria sem nomes: só contagens e ids de cliente (máx. 50) e o lote.
@@ -131,4 +172,4 @@ async function aplicar(req) {
   });
 }
 
-module.exports = { ler, obter, aplicar, definirVerificadorDeClientes, MAX_LOTE };
+module.exports = { ler, obter, aplicar, definirVerificadorDeClientes, MAX_LOTE, LIMITE_CHAVE, LIMITE_CHAVE_NA_COLUNA, resumoDaChave, mensagemDosErros };

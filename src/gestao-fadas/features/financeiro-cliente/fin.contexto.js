@@ -26,13 +26,13 @@ const reais = (centavos) => Number(centavos) / 100;
 const filtroTransferencia = (id) => JSON.stringify({ movements: [{ balanceTransfer: { targetClientId: id } }] });
 
 /** Saldo CALCULADO do legado (Maturacao/52) das clientes (nível 0) pedidas, em centavos. SÓ CONFERÊNCIA: não decide saldo nenhum. */
-async function partidaNoLegadoReal(ids) {
+async function partidaNoLegadoReal(ids, opcoes = {}) {
   if (!ids.length) return new Map();
   const [linhas, calculados] = await Promise.all([
     lendo((m) => m.LegadoUsuario.findAll({ attributes: ['id', 'nome_id'], where: { nivel: 0, id: ids.map(Number) }, raw: true })),
-    saldosCalculados(ids),
+    saldosCalculados(ids, opcoes),
   ]);
-  return new Map(linhas.map((l) => [String(l.id), { centavos: calculados.get(String(l.id)).centavos, conhecido: true, nome: `${l.nome_id || ''}`.trim() }]));
+  return new Map(linhas.map((l) => { const c = calculados.get(String(l.id)); return [String(l.id), { centavos: c.centavos, dividaCentavos: c.dividaCentavos, depoisDoCorte: c.depoisDoCorte, conhecido: true, nome: `${l.nome_id || ''}`.trim() }]; }));
 }
 
 /** Existência e nome das clientes no legado, SEM calcular saldo (leitura leve). */
@@ -59,7 +59,7 @@ async function historicoNoLegado(clientId) {
     throw e;
   }
 }
-const partidaNoLegado = (ids) => (leitorDePartida || partidaNoLegadoReal)(ids);
+const partidaNoLegado = (ids, opcoes) => (leitorDePartida || partidaNoLegadoReal)(ids, opcoes);
 const clientesNoLegado = (ids) => (leitorDePartida || clientesNoLegadoReal)(ids);
 
 /** Fontes de dados. `executor`: dentro da transação (SQL); `modelos`: leitura pelos models do banco novo. */
