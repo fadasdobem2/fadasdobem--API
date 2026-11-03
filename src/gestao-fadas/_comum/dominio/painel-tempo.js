@@ -10,6 +10,8 @@
 
 const HORA_LOCAL_MS = 3 * 3600_000;
 const DIA_MS = 86_400_000;
+/** Janela de 15 min da Fila Geral (`generalQueueTiming`: pedido a até 15 min ainda conta como espera); fonte única, usada por `painel-fila-geral` e `painel-fluxo`. */
+const JANELA_DE_ESPERA_MS = 15 * 60_000;
 
 /** `saoPauloOperationalDateKey` para um instante em ms: a data de (instante - 3h - 6h), em UTC. */
 const diaOperacionalDe = (ms) => new Date(ms - HORA_LOCAL_MS - 6 * 3600_000).toISOString().slice(0, 10);
@@ -56,4 +58,4 @@ function rotuloDecorrido(em, agora) {
   return min < 1 ? 'menos de 1 min' : min < 60 ? `${min} min` : min < 1440 ? `${Math.floor(min / 60)}h ${min % 60}min` : `${Math.floor(min / 1440)}d ${Math.floor(min % 1440 / 60)}h`;
 }
 
-module.exports = { DIA_MS, diaOperacionalDe, hojeDe, relogioSP, somarDia, precisaMigracao, entradaOriginal, rotuloDoPlano, rotuloDecorrido };
+module.exports = { DIA_MS, JANELA_DE_ESPERA_MS, diaOperacionalDe, hojeDe, relogioSP, somarDia, precisaMigracao, entradaOriginal, rotuloDoPlano, rotuloDecorrido };

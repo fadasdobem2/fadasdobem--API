@@ -18,6 +18,9 @@ process.env.LEGADO_DB_PORT = '1';
 process.env.LEGADO_DB_NAME = 'verificacao_offline';
 process.env.LEGADO_DB_USER = 'verificacao';
 process.env.LEGADO_DB_PASSWORD = '';
+// O banco NOVO (PostgreSQL) também fica inacessível: sem isso, um `.env` de desenvolvimento com Postgres no ar faz o acordo responder 200 em vez de 503.
+Object.assign(process.env, { DB_HOST: '127.0.0.1', DB_PORT: '1', DB_NAME: 'verificacao_offline', DB_USER: 'verificacao', DB_PASSWORD: '' });
+delete process.env.DATABASE_URL;
 delete process.env.GATE_B_ORIGEM;
 // `payouts` só liga no ambiente `test` (R24); os testes de repasse abaixo rodam ligados.
 process.env.FADAS_ENVIRONMENT = 'test';

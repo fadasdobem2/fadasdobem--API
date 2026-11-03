@@ -180,7 +180,9 @@ async function contas(req) {
       const viva = vivas.get(id);
       if (!viva) continue;
       const contexto = await ctx.carregar(ctx.porModelos(m), id, { perfilPagamento: perfis.get(id) || '' });
-      saida[id] = { name: nomes.get(id) || viva.nome, paymentProfile: contexto.profile.paymentProfile || '', openingKnown: viva.conhecido, ...ctx.resumir(contexto, agora) };
+      // A3: o histórico do ASP (consulta ou pagamento anterior) decide a tabela de "primeira consulta"; o front lê estes dois campos do perfil.
+      const { hasPriorConsultations, firstConsultationAt } = contexto.profile;
+      saida[id] = { name: nomes.get(id) || viva.nome, paymentProfile: contexto.profile.paymentProfile || '', openingKnown: viva.conhecido, hasPriorConsultations: hasPriorConsultations === true, ...(firstConsultationAt ? { firstConsultationAt } : {}), ...ctx.resumir(contexto, agora) };
     }
   });
   return { readAt: agora, accounts: saida };

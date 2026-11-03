@@ -22,6 +22,8 @@ const resposta = require('./agenda.resposta');
 const admissao = require('./agenda-admissao.service');
 const painel = require('../../_comum/dominio/painel-validacao');
 const painelContexto = require('./agenda-painel.contexto');
+const direto = require('./agenda-direto.service');
+const { rotuloDaCliente, definirLeitorDeRotulo } = require('./agenda-cliente');
 const FILA_GERAL = 'afila';
 
 const somarDias = (data, n) => new Date(Date.parse(`${data}T12:00:00Z`) + n * 86400000).toISOString().slice(0, 10);
@@ -32,7 +34,8 @@ let verificarCliente = async (clientId) => {
   const { clienteExiste } = require('../clientes/clientes.service');
   return clienteExiste(clientId);
 };
-const definirVerificadorDeCliente = (fn) => { verificarCliente = fn; };
+// Trocar o verificador (só os testes o fazem, onde o legado não está configurado) troca também o rótulo: "Cliente {id}", o que o legado devolve sem `nome_id`.
+const definirVerificadorDeCliente = (fn) => { verificarCliente = fn; definirLeitorDeRotulo(async (id) => ((await fn(id)) ? `Cliente ${id}` : null)); };
 
 /** Erro do domínio -> erro HTTP: regra vira 422 com a mensagem do front, versão vira 409. */
 function traduzir(erro) {
@@ -56,6 +59,7 @@ async function criar(req) {
   const a = comum.ator(req, true);
   const c = validar.corpoCriacao(req.body);
   if (!(await verificarCliente(c.clientId))) throw new AppError('Cadastro de cliente não encontrado.', 404, { codigo: 'CLIENT_NOT_FOUND' }, true);
+  const rotulo = await rotuloDaCliente(c.clientId); // o nome da cliente é o do legado, não o do navegador (Maturacao/56, C2)
   return comum.gravar(req, a, {
     escopo: 'agenda.criar', operationKey: c.operationKey, corpo: c, acao: 'agenda.criar',
     producao: async (ex) => {
@@ -66,7 +70,8 @@ async function criar(req) {
       const numero = await store.proximoNumero(ex);
       let r;
       try { r = itemNovo(c, a, { abertos, numero, agora, hoje: hojeOperacional() }); } catch (e) { throw traduzir(e); }
-      const item = r.item;
+      const item = { ...r.item, client: rotulo };
+      await direto.conferir(ex, { antes: undefined, item, grupo: 'agendamento', set: c.set, agora: agora.getTime() });
       await store.inserir(ex, item, numero, a.nome, c.operationKey);
       await store.inserirEvento(ex, { idAgenda: item.id, tipo: 'criacao', ref: null, a, dados: { tarotId: item.tarotId, clientId: item.clientId, date: item.date }, versao: 1, operationKey: c.operationKey });
       for (const e of r.eventos) await store.inserirEvento(ex, { idAgenda: item.id, tipo: e.tipo, ref: e.ref, a, dados: e.dados, versao: 1, operationKey: c.operationKey });
@@ -95,6 +100,10 @@ async function comando(req, grupo) {
       try { r = aplicarDelta(atual.item, c, grupo, a); } catch (e) { throw traduzir(e); }
       let item = r.item;
       // Agendar a cliente da FILA GERAL para uma taróloga (`scheduleGeneralMatch`): o front roda `validateGeneralScheduling` (Maturacao/39).
+      if (c.set.client !== undefined) item = { ...item, client: await rotuloDaCliente(item.clientId) }; // o nome da cliente é o do legado (Maturacao/56, C2)
+      const daFilaGeral = atual.item.tarotId === FILA_GERAL && item.tarotId !== FILA_GERAL;
+      // Agendamento direto e edição: o servidor repete o que o front decide ao salvar (Maturacao/56, C1). A Fila Geral -> tarólogo tem a validação abaixo.
+      if (!daFilaGeral) await direto.conferir(ex, { antes: atual.item, item, grupo, set: c.set, agora: Date.now() });
       if (grupo === 'agendamento' && atual.item.tarotId === FILA_GERAL && item.tarotId !== FILA_GERAL) {
         const entrada = await painelContexto.carregarEntrada(ex, { tarotId: item.tarotId, agora: Date.now() });
         try { painel.validarAgendamento(entrada, id, item.tarotId, item.date || entrada.date, item.scheduledTime); } catch (e) { if (e instanceof painel.RegraDoPainelError) throw comum.regra(e.message); throw e; }
@@ -115,4 +124,4 @@ async function comando(req, grupo) {
   });
 }
 
-module.exports = { ler, criar, comando, definirVerificadorDeCliente };
+module.exports = { ler, criar, comando, definirVerificadorDeCliente, definirLeitorDeRotulo };

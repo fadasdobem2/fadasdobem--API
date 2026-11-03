@@ -19,6 +19,8 @@ const r = (p) => path.join(raiz, p);
 const LEGADO = [
   { idTarologo: 9001, nmuTarologo: 'Tarólogo A', ativo: 1, meus_horarios: '\r\n\t<div><b>Seg a Sex:</b> 10h as 18h<br>Sab: 9h&nbsp;as 12h</div>\r\n\t', email: 'contato.a@exemplo.com' }, { idTarologo: 9002, nmuTarologo: 'Tarólogo B', ativo: 1 },
   { idTarologo: 9003, nmuTarologo: 'Tarólogo C', ativo: 0, meus_horarios: '\r\n\t\t\r\n', email: 'sem-arroba' }, { idTarologo: 9005, nmuTarologo: 'Tarólogo E', ativo: 1 },
+  // Onda 1 (A5): a Fila Geral da ferramenta antiga (exibir=0, 347 "AFila") não é profissional: fica fora do catálogo.
+  { idTarologo: 347, nmuTarologo: 'AFila', ativo: 1 },
 ];
 
 (async () => {
@@ -68,6 +70,10 @@ const LEGADO = [
     assert.deepEqual(c0.j.tarologists.map((t) => t.id), ['9001', '9002', '9003', '9005']);
     assert.equal(item(c0, '9003').registrationActive, false); assert.equal(item(c0, '9001').revision, 0);
     assert.equal(c0.h.get('cache-control'), 'no-store'); assert.ok(!('sucesso' in c0.j));
+  });
+  await passo('A5: o perfil de sistema 347 "AFila" (Fila Geral antiga) não entra no catálogo nem tem detalhe; os outros ativos seguem', async () => {
+    assert.ok(!c0.j.tarologists.some((t) => t.id === '347'), 'AFila fora da lista');
+    assert.equal((await chamar('GET', '/catalog/tarologists/347')).status, 404);
   });
   await passo('atendente lê todos, mas SEM nascimento, nome civil e WhatsApps; taróloga só o próprio, com tudo', async () => {
     const e1 = await perfil('9001', { expectedRevision: 0, directory: { personalWhatsapp: '11 91111-1111', realFirstName: 'Ana', birthDate: '1990-01-02', biography: 'Bio A' } });

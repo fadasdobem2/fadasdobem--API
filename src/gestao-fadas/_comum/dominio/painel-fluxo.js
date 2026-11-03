@@ -56,7 +56,7 @@ function fluxoDoPainel(entrada, ignoradas = new Set()) {
     const futuro = esperando.filter((item) => item.tarotId === perfil.id && candidatoDaFila(item) && (b.instantePedido(item, date) ?? 0) > now).sort((p, z) => b.instantePedido(p, date) - b.instantePedido(z, date))[0];
     const temAgendamento = agenda.some((e) => e.tarotId === perfil.id && candidatoDaFila(e) && !encerrado(e) && ativoNoDia(e, date, date)
       && (!['after', 'shift'].includes((e.contactPlan && e.contactPlan.timing) ?? '') || b.planoPermiteContato(e, date, now))
-      && (b.instantePedido(e, date) ?? 0) <= now + 15 * 60000
+      && (b.instantePedido(e, date) ?? 0) <= now + t.JANELA_DE_ESPERA_MS
       && !(e.workflowStatus === 'Em consulta' && consultations.some((v) => v.agendaItemId === e.id && v.clientId === e.clientId && v.tarotId === e.tarotId && consomeCobertura(v))));
     const admissao = adm.admissaoVigente(eventos, perfil.id, date, now);
     const original = profiles.find((i) => i.id === perfil.id);

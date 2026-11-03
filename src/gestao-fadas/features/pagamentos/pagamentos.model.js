@@ -3,6 +3,7 @@
 const { localOperationalDateKey, utcLocalToSaoPauloLocal } = require('./helpers/datas');
 const { sumMoney } = require('./helpers/dinheiro');
 const { paginate } = require('./helpers/paginacao');
+const { agoraSaoPaulo, linhaVazia, pagamentoPlausivel } = require('../../_comum/legado-datas');
 const { legacyId, requireLegacyId, legacyLocalDateTime, legacyMoney, legacyText } = require('./helpers/valores-legado');
 
 /**
@@ -47,7 +48,8 @@ function readLegacyPayment(row, table, catalogs = {}) {
     clientId: legacyId(row.idUsuario),
     clientIdentification: legacyText(row.nome_id),
     recordedAmount: legacyMoney(row.vlPagtoInformado),
-    paidAtLocal: legacyLocalDateTime(row.dtPagtoInformado),
+    // Data absurda (ano < 2000 ou depois de amanhã) = "Sem data" (A4b); o valor continua na linha.
+    paidAtLocal: pagamentoPlausivel(legacyLocalDateTime(row.dtPagtoInformado), catalogs.agoraLocal || agoraSaoPaulo()),
     informedAtLocal: informedAtUtc === null ? null : utcLocalToSaoPauloLocal(informedAtUtc),
     bank: catalogValue(row.idBanco, catalogs.banks),
     method: catalogValue(row.idFormaPagto, catalogs.paymentOptions),
@@ -146,7 +148,11 @@ function samePayment(a, b) {
 }
 
 /** Concilia as três fontes em operações antes de qualquer filtro de período (R5); Clientes concilia o histórico com isto (R20). */
-function reconcileReceipts(input) {
+/** Linha vazia do ASP (idUsuario 0, valor 0, data 2000-01-01): fora de listas e contagens (A4c). Nunca descarta pagamento com valor ou com cliente. */
+const naoVazia = (row) => !linhaVazia({ idUsuario: row.clientId, valor: row.recordedAmount, data: row.paidAtLocal });
+
+function reconcileReceipts(bruto) {
+  const input = { ...bruto, informed: bruto.informed.filter(naoVazia), confirmed: bruto.confirmed.filter(naoVazia), notFound: bruto.notFound.filter(naoVazia) };
   const confirmedById = new Map(input.confirmed.map((row) => [row.sourceId, row]));
   const informedById = new Map(input.informed.map((row) => [row.sourceId, row]));
   const receipts = [];

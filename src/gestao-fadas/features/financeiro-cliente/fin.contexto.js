@@ -16,6 +16,8 @@ const { lendo } = require('../../_comum/legado');
 const { saldosCalculados } = require('./fin.saldo-legado');
 const saldo = require('../../_comum/dominio/financeiro-saldo');
 const planilha = require('../../_comum/dominio/migracao-planilha');
+const { SEM_HISTORICO } = require('../../_comum/dominio/historico-legado');
+const { historicoDoLegadoReal } = require('./fin.historico-legado');
 
 const FONTE_PLANILHA = 'planilha-migracao';
 const FONTE_SEM_PLANILHA = 'sem-planilha-zero';
@@ -43,6 +45,20 @@ async function clientesNoLegadoReal(ids) {
 let leitorDePartida = null;
 /** Troca o leitor do legado (nos testes o MySQL legado nem é configurado). O mesmo leitor serve ao cálculo de conferência e à existência. */
 const definirLeitorDePartida = (fn) => { leitorDePartida = fn || null; };
+
+let leitorDeHistorico = null;
+/** Troca o leitor do histórico do legado (nos testes o MySQL legado nem é configurado). */
+const definirLeitorDeHistorico = (fn) => { leitorDeHistorico = fn || null; };
+/**
+ * Histórico da cliente no ASP (A3): `{ hasPriorConsultations, firstConsultationAt? }`. Sem legado CONFIGURADO (ambiente de teste) é "sem histórico"; legado FORA DO AR
+ * propaga o 503: cobrar pela tabela de primeira compra sem saber seria o erro que esta leitura existe para evitar.
+ */
+async function historicoNoLegado(clientId) {
+  try { return ((await (leitorDeHistorico || historicoDoLegadoReal)([String(clientId)])).get(String(clientId))) || SEM_HISTORICO; } catch (e) {
+    if (e && e.dados && e.dados.codigo === 'LEGADO_NAO_CONFIGURADO') return SEM_HISTORICO;
+    throw e;
+  }
+}
 const partidaNoLegado = (ids) => (leitorDePartida || partidaNoLegadoReal)(ids);
 const clientesNoLegado = (ids) => (leitorDePartida || clientesNoLegadoReal)(ids);
 
@@ -81,7 +97,7 @@ async function congelarPartida(ex, clientId, nomeAtor, operationKey) {
  * (o saldo do legado é só conferência) e fica na assinatura para não quebrar quem ainda o passa.
  */
 async function carregar(fonte, clientId, { perfilPagamento = '' } = {}) {
-  const [payments, consultations, benefits, congelado, historico] = await Promise.all([fonte.pagamentos(clientId), fonte.consultas(clientId), fonte.beneficios(clientId), fonte.partida(clientId), fonte.migracao(clientId)]);
+  const [payments, consultations, benefits, congelado, historico, antiga] = await Promise.all([fonte.pagamentos(clientId), fonte.consultas(clientId), fonte.beneficios(clientId), fonte.partida(clientId), fonte.migracao(clientId), historicoNoLegado(clientId)]);
   let credito = 0; let aberturaCentavos = 0; let perfil = perfilPagamento; let posPago;
   if (historico) {
     credito = planilha.offsetDaAbertura(historico, planilha.linhasDaConta(clientId, payments, consultations));
@@ -91,7 +107,7 @@ async function carregar(fonte, clientId, { perfilPagamento = '' } = {}) {
     if (!(editadoEm && Date.parse(editadoEm) > Date.parse(historico.approvedAt))) perfil = historico.postpaid ? 'Pós-pago' : 'Pré-pago';
     posPago = planilha.ultimoCreditoPosPago([historico], clientId);
   }
-  const profile = { clientId, name: '', paymentProfile: perfil, birthDate: '', whatsapp: '', credit: credito, creditUpdatedAt: historico ? historico.approvedAt : '', movements: [], neverTarotIds: [], minuteBenefits: benefits, ...(posPago ? { postpaidCredit: posPago } : {}) };
+  const profile = { clientId, name: '', paymentProfile: perfil, birthDate: '', whatsapp: '', credit: credito, creditUpdatedAt: historico ? historico.approvedAt : '', movements: [], neverTarotIds: [], minuteBenefits: benefits, ...(posPago ? { postpaidCredit: posPago } : {}), ...(antiga.hasPriorConsultations ? antiga : {}) };
   return { payments, consultations, profile, partida: { centavos: aberturaCentavos, congelada: congelado !== null, origem: historico ? FONTE_PLANILHA : FONTE_SEM_PLANILHA }, migracao: historico || null };
 }
 
@@ -109,4 +125,4 @@ function resumir(ctx, agora = new Date().toISOString()) {
   };
 }
 
-module.exports = { FONTE_PLANILHA, FONTE_SEM_PLANILHA, partidaNoLegado, clientesNoLegado, definirLeitorDePartida, porExecutor, porModelos, congelarPartida, carregar, resumir };
+module.exports = { FONTE_PLANILHA, FONTE_SEM_PLANILHA, partidaNoLegado, clientesNoLegado, definirLeitorDePartida, definirLeitorDeHistorico, historicoNoLegado, porExecutor, porModelos, congelarPartida, carregar, resumir };

@@ -20,6 +20,8 @@ let fonteDeTarologo = async (tarotId) => {
 };
 /** Sem catálogo (legado fora do ar ou não configurado) o tarólogo é desconhecido: regras de cadastro e de presença não se aplicam. */
 const cadastroOuNada = async (tarotId) => { try { return await fonteDeTarologo(tarotId); } catch (_e) { return null; } };
+/** Como `cadastroOuNada`, mas diz se o catálogo foi lido: `{ catalogo: true, item }` (item null = não existe) ou `{ catalogo: false }`. */
+const cadastroConhecido = async (tarotId) => { try { return { catalogo: true, item: await fonteDeTarologo(tarotId) }; } catch (_e) { return { catalogo: false, item: null }; } };
 const definirFonteDeTarologo = (fn) => { fonteDeTarologo = fn; };
 
 async function restrita(ex, clientId, tarotId) {
@@ -44,4 +46,4 @@ async function carregar(ex, { tarotId, clientId, data }) {
   return { agenda: registros.map((r) => r.item), consultas, eventos, cadastro, perfil, restrita: await restrita(ex, clientId, tarotId) };
 }
 
-module.exports = { carregar, definirFonteDeTarologo, ligado, cadastroDe: cadastroOuNada };
+module.exports = { carregar, definirFonteDeTarologo, ligado, cadastroDe: cadastroOuNada, cadastroConhecido };

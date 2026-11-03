@@ -22,6 +22,7 @@ const r = (p) => path.join(raiz, p);
   const servico = require(r('src/gestao-fadas/features/agenda/agenda.service'));
   const { revisaoDaFila } = require(r('src/gestao-fadas/_comum/dominio/agenda-ordem'));
   servico.definirVerificadorDeCliente(async (id) => id !== '999999'); // o legado não está configurado neste processo
+  servico.definirLeitorDeRotulo(async (id) => (id === '900013' ? 'Cliente Teste' : `Cliente ${id}`)); // idem para o rótulo da cliente (Maturacao/56, C2)
   const uAtend = await criarUsuario('Atendente Agenda');
   const uSup = await criarUsuario('Supervisora Agenda');
   const uAdm = await criarUsuario('Administradora Agenda');

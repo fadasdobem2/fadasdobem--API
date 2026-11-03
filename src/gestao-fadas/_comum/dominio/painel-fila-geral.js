@@ -44,7 +44,7 @@ function temporizacao(item, data, agora) {
   const pedidoEm = b.instantePedido(item, data); const entrouEm = t.entradaOriginal(item, data);
   const contato = contatoDe(item); const pronta = contato.date === data && clientePronta(contato.tags);
   const futuro = (item.date ?? data) > data || (pedidoEm !== null && pedidoEm > agora);
-  const janela = !item.queueReservation && pedidoEm !== null && pedidoEm > agora && pedidoEm - agora <= 15 * 60_000;
+  const janela = !item.queueReservation && pedidoEm !== null && pedidoEm > agora && pedidoEm - agora <= t.JANELA_DE_ESPERA_MS;
   const relogio = pedidoEm !== null ? t.relogioSP(pedidoEm) : null;
   const dia = (item.date ?? data) > data ? `${item.date.slice(8, 10)}/${item.date.slice(5, 7)} · ` : '';
   const status = contato.tags.includes('Cliente vai chamar') ? 'Cliente vai chamar' : contato.tags.includes('Chamar cliente') ? 'Chamar cliente' : contato.tags.find((x) => ETAPAS_DE_STATUS.includes(x)) ?? (pronta ? 'Pode agora' : 'Chamar cliente');

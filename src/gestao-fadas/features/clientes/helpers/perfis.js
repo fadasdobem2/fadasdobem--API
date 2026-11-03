@@ -38,6 +38,15 @@ const permissionsFor = (role) => ({
   canExpandRealClientHistory: role === 'supervisora',
 });
 
+/**
+ * Identidade civil da cliente (nome completo, CPF e nascimento) por perfil (onda 1, A2). A API é a AUTORIDADE: o recorte é feito aqui, no servidor, com a regra que
+ * o front aplica HOJE e que a tela já mostra (`clientListDisplayName`, `canUseClientProfile`, `basicRegistrationFields`): os quatro perfis de equipe veem
+ * (administradora, assistente, supervisora, atendente) e a taróloga não (nem chega: `canReadRealClients` é falso e a rota responde 403). Perfil desconhecido: nada.
+ * Mudar quem vê = mudar SÓ esta tabela (decisão da Nice, CLIENTES-12); lista, ficha e históricos leem daqui.
+ */
+const IDENTIDADE_CIVIL_POR_PERFIL = Object.freeze({ administradora: true, assistente: true, supervisora: true, atendente: true, tarologa: false });
+const canViewCivilIdentity = (role) => IDENTIDADE_CIVIL_POR_PERFIL[role] === true;
+
 const canViewFullRegistration = (role) => role === 'administradora' || role === 'assistente';
 
 const clientRolePolicy = (role) => ({
@@ -49,4 +58,4 @@ const clientRolePolicy = (role) => ({
   pageSize: role === 'administradora' ? 50 : role === 'atendente' ? 20 : 30,
 });
 
-module.exports = { CONFIGURACAO_PERFIS, PERFIS, canViewFullRegistration, clientRolePolicy, perfilDeClientes, permissionsFor };
+module.exports = { CONFIGURACAO_PERFIS, IDENTIDADE_CIVIL_POR_PERFIL, PERFIS, canViewCivilIdentity, canViewFullRegistration, clientRolePolicy, perfilDeClientes, permissionsFor };

@@ -11,7 +11,7 @@
 
 const AppError = require('../../../utils/AppError');
 const { foto, CadastroInvalidoError } = require('../../_comum/dominio/cadastro-tarologo');
-const { validarDiretorio, montarItem, aplicarEdicao, semPrivados, conferirInativacao, emailDoLegado } = require('../../_comum/dominio/catalogo-tarologos');
+const { validarDiretorio, ehPerfilDeSistema, montarItem, aplicarEdicao, semPrivados, conferirInativacao, emailDoLegado } = require('../../_comum/dominio/catalogo-tarologos');
 const ciclo = require('../consultas-ciclo/ciclo.store');
 const { lendo } = require('../../_comum/legado');
 const { novosDadosNoPostgres } = require('../../novo/modo');
@@ -78,7 +78,7 @@ async function catalogo() {
   const [legado, novos] = await Promise.all([fonteLegado.listar(), lendoNovo((m) => store.lerTudo(m))]);
   const porLegado = new Map(novos.perfis.filter((p) => p.id_legado !== null).map((p) => [Number(p.id_legado), p]));
   const extPorId = new Map(novos.exts.map((e) => [Number(e.id_tarologo), e]));
-  const itens = legado.map((l) => montarItem({ legado: l, perfil: porLegado.get(Number(l.idTarologo)) || null, ext: extPorId.get(Number(l.idTarologo)) || null }));
+  const itens = legado.filter((l) => !ehPerfilDeSistema(l)).map((l) => montarItem({ legado: l, perfil: porLegado.get(Number(l.idTarologo)) || null, ext: extPorId.get(Number(l.idTarologo)) || null }));
   const vistos = new Set(itens.map((i) => i.id));
   for (const p of novos.perfis) if (!vistos.has(p.tarot_id) && p.id_legado === null) itens.push(montarItem({ legado: null, perfil: p, ext: null }));
   return itens;

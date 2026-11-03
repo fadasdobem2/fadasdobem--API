@@ -210,6 +210,8 @@ Nos pagamentos, o modo estrito (`GF_FINANCEIRO_REGRAS`, ligado por padrão; só 
 
 O que já é imposto com paridade provada inclui: horários e escala, presença, agenda e fila geral, o "livres agora" do painel (`panelFlow`), ciclo da consulta, correção de tempo com saldo real, conferência de encerramento, desfechos, compensação, autorização no lançamento, lançamento e revisão de pagamentos, divergências, pendências derivadas das fontes reais, recados e orientação financeira. A lista viva do que ainda é conferido só por forma está na matriz mantida junto à documentação de maturação.
 
+Onda 1, grupo D (Maturacao/56): os prazos de atenção (5 min), expirada (10 min), prazo combinado, "mais tempo" e fim de turno (15 min) estão em `_comum/dominio/prazos-atendimento.js` (`prazos-espera.js`, `prazos-painel.js`, `prazos-turno.js`), provados por `verificar:gf-prazos` contra o código real do front (bordas exatas, virada das 06:00, mutantes). O ouro do `panelFlow` ganhou o guarda `verificar:gf-painel-cobertura` (lista o que não é coberto). `finishConsultation` e `confirmAnnul` têm ouro do próprio componente (`scripts/apoio-gf-consulta/componente/harness.js` executa o texto real das funções, sem alterar o front); `saveForm` continua só transcrito. Nenhum endpoint novo: a tela ainda calcula esses prazos sozinha.
+
 ---
 
 ## 7. Segurança
@@ -257,6 +259,9 @@ Cada verificador cria um banco PostgreSQL descartável (`fdb_<prefixo>_<aleatór
 | `npm run verificar:gf-banco-novo` | Base `gf_*`, executor, idempotência, auditoria |
 | `npm run verificar:gf-{horarios,presenca,agenda,consulta,cadastros,painel,recados,divergencias,clientes,ficha,contas,pendencias,espelho}` | Cada fatia |
 | `npm run verificar:gf-{consulta-regras,painel-fluxo,pagamentos-regras,pendencias-orientacao}` | Regras de negócio portadas, com ouro |
+| `npm run verificar:gf-agenda-direto` | Agendamento direto, rótulo da cliente e fechamento de turno da Agenda (onda 1, grupo C): ouro do código real do front, mutantes e Postgres descartável |
+| `npm run verificar:gf-{prazos,painel-cobertura,consulta-componente}` | Prazos de atendimento (5, 10 e 15 min), cobertura do ouro do `panelFlow` e `finishConsultation`/`confirmAnnul` do componente real (onda 1, grupo D) |
+| (front, sem script) `tests/real-group-b-front-fixes.test.mjs` | Onda 1, grupo B: exemplo não passa por real no Painel, Pendências e Consultas; "+ Cadastro" indisponível em sessão real; saldo com origem da abertura e sem sinal duplo; "sem data", código 0, Copiar dados com celular, ordenação por nome_id (ver Maturacao/56) |
 | `npm run verificar:gf-pagamentos`, `npm run verificar:financeiro` | Pagamentos e financeiro da plataforma |
 
 Ordem recomendada antes de entregar: `verificar:legado`, `comparar:models-migracoes`, o banco novo, as fatias e, por fim, o financeiro.
@@ -288,6 +293,10 @@ Catálogo de tarólogos (`GET /catalog/tarologists`, `Maturacao/56`): lê do leg
 Tarólogo: cadastro e campos (`Maturacao/56`, seção "Tarólogo: cadastro e campos"): o catálogo também lê `meus_horarios` (HTML do legado, vira linhas de texto em `profile.official`; só 6 dos 56 ativos têm conteúdo). O e-mail de contato (`tbl_tarologos.email`) nunca vai na lista: a rota `GET /catalog/tarologists/:tarotId` o entrega em `directory.contactEmail` só à administradora (decisão no servidor); os demais perfis recebem o tarólogo sem o campo, e a taróloga só lê o próprio. `pass` nunca é selecionada. A rota usa `canViewTarologists` como a lista (taróloga: só o próprio id, 404 nos outros).
 
 Consultas e Configuração (`Maturacao/56`, seção "Consultas e Configuração"): o leitor do legado normaliza dado sujo. Tarólogo com `nmuTarologo` vazio vira `Tarólogo NNN` (lista de tarólogos, linha de consulta e ficha); consulta que cruza a meia-noite tem o fim corrigido para o dia seguinte quando a diferença das datas bate com `tmpConsulta` (tolerância de 1 min); `tmpConsulta = -1` deriva a duração das datas quando coerentes. Pendências da Nice: valor R$ 0,00 e consultas de 0 min, as 2 abertas com início no ano 0 (não exibidas) e `nome_id` com nome civil.
+
+Onda 1, grupo C (`Maturacao/56`, seção "Correções da onda 1 - grupo C"): `POST /agenda` e `PATCH /agenda/:id` repetem no servidor as recusas do front ao agendar e editar (identidade da cliente, restrição "Indisponível", horário, agenda fechada, cadastro inativo, tarólogo fora do cadastro, solicitação, "Se der hoje", consulta em curso, "Próximo turno" com data passada) com o mesmo 422 e a mesma frase (`_comum/dominio/agenda-agendamento-direto.js`, `features/agenda/agenda-direto.service.js`); valores de cobertura de pagamento vindos do navegador são recusados; o nome da cliente na Agenda é o rótulo do legado (`features/agenda/agenda-cliente.js`), não o do navegador; "Fechar agenda deste turno" usa o turno do servidor (`_comum/dominio/agenda-fechamento.js`). Verificador: `node scripts/verificar-gf-agenda-direto.js` (ouro do código real do front, mutantes e Postgres descartável). Pendências: janela de datas do agendamento direto, `paymentPending` no agendamento novo, conflito de cliente na mesma agenda, `agenda_fadas` do legado.
+
+Onda 1, grupo A (`Maturacao/56`, seção "Correções da onda 1 - grupo A"): `GET /client-notes?clientId=` traz também as observações do sistema antigo, somente leitura e paginadas; a ficha e a lista filtram nome civil, CPF e nascimento por perfil no servidor (`IDENTIDADE_CIVIL_POR_PERFIL`); o perfil de preço lê do legado se a cliente já tem consulta ou pagamento anterior (tabela regular em vez de primeira compra, com a janela de 24 h); datas sentinela, datas absurdas e linhas vazias do ASP seguem as regras de `_comum/legado-datas.js`; o 347 "AFila" (Fila Geral antiga) fica fora do catálogo de tarólogos. Verificador: `node scripts/verificar-gf-onda1-grupo-a.js`. Pendências: quem vê CPF/nascimento/nome civil; índice em `obs_liberacao_consulta.id_usuario`.
 
 Limites técnicos:
 

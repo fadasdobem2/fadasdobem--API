@@ -25,7 +25,7 @@ const { searchAndSortClientHistory, validateHistoryAccessReason, visibleClientHi
 const {
   clientListDisplayName, clientMatchesSearch, emptyClientSearch, hasClientSearch,
 } = require('./helpers/busca');
-const { canViewFullRegistration, clientRolePolicy, permissionsFor } = require('./helpers/perfis');
+const { canViewCivilIdentity, canViewFullRegistration, clientRolePolicy, permissionsFor } = require('./helpers/perfis');
 
 const ZERO = BigInt(0);
 /** Intervalo que cabe qualquer história: o corte I14 mantém toda consulta com início e nenhuma como "aberta-antes". */
@@ -347,7 +347,7 @@ function buildRealClientList(selection, history) {
     const consultation = lastConsultation.get(record.id);
     const receipt = lastReceipt.get(record.id);
     return {
-      id: record.id, name: record.name, nameMissing: record.name === null, treatAs: record.treatAs, fullName: record.fullName, modality: null,
+      id: record.id, name: record.name, nameMissing: record.name === null, treatAs: record.treatAs, fullName: canViewCivilIdentity(plan.role) ? record.fullName : null, modality: null,
       ...(seeBalance ? { oldBalance: record.oldBalance.balance } : {}),
       inConsultationNow, latestActivityLocal,
       lastConsultation: consultation ? { id: consultation.id, startedAtLocal: consultation.startedAtLocal, tarotName: consultation.tarotName, situation: consultation.situation } : null,
@@ -384,22 +384,24 @@ const clientReceipts = (clientId, sources) => reconcileReceipts(sources).filter(
 function tarologistsOf(newestFirstItems) {
   const byTarot = new Map();
   for (const item of newestFirstItems) {
-    if (item.tarotId === null || item.startedAtLocal === null) continue;
+    // Consulta sem data (A4a) conta para a leitora; sem data, a última relação fica '' (a tela só ordena por ela).
+    if (item.tarotId === null || (item.startedAtLocal === null && !item.undatedStart)) continue;
     // Só os minutos de consulta finalizada são somados, como nos totais de Consultas (D10).
     const minutes = item.situation === 'finalizada' ? item.recordedMinutes ?? 0 : 0;
     const seen = byTarot.get(item.tarotId);
     if (seen) { seen.consultations += 1; seen.recordedMinutes += minutes; }
-    else byTarot.set(item.tarotId, { tarotId: item.tarotId, tarotName: item.tarotName, consultations: 1, recordedMinutes: minutes, lastStartedAtLocal: item.startedAtLocal });
+    else byTarot.set(item.tarotId, { tarotId: item.tarotId, tarotName: item.tarotName, consultations: 1, recordedMinutes: minutes, lastStartedAtLocal: item.startedAtLocal ?? '' });
   }
   return [...byTarot.values()];
 }
 
 function projectProfile(record, role) {
   const full = canViewFullRegistration(role);
+  const civil = canViewCivilIdentity(role); // A2: nome completo, CPF e nascimento só de quem a regra do perfil libera
   return {
-    id: record.id, name: record.name, nameMissing: record.name === null, treatAs: record.treatAs, fullName: record.fullName,
+    id: record.id, name: record.name, nameMissing: record.name === null, treatAs: record.treatAs, fullName: civil ? record.fullName : null,
     phones: full ? record.phones : { home: record.phones.home },
-    whatsapp: record.whatsapp, email: record.email, cpf: record.cpf, birthDate: record.birthDate,
+    whatsapp: record.whatsapp, email: record.email, cpf: civil ? record.cpf : null, birthDate: civil ? record.birthDate : null,
     createdAtLocal: record.createdAtLocal, linkedValidId: record.linkedValidId,
     ...(full ? {
       email2: record.email2, cpfStatus: record.cpfStatus, cpfResult: record.cpfResult, birthTime: record.birthTime,
@@ -476,7 +478,7 @@ const RECEIPT_LABELS = {
 // recebimentos, opção de pagamento, banco, situação e as origens com seus IDs. Relógio de parede é lido como UTC.
 function consultationEntry(item) {
   return {
-    id: item.id, at: `${item.startedAtLocal}Z`, title: item.tarotName ?? '',
+    id: item.id, at: item.startedAtLocal === null ? UNDATED : `${item.startedAtLocal}Z`, title: item.tarotName ?? '',
     detail: [item.channel.label, item.paymentOption.label, item.id].filter(Boolean).join(' · '),
     status: item.situation === 'finalizada' ? 'Finalizada' : 'Em curso', actor: '',
     channel: item.channel.label ?? item.channel.code ?? undefined,
@@ -594,6 +596,7 @@ module.exports = {
   consultingNow,
   filterAndSortClients,
   isRealClientHistoryGrantFor,
+  projectProfile,
   movementsOf,
   planRealClientHistoryGrant,
   planRealClientList,

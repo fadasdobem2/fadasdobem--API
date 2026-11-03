@@ -23,6 +23,8 @@ const validar = require('./agenda.validacao');
 const store = require('./agenda.store');
 const adm = require('./agenda-admissao.store');
 const ciclo = require('../consultas-ciclo/ciclo.store');
+const contexto = require('./agenda-painel.contexto');
+const { turnoVigente, TURNO_ENCERRADO } = require('../../_comum/dominio/agenda-fechamento');
 
 const invalido = (c) => new AppError('Dados inválidos.', 400, { codigo: 'INVALID_INPUT', campo: c }, true);
 const ehObjeto = (v) => typeof v === 'object' && v !== null && !Array.isArray(v);
@@ -81,11 +83,21 @@ async function registrarAdmissao(req) {
       evento.consultationIds = consultas.filter((x) => ((contaMinutos(x.status) || retemCoberturaDeCancelamento(x)) && x.durationSeconds > 0) || Boolean(x.tarologistFinishReport)).map((x) => x.id);
       if (e.mode === 'no_more') {
         const fimDoDia = new Date(`${somarDias(hoje, 1)}T06:00:00-03:00`).toISOString();
+        let fimDoTurno = e.closedUntil; let relogioDoFim = e.endTime;
         if (e.closeScope === 'shift') {
-          const fim = Date.parse(e.closedUntil);
-          if (fim <= agora.getTime() || fim > agora.getTime() + 24 * 3600000) throw comum.regra('Este turno já terminou. Confira o período de fechamento.');
+          // O turno vigente é o do servidor (confirmação de presença, retorno ou escala do dia), como `currentClosurePeriod` do front: o fim e o relógio
+          // que o navegador manda são ignorados. Sem cadastro do tarólogo (catálogo fora do ar) vale só a conferência do intervalo (Maturacao/56, C3).
+          const entrada = await contexto.carregarEntrada(ex, { tarotId: e.tarotId, agora: agora.getTime() });
+          if (entrada.cadastro) {
+            const turno = turnoVigente(entrada.profiles[0], entrada.overrides, hoje, agora.getTime());
+            if (!turno) throw comum.regra(TURNO_ENCERRADO);
+            fimDoTurno = new Date(turno.endsAt).toISOString(); relogioDoFim = turno.end;
+          } else {
+            const fim = Date.parse(e.closedUntil);
+            if (fim <= agora.getTime() || fim > agora.getTime() + 24 * 3600000) throw comum.regra(TURNO_ENCERRADO);
+          }
         }
-        Object.assign(evento, { closeScope: e.closeScope, closedUntil: e.closeScope === 'shift' ? new Date(e.closedUntil).toISOString() : fimDoDia, ...(e.closeScope === 'shift' ? { endTime: e.endTime } : {}) });
+        Object.assign(evento, { closeScope: e.closeScope, closedUntil: e.closeScope === 'shift' ? new Date(fimDoTurno).toISOString() : fimDoDia, ...(e.closeScope === 'shift' ? { endTime: relogioDoFim } : {}) });
         const abertos = (await store.abertosDe(ex, [e.tarotId])).filter((i) => ativoNoDia(i, hoje, hoje) && !encerrado(i));
         evento.agendaIds = abertos.map((i) => i.id);
       }

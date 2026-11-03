@@ -32,9 +32,19 @@ const { emptyClientSearch, parseClientBirthDate } = require('./helpers/busca');
 const { ampliarHistorico: ampliar } = require('./helpers/ampliacao');
 const extensao = require('./helpers/extensao');
 const {
-  legacyLocalDateTime, localOperationalDateKey, normalizeSearch, shiftDateKey,
+  legacyLocalDateTime, localOperationalDateKey, normalizeSearch, saoPauloTimestamp, shiftDateKey,
 } = require('./helpers/valores');
 const { erro } = require('./clientes.validacao');
+const { ANO_MINIMO_CONSULTA, ANO_MINIMO_PAGAMENTO, diaSeguinte } = require('../../_comum/legado-datas');
+
+/** Janela das datas pagas que valem (A4b): de 2000 até amanhã, no relógio de São Paulo; `civil` (opcional) a estreita ainda mais. */
+function pagamentoValido(civil) {
+  const de = `${ANO_MINIMO_PAGAMENTO}-01-01 00:00:00`;
+  const ate = `${diaSeguinte(diaSeguinte(saoPauloTimestamp().slice(0, 10)))} 00:00:00`;
+  const gte = civil && civil[Op.gte] > de ? civil[Op.gte] : de;
+  const lt = civil && civil[Op.lt] < ate ? civil[Op.lt] : ate;
+  return { [Op.gte]: gte, [Op.lt]: lt };
+}
 
 /** Colunas de `usuarios` que Clientes lê (R18), como database/legacy/read-clients.sql as nomeia. Sem senha, sem login. */
 const COLUNAS_CLIENTE = [
@@ -187,7 +197,7 @@ async function movimentosNoRecorte(m, range) {
   const maximo = (campo) => [[fn('MAX', col(campo)), 'em']];
   const [consultas, ...recibos] = await Promise.all([
     m.LegadoConsulta.findAll({ attributes: ['idUsuario', ...maximo('iniConsulta')], where: { iniConsulta: { [Op.gte]: inicio, [Op.lt]: fim } }, group: ['idUsuario'], raw: true }),
-    ...Object.values(modelosDePagamento(m)).map((Modelo) => Modelo.findAll({ attributes: ['idUsuario', ...maximo('dtPagtoInformado')], where: { dtPagtoInformado: civil }, group: ['idUsuario'], raw: true })),
+    ...Object.values(modelosDePagamento(m)).map((Modelo) => Modelo.findAll({ attributes: ['idUsuario', ...maximo('dtPagtoInformado')], where: { dtPagtoInformado: pagamentoValido(civil) }, group: ['idUsuario'], raw: true })),
   ]);
   agregarMaximo(mapa, consultas, 'em');
   for (const linhas of recibos) agregarMaximo(mapa, linhas, 'em');
@@ -203,8 +213,9 @@ async function movimentosGerais(m, ids) {
   for (let i = 0; i < unicos.length; i += LOTE) {
     const lote = unicos.slice(i, i + LOTE);
     const [consultas, ...recibos] = await Promise.all([
-      m.LegadoConsulta.findAll({ attributes: ['idUsuario', ...maximo('iniConsulta')], where: { idUsuario: lote }, group: ['idUsuario'], raw: true }),
-      ...Object.values(modelosDePagamento(m)).map((Modelo) => Modelo.findAll({ attributes: ['idUsuario', ...maximo('dtPagtoInformado')], where: { idUsuario: lote }, group: ['idUsuario'], raw: true })),
+      m.LegadoConsulta.findAll({ attributes: ['idUsuario', ...maximo('iniConsulta')], where: { idUsuario: lote, iniConsulta: { [Op.gte]: `${ANO_MINIMO_CONSULTA}-01-01 00:00:00` } }, group: ['idUsuario'], raw: true }),
+      // Pagamento com data absurda (A4b) não é "último pagamento": só entre 2000 e amanhã.
+      ...Object.values(modelosDePagamento(m)).map((Modelo) => Modelo.findAll({ attributes: ['idUsuario', ...maximo('dtPagtoInformado')], where: { idUsuario: lote, dtPagtoInformado: pagamentoValido() }, group: ['idUsuario'], raw: true })),
     ]);
     agregarMaximo(consultaAt, consultas, 'em');
     for (const linhas of recibos) agregarMaximo(recebAt, linhas, 'em');

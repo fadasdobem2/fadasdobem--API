@@ -72,6 +72,17 @@ function validarDiretorio(entrada) {
   return saida;
 }
 
+/**
+ * PERFIS DE SISTEMA (onda 1, A5 / AGENDA-02): linhas de `tbl_tarologos` que NÃO são profissionais de atendimento. Hoje só o 347 "AFila", a Fila Geral da ferramenta
+ * antiga (1 consulta, 4.090 linhas em `agenda_fadas`). Fica FORA do catálogo (Equipe, seletor do Agendar, contagem de perfis) e não pode ser agendado.
+ * NÃO se usa `exibir = 0` como critério: em produção 51 das 52 tarólogas ativas com `exibir = 0` são profissionais reais (milhares de consultas cada); só
+ * 4 ativas têm `exibir = 1`. A lista é por ID E nome juntos (um id reaproveitado com outro nome não some por engano). Nova linha: só com decisão da Nice.
+ */
+const PERFIS_DE_SISTEMA = Object.freeze([Object.freeze({ id: '347', nome: 'afila', motivo: 'Fila Geral da ferramenta antiga' })]);
+const semCaixa = (v) => (typeof v === 'string' ? v.trim().toLocaleLowerCase('pt-BR') : '');
+/** `legado`: `{ idTarologo, nmuTarologo }` de `tbl_tarologos`. */
+const ehPerfilDeSistema = (legado) => Boolean(legado) && PERFIS_DE_SISTEMA.some((p) => p.id === String(legado.idTarologo) && p.nome === semCaixa(legado.nmuTarologo));
+
 const ativoDoLegado = (v) => (String(v) === '1' ? true : String(v) === '0' ? false : null);
 /** `tbl_tarologos.status`: 2 = em consulta, 1 (ou ausente) = disponível. É só a situação cadastral: NUNCA vira online/presença. */
 const statusDoLegado = (v) => (String(v) === '2' ? 'Em consulta' : 'Disponível');
@@ -139,4 +150,4 @@ function conferirInativacao(ativoNovo, consultasDoTarologo) {
   return !ativoNovo && consultasDoTarologo.some((c) => c.status === 'Em curso') ? MSG_INATIVAR_COM_CONSULTA : null;
 }
 
-module.exports = { horariosDoLegado, emailDoLegado, statusDoLegado, conferirInativacao, MSG_INATIVAR_COM_CONSULTA, validarDiretorio, montarItem, aplicarEdicao, semPrivados, ativoDoLegado, nomeLegado, PRIVADOS, LISTAS };
+module.exports = { PERFIS_DE_SISTEMA, ehPerfilDeSistema, horariosDoLegado, emailDoLegado, statusDoLegado, conferirInativacao, MSG_INATIVAR_COM_CONSULTA, validarDiretorio, montarItem, aplicarEdicao, semPrivados, ativoDoLegado, nomeLegado, PRIVADOS, LISTAS };

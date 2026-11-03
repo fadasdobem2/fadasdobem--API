@@ -6,7 +6,8 @@
  * Cópia local de propósito: a feature `pagamentos` da A mantém as três listas separadas; a conciliação é da B.
  */
 
-const { legacyId, legacyLocalDateTime, legacyMoney, legacyText, localOperationalDateKey, requireLegacyId, sumMoney, utcLocalToSaoPauloLocal } = require('./valores');
+const { legacyId, legacyLocalDateTime, legacyMoney, legacyText, localOperationalDateKey, requireLegacyId, saoPauloTimestamp, sumMoney, utcLocalToSaoPauloLocal } = require('./valores');
+const { linhaVazia, pagamentoPlausivel } = require('../../../_comum/legado-datas');
 const { legacyClientLabel } = require('./consultas');
 
 const INFORMED_TABLE = 'tbl_pagtoinformado';
@@ -20,6 +21,7 @@ function catalogValue(code, labels) {
 
 /** Identidade da origem é (tabela, id). IDs iguais não provam deduplicação nem alocação. */
 function readLegacyPayment(row, table, catalogs = {}) {
+  const agoraLocal = catalogs.agoraLocal || saoPauloTimestamp();
   const id = requireLegacyId(row.idPagtoInformado, `${table}.idPagtoInformado`);
   const informedAtUtc = legacyLocalDateTime(row.dt_criado);
   const textStatus = legacyText(row.status);
@@ -30,7 +32,8 @@ function readLegacyPayment(row, table, catalogs = {}) {
   return {
     origin: 'legacy', sourceTable: table, sourceId: id, sourceKey: `${table}:${id}`,
     readOnly: true, clientId: legacyId(row.idUsuario), clientIdentification: legacyText(row.nome_id), recordedAmount: legacyMoney(row.vlPagtoInformado),
-    paidAtLocal: legacyLocalDateTime(row.dtPagtoInformado), informedAtLocal: informedAtUtc === null ? null : utcLocalToSaoPauloLocal(informedAtUtc),
+    // Data absurda (ano < 2000 ou depois de amanhã) = "Sem data" (A4b): fora do último pagamento e da última movimentação; o valor segue na linha.
+    paidAtLocal: pagamentoPlausivel(legacyLocalDateTime(row.dtPagtoInformado), agoraLocal), informedAtLocal: informedAtUtc === null ? null : utcLocalToSaoPauloLocal(informedAtUtc),
     bank: catalogValue(row.idBanco, catalogs.banks), method: catalogValue(row.idFormaPagto, catalogs.paymentOptions),
     textStatus, numericStatus,
     confirmationEvidence: confirmedEvidence && blockedEvidence ? 'conflicting' : blockedEvidence ? 'blocked' : confirmedEvidence ? 'confirmed' : 'unverified',
@@ -98,7 +101,11 @@ function samePayment(a, b) {
 }
 
 /** Concilia as três fontes em operações, antes de qualquer filtro de período (R5). `input` = { informed, confirmed, notFound }. */
-function reconcileReceipts(input) {
+const naoVazia = (row) => !linhaVazia({ idUsuario: row.clientId, valor: row.recordedAmount, data: row.paidAtLocal });
+
+function reconcileReceipts(bruto) {
+  // Linha vazia do ASP (A4c) fica fora; pagamento com valor ou com cliente nunca sai daqui.
+  const input = { ...bruto, informed: bruto.informed.filter(naoVazia), confirmed: bruto.confirmed.filter(naoVazia), notFound: bruto.notFound.filter(naoVazia) };
   const confirmedById = new Map(input.confirmed.map((row) => [row.sourceId, row]));
   const informedById = new Map(input.informed.map((row) => [row.sourceId, row]));
   const receipts = [];

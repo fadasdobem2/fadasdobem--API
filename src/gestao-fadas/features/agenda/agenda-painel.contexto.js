@@ -61,7 +61,8 @@ async function restricoesDoTarologo(ex, tarotId) {
 /** `{ agenda, consultations, profiles, accounts, overrides, intakeEvents, restrictions, date, now, cadastro }` para `tarotId`. */
 async function carregarEntrada(ex, { tarotId, agora }) {
   const data = hojeDe(agora);
-  const [registros, consultations, cadastro, intakeEvents] = [await store.abertosTodos(ex), await consultasDoPainel(ex), await base.cadastroDe(tarotId), await adm.eventosDoDia(ex, tarotId, data)];
+  const lido = await base.cadastroConhecido(tarotId); const cadastro = lido.item || null;
+  const [registros, consultations, intakeEvents] = [await store.abertosTodos(ex), await consultasDoPainel(ex), await adm.eventosDoDia(ex, tarotId, data)];
   const profiles = [];
   let accounts = []; let overrides = {};
   if (cadastro) {
@@ -71,7 +72,7 @@ async function carregarEntrada(ex, { tarotId, agora }) {
     if (ligado('GF_FATIA_PRESENCA')) { const estado = await presencaStore.carregarTravado(ex, tarotId); presenca = estado ? estado.perfil : { online: false, status: 'Disponível', shiftStatus: 'Offline' }; }
     profiles.push({ id: tarotId, name: cadastro.name, registrationActive: cadastro.registrationActive, official: [], today: '', note: '', ...presenca, weeklySchedule: semana });
   }
-  return { agenda: registros.map((r) => r.item), consultations, profiles, accounts, overrides, intakeEvents, restrictions: await restricoesDoTarologo(ex, tarotId), date: data, now: agora, cadastro };
+  return { agenda: registros.map((r) => r.item), consultations, profiles, accounts, overrides, intakeEvents, restrictions: await restricoesDoTarologo(ex, tarotId), date: data, now: agora, cadastro, catalogoLido: lido.catalogo };
 }
 
 module.exports = { carregarEntrada, consultasDoPainel, contasDasTarologas };

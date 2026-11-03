@@ -128,7 +128,9 @@ async function main() {
     const tentar = (fn) => { try { return { ok: fn() }; } catch (e) { return { erro: e instanceof Error ? e.message : String(e) }; } };
     const ids = (l) => (l || []).map((x) => x.id);
     const casos = []; let pulados = 0; const estat = { livre: 0, validacoesOk: 0, validacoesRecusa: 0, mutantes: 0, mutantesRecusados: 0 };
-    for (let k = 0; k < 600; k += 1) {
+    for (let k = 0; k < 900; k += 1) {
+      // os 600 primeiros casos mantêm a sequência original; do 601º em diante entra o modo REFORÇADO (mais recessos de reserva, 'Não respondeu' seguidos e janela de 15 min)
+      const reforco = k >= 600;
       const agora = sorteio(AGORAS) + (chance(0.5) ? minutos(inteiro(30)) : 0);
       const dia = diaOp(agora);
       const date = chance(0.9) ? dia : somar(dia, sorteio([-1, 1]));
@@ -142,12 +144,12 @@ async function main() {
         agenda.forEach((a, i) => {
           if (a.tarotId === 'afila' && chance(0.7)) return;
           a.tarotId = donaDaFila; a.date = dia; delete a.scheduledTime; delete a.requestedTime; a.contactPlan = undefined; a.standbyDate = undefined; a.queueDeferral = undefined; a.agendaOutcome = undefined; a.workflowStatus = chance(0.9) ? undefined : a.workflowStatus;
-          const tags = sorteio([['Pode agora'], ['Avisada'], ['Avisada', 'Pode agora'], ['Não respondeu'], ['Não pode agora'], [], ['Vai pagar']]);
+          const tags = sorteio(reforco ? [['Pode agora'], ['Avisada'], ['Não respondeu'], ['Não respondeu'], ['Não respondeu'], ['Avisada', 'Pode agora'], ['Vai pagar']] : [['Pode agora'], ['Avisada'], ['Avisada', 'Pode agora'], ['Não respondeu'], ['Não pode agora'], [], ['Vai pagar']]);
           a.contact = { attempt: 1, date: dia, tags }; a.contactHistory = tags.map((t, j) => ({ id: `h${i}${j}`, actor: 'x', at: new Date(agora - 900000 + j * 1000).toISOString(), date: dia, attempt: 1, tag: t, active: true, before: [], after: tags }));
-          if (tags.includes('Não respondeu') && chance(0.3)) a.contactHistory.push({ id: `common-call-timeout-${a.id}-1`, actor: 'Sistema', at: new Date(agora - 60000).toISOString(), date: dia, attempt: 1, tag: 'Não respondeu', active: true, before: ['Pode agora'], after: ['Não respondeu'] });
+          if (tags.includes('Não respondeu') && chance(reforco ? 0.7 : 0.3)) a.contactHistory.push({ id: `common-call-timeout-${a.id}-1`, actor: 'Sistema', at: new Date(agora - 60000).toISOString(), date: dia, attempt: 1, tag: 'Não respondeu', active: true, before: ['Pode agora'], after: ['Não respondeu'] });
           if (chance(0.15)) a.positionOverrides = { [`explicit:queue:${donaDaFila}`]: inteiro(5) + 1 };
           if (chance(0.15)) a.positionOverrides = { ...a.positionOverrides, [`yield:queue:${donaDaFila}`]: inteiro(5) + 1 };
-          if (chance(0.15)) a.queueReservation = { tarotId: donaDaFila, at: new Date(agora - 300000).toISOString(), by: 'x' };
+          if (chance(reforco ? 0.45 : 0.15)) a.queueReservation = { tarotId: donaDaFila, at: new Date(agora - 300000).toISOString(), by: 'x' };
           if (chance(0.2)) a.reservationClock = { active: true, tarotId: donaDaFila, startedAt: new Date(agora - 100000).toISOString() };
         });
         const comPagamento = agenda.filter(() => chance(0.6));

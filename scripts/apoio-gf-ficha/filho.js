@@ -135,6 +135,14 @@ const r = (p) => path.join(raiz, p);
     const l = await chamar('GET', '/client-notes?clientId=900013'); assert.equal(l.status, 200); assert.equal(l.j.items.length, 1); assert.equal(l.j.versions[idNota], 1);
     assert.equal((await chamar('GET', '/client-notes?clientId=900014')).j.items.length, 0);
   });
+  await passo('A1: nota do sistema antigo (id legado:*) é somente leitura (PUT 422); a leitura da cliente diz legacy.available=false quando o legado está fora; limit/before ruins são 400; sem clientId vem truncated=false', async () => {
+    como('atendente');
+    const p = await gravarNota(nota('legado:obs:1', '900013', 'Tentativa.'), 0); assert.equal(p.status, 422, p.t);
+    assert.equal(await contar("SELECT COUNT(*) AS n FROM gf_clientes_notas WHERE id LIKE 'legado:%'"), 0);
+    const l = await chamar('GET', '/client-notes?clientId=900013'); assert.equal(l.status, 200); assert.equal(l.j.legacy.available, false); assert.equal(l.j.legacy.hasMore, false); assert.equal(l.j.items.length, 1);
+    for (const ruim of ['limit=0', 'limit=201', 'limit=x', 'before=0', 'before=a']) assert.equal((await chamar('GET', `/client-notes?clientId=900013&${ruim}`)).status, 400, ruim);
+    const t = await chamar('GET', '/client-notes'); assert.equal(t.status, 200); assert.equal(t.j.truncated, false); assert.equal(t.j.items.length, 1);
+  });
   await passo('mesma chave repete sem gravar de novo; outro corpo com a mesma chave é 409; versão velha é 409 VERSION_CHANGED', async () => {
     const x = await gravarNota(nota(idNota, '900013', '  Prefere falar à noite.  ', { author: 'Hacker', createdAt: '2000-01-01T00:00:00.000Z', authorRole: 'administradora' }), 0, chaveNota); assert.equal(x.status, 200, x.t);
     assert.equal((await gravarNota(nota(idNota, '900013', 'Outro.'), 0, chaveNota)).status, 409);

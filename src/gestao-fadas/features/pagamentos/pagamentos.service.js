@@ -6,6 +6,7 @@ const { lendo } = require('../../_comum/legado');
 const { hojeOperacional } = require('../../_comum/dia-operacional');
 const { OPERATIONAL_DAY_START_HOUR, shiftDateKey, isRealDay, withinRealPeriod } = require('./helpers/datas');
 const { PageOutOfRange } = require('./helpers/paginacao');
+const { sqlDataInvalida } = require('../../_comum/legado-datas');
 const {
   INFORMED_TABLE,
   CONFIRMED_TABLE,
@@ -78,7 +79,8 @@ function lerConsulta(query, hoje) {
 
 /* ------------------------------------------- consultas ------------------------------------------- */
 
-const semData = (ref) => `(${ref} IS NULL OR YEAR(${ref}) < 1000 OR MONTH(${ref}) = 0 OR DAYOFMONTH(${ref}) = 0)`;
+/** "Sem data" (A4b): nula, zero-date, ano < 2000 ou depois de amanhã. Regra única em `_comum/legado-datas.js`. */
+const semData = sqlDataInvalida;
 
 function incluirCliente(m) {
   return [{ model: m.LegadoUsuario, as: 'cliente', attributes: ['nome_id'], required: false }];

@@ -92,14 +92,21 @@ const HOJE = () => require(r('src/gestao-fadas/_comum/dia-operacional')).hojeOpe
     const y = await ad('adm-2', 'open'); assert.equal(y.status, 200, y.t); assert.equal(y.j.items[0].mode, 'open');
     const todos = (await chamar('GET', '/agenda')).j.intakeEvents; assert.deepEqual(todos.map((v) => v.id), ['adm-1', 'adm-2']);
   });
-  await passo('fechar por turno: fim do turno validado; id repetido com outra chave é 409; mesma chave repete a resposta; forma inválida é 400', async () => {
+  await passo('fechar por turno: o fim e o relógio são os do turno do servidor (Maturacao/56, C3); sem turno é 422; id repetido com outra chave é 409; mesma chave repete a resposta; forma inválida é 400', async () => {
+    // Osíris tem escala cobrindo o agora; o fim e o relógio do corpo (que o navegador mandava) são ignorados.
+    const rel = (ms) => new Intl.DateTimeFormat('pt-BR', { timeZone: 'America/Sao_Paulo', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(new Date(ms));
+    const agora = Date.now(); let ini = rel(agora - 30 * 60000); const fimRel = rel(agora + 3 * 3600000);
+    if (Number(ini.slice(0, 2)) < 6 && Number(rel(agora).slice(0, 2)) >= 6) ini = '06:00';
+    const dia = ['domingo', 'segunda', 'terca', 'quarta', 'quinta', 'sexta', 'sabado'][new Date(`${hoje}T12:00:00Z`).getUTCDay()];
+    await sequelize.query('INSERT INTO gf_escalas_semanais (id_tarologo, weekday, hours) VALUES (?, ?, ?)', { replacements: ['osiris', dia, `${ini} às ${fimRel}`] });
+    const esperado = require(r('src/gestao-fadas/_comum/dominio/presenca-agenda')).instantesDosPeriodos([{ start: ini, end: fimRel }], hoje)[0];
     const fim = new Date(Date.now() + 3600000).toISOString();
     const chave = n();
     const corpo = { operationKey: chave, event: { id: 'adm-3', tarotId: 'osiris', mode: 'no_more', closeScope: 'shift', endTime: '23:00', closedUntil: fim } };
-    const a = await chamar('POST', '/agenda/admissions', corpo); assert.equal(a.status, 200, a.t); assert.equal(a.j.items[0].endTime, '23:00'); assert.equal(a.j.items[0].closedUntil, fim);
+    const a = await chamar('POST', '/agenda/admissions', corpo); assert.equal(a.status, 200, a.t); assert.equal(a.j.items[0].endTime, fimRel); assert.equal(a.j.items[0].closedUntil, new Date(esperado.endsAt).toISOString());
     const b = await chamar('POST', '/agenda/admissions', corpo); assert.deepEqual(b.j, a.j);
     assert.equal((await ad('adm-3', 'open')).status, 409);
-    const velho = await ad('adm-4', 'no_more', { closeScope: 'shift', endTime: '23:00', closedUntil: new Date(Date.now() - 60000).toISOString() }); assert.equal(velho.status, 422); assert.equal(velho.j.error.message, 'Este turno já terminou. Confira o período de fechamento.');
+    const velho = await ad('adm-4', 'no_more', { tarotId: 'nyx', closeScope: 'shift', endTime: '23:00', closedUntil: new Date(Date.now() - 60000).toISOString() }); assert.equal(velho.status, 422); assert.equal(velho.j.error.message, 'Este turno já terminou. Confira o período de fechamento.')
     assert.equal((await ad('adm-5', 'count')).status, 400); assert.equal((await ad('adm-5', 'no_more', { closeScope: 'tudo' })).status, 400);
     await ad('adm-6', 'open');
   });
