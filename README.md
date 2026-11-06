@@ -93,3 +93,7 @@ npm run checar:implantacao -- --etapa=0 --base=<URL>                   # smoke t
 ## Segurança, em uma linha
 
 Sessão por JWT em cookie, CSRF, rate limit, auditoria na mesma transação de cada gravação, idempotência por `operationKey`, revisão otimista (`409 VERSION_CHANGED`), webhooks autenticados e nenhuma credencial do legado modelada. Detalhes na documentação completa.
+
+## Repositórios do projeto
+
+Este repositório (API A) e `fadasdobem2/Fadasdobem--PAINEL` (o painel) são o nosso trabalho: é onde as coisas funcionam e são publicadas. O repositório `fadasdobem2/fadasdobem-site` é o da Nice com o GPT: ela sobe lá o que cria, e nós comparamos (`git diff`) e trazemos para o nosso já integrando com esta API. Detalhes em `docs/FLUXO_DOIS_REPOSITORIOS.md` do painel.
