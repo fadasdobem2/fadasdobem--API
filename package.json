@@ -19,6 +19,7 @@
     "front:gate": "node scripts/rodar-front-no-gate.js",
     "ensaiar:gestao-fadas-http": "node scripts/ensaiar-gestao-fadas-http.js",
     "verificar:financeiro": "node scripts/verificar-financeiro-webhooks.js && node scripts/verificar-financeiro-saques-sessoes.js && node scripts/verificar-financeiro-pagamentos.js",
+    "verificar:umbler": "node scripts/verificar-umbler-provider.js",
     "verificar:gf-banco-novo": "node scripts/verificar-gf-banco-novo.js",
     "verificar:gf-horarios": "node scripts/verificar-gf-horarios.js",
     "verificar:gf-presenca": "node scripts/verificar-gf-presenca.js",

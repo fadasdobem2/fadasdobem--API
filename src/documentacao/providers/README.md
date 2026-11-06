@@ -9,6 +9,7 @@ Integrações externas isoladas por pasta: HTTP/SDK, templates e ferramentas reu
 | [Intelbras.md](./Intelbras.md) | `intelbras/` | VOZ (Wide Voice REST) |
 | [Evolution.md](./Evolution.md) | `evolution/` | Feature `evolution-admin` |
 | [Chatwoot.md](./Chatwoot.md) | `chatwoot/` | Cliente REST Chatwoot |
+| [Umbler.md](./Umbler.md) | `umbler/` | Cliente Umbler Talk (leitura e nota de equipe) e autenticação do webhook |
 | [Mail.md](./Mail.md) | `mail/` | Resend + templates Auth |
 | [Anthropic.md](./Anthropic.md) | `anthropic/` | Claude + tools/prompts |
 | [OpenAI.md](./OpenAI.md) | `openai/` | Assistants / client API |
