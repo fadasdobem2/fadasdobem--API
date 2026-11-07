@@ -5,7 +5,7 @@
  * (`novo/escritor.js`) dentro da transação do service. jsonb volta do executor como TEXTO.
  */
 
-const COLUNAS = 'id, dados, status, revisao, tarot_id, aprovado_dados, aprovado_publico, aprovado_revisao, aprovado_em, aprovado_por, criado_em, atualizado_em, atualizado_por';
+const COLUNAS = 'id, dados, status, revisao, tarot_id, aprovado_dados, aprovado_publico, aprovado_revisao, aprovado_em, aprovado_por, criado_em, atualizado_em, atualizado_por, envio_original';
 const json = (v) => (typeof v === 'string' ? JSON.parse(v) : v === undefined ? null : v);
 const iso = (v) => (v instanceof Date ? v.toISOString() : v === null || v === undefined ? undefined : new Date(v).toISOString());
 
@@ -19,6 +19,7 @@ function paraRegistro(l) {
     createdAt: iso(l.criado_em), updatedAt: iso(l.atualizado_em), updatedBy: l.atualizado_por,
     ...(privado ? { approvedData: { ...privado, ...camposPublicos } } : {}),
     ...(publico ? { approvedPublic: publico } : {}),
+    ...(json(l.envio_original) ? { originalSubmission: json(l.envio_original) } : {}),
     ...(l.aprovado_em ? { approvedAt: iso(l.aprovado_em) } : {}), ...(l.aprovado_por ? { approvedBy: l.aprovado_por } : {}),
   };
 }
@@ -45,9 +46,9 @@ async function envioPorChave(ex, chaveHash) { const [l] = await ex.execute('SELE
 
 async function inserirCadastro(ex, c) {
   await ex.execute(
-    'INSERT INTO gf_cadastros_tarologo (id, dados, status, revisao, tarot_id, aprovado_dados, aprovado_publico, aprovado_revisao, aprovado_em, aprovado_por, criado_em, atualizado_em, atualizado_por) VALUES (?, ?, ?, 1, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+    'INSERT INTO gf_cadastros_tarologo (id, dados, status, revisao, tarot_id, aprovado_dados, aprovado_publico, aprovado_revisao, aprovado_em, aprovado_por, criado_em, atualizado_em, atualizado_por, envio_original) VALUES (?, ?, ?, 1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
     [c.id, JSON.stringify(c.dados), c.status, c.tarotId, c.aprovadoDados && JSON.stringify(c.aprovadoDados), c.aprovadoPublico && JSON.stringify(c.aprovadoPublico),
-      c.aprovadoPublico ? 1 : null, c.aprovadoPublico ? c.agora : null, c.aprovadoPublico ? c.por : null, c.agora, c.agora, c.por],
+      c.aprovadoPublico ? 1 : null, c.aprovadoPublico ? c.agora : null, c.aprovadoPublico ? c.por : null, c.agora, c.agora, c.por, c.envioOriginal ? JSON.stringify(c.envioOriginal) : null],
   );
 }
 
@@ -77,7 +78,24 @@ async function gravarLink(ex, id, tokenHash, revisao, expiraEm, agora, por) {
   );
 }
 
+/** Link por token (qualquer estado), para dizer ao formulário POR QUE não vale: usado, expirado, cancelado ou inválido. */
+async function linkDeAtualizacaoPorHash(ex, tokenHash, travar = false) {
+  const [l] = await ex.execute(
+    `SELECT t.id_cadastro, t.revisao_emitida, t.expira_em, t.consumido_em, r.dados, r.revisao FROM gf_cadastros_tarologo_links t JOIN gf_cadastros_tarologo r ON r.id = t.id_cadastro WHERE t.token_hash = ?${travar ? ' FOR UPDATE OF t' : ''}`, [tokenHash],
+  );
+  return l[0] ? { ...l[0], dados: json(l[0].dados) } : null;
+}
+
+const COLUNAS_NOVO_LINK = 'id, token_hash, emitido_em, expira_em, consumido_em, revogado_em, id_cadastro';
+async function novoLinkPorHash(ex, tokenHash, travar = false) { const [l] = await ex.execute(`SELECT ${COLUNAS_NOVO_LINK} FROM gf_cadastros_tarologo_novos_links WHERE token_hash = ?${travar ? ' FOR UPDATE' : ''}`, [tokenHash]); return l[0] || null; }
+async function novoLinkPorId(ex, id) { const [l] = await ex.execute(`SELECT ${COLUNAS_NOVO_LINK} FROM gf_cadastros_tarologo_novos_links WHERE id = ? FOR UPDATE`, [id]); return l[0] || null; }
+const listarNovosLinks = (ex) => ex.execute(`SELECT ${COLUNAS_NOVO_LINK} FROM gf_cadastros_tarologo_novos_links ORDER BY emitido_em DESC, id DESC LIMIT 200`).then(([l]) => l);
+const inserirNovoLink = (ex, l) => ex.execute('INSERT INTO gf_cadastros_tarologo_novos_links (id, token_hash, emitido_em, expira_em, criado_por) VALUES (?, ?, ?, ?, ?)', [l.id, l.tokenHash, l.emitidoEm, l.expiraEm, l.por]);
+const revogarNovoLink = (ex, id, agora) => ex.execute('UPDATE gf_cadastros_tarologo_novos_links SET revogado_em = ? WHERE id = ? AND consumido_em IS NULL AND revogado_em IS NULL', [agora, id]);
+const consumirNovoLink = (ex, id, idCadastro, agora) => ex.execute('UPDATE gf_cadastros_tarologo_novos_links SET consumido_em = ?, id_cadastro = ? WHERE id = ?', [agora, idCadastro, id]);
+
 module.exports = {
+  linkDeAtualizacaoPorHash, novoLinkPorHash, novoLinkPorId, listarNovosLinks, inserirNovoLink, revogarNovoLink, consumirNovoLink,
   COLUNAS, paraRegistro, lerPorId, lerPorTarot, lerRecentes, lerAprovados, linkValido, travar, porIdTravado, donoDoTarot, envioPorChave, inserirCadastro,
   atualizarCadastro, inserirEnvio, atualizarPorLink, gravarLink, json, iso,
 };

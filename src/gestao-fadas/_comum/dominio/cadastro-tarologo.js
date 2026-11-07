@@ -6,11 +6,13 @@
  * As mensagens são as do front. Sem banco e sem HTTP: o service e o teste usam as mesmas funções.
  */
 
+const horarios = require('./cadastro-tarologo-horarios');
+
 const DIAS = ['domingo', 'segunda', 'terca', 'quarta', 'quinta', 'sexta', 'sabado'];
 const ORCAMENTO_FOTOS = 500000;
 const GRUPOS_COMPETENCIA = ['definitions', 'tarot', 'cartomancy', 'astrology', 'numerology', 'oracles', 'spreads', 'practices'];
 const GRUPOS_SEM = ['tarot', 'cartomancy', 'astrology', 'numerology', 'oracles'];
-const PRIVADOS = ['commissionRate', 'paymentSchedule', 'role', 'active', 'password', 'passwordHash', 'account', 'accountId', 'login', 'permissions', 'tarotId', 'status'];
+const PRIVADOS = ['weeklyScheduleEffectiveFrom', 'weeklyScheduleBase', 'weeklyScheduleVersions', 'commissionRate', 'paymentSchedule', 'role', 'active', 'password', 'passwordHash', 'account', 'accountId', 'login', 'permissions', 'tarotId', 'status'];
 
 class CadastroInvalidoError extends Error {}
 const falha = (m) => new CadastroInvalidoError(m);
@@ -134,15 +136,9 @@ function validarCadastro(entrada, { publica = false, hoje = new Date().toISOStri
     if (r.capabilityNone.some((k) => r.capabilityGroups && r.capabilityGroups[k] && r.capabilityGroups[k].length)) throw falha('Confira as competências: uma categoria não pode estar vazia e selecionada ao mesmo tempo.');
   }
   if (r.channels.some((c) => c !== 'Chat' && c !== 'Voz')) throw falha('Os canais disponíveis são Chat e Voz.');
-  const semana = dados.weeklySchedule === undefined ? {} : objeto(dados.weeklySchedule, 'Horários');
-  for (const dia of DIAS) {
-    if (semana[dia] === undefined) continue;
-    const horas = texto(semana[dia], `Horário de ${dia}`, 240);
-    if (!horas || /^(folga|não atende|não vou atender|horário não informado|horário a informar|sem horário informado)$/i.test(horas)) { r.weeklySchedule[dia] = horas; continue; }
-    const ps = periodosDoTexto(horas);
-    try { validarPeriodos(ps); } catch (_e) { throw falha(`Confira os horários de ${dia}. Use períodos como 9h às 12h e 14h às 18h, ou Folga.`); }
-    r.weeklySchedule[dia] = formatarPeriodos(ps);
-  }
+  const ajudaHorario = { texto, objeto, periodos: (t) => { const ps = periodosDoTexto(t); validarPeriodos(ps); return ps; }, formatar: formatarPeriodos, falha };
+  r.weeklySchedule = horarios.semanaValida(dados.weeklySchedule, ajudaHorario);
+  if (!publica) horarios.vigencias(dados, r, ajudaHorario);
   const banco = dados.bank === undefined ? {} : objeto(dados.bank, 'Dados bancários');
   for (const k of Object.keys(r.bank)) r.bank[k] = texto(banco[k], `Banco: ${k}`, k === 'pix' ? 300 : 200);
   const forma = dados.preferredPaymentMethod ?? '';
@@ -181,6 +177,9 @@ function perfilPublico(d, tarotId) {
     tarotId, professionalName: d.professionalName, avatar: d.avatar, portrait: d.portrait || '', gallery: [...(d.gallery || [])], biography: d.biography,
     definitions: [...d.definitions], oracles: [...d.oracles], techniques: [...d.techniques], spreads: [...d.spreads], channels: [...d.channels],
     equipment: [...d.equipment], themes: [...d.themes], weeklySchedule: { ...d.weeklySchedule },
+    ...(d.weeklyScheduleEffectiveFrom ? { weeklyScheduleEffectiveFrom: d.weeklyScheduleEffectiveFrom } : {}),
+    ...(d.weeklyScheduleBase ? { weeklyScheduleBase: JSON.parse(JSON.stringify(d.weeklyScheduleBase)) } : {}),
+    ...(d.weeklyScheduleVersions ? { weeklyScheduleVersions: JSON.parse(JSON.stringify(d.weeklyScheduleVersions)) } : {}),
   };
 }
 
@@ -207,5 +206,5 @@ function projecaoAprovada({ id, revisao, dados, tarotId }) {
 }
 
 module.exports = {
-  texto, lista, objeto, GRUPOS_SEM, GRUPOS_COMPETENCIA, CadastroInvalidoError, foto, cadastroVazio, validarCadastro, perfilPublico, projecaoDoLink, projecaoAprovada, cpfValido, calendarioDePagamento, ORCAMENTO_FOTOS, dois,
+  horarios, texto, lista, objeto, GRUPOS_SEM, GRUPOS_COMPETENCIA, CadastroInvalidoError, foto, cadastroVazio, validarCadastro, perfilPublico, projecaoDoLink, projecaoAprovada, cpfValido, calendarioDePagamento, ORCAMENTO_FOTOS, dois,
 };

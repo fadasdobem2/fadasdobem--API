@@ -162,6 +162,11 @@ const CHECKS = {
     ['chk_cadastros_links_token', "token_hash ~ '^[0-9a-f]{64}$'"], ['chk_cadastros_links_revisao', 'revisao_emitida >= 1'],
     ['chk_cadastros_links_criado_por', nt('criado_por')],
   ],
+  gf_cadastros_tarologo_novos_links: [
+    ['chk_cadastros_novos_links_id', nv('id')], ['chk_cadastros_novos_links_token', "token_hash ~ '^[0-9a-f]{64}$'"],
+    ['chk_cadastros_novos_links_prazo', 'expira_em > emitido_em'], ['chk_cadastros_novos_links_criado_por', nt('criado_por')],
+    ['chk_cadastros_novos_links_estado', 'consumido_em IS NULL OR revogado_em IS NULL'],
+  ],
   gf_clientes_ext: [
     ['chk_clientes_ext_id', "id_cliente ~ '^[1-9][0-9]{0,9}$'"],
     ['chk_clientes_ext_perfil', "perfil_pagamento IS NULL OR perfil_pagamento IN ('Pré-pago', 'Pós-pago')"],
@@ -223,6 +228,11 @@ const CHECKS = {
     ['chk_agenda_solicitacoes_versao', 'version >= 1'], ['chk_agenda_solicitacoes_item', "jsonb_typeof(item) = 'object'"],
     ['chk_agenda_solicitacoes_criado_por', nt('criado_por')], ['chk_agenda_solicitacoes_operation_key', nv('operation_key')],
   ],
+  gf_agenda_contatos: [
+    ['chk_agenda_contatos_id', nv('id')], ['chk_agenda_contatos_codigo', 'codigo IS NULL OR char_length(codigo) > 0'],
+    ['chk_agenda_contatos_versao', 'version >= 1'], ['chk_agenda_contatos_item', "jsonb_typeof(item) = 'object'"],
+    ['chk_agenda_contatos_criado_por', nt('criado_por')], ['chk_agenda_contatos_operation_key', nv('operation_key')],
+  ],
   gf_divergencias: [
     ['chk_divergencias_id', nv('id')], ['chk_divergencias_tipo', "tipo IN ('Operacional', 'Financeira')"], ['chk_divergencias_area', "area IN ('Consulta', 'Pagamento', 'Repasse')"],
     ['chk_divergencias_situacao', "situacao IN ('Pendente', 'Em conferência', 'Resolvida', 'Arquivada')"],
@@ -264,6 +274,17 @@ const CHECKS = {
   ],
   gf_lilly_avisos: [
     ['chk_lilly_avisos_id', nv('id')], ['chk_lilly_avisos_conversa', nv('conversation_id')], ['chk_lilly_avisos_cliente', "id_cliente IS NULL OR id_cliente ~ '^[1-9][0-9]{0,9}$'"],
+  ],
+  gf_ponto_turnos: [
+    ['chk_ponto_turnos_id', nv('id')], ['chk_ponto_turnos_conta', nv('id_conta')], ['chk_ponto_turnos_revisao', 'revisao >= 1'],
+    ['chk_ponto_turnos_conteudo', "jsonb_typeof(conteudo) = 'object'"], ['chk_ponto_turnos_fim', 'ultimo_em >= iniciado_em'],
+  ],
+  gf_ponto_escalas: [
+    ['chk_ponto_escalas_conta', nv('id_conta')], ['chk_ponto_escalas_revisao', 'revisao >= 1'], ['chk_ponto_escalas_autor', nv('atualizado_por')],
+    ['chk_ponto_escalas_conteudo', "jsonb_typeof(conteudo) = 'object'"],
+  ],
+  gf_ponto_eventos: [
+    ['chk_ponto_eventos_id', nv('id')], ['chk_ponto_eventos_conta', nv('id_conta')], ['chk_ponto_eventos_conteudo', "jsonb_typeof(conteudo) = 'object'"],
   ],
   gf_operacoes: [['chk_operacoes_chave', nv('chave')], ['chk_operacoes_escopo', nv('escopo')], ['chk_operacoes_hash', "hash_corpo ~ '^[0-9a-f]{64}$'"]],
   gf_welcome: [['chk_welcome_id', nv('id')], ['chk_welcome_revisao', 'revisao >= 1']],
@@ -319,6 +340,11 @@ const CHECKS = {
 const ESTADOS_ESPELHO = "('nao_espelhada', 'pendente', 'espelhada', 'sem_registro', 'erro', 'reaplicada', 'divergente')";
 const ESTADOS_PAGTO_NOTA = "('nao_espelhada', 'espelhada', 'recusada', 'desatualizada', 'erro')";
 const CHECKS_ESPELHO = {
+  // Convite/permissão (v706): a migração 20261210 os cria depois das colunas, por isso ficam fora de CHECKS (CREATE TABLE da contas-config).
+  gf_contas_ext: [
+    ['chk_contas_ext_convite', "(convite_hash IS NULL AND convite_tipo IS NULL AND convite_emitido IS NULL AND convite_expira IS NULL) OR (convite_hash ~ '^[0-9a-f]{64}$' AND convite_tipo IN ('first-access', 'reset-password') AND convite_emitido IS NOT NULL AND convite_expira > convite_emitido)"],
+    ['chk_contas_ext_trilha', "jsonb_typeof(permissoes_trilha) = 'array'"],
+  ],
   gf_clientes_ext: [
     ['chk_clientes_ext_legado_estado', `legado_estado IN ${ESTADOS_ESPELHO}`], ['chk_clientes_ext_legado_pendentes', "jsonb_typeof(legado_pendentes) = 'array'"],
   ],

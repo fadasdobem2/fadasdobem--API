@@ -140,14 +140,14 @@ const D = (m) => require(r(`src/gestao-fadas/_comum/dominio/${m}`));
   });
 
   console.log('Ocorrência financeira e transferência de saldo');
-  await passo('ocorrência (devolução com dispensa recusada se não há cobrança): assistente registra, atendente leva a frase do front, contato é da equipe', async () => {
+  await passo('ocorrência (devolução com dispensa recusada se não há cobrança): assistente registra, atendente sem permissão de saída leva a recusa do front, contato é da equipe', async () => {
     como('administradora'); { const l = await lancar(novo('PG-O1', '900013', entradaPix('100,00', '900013', { payerName: 'Pessoa Um' }))); assert.equal(l.status, 200, l.t); }
     como('atendente'); // a atendente lança e a assistente confirma; aqui só a ocorrência
     const g = await pegar('PG-O1'); const ctx = await ctxCliente('900013');
     const estado = { payments: ctx.payments, consultations: ctx.consultations };
     const entrada = { id: 'OC-1', operationId: 'OPE-1', paymentId: 'PG-O1', kind: 'refund', amount: 30, note: 'Cliente pediu devolução.', initiatedBy: 'client', agreement: 'agreed', chargeDecision: 'maintain', bankMoved: true };
     const feito = O.registrarOcorrencia(estado, entrada, 'Assist', 'assistente', agora()).payments.find((p) => p.id === 'PG-O1');
-    como('atendente'); const neg = await revisar('PG-O1', g.versao, feito); assert.equal(neg.status, 422, neg.t); assert.equal(mensagem(neg), 'Esta decisão financeira está disponível para assistente e administradora.');
+    como('atendente'); const neg = await revisar('PG-O1', g.versao, feito); assert.equal(neg.status, 422, neg.t); assert.equal(mensagem(neg), 'Seu acesso não está autorizado a registrar saídas.'); // v706 (canRegisterPaymentOutgoing): sem conta com registerOutgoing a recusa de PERMISSÃO vem antes da frase da decisão (essa só alcança atendente/supervisora COM a permissão; coberta no ouro do front)
     como('assistente'); const adulterado = await revisar('PG-O1', g.versao, { ...feito, financialOccurrences: feito.financialOccurrences.map((o) => ({ ...o, amount: 99 })) }); assert.equal(adulterado.status, 422, adulterado.t);
     const ok = await revisar('PG-O1', g.versao, feito); assert.equal(ok.status, 200, ok.t);
     const h = (await pegar('PG-O1')).item; assert.equal(h.financialOccurrences.length, 1); assert.equal(h.financialOccurrences[0].createdBy, 'Assist'); assert.equal(h.movements[0].actor, 'Assist'); assert.equal(h.movements[0].occurrenceId, 'OC-1');

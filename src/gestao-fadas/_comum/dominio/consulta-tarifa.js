@@ -33,8 +33,8 @@ function resolverTarifa(req, ctx) {
   const origem = coverage && coverage.sourceConsultationId ? ctx.consultations.find((c) => c.clientId === clientId && semC(c.id) === semC(coverage.sourceConsultationId)) : undefined;
   const pagamentos = req.payments || [];
   if (coverage && coverage.kind === 'Crédito' && !existing) {
-    const credito = tarifaDeCredito(clientId, at, coverage.minutes || req.expectedMinutes, ctx.consultations, pagamentos, ctx.profiles[clientId], req.consultationId, false);
-    if (credito.availableLots.length) return { ...base, table: 'custom', source: 'credit', unitValue: credito.unitValue, paymentIds: credito.availableLots.flatMap((l) => (l.paymentId ? [l.paymentId] : [])), sourceConsultationId: credito.sourceConsultationId, creditLots: credito.availableLots };
+    const credito = tarifaDeCredito(clientId, at, coverage.minutes || req.expectedMinutes, ctx.consultations, pagamentos, ctx.profiles[clientId], req.consultationId, true);
+    if (credito.availableLots.length) return { ...base, table: 'custom', source: 'credit', unitValue: credito.unitValue, paymentIds: credito.availableLots.flatMap((l) => (l.paymentId ? [l.paymentId] : [])), sourceConsultationId: credito.sourceConsultationId, creditLots: credito.availableLots, ...(credito.creditRounding ? { creditRounding: credito.creditRounding } : {}) };
   }
   const tarifaGravada = existing && existing.billing && existing.billing.tariff;
   if (tarifaGravada && tarifaGravada.creditLots && tarifaGravada.creditLots.length && !req.repriceContract && (existing.coverage && existing.coverage.kind) === (coverage && coverage.kind)) return tarifaGravada;

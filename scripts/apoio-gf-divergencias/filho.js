@@ -116,7 +116,7 @@ const r = (p) => path.join(raiz, p);
   console.log('Transições da taróloga');
   como('tarologa');
   const ver = async (id) => { const x = (await ler()).j; return { d: x.items.find((i) => i.id === id), v: x.versions[id] }; };
-  await passo('nota, editar, arquivar, desarquivar, excluir, restaurar e limpar a lixeira (formato do front), com 409 na versão velha', async () => {
+  await passo('nota, editar, cancelar (substitui arquivar), limpar a lixeira (formato do front), com 409 na versão velha', async () => {
     let { d, v } = await ver('DIV-d1');
     const nota = { ...d, updatedAt: AGORA, comments: [{ id: 'DIV-d1:comment:1', text: 'Mais um detalhe.', actor: 'Osíris', at: AGORA, source: 'tarologist' }] };
     let x = await gravar('DIV-d1', v, nota); assert.equal(x.status, 200, x.t); assert.equal(x.j.items[0].comments[0].actor, 'Osíris'); assert.notEqual(x.j.items[0].comments[0].at, AGORA);
@@ -125,28 +125,22 @@ const r = (p) => path.join(raiz, p);
     const editada = { ...d, reportNote: 'Novo.', reason: 'Nova razão.', updatedAt: AGORA, history: [{ id: 'h1', at: AGORA, actor: 'Osíris', action: 'Relato editado', before: snap(d), after: { reason: 'Nova razão.', status: 'Pendente' } }] };
     x = await gravar('DIV-d1', v, editada); assert.equal(x.status, 200, x.t); assert.equal(x.j.items[0].history[0].actor, 'Osíris');
     ({ d, v } = await ver('DIV-d1'));
+    // v706: o antigo "arquivar" foi SUBSTITUÍDO por "cancelar pedido" (Nice); o servidor não aceita mais a ação antiga.
     const arq = { ...d, status: 'Arquivada', statusBeforeArchive: 'Pendente', archivedAt: AGORA, archivedBy: 'Hacker', archiveReason: 'Já conferi.', updatedAt: AGORA, history: [...d.history, { id: 'h2', at: AGORA, actor: 'Hacker', action: 'Retirada e arquivada', before: snap(d), after: { reason: d.reason, status: 'Arquivada' } }] };
-    x = await gravar('DIV-d1', v, arq); assert.equal(x.status, 200, x.t); assert.equal(x.j.items[0].archivedBy, 'Osíris'); assert.equal(x.j.items[0].history[1].actor, 'Osíris');
+    assert.equal((await gravar('DIV-d1', v, arq)).status, 422, 'arquivar (regra antiga) não é mais aceito');
+    const cancel = { ...d, status: 'Arquivada', statusBeforeArchive: 'Pendente', readerCancelledAt: AGORA, readerCancelledBy: 'Hacker', archivedAt: AGORA, archivedBy: 'Hacker', updatedAt: AGORA, history: [...d.history, { id: 'h2', at: AGORA, actor: 'Hacker', action: 'Pedido cancelado', before: snap(d), after: { reason: d.reason, status: 'Arquivada' } }] };
+    x = await gravar('DIV-d1', v, cancel); assert.equal(x.status, 200, x.t); assert.equal(x.j.items[0].readerCancelledBy, 'Osíris'); assert.equal(x.j.items[0].archivedBy, 'Osíris'); assert.equal(x.j.items[0].history[1].actor, 'Osíris');
     assert.equal(await contar("SELECT COUNT(*) AS n FROM gf_divergencias WHERE id = 'DIV-d1' AND situacao = 'Arquivada'"), 1);
     ({ d, v } = await ver('DIV-d1'));
-    assert.equal((await gravar('DIV-d1', v, { ...d, reason: 'Editar arquivada.', history: [...d.history, { id: 'h3', at: AGORA, actor: 'Osíris', action: 'Relato editado', before: snap(d), after: snap(d) }] })).status, 422);
-    const des = { ...d, status: 'Pendente', archivedAt: undefined, archivedBy: undefined, archiveReason: undefined, statusBeforeArchive: undefined, updatedAt: AGORA, history: [...d.history, { id: 'h3', at: AGORA, actor: 'Osíris', action: 'Desarquivada', before: snap(d), after: { reason: d.reason, status: 'Pendente' } }] };
-    x = await gravar('DIV-d1', v, des); assert.equal(x.status, 200, x.t);
-    ({ d, v } = await ver('DIV-d1'));
+    assert.equal((await gravar('DIV-d1', v, { ...d, reason: 'Editar cancelada.', history: [...d.history, { id: 'h3', at: AGORA, actor: 'Osíris', action: 'Relato editado', before: snap(d), after: snap(d) }] })).status, 422);
+    const restCancelada = { ...d, updatedAt: AGORA, history: [...d.history, { id: 'h3', at: AGORA, actor: 'Osíris', action: 'Restaurada', before: snap(d), after: snap(d) }] };
+    assert.equal((await gravar('DIV-d1', v, restCancelada)).status, 422, 'cancelada não se restaura');
     const exc = { ...d, deletedAt: AGORA, deletedBy: 'Osíris', deleteReason: 'Enviei por engano.', updatedAt: AGORA, history: [...d.history, { id: 'h4', at: AGORA, actor: 'Osíris', action: 'Excluída', note: 'Enviei por engano.', before: snap(d), after: snap(d) }] };
-    x = await gravar('DIV-d1', v, exc); assert.equal(x.status, 200, x.t);
-    assert.equal(await contar("SELECT COUNT(*) AS n FROM gf_divergencias WHERE id = 'DIV-d1' AND excluida"), 1);
-    ({ d, v } = await ver('DIV-d1'));
-    const res = { ...d, deletedAt: undefined, deletedBy: undefined, deleteReason: undefined, status: 'Arquivada', statusBeforeArchive: 'Pendente', archivedAt: AGORA, archivedBy: 'Osíris', archiveReason: 'Restaurada das excluídas. Mantida fora das pendências.', updatedAt: AGORA, history: [...d.history, { id: 'h5', at: AGORA, actor: 'Osíris', action: 'Restaurada', before: snap(d), after: { reason: d.reason, status: 'Arquivada' } }] };
-    x = await gravar('DIV-d1', v, res); assert.equal(x.status, 200, x.t);
-    ({ d, v } = await ver('DIV-d1'));
-    const exc2 = { ...d, deletedAt: AGORA, deletedBy: 'Osíris', deleteReason: 'Agora sim.', updatedAt: AGORA, history: [...d.history, { id: 'h6', at: AGORA, actor: 'Osíris', action: 'Excluída', before: snap(d), after: snap(d) }] };
-    assert.equal((await gravar('DIV-d1', v, exc2)).status, 200);
-    ({ d, v } = await ver('DIV-d1'));
+    assert.equal((await gravar('DIV-d1', v, exc)).status, 422, 'cancelada já está nas excluídas');
     const lix = { ...d, readerTrashClearedAt: AGORA, readerTrashClearedBy: 'Osíris', updatedAt: AGORA, history: [...d.history, { id: 'h7', at: AGORA, actor: 'Osíris', action: 'Removida da lixeira do tarólogo', before: snap(d), after: snap(d) }] };
     x = await gravar('DIV-d1', v, lix); assert.equal(x.status, 200, x.t); assert.ok(x.j.items[0].readerTrashClearedAt);
     assert.equal((await ler()).j.items.some((i) => i.id === 'DIV-d1'), false, 'a lixeira esvaziada sai da lista dela');
-    assert.equal(await contar("SELECT COUNT(*) AS n FROM gf_auditoria WHERE acao = 'divergencias.gravar'"), 10);
+    assert.equal(await contar("SELECT COUNT(*) AS n FROM gf_auditoria WHERE acao = 'divergencias.gravar'"), 6);
   });
   await passo('a taróloga não resolve, não apaga histórico, não troca cliente e a equipe não cria operacional', async () => {
     const { d, v } = await ver('DIV-v1');

@@ -412,12 +412,14 @@
        "actor": "Equipe",
        "at": "2026-10-12T13:00:00.000Z",
        "before": {
+        "channel": "Telefone",
         "date": "2026-10-12",
         "scheduledTime": "10:30",
         "requestedTime": "",
         "tarotId": "afila"
        },
        "after": {
+        "channel": "Telefone",
         "date": "2026-10-12",
         "scheduledTime": "",
         "requestedTime": "",
@@ -2034,12 +2036,14 @@
        "actor": "Equipe",
        "at": "2026-10-12T13:00:00.000Z",
        "before": {
+        "channel": "Telefone",
         "date": "2026-10-12",
         "scheduledTime": "09:30",
         "requestedTime": "",
         "tarotId": "afila"
        },
        "after": {
+        "channel": "Telefone",
         "date": "2026-10-12",
         "scheduledTime": "",
         "requestedTime": "",
@@ -3357,12 +3361,14 @@
        "actor": "Equipe",
        "at": "2026-10-12T13:00:00.000Z",
        "before": {
+        "channel": "Telefone",
         "date": "2026-10-12",
         "scheduledTime": "",
         "requestedTime": "10h",
         "tarotId": "afila"
        },
        "after": {
+        "channel": "Telefone",
         "date": "2026-10-12",
         "scheduledTime": "",
         "requestedTime": "",
@@ -5421,12 +5427,14 @@
        "actor": "Equipe",
        "at": "2026-10-12T13:14:00.000Z",
        "before": {
+        "channel": "Telefone",
         "date": "2026-10-13",
         "scheduledTime": "",
         "requestedTime": "",
         "tarotId": "afila"
        },
        "after": {
+        "channel": "Telefone",
         "date": "2026-10-12",
         "scheduledTime": "",
         "requestedTime": "",
@@ -5656,12 +5664,14 @@
         "actor": "Equipe",
         "at": "2026-10-12T13:14:00.000Z",
         "before": {
+         "channel": "Telefone",
          "date": "2026-10-13",
          "scheduledTime": "",
          "requestedTime": "",
          "tarotId": "afila"
         },
         "after": {
+         "channel": "Telefone",
          "date": "2026-10-12",
          "scheduledTime": "",
          "requestedTime": "",
@@ -5874,12 +5884,14 @@
         "actor": "Equipe",
         "at": "2026-10-12T13:14:00.000Z",
         "before": {
+         "channel": "Telefone",
          "date": "2026-10-13",
          "scheduledTime": "",
          "requestedTime": "",
          "tarotId": "afila"
         },
         "after": {
+         "channel": "Telefone",
          "date": "2026-10-12",
          "scheduledTime": "",
          "requestedTime": "",
@@ -7054,12 +7066,14 @@
        "actor": "Equipe",
        "at": "2026-10-12T13:00:00.000Z",
        "before": {
+        "channel": "Telefone",
         "date": "2026-10-13",
         "scheduledTime": "",
         "requestedTime": "",
         "tarotId": "afila"
        },
        "after": {
+        "channel": "Telefone",
         "date": "2026-10-12",
         "scheduledTime": "",
         "requestedTime": "",
@@ -7724,12 +7738,14 @@
        "actor": "Equipe",
        "at": "2026-10-12T13:07:00.000Z",
        "before": {
+        "channel": "Telefone",
         "date": "2026-10-13",
         "scheduledTime": "",
         "requestedTime": "",
         "tarotId": "afila"
        },
        "after": {
+        "channel": "Telefone",
         "date": "2026-10-12",
         "scheduledTime": "",
         "requestedTime": "",
@@ -8646,12 +8662,14 @@
        "actor": "Equipe",
        "at": "2026-10-12T13:00:00.000Z",
        "before": {
+        "channel": "Telefone",
         "date": "2026-10-12",
         "scheduledTime": "10:30",
         "requestedTime": "",
         "tarotId": "afila"
        },
        "after": {
+        "channel": "Telefone",
         "date": "2026-10-12",
         "scheduledTime": "",
         "requestedTime": "",
@@ -9340,12 +9358,14 @@
        "actor": "Equipe",
        "at": "2026-10-12T13:00:00.000Z",
        "before": {
+        "channel": "Telefone",
         "date": "2026-10-13",
         "scheduledTime": "",
         "requestedTime": "11:15",
         "tarotId": "afila"
        },
        "after": {
+        "channel": "Telefone",
         "date": "2026-10-12",
         "scheduledTime": "",
         "requestedTime": "",
@@ -10035,12 +10055,14 @@
        "actor": "Equipe",
        "at": "2026-10-12T13:00:00.000Z",
        "before": {
+        "channel": "Telefone",
         "date": "2026-10-12",
         "scheduledTime": "",
         "requestedTime": "11:15",
         "tarotId": "afila"
        },
        "after": {
+        "channel": "Telefone",
         "date": "2026-10-12",
         "scheduledTime": "",
         "requestedTime": "",
@@ -11019,12 +11041,14 @@
        "actor": "Equipe",
        "at": "2026-10-12T13:00:00.000Z",
        "before": {
+        "channel": "Telefone",
         "date": "2026-10-13",
         "scheduledTime": "",
         "requestedTime": "",
         "tarotId": "afila"
        },
        "after": {
+        "channel": "Telefone",
         "date": "2026-10-12",
         "scheduledTime": "",
         "requestedTime": "",
@@ -11824,6 +11848,7 @@
        "actor": "Equipe",
        "at": "2026-10-12T13:00:00.000Z",
        "before": {
+        "channel": "Telefone",
         "date": "2026-10-12",
         "scheduledTime": "10:30",
         "requestedTime": "",
@@ -11836,6 +11861,7 @@
         }
        },
        "after": {
+        "channel": "Telefone",
         "date": "2026-10-12",
         "scheduledTime": "",
         "requestedTime": "",
@@ -16324,6 +16350,7 @@
        "actor": "Equipe",
        "at": "2026-10-12T13:00:00.000Z",
        "before": {
+        "channel": "Telefone",
         "date": "2026-10-13",
         "scheduledTime": "",
         "requestedTime": "",
@@ -16339,6 +16366,7 @@
         }
        },
        "after": {
+        "channel": "Telefone",
         "date": "2026-10-12",
         "scheduledTime": "",
         "requestedTime": "",
@@ -16797,12 +16825,14 @@
        "actor": "Equipe",
        "at": "2026-10-12T13:00:00.000Z",
        "before": {
+        "channel": "Telefone",
         "date": "2026-10-13",
         "scheduledTime": "",
         "requestedTime": "11:15",
         "tarotId": "afila"
        },
        "after": {
+        "channel": "Telefone",
         "date": "2026-10-12",
         "scheduledTime": "",
         "requestedTime": "",
@@ -18002,12 +18032,14 @@
        "actor": "Equipe",
        "at": "2026-10-12T13:10:00.000Z",
        "before": {
+        "channel": "Telefone",
         "date": "2026-10-12",
         "scheduledTime": "",
         "requestedTime": "11:15",
         "tarotId": "afila"
        },
        "after": {
+        "channel": "Telefone",
         "date": "2026-10-12",
         "scheduledTime": "",
         "requestedTime": "",
@@ -18516,12 +18548,14 @@
         "actor": "Equipe",
         "at": "2026-10-12T13:10:00.000Z",
         "before": {
+         "channel": "Telefone",
          "date": "2026-10-12",
          "scheduledTime": "",
          "requestedTime": "11:15",
          "tarotId": "afila"
         },
         "after": {
+         "channel": "Telefone",
          "date": "2026-10-12",
          "scheduledTime": "",
          "requestedTime": "",
@@ -18837,12 +18871,14 @@
         "actor": "Equipe",
         "at": "2026-10-12T13:10:00.000Z",
         "before": {
+         "channel": "Telefone",
          "date": "2026-10-12",
          "scheduledTime": "",
          "requestedTime": "11:15",
          "tarotId": "afila"
         },
         "after": {
+         "channel": "Telefone",
          "date": "2026-10-12",
          "scheduledTime": "",
          "requestedTime": "",
@@ -20300,12 +20336,14 @@
         "actor": "Equipe",
         "at": "2026-10-12T13:15:00.000Z",
         "before": {
+         "channel": "Telefone",
          "date": "2026-10-12",
          "scheduledTime": "",
          "requestedTime": "10h",
          "tarotId": "afila"
         },
         "after": {
+         "channel": "Telefone",
          "date": "2026-10-12",
          "scheduledTime": "",
          "requestedTime": "10h",
@@ -21428,12 +21466,14 @@
        "actor": "Equipe",
        "at": "2026-10-12T13:07:00.000Z",
        "before": {
+        "channel": "Telefone",
         "date": "2026-10-13",
         "scheduledTime": "",
         "requestedTime": "",
         "tarotId": "afila"
        },
        "after": {
+        "channel": "Telefone",
         "date": "2026-10-12",
         "scheduledTime": "",
         "requestedTime": "",
@@ -22559,12 +22599,14 @@
         "actor": "Equipe",
         "at": "2026-10-12T13:00:00.000Z",
         "before": {
+         "channel": "Telefone",
          "date": "2026-10-12",
          "scheduledTime": "",
          "requestedTime": "",
          "tarotId": "afila"
         },
         "after": {
+         "channel": "Telefone",
          "date": "2026-10-12",
          "scheduledTime": "",
          "requestedTime": "",
@@ -26106,12 +26148,14 @@
        "actor": "Equipe",
        "at": "2026-10-12T13:00:00.000Z",
        "before": {
+        "channel": "Telefone",
         "date": "2026-10-12",
         "scheduledTime": "14:00",
         "requestedTime": "",
         "tarotId": "afila"
        },
        "after": {
+        "channel": "Telefone",
         "date": "2026-10-12",
         "scheduledTime": "",
         "requestedTime": "",
@@ -27916,12 +27960,14 @@
        "actor": "Equipe",
        "at": "2026-10-12T13:00:00.000Z",
        "before": {
+        "channel": "Telefone",
         "date": "2026-10-13",
         "scheduledTime": "",
         "requestedTime": "",
         "tarotId": "afila"
        },
        "after": {
+        "channel": "Telefone",
         "date": "2026-10-12",
         "scheduledTime": "",
         "requestedTime": "",
@@ -28337,12 +28383,14 @@
         "actor": "Equipe",
         "at": "2026-10-12T13:00:00.000Z",
         "before": {
+         "channel": "Telefone",
          "date": "2026-10-13",
          "scheduledTime": "",
          "requestedTime": "",
          "tarotId": "afila"
         },
         "after": {
+         "channel": "Telefone",
          "date": "2026-10-12",
          "scheduledTime": "",
          "requestedTime": "",
@@ -28587,12 +28635,14 @@
         "actor": "Equipe",
         "at": "2026-10-12T13:00:00.000Z",
         "before": {
+         "channel": "Telefone",
          "date": "2026-10-13",
          "scheduledTime": "",
          "requestedTime": "",
          "tarotId": "afila"
         },
         "after": {
+         "channel": "Telefone",
          "date": "2026-10-12",
          "scheduledTime": "",
          "requestedTime": "",
@@ -28907,12 +28957,14 @@
        "actor": "Equipe",
        "at": "2026-10-12T13:00:00.000Z",
        "before": {
+        "channel": "Telefone",
         "date": "2026-10-12",
         "scheduledTime": "10:30",
         "requestedTime": "",
         "tarotId": "afila"
        },
        "after": {
+        "channel": "Telefone",
         "date": "2026-10-12",
         "scheduledTime": "",
         "requestedTime": "",
@@ -29052,12 +29104,14 @@
         "actor": "Equipe",
         "at": "2026-10-12T13:00:00.000Z",
         "before": {
+         "channel": "Telefone",
          "date": "2026-10-12",
          "scheduledTime": "10:30",
          "requestedTime": "",
          "tarotId": "afila"
         },
         "after": {
+         "channel": "Telefone",
          "date": "2026-10-12",
          "scheduledTime": "",
          "requestedTime": "",
@@ -29188,12 +29242,14 @@
         "actor": "Equipe",
         "at": "2026-10-12T13:00:00.000Z",
         "before": {
+         "channel": "Telefone",
          "date": "2026-10-12",
          "scheduledTime": "10:30",
          "requestedTime": "",
          "tarotId": "afila"
         },
         "after": {
+         "channel": "Telefone",
          "date": "2026-10-12",
          "scheduledTime": "",
          "requestedTime": "",
@@ -30867,12 +30923,14 @@
         "actor": "Equipe",
         "at": "2026-10-12T13:00:00.000Z",
         "before": {
+         "channel": "Telefone",
          "date": "2026-10-12",
          "scheduledTime": "09:30",
          "requestedTime": "",
          "tarotId": "afila"
         },
         "after": {
+         "channel": "Telefone",
          "date": "2026-10-12",
          "scheduledTime": "",
          "requestedTime": "",
@@ -31510,12 +31568,14 @@
        "actor": "Equipe",
        "at": "2026-10-12T13:09:00.000Z",
        "before": {
+        "channel": "Telefone",
         "date": "2026-10-13",
         "scheduledTime": "",
         "requestedTime": "",
         "tarotId": "afila"
        },
        "after": {
+        "channel": "Telefone",
         "date": "2026-10-12",
         "scheduledTime": "",
         "requestedTime": "",
@@ -31832,12 +31892,14 @@
         "actor": "Equipe",
         "at": "2026-10-12T13:09:00.000Z",
         "before": {
+         "channel": "Telefone",
          "date": "2026-10-13",
          "scheduledTime": "",
          "requestedTime": "",
          "tarotId": "afila"
         },
         "after": {
+         "channel": "Telefone",
          "date": "2026-10-12",
          "scheduledTime": "",
          "requestedTime": "",
@@ -32068,12 +32130,14 @@
         "actor": "Equipe",
         "at": "2026-10-12T13:09:00.000Z",
         "before": {
+         "channel": "Telefone",
          "date": "2026-10-13",
          "scheduledTime": "",
          "requestedTime": "",
          "tarotId": "afila"
         },
         "after": {
+         "channel": "Telefone",
          "date": "2026-10-12",
          "scheduledTime": "",
          "requestedTime": "",
@@ -33187,12 +33251,14 @@
        "actor": "Equipe",
        "at": "2026-10-12T13:00:00.000Z",
        "before": {
+        "channel": "Telefone",
         "date": "2026-10-13",
         "scheduledTime": "09:30",
         "requestedTime": "",
         "tarotId": "afila"
        },
        "after": {
+        "channel": "Telefone",
         "date": "2026-10-12",
         "scheduledTime": "",
         "requestedTime": "",
@@ -33384,12 +33450,14 @@
         "actor": "Equipe",
         "at": "2026-10-12T13:00:00.000Z",
         "before": {
+         "channel": "Telefone",
          "date": "2026-10-13",
          "scheduledTime": "09:30",
          "requestedTime": "",
          "tarotId": "afila"
         },
         "after": {
+         "channel": "Telefone",
          "date": "2026-10-12",
          "scheduledTime": "",
          "requestedTime": "",
@@ -33572,12 +33640,14 @@
         "actor": "Equipe",
         "at": "2026-10-12T13:00:00.000Z",
         "before": {
+         "channel": "Telefone",
          "date": "2026-10-13",
          "scheduledTime": "09:30",
          "requestedTime": "",
          "tarotId": "afila"
         },
         "after": {
+         "channel": "Telefone",
          "date": "2026-10-12",
          "scheduledTime": "",
          "requestedTime": "",
@@ -34090,12 +34160,14 @@
        "actor": "Equipe",
        "at": "2026-10-12T13:00:00.000Z",
        "before": {
+        "channel": "Telefone",
         "date": "2026-10-12",
         "scheduledTime": "",
         "requestedTime": "11:15",
         "tarotId": "afila"
        },
        "after": {
+        "channel": "Telefone",
         "date": "2026-10-12",
         "scheduledTime": "",
         "requestedTime": "",
@@ -34288,12 +34360,14 @@
         "actor": "Equipe",
         "at": "2026-10-12T13:00:00.000Z",
         "before": {
+         "channel": "Telefone",
          "date": "2026-10-12",
          "scheduledTime": "",
          "requestedTime": "11:15",
          "tarotId": "afila"
         },
         "after": {
+         "channel": "Telefone",
          "date": "2026-10-12",
          "scheduledTime": "",
          "requestedTime": "",
@@ -34469,12 +34543,14 @@
         "actor": "Equipe",
         "at": "2026-10-12T13:00:00.000Z",
         "before": {
+         "channel": "Telefone",
          "date": "2026-10-12",
          "scheduledTime": "",
          "requestedTime": "11:15",
          "tarotId": "afila"
         },
         "after": {
+         "channel": "Telefone",
          "date": "2026-10-12",
          "scheduledTime": "",
          "requestedTime": "",
@@ -35539,12 +35615,14 @@
         "actor": "Equipe",
         "at": "2026-10-12T13:00:00.000Z",
         "before": {
+         "channel": "Telefone",
          "date": "2026-10-12",
          "scheduledTime": "",
          "requestedTime": "",
          "tarotId": "afila"
         },
         "after": {
+         "channel": "Telefone",
          "date": "2026-10-12",
          "scheduledTime": "",
          "requestedTime": "",
@@ -35937,12 +36015,14 @@
        "actor": "Equipe",
        "at": "2026-10-12T13:00:00.000Z",
        "before": {
+        "channel": "Telefone",
         "date": "2026-10-13",
         "scheduledTime": "05:30",
         "requestedTime": "",
         "tarotId": "afila"
        },
        "after": {
+        "channel": "Telefone",
         "date": "2026-10-12",
         "scheduledTime": "",
         "requestedTime": "",
@@ -37446,12 +37526,14 @@
         "actor": "Equipe",
         "at": "2026-10-12T13:00:00.000Z",
         "before": {
+         "channel": "Telefone",
          "date": "2026-10-12",
          "scheduledTime": "",
          "requestedTime": "",
          "tarotId": "afila"
         },
         "after": {
+         "channel": "Telefone",
          "date": "2026-10-12",
          "scheduledTime": "",
          "requestedTime": "",
@@ -39884,6 +39966,7 @@
         "actor": "Equipe",
         "at": "2026-10-12T13:00:00.000Z",
         "before": {
+         "channel": "Telefone",
          "date": "2026-10-12",
          "scheduledTime": "",
          "requestedTime": "",
@@ -39896,6 +39979,7 @@
          }
         },
         "after": {
+         "channel": "Telefone",
          "date": "2026-10-12",
          "scheduledTime": "",
          "requestedTime": "",
@@ -40813,12 +40897,14 @@
        "actor": "Equipe",
        "at": "2026-10-12T13:00:00.000Z",
        "before": {
+        "channel": "Telefone",
         "date": "2026-10-13",
         "scheduledTime": "09:30",
         "requestedTime": "",
         "tarotId": "reader"
        },
        "after": {
+        "channel": "Telefone",
         "date": "2026-10-12",
         "scheduledTime": "",
         "requestedTime": "",
@@ -41644,12 +41730,14 @@
        "actor": "Equipe",
        "at": "2026-10-12T13:00:00.000Z",
        "before": {
+        "channel": "Telefone",
         "date": "2026-10-13",
         "scheduledTime": "",
         "requestedTime": "",
         "tarotId": "afila"
        },
        "after": {
+        "channel": "Telefone",
         "date": "2026-10-12",
         "scheduledTime": "",
         "requestedTime": "",
@@ -42014,12 +42102,14 @@
         "actor": "Equipe",
         "at": "2026-10-12T13:00:00.000Z",
         "before": {
+         "channel": "Telefone",
          "date": "2026-10-13",
          "scheduledTime": "",
          "requestedTime": "",
          "tarotId": "afila"
         },
         "after": {
+         "channel": "Telefone",
          "date": "2026-10-12",
          "scheduledTime": "",
          "requestedTime": "",
@@ -42365,12 +42455,14 @@
         "actor": "Equipe",
         "at": "2026-10-12T13:00:00.000Z",
         "before": {
+         "channel": "Telefone",
          "date": "2026-10-13",
          "scheduledTime": "",
          "requestedTime": "",
          "tarotId": "afila"
         },
         "after": {
+         "channel": "Telefone",
          "date": "2026-10-12",
          "scheduledTime": "",
          "requestedTime": "",
@@ -43993,12 +44085,14 @@
        "actor": "Equipe",
        "at": "2026-10-12T13:04:00.000Z",
        "before": {
+        "channel": "Telefone",
         "date": "2026-10-12",
         "scheduledTime": "10:30",
         "requestedTime": "",
         "tarotId": "afila"
        },
        "after": {
+        "channel": "Telefone",
         "date": "2026-10-12",
         "scheduledTime": "",
         "requestedTime": "",
@@ -46593,12 +46687,14 @@
        "actor": "Equipe",
        "at": "2026-10-12T13:00:00.000Z",
        "before": {
+        "channel": "Telefone",
         "date": "2026-10-12",
         "scheduledTime": "05:30",
         "requestedTime": "",
         "tarotId": "afila"
        },
        "after": {
+        "channel": "Telefone",
         "date": "2026-10-12",
         "scheduledTime": "",
         "requestedTime": "",
@@ -49252,12 +49348,14 @@
        "actor": "Equipe",
        "at": "2026-10-12T13:00:00.000Z",
        "before": {
+        "channel": "Telefone",
         "date": "2026-10-12",
         "scheduledTime": "14:00",
         "requestedTime": "",
         "tarotId": "afila"
        },
        "after": {
+        "channel": "Telefone",
         "date": "2026-10-12",
         "scheduledTime": "",
         "requestedTime": "",
@@ -49442,12 +49540,14 @@
         "actor": "Equipe",
         "at": "2026-10-12T13:00:00.000Z",
         "before": {
+         "channel": "Telefone",
          "date": "2026-10-12",
          "scheduledTime": "14:00",
          "requestedTime": "",
          "tarotId": "afila"
         },
         "after": {
+         "channel": "Telefone",
          "date": "2026-10-12",
          "scheduledTime": "",
          "requestedTime": "",
@@ -49581,12 +49681,14 @@
         "actor": "Equipe",
         "at": "2026-10-12T13:00:00.000Z",
         "before": {
+         "channel": "Telefone",
          "date": "2026-10-12",
          "scheduledTime": "14:00",
          "requestedTime": "",
          "tarotId": "afila"
         },
         "after": {
+         "channel": "Telefone",
          "date": "2026-10-12",
          "scheduledTime": "",
          "requestedTime": "",
@@ -51630,12 +51732,14 @@
        "actor": "Equipe",
        "at": "2026-10-12T13:00:00.000Z",
        "before": {
+        "channel": "Telefone",
         "date": "2026-10-13",
         "scheduledTime": "",
         "requestedTime": "",
         "tarotId": "afila"
        },
        "after": {
+        "channel": "Telefone",
         "date": "2026-10-12",
         "scheduledTime": "",
         "requestedTime": "",
@@ -53602,12 +53706,14 @@
         "actor": "Equipe",
         "at": "2026-10-12T13:00:00.000Z",
         "before": {
+         "channel": "Telefone",
          "date": "2026-10-12",
          "scheduledTime": "",
          "requestedTime": "",
          "tarotId": "afila"
         },
         "after": {
+         "channel": "Telefone",
          "date": "2026-10-12",
          "scheduledTime": "",
          "requestedTime": "",
@@ -55716,12 +55822,14 @@
        "actor": "Equipe",
        "at": "2026-10-12T13:00:00.000Z",
        "before": {
+        "channel": "Telefone",
         "date": "2026-10-12",
         "scheduledTime": "09:30",
         "requestedTime": "",
         "tarotId": "afila"
        },
        "after": {
+        "channel": "Telefone",
         "date": "2026-10-12",
         "scheduledTime": "",
         "requestedTime": "",
@@ -58469,12 +58577,14 @@
        "actor": "Equipe",
        "at": "2026-10-12T13:00:00.000Z",
        "before": {
+        "channel": "Telefone",
         "date": "2026-10-13",
         "scheduledTime": "09:30",
         "requestedTime": "",
         "tarotId": "afila"
        },
        "after": {
+        "channel": "Telefone",
         "date": "2026-10-12",
         "scheduledTime": "",
         "requestedTime": "",
@@ -58701,12 +58811,14 @@
         "actor": "Equipe",
         "at": "2026-10-12T13:00:00.000Z",
         "before": {
+         "channel": "Telefone",
          "date": "2026-10-13",
          "scheduledTime": "09:30",
          "requestedTime": "",
          "tarotId": "afila"
         },
         "after": {
+         "channel": "Telefone",
          "date": "2026-10-12",
          "scheduledTime": "",
          "requestedTime": "",
@@ -58901,12 +59013,14 @@
         "actor": "Equipe",
         "at": "2026-10-12T13:00:00.000Z",
         "before": {
+         "channel": "Telefone",
          "date": "2026-10-13",
          "scheduledTime": "09:30",
          "requestedTime": "",
          "tarotId": "afila"
         },
         "after": {
+         "channel": "Telefone",
          "date": "2026-10-12",
          "scheduledTime": "",
          "requestedTime": "",
@@ -59819,12 +59933,14 @@
        "actor": "Equipe",
        "at": "2026-10-12T13:09:00.000Z",
        "before": {
+        "channel": "Telefone",
         "date": "2026-10-12",
         "scheduledTime": "10:30",
         "requestedTime": "",
         "tarotId": "afila"
        },
        "after": {
+        "channel": "Telefone",
         "date": "2026-10-12",
         "scheduledTime": "",
         "requestedTime": "",
@@ -61166,12 +61282,14 @@
        "actor": "Equipe",
        "at": "2026-10-12T13:03:00.000Z",
        "before": {
+        "channel": "Telefone",
         "date": "2026-10-13",
         "scheduledTime": "05:30",
         "requestedTime": "",
         "tarotId": "afila"
        },
        "after": {
+        "channel": "Telefone",
         "date": "2026-10-12",
         "scheduledTime": "",
         "requestedTime": "",
@@ -63004,12 +63122,14 @@
        "actor": "Equipe",
        "at": "2026-10-12T13:06:00.000Z",
        "before": {
+        "channel": "Telefone",
         "date": "2026-10-13",
         "scheduledTime": "14:00",
         "requestedTime": "11:15",
         "tarotId": "afila"
        },
        "after": {
+        "channel": "Telefone",
         "date": "2026-10-12",
         "scheduledTime": "",
         "requestedTime": "",
@@ -63270,12 +63390,14 @@
         "actor": "Equipe",
         "at": "2026-10-12T13:06:00.000Z",
         "before": {
+         "channel": "Telefone",
          "date": "2026-10-13",
          "scheduledTime": "14:00",
          "requestedTime": "11:15",
          "tarotId": "afila"
         },
         "after": {
+         "channel": "Telefone",
          "date": "2026-10-12",
          "scheduledTime": "",
          "requestedTime": "",
@@ -63504,12 +63626,14 @@
         "actor": "Equipe",
         "at": "2026-10-12T13:06:00.000Z",
         "before": {
+         "channel": "Telefone",
          "date": "2026-10-13",
          "scheduledTime": "14:00",
          "requestedTime": "11:15",
          "tarotId": "afila"
         },
         "after": {
+         "channel": "Telefone",
          "date": "2026-10-12",
          "scheduledTime": "",
          "requestedTime": "",
@@ -64007,12 +64131,14 @@
        "actor": "Equipe",
        "at": "2026-10-12T13:00:00.000Z",
        "before": {
+        "channel": "Telefone",
         "date": "2026-10-12",
         "scheduledTime": "",
         "requestedTime": "11:15",
         "tarotId": "afila"
        },
        "after": {
+        "channel": "Telefone",
         "date": "2026-10-12",
         "scheduledTime": "",
         "requestedTime": "",
@@ -64179,12 +64305,14 @@
         "actor": "Equipe",
         "at": "2026-10-12T13:00:00.000Z",
         "before": {
+         "channel": "Telefone",
          "date": "2026-10-12",
          "scheduledTime": "",
          "requestedTime": "11:15",
          "tarotId": "afila"
         },
         "after": {
+         "channel": "Telefone",
          "date": "2026-10-12",
          "scheduledTime": "",
          "requestedTime": "",
@@ -64331,12 +64459,14 @@
         "actor": "Equipe",
         "at": "2026-10-12T13:00:00.000Z",
         "before": {
+         "channel": "Telefone",
          "date": "2026-10-12",
          "scheduledTime": "",
          "requestedTime": "11:15",
          "tarotId": "afila"
         },
         "after": {
+         "channel": "Telefone",
          "date": "2026-10-12",
          "scheduledTime": "",
          "requestedTime": "",
@@ -65817,12 +65947,14 @@
        "actor": "Equipe",
        "at": "2026-10-12T13:00:00.000Z",
        "before": {
+        "channel": "Telefone",
         "date": "2026-10-12",
         "scheduledTime": "05:30",
         "requestedTime": "",
         "tarotId": "afila"
        },
        "after": {
+        "channel": "Telefone",
         "date": "2026-10-12",
         "scheduledTime": "",
         "requestedTime": "",
@@ -68345,12 +68477,14 @@
         "actor": "Equipe",
         "at": "2026-10-12T13:15:00.000Z",
         "before": {
+         "channel": "Telefone",
          "date": "2026-10-12",
          "scheduledTime": "",
          "requestedTime": "",
          "tarotId": "afila"
         },
         "after": {
+         "channel": "Telefone",
          "date": "2026-10-12",
          "scheduledTime": "",
          "requestedTime": "",
@@ -68892,12 +69026,14 @@
        "actor": "Equipe",
        "at": "2026-10-12T13:00:00.000Z",
        "before": {
+        "channel": "Telefone",
         "date": "2026-10-13",
         "scheduledTime": "",
         "requestedTime": "",
         "tarotId": "afila"
        },
        "after": {
+        "channel": "Telefone",
         "date": "2026-10-12",
         "scheduledTime": "",
         "requestedTime": "",
@@ -69562,12 +69698,14 @@
         "actor": "Equipe",
         "at": "2026-10-12T13:00:00.000Z",
         "before": {
+         "channel": "Telefone",
          "date": "2026-10-12",
          "scheduledTime": "",
          "requestedTime": "",
          "tarotId": "afila"
         },
         "after": {
+         "channel": "Telefone",
          "date": "2026-10-12",
          "scheduledTime": "",
          "requestedTime": "",
@@ -70263,12 +70401,14 @@
        "actor": "Equipe",
        "at": "2026-10-12T13:00:00.000Z",
        "before": {
+        "channel": "Telefone",
         "date": "2026-10-12",
         "scheduledTime": "14:00",
         "requestedTime": "",
         "tarotId": "afila"
        },
        "after": {
+        "channel": "Telefone",
         "date": "2026-10-12",
         "scheduledTime": "",
         "requestedTime": "",

@@ -12,6 +12,8 @@
  * novos. O ouro (`scripts/gerar-ouro-gf-divergencias.js`) roda as funções reais do front e exige que o porte aceite tudo o que elas produzem.
  */
 
+const estado = require('./divergencias-estado');
+
 class DivergenciaInvalidaError extends Error { constructor(m) { super(m); this.name = 'DivergenciaInvalidaError'; } }
 const falha = (m) => { throw new DivergenciaInvalidaError(m); };
 
@@ -19,16 +21,16 @@ const TIPOS = ['Operacional', 'Financeira'];
 const AREAS = ['Consulta', 'Pagamento', 'Repasse'];
 const SITUACOES = ['Pendente', 'Em conferência', 'Resolvida', 'Arquivada'];
 const ASSUNTOS = ['Consulta ausente', 'Profissional incorreto', 'Minutagem incorreta', 'Outro'];
-const ACOES = ['Relato editado', 'Retirada e arquivada', 'Arquivada', 'Excluída', 'Restaurada', 'Desarquivada', 'Removida da lixeira do tarólogo'];
-const INSTANTES = ['createdAt', 'updatedAt', 'resolvedAt', 'archivedAt', 'deletedAt', 'readerTrashClearedAt'];
-const AUTORES = { resolvedAt: 'resolvedBy', archivedAt: 'archivedBy', deletedAt: 'deletedBy', readerTrashClearedAt: 'readerTrashClearedBy' };
+const ACOES = ['Relato editado', 'Pedido cancelado', 'Retirada e arquivada', 'Arquivada', 'Excluída', 'Restaurada', 'Desarquivada', 'Removida da lixeira do tarólogo'];
+const INSTANTES = ['createdAt', 'updatedAt', 'resolvedAt', 'archivedAt', 'deletedAt', 'readerTrashClearedAt', 'readerCancelledAt'];
+const AUTORES = { readerCancelledAt: 'readerCancelledBy', resolvedAt: 'resolvedBy', archivedAt: 'archivedBy', deletedAt: 'deletedBy', readerTrashClearedAt: 'readerTrashClearedBy' };
 const LIMITE_TEXTO = 4000;
 
 const texto = (v) => typeof v === 'string';
 const instante = (v) => texto(v) && Number.isFinite(Date.parse(v));
-const aberta = (d) => !d.deletedAt && (d.status === 'Pendente' || d.status === 'Em conferência');
+const aberta = estado.aberta;
 const dela = (d, tarotId) => Boolean(tarotId) && d.kind === 'Operacional' && d.reporterTarotId === tarotId;
-const visivelDaTarologa = (d, tarotId) => !(d.deletedAt && d.readerTrashClearedAt) && Boolean(tarotId) && d.kind === 'Operacional' && (d.reporterTarotId === tarotId || (!d.reporterTarotId && d.tarotId === tarotId));
+const visivelDaTarologa = (d, tarotId) => !d.readerTrashClearedAt && Boolean(tarotId) && d.kind === 'Operacional' && (d.reporterTarotId === tarotId || (!d.reporterTarotId && d.tarotId === tarotId));
 const visivelParaEquipe = (d, p) => Boolean(p.canViewDivergences) && (d.kind === 'Operacional' || Boolean(p.canViewFinancialDivergences));
 
 /** Quem vê o quê. `ator`: `{ tarologa, proprio, p }`. */
@@ -50,7 +52,7 @@ function forma(d) {
   if (!texto(d.reportedBy) || !d.reportedBy.trim() || d.reportedBy.length > 200) falha('Divergência: autor inválido.');
   if (!instante(d.createdAt)) falha('Divergência: data inválida.');
   for (const c of ['consultationId', 'paymentId', 'tarotId', 'tarot', 'reporterTarotId']) opcional(d, c, 'string');
-  for (const c of ['reportNote', 'decision', 'resolvedBy', 'archiveReason', 'deleteReason', 'reportedClientName', 'reportedClientPhone', 'reportedDate', 'reportedTime', 'reportedChannel']) opcional(d, c, 'string');
+  for (const c of ['reportNote', 'decision', 'resolvedBy', 'readerCancelledBy', 'archiveReason', 'deleteReason', 'reportedClientName', 'reportedClientPhone', 'reportedDate', 'reportedTime', 'reportedChannel']) opcional(d, c, 'string');
   for (const c of INSTANTES) if (d[c] !== undefined && !instante(d[c])) falha('Divergência: data inválida.');
   for (const c of ['reportedMinutes', 'recordedMinutes', 'amount']) if (d[c] !== undefined && !(typeof d[c] === 'number' && Number.isFinite(d[c]) && d[c] >= 0)) falha('Divergência: valor inválido.');
   for (const c of ['id', 'consultationId', 'paymentId', 'tarotId', 'reporterTarotId']) if (d[c] !== undefined && !/^[A-Za-z0-9._:-]{1,64}$/.test(d[c])) falha('Divergência: vínculo inválido.');
@@ -91,7 +93,7 @@ function repetida(nova, outras, tarotId) {
   return null;
 }
 
-const SEM_RESOLUCAO = ['resolvedBy', 'resolvedAt', 'decision', 'archivedAt', 'archivedBy', 'archiveReason', 'statusBeforeArchive', 'deletedAt', 'deletedBy', 'deleteReason', 'readerTrashClearedAt', 'readerTrashClearedBy'];
+const SEM_RESOLUCAO = ['resolvedBy', 'resolvedAt', 'decision', 'archivedAt', 'archivedBy', 'archiveReason', 'statusBeforeArchive', 'deletedAt', 'deletedBy', 'deleteReason', 'readerTrashClearedAt', 'readerTrashClearedBy', 'readerCancelledAt', 'readerCancelledBy'];
 
 /** Criação: a taróloga cria Operacional dela, Pendente; a equipe cria Financeira, Pendente. */
 function conferirCriacao(d, ator) {
@@ -116,42 +118,53 @@ function conferirTransicao(antes, depois, ator) {
   return transicaoDaEquipe(antes, depois, eventos, notas);
 }
 
+const CANCELAMENTO = ['readerCancelledAt', 'readerCancelledBy'];
+const ARQUIVO = ['archivedAt', 'archivedBy', 'archiveReason', 'statusBeforeArchive'];
+
+/**
+ * Transições da taróloga na v706 (`changeReaderDivergence`). SUBSTITUÍDAS: "Arquivada", "Retirada e arquivada" e "Desarquivada" deixaram de ser
+ * produzidas (o front agora CANCELA o pedido em análise, e só restaura uma resolvida excluída); o histórico antigo com esses nomes segue válido.
+ */
 function transicaoDaTarologa(antes, depois, ator, eventos, notas) {
   if (!dela(antes, ator.proprio)) falha('Você só pode alterar divergências que enviou.');
   if (!mesmo(antes, depois, ['clientId', 'client', 'tarotId', 'tarot', 'reporterTarotId', 'consultationId', 'reportedBy', 'createdAt', 'clientIdentificationPending', 'resolvedBy', 'resolvedAt', 'decision'])) falha('Você só pode alterar divergências que enviou.');
   if (notas.some((c) => c.source !== 'tarologist')) falha('Você não pode comentar nesta divergência.');
   if (notas.length) {
-    if (eventos.length || antes.deletedAt || antes.status === 'Arquivada') falha('Esta divergência não recebe novos comentários.');
-    if (!mesmo(antes, depois, ['status', 'reason', 'reportNote', 'reportedMinutes', 'reportedDate', 'reportedTime', 'reportedChannel', 'deletedAt', 'archivedAt', 'readerTrashClearedAt'])) falha('Não foi possível identificar esta alteração.');
+    if (antes.readerCancelledAt) falha('Esta divergência não recebe novos comentários.');
+    if (eventos.length || antes.deletedAt || (antes.status === 'Arquivada' && estado.aba(antes) !== 'resolvidas')) falha('Esta divergência não recebe novos comentários.');
+    if (!mesmo(antes, depois, ['status', 'reason', 'reportNote', 'reportedMinutes', 'reportedDate', 'reportedTime', 'reportedChannel', 'deletedAt', 'archivedAt', 'readerTrashClearedAt', ...CANCELAMENTO])) falha('Não foi possível identificar esta alteração.');
     return notas.length === 1 ? 'comentario' : falha('Envie um comentário por vez.');
   }
   if (eventos.length !== 1) falha('Não foi possível identificar esta alteração.');
   const [e] = eventos;
   const sit = (x) => x.status;
-  if (antes.deletedAt && !['Restaurada', 'Removida da lixeira do tarólogo'].includes(e.action)) falha('Esta divergência foi excluída.');
-  if (antes.status === 'Arquivada' && !antes.deletedAt && !['Excluída', 'Desarquivada'].includes(e.action)) falha('Esta divergência já está arquivada.');
+  const naoTocou = (...grupos) => { if (!mesmo(antes, depois, grupos.flat())) falha('Não foi possível identificar esta alteração.'); };
+  if (antes.readerCancelledAt && e.action !== 'Removida da lixeira do tarólogo') falha('Este pedido já foi cancelado.');
+  if (antes.deletedAt && e.action !== 'Restaurada' && e.action !== 'Removida da lixeira do tarólogo') falha('Esta divergência foi excluída.');
+  if (antes.readerTrashClearedAt) falha('Este relato já saiu da sua lixeira.');
+  if (estado.aba(antes) === 'excluidas' && !['Restaurada', 'Removida da lixeira do tarólogo'].includes(e.action)) falha('Este pedido está nas excluídas.');
   switch (e.action) {
+    case 'Pedido cancelado':
+      if (!(antes.status === 'Pendente' || antes.status === 'Em conferência')) falha('Só é possível cancelar um pedido em análise.');
+      if (sit(depois) !== 'Arquivada' || depois.statusBeforeArchive !== antes.status || !depois.readerCancelledAt || !depois.readerCancelledBy || !depois.archivedAt || !depois.archivedBy || depois.deletedAt) falha('Não foi possível identificar esta alteração.');
+      return 'cancelamento';
     case 'Excluída':
       if (antes.deletedAt || !depois.deletedAt || !depois.deleteReason || sit(depois) !== sit(antes)) falha('Informe o motivo da exclusão.');
+      naoTocou(CANCELAMENTO, ARQUIVO);
       return 'exclusao';
     case 'Restaurada':
-      if (!antes.deletedAt || antes.readerTrashClearedAt || depois.deletedAt || sit(depois) !== 'Arquivada') falha('Este relato já saiu da sua lixeira.');
+      if (!estado.podeRestaurar(antes)) falha('Só é possível restaurar um pedido resolvido que foi excluído.');
+      if (depois.deletedAt || depois.deletedBy || depois.deleteReason || sit(depois) !== sit(antes)) falha('Não foi possível identificar esta alteração.');
+      naoTocou(CANCELAMENTO, ARQUIVO);
       return 'restauracao';
-    case 'Desarquivada': {
-      if (antes.deletedAt || antes.status !== 'Arquivada') falha('Esta divergência não está arquivada.');
-      const alvo = antes.statusBeforeArchive === 'Resolvida' || antes.resolvedAt ? 'Resolvida' : 'Pendente';
-      if (sit(depois) !== alvo || depois.archivedAt !== undefined) falha('Esta divergência não está arquivada.');
-      return 'desarquivar';
-    }
-    case 'Arquivada': case 'Retirada e arquivada': {
-      if (antes.status === 'Arquivada' || sit(depois) !== 'Arquivada' || !depois.archivedAt || depois.statusBeforeArchive !== antes.status || (e.action === 'Retirada e arquivada') !== aberta(antes)) falha('Esta divergência já está arquivada.');
-      return 'arquivo';
-    }
     case 'Relato editado':
       if (!aberta(antes) || sit(depois) !== sit(antes)) falha('A conferência já foi concluída. O relato original permanece no histórico.');
+      if (antes.issueType === 'Minutagem incorreta' && depois.reportedMinutes !== undefined && depois.reportedMinutes === antes.recordedMinutes) falha('Os dois tempos são iguais. Para retirar a solicitação, use Cancelar pedido.');
+      naoTocou(CANCELAMENTO, ARQUIVO);
       return 'edicao';
     case 'Removida da lixeira do tarólogo':
-      if (!antes.deletedAt || antes.readerTrashClearedAt || !depois.readerTrashClearedAt || sit(depois) !== sit(antes)) falha('A lixeira foi atualizada. Confira a lista novamente.');
+      if (estado.aba(antes) !== 'excluidas' || !depois.readerTrashClearedAt || sit(depois) !== sit(antes)) falha('A lixeira foi atualizada. Confira a lista novamente.');
+      naoTocou(CANCELAMENTO, ARQUIVO, ['deletedAt']);
       return 'lixeira';
     default: return falha('Não foi possível identificar esta alteração.');
   }
@@ -160,7 +173,7 @@ function transicaoDaTarologa(antes, depois, ator, eventos, notas) {
 function transicaoDaEquipe(antes, depois, eventos, notas) {
   if (eventos.length) falha('Não foi possível identificar esta alteração.');
   if (notas.some((c) => c.source !== 'staff')) falha('Você não pode comentar nesta divergência.');
-  if (!mesmo(antes, depois, ['deletedAt', 'deletedBy', 'deleteReason', 'readerTrashClearedAt', 'archivedAt', 'archivedBy', 'archiveReason', 'statusBeforeArchive'])) falha('Esta divergência não pode ser alterada pela equipe.');
+  if (!mesmo(antes, depois, ['deletedAt', 'deletedBy', 'deleteReason', 'readerTrashClearedAt', 'readerCancelledAt', 'readerCancelledBy', 'archivedAt', 'archivedBy', 'archiveReason', 'statusBeforeArchive'])) falha('Esta divergência não pode ser alterada pela equipe.');
   if (notas.length) {
     if (antes.deletedAt || antes.status === 'Arquivada') falha('Esta divergência não recebe novos comentários.');
     if (notas.length !== 1) falha('Envie um comentário por vez.');
@@ -216,4 +229,4 @@ function carimbar(antes, depois, nome, agora) {
   return reg;
 }
 
-module.exports = { DivergenciaInvalidaError, aberta, dela, visivel, visivelDaTarologa, visivelParaEquipe, forma, repetida, conferirCriacao, conferirTransicao, exigeResolver, carimbar, igual, estavel };
+module.exports = { DivergenciaInvalidaError, estado, aberta, dela, visivel, visivelDaTarologa, visivelParaEquipe, forma, repetida, conferirCriacao, conferirTransicao, exigeResolver, carimbar, igual, estavel };

@@ -9,6 +9,8 @@
 
 const { somarDias, chaveDoDia, pertence } = require('./horarios');
 const { diaOperacionalDe, timestampSaoPaulo } = require('../dia-operacional');
+const RC = require('./escala-relogio-civil');
+const { saoPauloWallTimestamp } = require('./operacao-calendario');
 
 const DIAS = ['domingo', 'segunda', 'terca', 'quarta', 'quinta', 'sexta', 'sabado'];
 const HORA_VALIDA = /^([01]\d|2[0-3]):[0-5]\d$/;
@@ -38,9 +40,15 @@ function periodosDoTexto(texto) {
     .map((m) => ({ start: `${m[1].padStart(2, '0')}:${m[2] || '00'}`, end: `${m[3].padStart(2, '0')}:${m[4] || '00'}` }));
 }
 
-/** `scheduleHoursForDate` (formatters.ts:151). */
+/** `weeklyScheduleForDate` (formatters.ts, v706): a versão da escala habitual vigente na data (cadastro com vigência) vence a semana base. */
+function semanaDaData(perfil, data) {
+  const versao = [...(perfil.weeklyScheduleVersions || [])].filter((v) => v.effectiveFrom <= data).sort((a, b) => b.effectiveFrom.localeCompare(a.effectiveFrom))[0];
+  return (versao && versao.schedule) || perfil.weeklySchedule || {};
+}
+
+/** `scheduleHoursForDate` (formatters.ts:151, com `weeklyScheduleForDate` da v706). */
 function horasDaData(perfil, data) {
-  return (perfil.weeklySchedule && perfil.weeklySchedule[DIAS[new Date(`${data}T12:00:00Z`).getUTCDay()]]) || 'Horário não informado';
+  return semanaDaData(perfil, data)[DIAS[new Date(`${data}T12:00:00Z`).getUTCDay()]] || 'Horário não informado';
 }
 
 /** `scheduleOverrideKeyOnDate`: o registro mais recente que cobre a data; empate fica com o específico do dia. */
@@ -108,11 +116,15 @@ function escalaNaData(perfil, excecoes, data) {
 
 /** `professionalPeriodTimestamps`: períodos do dia operacional de 06h a 06h, inclusive na madrugada. */
 function instantesDosPeriodos(periodos, data) {
-  const minuto = (h) => { const [hh, mm] = h.split(':').map(Number); return hh * 60 + mm + (hh < 6 ? 1440 : 0); };
-  const base = Date.parse(`${data}T00:00:00-03:00`);
-  if (!Number.isFinite(base)) return [];
+  // v706: instantes por São Paulo real; a âncora 06:00 é só convenção de armazenamento da escala (escala-relogio-civil.js).
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(data) || !Number.isFinite(Date.parse(data))) return [];
   return periodos.filter((p) => HORA_VALIDA.test(p.start) && HORA_VALIDA.test(p.end))
-    .map((p) => { const ini = minuto(p.start); let fim = minuto(p.end); if (p.end === '06:00' && ini > 360) fim = 1800; return { ...p, startsAt: base + ini * 60_000, endsAt: base + fim * 60_000 }; })
+    .map((p) => {
+      const inicio = Date.parse(RC.instanteDoRelogioLegado(data, p.start));
+      let diaFim = RC.dataCivilDoRelogioLegado(data, p.end);
+      if (p.end === RC.LEGACY_SCHEDULE_DAY_START && RC.minutosDoRelogioLegado(p.start) > RC.LEGACY_SCHEDULE_DAY_START_MINUTES) diaFim = somarDias(data, 1);
+      return { ...p, startsAt: inicio, endsAt: Date.parse(saoPauloWallTimestamp(diaFim, p.end)) };
+    })
     .filter((p) => p.endsAt > p.startsAt)
     .sort((a, b) => a.startsAt - b.startsAt);
 }
@@ -133,5 +145,5 @@ function periodosNaData(perfil, excecoes, data) {
 
 module.exports = {
   HORA_VALIDA, milissegundos, diaOperacionalDoInstante, relogio, formatarHora, formatarPeriodos, periodosDoTexto, horasDaData,
-  excecaoNaData, retornoSubstituido, escalaNaData, instantesDosPeriodos, proximoPeriodo, periodosNaData, somarDias,
+  excecaoNaData, semanaDaData, retornoSubstituido, escalaNaData, instantesDosPeriodos, proximoPeriodo, periodosNaData, somarDias,
 };

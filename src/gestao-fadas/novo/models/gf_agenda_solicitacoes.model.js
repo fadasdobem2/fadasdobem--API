@@ -11,7 +11,8 @@ module.exports = definir({
   atributos: {
     id: { type: DataTypes.STRING(64), allowNull: false, primaryKey: true },
     id_tarologo: { type: DataTypes.STRING(64), allowNull: false },
-    id_cliente: { type: DataTypes.STRING(64), allowNull: false },
+    id_cliente: { type: DataTypes.STRING(64), allowNull: true },
+    id_contato: { type: DataTypes.STRING(64), allowNull: true },
     data_operacional: { type: DataTypes.DATEONLY, allowNull: false },
     item: { type: DataTypes.JSONB, allowNull: false },
     version: { type: DataTypes.BIGINT, allowNull: false, defaultValue: 1 },

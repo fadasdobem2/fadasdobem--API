@@ -2,19 +2,19 @@
 
 /**
  * Ouro das CONTAS (Maturacao/44): `planAccountCommand` REAL (as checagens do diálogo de conta no modo real: nome, e-mail, duplicidade, senha forte,
- * troca de senha, o que mudou numa edição) sobre muitos rascunhos, e `strongAccountPassword` REAL sobre senhas de borda.
+ * link de nova senha, e-mail do Fadas, o que mudou numa edição; v706: a conta nasce por convite, sem senha no diálogo) sobre muitos rascunhos, e `strongAccountPassword` REAL sobre senhas de borda.
  */
 
 const { sorteador } = require('./front');
 
 const CONTAS = [
-  { id: 'u1', name: 'Clara Gestora', email: 'clara@exemplo.com', role: 'administradora', commission: '—', access: 'Hoje, 10:00', active: true },
-  { id: 'u2', name: 'Bia Atendente', email: 'Bia@Exemplo.com', role: 'atendente', commission: '—', access: 'Ainda não acessou', active: true, legacyId: '77' },
-  { id: 'u3', name: 'Lia Supervisora', email: 'lia@exemplo.com', role: 'supervisora', commission: '—', access: 'Ontem, 22:10', active: false, avatar: 'data:image/png;base64,AAAA' },
+  { id: 'u1', name: 'Clara Gestora', email: 'clara@fadasdobem.com.br', role: 'administradora', commission: '—', access: 'Hoje, 10:00', active: true },
+  { id: 'u2', name: 'Bia Atendente', email: 'Bia@Fadasdobem.com.br', role: 'atendente', commission: '—', access: 'Ainda não acessou', active: true, legacyId: '77' },
+  { id: 'u3', name: 'Lia Supervisora', email: 'lia@fadasdobem.com.br', role: 'supervisora', commission: '—', access: 'Ontem, 22:10', active: false, avatar: 'data:image/png;base64,AAAA' },
 ];
 const NOMES = ['', '   ', 'Ana', '  Ana   Maria  ', 'Clara Gestora', 'Ana\nMaria', 'x'.repeat(80)];
-const EMAILS = ['', ' ', 'ana@exemplo.com', 'ANA@EXEMPLO.COM', 'clara@exemplo.com', 'CLARA@exemplo.com', 'bia@exemplo.com', 'sem-arroba', 'a@b', 'a b@c.com', ' ana@exemplo.com ', 'ana@@x.com', 'ana@x.com.br', 'a@b.c'];
-const SENHAS = ['', 'curta', 'semmaiuscula123!', 'SEMMINUSCULA123!', 'SemNumeroAqui!!', 'SemSimbolo1234A', 'Valida#Senha123', 'Valida#Senha123 ', 'x'.repeat(200)];
+const EMAILS = ['', ' ', 'ana@fadasdobem.com.br', 'ANA@FADASDOBEM.COM.BR', 'clara@fadasdobem.com.br', 'CLARA@fadasdobem.com.br', 'bia@fadasdobem.com.br', 'sem-arroba', 'a@b', 'a b@c.com', ' ana@fadasdobem.com.br ', 'ana@@x.com', 'ana@x.com.br', 'ana@exemplo.com', 'ana@fadasdobem.com', 'a@fadasdobem.com.br'];
+const SENHAS = ['', 'curta', 'semmaiuscula123!', 'SEMMINUSCULA123!', 'SemNumeroAqui!!', 'SemSimbolo1234A', 'Valida#Senha1234', 'Valida#Senha123 ', 'x'.repeat(200)];
 const PAPEIS = ['administradora', 'assistente', 'supervisora', 'atendente', 'tarologa'];
 const AVATARES = [undefined, 'data:image/png;base64,AAAA', 'https://x.com/a.png'];
 
@@ -33,10 +33,10 @@ async function gerar(ctx) {
     if (draft.role !== 'tarologa') draft.tarotId = undefined; else if (!draft.tarotId && alea() < 0.7) draft.tarotId = 't-1';
     draft.confirmation = alea() < 0.8 ? draft.password : sorteio(SENHAS);
     const resetting = Boolean(editing) && alea() < 0.25;
-    if (resetting) draft.passwordRequired = true; // a troca de senha sempre exige a senha nova (user-account-dialog.tsx, modo 'reset')
+    if (resetting) draft.passwordRequired = true; // o link de nova senha sempre gera convite (user-account-dialog.tsx, modo 'reset')
     cenarios.push({ draft, resetting, esperado: pl.planAccountCommand(draft, CONTAS, resetting) });
   }
-  const senhas = SENHAS.concat(['Abcdefghij1!', 'Abcdefghij1', 'abcdefghij1!', 'ABCDEFGHIJ1!', 'Abcdefghij!!', 'Abc1!', 'Ação#Forte1234', '12345678901!aA']).map((s) => ({ s, forte: dc.strongAccountPassword(s) }));
+  const senhas = SENHAS.concat(['Abcdefghij1!', 'Abcdefghijklmn1!', 'Abcdefghijklm1!', 'Abcdefghij1', 'abcdefghij1!', 'ABCDEFGHIJ1!', 'Abcdefghij!!', 'Abc1!', 'Ação#Forte1234', '12345678901!aA']).map((s) => ({ s, forte: dc.strongAccountPassword(s) }));
   return { contas: CONTAS, cenarios, senhas, vinculo: await module.exports.gerarVinculo(ctx) };
 }
 

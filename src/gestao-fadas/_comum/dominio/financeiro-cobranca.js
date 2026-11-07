@@ -6,6 +6,8 @@
  */
 
 const b = require('./financeiro-base');
+const fd = require('./financeiro-financiamento-dividido');
+const { minutosDeArredondamento } = require('./credito-arredondamento');
 
 const dinheiro = (v) => Math.round(v * 100) / 100;
 const confirmado = (p) => p.status !== 'Cancelado' && (p.confirmation ? p.confirmation === 'Confirmado' : p.status === 'Informado' || p.status === 'Corrigido');
@@ -17,16 +19,22 @@ const minutosRelatados = (item) => (item.status === 'Não houve' ? 0 : Math.max(
 function minutosDeCredito(item) {
   if (!(item.coverage && item.coverage.balanceOnly)) return (item.coverage && item.coverage.minutes) || 0;
   const lotes = item.billing && item.billing.tariff && item.billing.tariff.creditLots;
-  if (lotes && lotes.length) return lotes.reduce((s, l) => s + l.minutes, 0);
+  if (lotes && lotes.length) return lotes.reduce((s, l) => s + l.minutes, 0) + minutosDeArredondamento(lotes, item.billing.tariff.creditRounding);
   const unit = item.coverage.unitValue || item.minuteValue || 2.96;
   return unit > 0 ? Math.max(0, Math.floor(((item.coverage.balanceAtLaunch || 0) + 0.000001) / unit)) : 0;
 }
 
 function financiamento(item, pagamentos) {
   if (!pagamentos) return (item.billing && item.billing.funding) || [];
-  return pagamentos.filter((p) => p.clientId === item.clientId && p.linkedConsultationId === item.id && confirmado(p)).map((p) => {
-    const salvo = item.billing && item.billing.funding.find((l) => l.paymentId === p.id);
-    return { paymentId: p.id, amount: p.amount, minutes: p.cashUnitValue ? Math.floor(p.amount / p.cashUnitValue + 0.000001) : (p.purchase && p.purchase.minutes) || (salvo && salvo.minutes) || b.minutosComprados(p.amount, item.minuteValue || 2.96) };
+  return pagamentos.filter((p) => !p.unidentified && p.clientId === item.clientId && confirmado(p)).flatMap((p) => {
+    const salvo = item.billing && (item.billing.funding || []).find((l) => l.paymentId === p.id);
+    if (p.linkedConsultationId === item.id) return [{ paymentId: p.id, amount: p.amount, minutes: p.cashUnitValue ? Math.floor(p.amount / p.cashUnitValue + 0.000001) : (p.purchase && p.purchase.minutes) || (salvo && salvo.minutes) || b.minutosComprados(p.amount, item.minuteValue || 2.96) }];
+    // v706: recibo dividido, a fatia gravada nesta consulta.
+    const compartilhado = fd.financiamentoCompartilhado(item, p);
+    if (!compartilhado || p.amount <= 0) return [];
+    if (compartilhado.amount === 0) return [{ ...compartilhado, amount: 0, minutes: 0 }];
+    const amount = Math.min(compartilhado.amount, p.amount);
+    return [{ ...compartilhado, amount, minutes: compartilhado.minutes * amount / compartilhado.amount }];
   });
 }
 
@@ -39,12 +47,12 @@ function valorDoMinutoDaConsulta(item, pagamentos) {
   if (item.specialPrice) return item.specialPrice.unitValue;
   if (b.valorRegistradoDoMinuto(item) === 0) return 0;
   const tarifa = item.billing && item.billing.tariff;
-  if (item.paymentProfile === 'Pós-paga' && tarifa) return item.billing.unitValueOverride ?? tarifa.unitValue;
+  if (item.paymentProfile === 'Pós-paga' && tarifa && !tarifa.creditRounding) return item.billing.unitValueOverride ?? tarifa.unitValue;
   if (item.launchTimeDecision && item.launchTimeDecision.kind === 'discount' && tarifa) return tarifa.unitValue;
   const lotes = tarifa && tarifa.creditLots;
   if (lotes && lotes.length) {
     const minutos = minutosParaPrecificarCredito(item);
-    if (minutos > 0) return b.alocarLotes(lotes, minutos, tarifa.unitValue).rawAmount / minutos;
+    if (minutos > 0) return b.alocarLotes(lotes, minutos, tarifa.unitValue, tarifa.creditRounding).rawAmount / minutos;
     return tarifa.unitValue;
   }
   if (item.coverage && item.coverage.kind === 'Complemento') return item.coverage.unitValue || item.minuteValue || 2.96;
@@ -82,8 +90,8 @@ function acerto(item, pagamentos) {
   const comprados = item.coverage && item.coverage.kind === 'Crédito' ? minutosDeCredito(item) : funding.reduce((s, l) => s + l.minutes, 0);
   const lotesDaTarifa = item.billing && item.billing.tariff && item.billing.tariff.creditLots;
   const financiado = item.coverage && item.coverage.kind === 'Crédito'
-    ? (item.coverage.balanceOnly ? item.coverage.balanceAtLaunch || 0 : lotesDaTarifa && lotesDaTarifa.length ? b.alocarLotes(lotesDaTarifa, item.coverage.minutes, item.billing.tariff.unitValue).amount : item.coverage.minutes * unitValue)
-    : pagamentos ? pagamentos.filter((p) => p.clientId === item.clientId && p.linkedConsultationId === item.id && confirmado(p)).reduce((s, p) => s + principal(p), 0)
+    ? (item.coverage.balanceOnly ? item.coverage.balanceAtLaunch || 0 : lotesDaTarifa && lotesDaTarifa.length ? b.alocarLotes(lotesDaTarifa, item.coverage.minutes, item.billing.tariff.unitValue, item.billing.tariff.creditRounding).amount : item.coverage.minutes * unitValue)
+    : pagamentos ? funding.reduce((s, l) => { const p = pagamentos.find((x) => x.id === l.paymentId); return s + (p ? fd.valorDaFatia(l, p) : 0); }, 0)
       : funding.reduce((s, l) => s + l.amount, 0);
   const beneficio = item.coverage;
   const livre = Boolean(beneficio) && (beneficio.kind === 'Cortesia' || beneficio.kind === 'Bônus');
@@ -100,7 +108,7 @@ function acerto(item, pagamentos) {
   const mantemCreditoNaoUsado = item.status === 'Desistiu' && (!beneficio || beneficio.kind === 'Crédito') && Boolean(item.billing && item.billing.keepUnusedCashCredit);
   const cobravel = item.status === 'Não houve' ? 0 : mantemCreditoNaoUsado ? pagosReais : cobravelRegular;
   const lotesPrePagos = !item.specialPrice && complemento && beneficio.complementMode === 'prepaid' && lotesDaTarifa && lotesDaTarifa.length;
-  const alocCredito = !lotesPrePagos && !item.specialPrice && lotesDaTarifa && lotesDaTarifa.length ? b.alocarLotes(lotesDaTarifa, cobravel, item.billing.tariff.unitValue) : undefined;
+  const alocCredito = !lotesPrePagos && !item.specialPrice && lotesDaTarifa && lotesDaTarifa.length ? b.alocarLotes(lotesDaTarifa, cobravel, item.billing.tariff.unitValue, item.billing.tariff.creditRounding) : undefined;
   const preservaCobranca = b.contaMinutos(item.status) || b.retemCoberturaDeCancelamento(item);
   const debitoBruto = preservaCobranca ? (alocCredito ? alocCredito.amount : dinheiro(cobravel * (lotesPrePagos ? item.billing.tariff.unitValue : unitValue))) : 0;
   const dispensado = Math.min(debitoBruto, dinheiro(((item.billing && item.billing.chargeAdjustments) || []).reduce((s, a) => s + Math.max(0, Number.isFinite(a.amount) ? a.amount : 0), 0)));

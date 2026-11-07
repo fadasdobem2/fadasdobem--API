@@ -37,14 +37,21 @@ async function solicitacaoAberta(ex, tarotId, clientId) {
   const [linhas] = await ex.execute('SELECT id, item, version FROM gf_agenda_solicitacoes WHERE id_tarologo = ? AND id_cliente = ?', [tarotId, clientId]);
   return linhas.map(registroDe);
 }
+/** Todos os pedidos do tarólogo no dia (cliente ou contato), travados: a base do pedido repetido (`pedidoDuplicado`). */
+async function pedidosDoDia(ex, tarotId, data) {
+  const [linhas] = await ex.execute('SELECT id, item, version FROM gf_agenda_solicitacoes WHERE id_tarologo = ? AND data_operacional = ? FOR UPDATE', [tarotId, data]);
+  return linhas.map(registroDe);
+}
 async function inserirSolicitacao(ex, s, ator, operationKey) {
   const { id, ...resto } = s;
-  await ex.execute('INSERT INTO gf_agenda_solicitacoes (id, id_tarologo, id_cliente, data_operacional, item, version, criado_por, operation_key) VALUES (?, ?, ?, ?, ?, 1, ?, ?)',
-    [id, s.tarotId, s.clientId, s.date, JSON.stringify(resto), ator, operationKey]);
+  // v706: o pedido tem cliente OU contato; a ausência é NULA no banco.
+  await ex.execute('INSERT INTO gf_agenda_solicitacoes (id, id_tarologo, id_cliente, id_contato, data_operacional, item, version, criado_por, operation_key) VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?)',
+    [id, s.tarotId, s.clientId || null, s.contactId || null, s.date, JSON.stringify(resto), ator, operationKey]);
 }
 async function atualizarSolicitacao(ex, s, versao) {
   const { id, ...resto } = s;
-  await ex.execute('UPDATE gf_agenda_solicitacoes SET item = ?, version = ?, atualizado_em = CURRENT_TIMESTAMP WHERE id = ?', [JSON.stringify(resto), versao, id]);
+  await ex.execute('UPDATE gf_agenda_solicitacoes SET id_cliente = ?, id_contato = ?, data_operacional = ?, item = ?, version = ?, atualizado_em = CURRENT_TIMESTAMP WHERE id = ?',
+    [s.clientId || null, s.contactId || null, s.date, JSON.stringify(resto), versao, id]);
 }
 async function lerSolicitacoes(modelos, { desde, tarotId }) {
   const { Op } = require('sequelize');
@@ -53,4 +60,4 @@ async function lerSolicitacoes(modelos, { desde, tarotId }) {
   return linhas.map(registroDe);
 }
 
-module.exports = { eventosDoDia, inserirEvento, eventoExiste, lerEventos, solicitacaoTravada, solicitacaoAberta, inserirSolicitacao, atualizarSolicitacao, lerSolicitacoes, paraItem };
+module.exports = { pedidosDoDia, eventosDoDia, inserirEvento, eventoExiste, lerEventos, solicitacaoTravada, solicitacaoAberta, inserirSolicitacao, atualizarSolicitacao, lerSolicitacoes, paraItem };

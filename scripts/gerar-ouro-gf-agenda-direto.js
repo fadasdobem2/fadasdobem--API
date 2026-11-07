@@ -30,7 +30,7 @@ const HORAS = ['09:00', '10:30', '13:00', '17:45', '19:00', '20:30', '21:15', '2
 
 function gerarDireto(m) {
   const casos = [];
-  for (let k = 0; k < 600; k += 1) {
+  for (let k = 0; k < 1500; k += 1) {
     const dia = sorteio(['2026-11-02', '2026-11-04', '2026-11-09']);
     const now = sp(dia, sorteio(['05:30', '09:00', '14:20', '19:45', '21:10', '23:55', '02:30']));
     const hoje = m.cal.operationToday(now);
@@ -52,6 +52,16 @@ function gerarDireto(m) {
     // O formulário só deixa digitar um horário marcado inválido no campo "exato"; o plano normalizado nunca o leva (por isso 25:00 vai direto).
     const exato = timing === 'exact' ? (chance(0.12) ? sorteio(['25:00', '9h30', '24:61', '24:00']) : plano.time) : '';
     const form = { clientId, tarotId: chance(0.8) ? tarotId : outro, date: soma(hoje, sorteio([-2, -1, 0, 0, 0, 1, 1, 2, 5])), scheduledTime: exato };
+    // v706: minutos pedidos, meio de consulta, contato (lead) no lugar da cliente
+    if (chance(0.3)) form.requestedMinutes = chance(0.15) ? sorteio([0, -3, 1.5]) : sorteio([30, 45, 90]);
+    form.channel = chance(0.88) ? sorteio(['WhatsApp Áudio', 'PABX', 'WhatsApp Texto/Áudio', 'WhatsApp Ligação']) : sorteio(['WhatsApp', '', 'Telefone']);
+    const exigirModalidade = chance(0.5);
+    let contatos = [];
+    if (chance(0.3)) {
+      form.clientId = chance(0.05) ? clientId : ''; form.leadId = chance(0.9) ? 'lead-1' : chance(0.5) ? 'lead-9' : undefined;
+      contatos = [{ id: 'lead-1', name: chance(0.9) ? 'Ana' : ' ', whatsapp: chance(0.88) ? sorteio(['+5511987654321', '11 98765-4321']) : sorteio(['1234', '']), clientId: chance(0.05) ? '900001' : '', archived: chance(0.05), classification: chance(0.05) ? 'client' : 'lead' }];
+      if (antes) { antes.clientId = chance(0.85) ? '' : clientId; antes.leadId = chance(0.85) ? 'lead-1' : undefined; }
+    } else if (antes && chance(0.05)) { antes.leadId = 'lead-1'; }
     if (chance(0.15)) form.standbyDate = chance(0.7) ? hoje : soma(hoje, 1);
     const restricoes = chance(0.08) ? [{ id: 'r1', clientId, tarotId: form.tarotId, active: chance(0.85) }] : [];
     const perfil = { id: form.tarotId, name: form.tarotId === 'osiris' ? 'Osíris' : 'Nyx', registrationActive: chance(0.8) };
@@ -69,11 +79,13 @@ function gerarDireto(m) {
       if (modo === 'until_end') e.endTime = sorteio(['20:00', '23:00']);
       eventos.push(e);
     }
-    const pedido = chance(0.15) ? { id: 'rq-1', tarotId: chance(0.8) ? form.tarotId : outro, clientId: chance(0.85) ? clientId : '900099', client: 'Cliente', date: hoje, at: iso(now), note: '', ...(chance(0.2) ? { agendaId: 'ag-z' } : {}) } : undefined;
+    const pedido = chance(form.leadId ? 0.4 : 0.15) ? { id: 'rq-1', tarotId: chance(0.8) ? form.tarotId : outro, clientId: form.leadId ? (chance(0.2) ? '900099' : '') : chance(0.85) ? clientId : '900099', client: 'Cliente', date: hoje, at: iso(now), note: '', ...(form.leadId ? { contactId: chance(0.85) ? 'lead-1' : 'lead-9' } : {}), ...(chance(0.2) ? { agendaId: 'ag-z' } : {}) } : undefined;
     const agenda = [];
+    if (form.leadId && chance(0.75)) agenda.push({ id: 'ag-l', tarotId: form.tarotId, clientId: '', leadId: 'lead-1', client: 'L', date: chance(0.7) ? form.date : soma(form.date, 1), time: '10:00', channel: 'WhatsApp Áudio', position: 1, response: 'Aguardando resposta', contact: { attempt: 1, date: hoje, tags: chance(0.2) ? ['Cancelada'] : [] } });
+    if (pedido && !pedido.contactId && chance(0.2)) agenda.push({ id: 'ag-m', tarotId: pedido.tarotId, clientId: pedido.clientId, date: hoje, client: 'C', time: '10:00', channel: 'WhatsApp Áudio', position: 2, response: 'Aguardando resposta', contact: { attempt: 1, date: hoje, tags: [] } });
     if (pedido && chance(0.5)) agenda.push({ id: 'ag-z', tarotId: pedido.tarotId, clientId: pedido.clientId, date: sorteio([hoje, soma(hoje, 1)]), client: 'C', time: '10:00', channel: 'WhatsApp', position: 1, response: 'Aguardando resposta', contact: { attempt: 1, date: hoje, tags: chance(0.2) ? ['Cancelada'] : [] }, ...(chance(0.3) ? { requestId: pedido.id } : {}), ...(chance(0.2) ? { agendaOutcome: 'Cancelada' } : {}) });
     const consultas = chance(0.25) ? [{ id: 'c1', agendaItemId: 'ag-1', status: sorteio(['Em curso', 'Concluída']), tarotId: form.tarotId }] : [];
-    casos.push({ now, hoje, antes: antes || null, form, plano, restricoes, perfil, eventos, pedido: pedido || null, agenda, consultas, esperado: m.referencia(m, { now, hoje, antes, form, plano, restricoes, perfil, eventos, pedido, agenda, consultas }) });
+    casos.push({ now, hoje, antes: antes || null, form, plano, restricoes, perfil, eventos, pedido: pedido || null, agenda, consultas, contatos, exigirModalidade, esperado: m.referencia(m, { now, hoje, antes, form, plano, restricoes, perfil, eventos, pedido, agenda, consultas, contatos, exigirModalidade }) });
   }
   return casos;
 }
@@ -111,27 +123,34 @@ function gerarTurno(m) {
     const forma = await l('/features/agenda/schedule-form-model.ts');
     const contato = await l('/features/agenda/agenda-contact.ts');
     const tarologas = await l('/features/tarologas/tarologist-presence.ts');
-    const m = { cal, intake, presenca, historia, restricoes, tempo, forma, contato, tarologas };
+    const identidade = await l('/features/agenda/agenda-identity.ts');
+    const canais = await l('/features/domain/consultation-channels.ts');
+    const m = { cal, intake, presenca, historia, restricoes, tempo, forma, contato, tarologas, identidade, canais };
 
-    /** `submitSchedule`, caminho direto: devolve a PRIMEIRA recusa (ou ''), na ordem do código do front. */
+    /** `submitSchedule` v706 (agenda-experience.tsx:1185-1230), caminho direto: devolve a PRIMEIRA recusa (ou ''), na ordem do código do front. */
     m.referencia = (mod, c) => {
-      const { now, hoje, antes, form, plano, restricoes: rs, perfil, eventos, pedido, agenda, consultas } = c;
-      const erroId = mod.historia.agendaClientChangeError(antes, form.clientId);
+      const { now, hoje, antes, form, plano, restricoes: rs, perfil, eventos, pedido, agenda, consultas, contatos, exigirModalidade } = c;
+      const minutos = mod.canais.validateRequestedMinutes(form.requestedMinutes);
+      if (minutos) return minutos;
+      if (exigirModalidade && !mod.canais.CURRENT_CONSULTATION_CHANNELS.includes(form.channel)) return 'Escolha um meio de consulta válido.';
+      const identidade = { clientId: form.clientId.trim(), leadId: form.leadId };
+      const erroId = mod.identidade.agendaIdentityError(identidade, contatos) || (antes && !mod.identidade.sameAgendaIdentity(antes, identidade) ? 'A identificação deste agendamento mudou. Feche e abra novamente para conferir.' : '');
       if (erroId) return erroId;
       if ((!antes || antes.clientId !== form.clientId.trim() || antes.tarotId !== form.tarotId || (antes.date || hoje) !== form.date) && mod.restricoes.isAttendanceRestricted(rs, form.clientId.trim(), form.tarotId)) return 'Indisponível';
+      if (form.leadId && !mod.intake.normalizeIntakeWhatsapp((contatos.find((x) => x.id === form.leadId) || {}).whatsapp || '')) return 'Complete o WhatsApp do contato, com DDD e número.';
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(form.date)) return 'Informe uma data válida.';
       if (form.scheduledTime && !mod.tempo.validClock(form.scheduledTime)) return 'Digite um horário válido, como 21:30, ou deixe em branco.';
-      const alvo = { tarotId: form.tarotId, date: form.date, clientId: form.clientId.trim(), standbyDate: form.standbyDate, scheduledTime: form.scheduledTime };
+      const alvo = { tarotId: form.tarotId, date: form.date, clientId: form.clientId.trim(), leadId: form.leadId, standbyDate: form.standbyDate, scheduledTime: form.scheduledTime };
       const admissao = mod.intake.intakeAdmissionError(mod.intake.currentIntake(eventos, form.tarotId, form.standbyDate || form.date, now), antes || undefined, alvo, now) || mod.presenca.presenceAdmissionError(perfil, antes || undefined, alvo, now);
       if (admissao) return admissao;
-      const agendaCompleta = antes ? [antes, ...agenda] : agenda;
-      if (pedido && ((!antes && pedido.tarotId !== form.tarotId) || pedido.clientId !== form.clientId.trim())) return 'Esta solicitação pertence à cliente e ao tarólogo informados. Abra um novo agendamento para outra pessoa.';
+      if (pedido && ((!antes && pedido.tarotId !== form.tarotId) || !mod.identidade.sameAgendaIdentity(mod.identidade.requestAgendaIdentity(pedido), identidade))) return 'Esta solicitação pertence à cliente e ao tarólogo informados. Abra um novo agendamento para outra pessoa.';
       if (pedido && !antes && mod.intake.requestAppointment(pedido, agenda)) return 'Esta solicitação já tem um agendamento. Abra o registro existente.';
       if (form.standbyDate && form.standbyDate !== form.date) return 'Se der hoje pertence à agenda de hoje. Confira a data.';
+      if (!antes && form.leadId && agenda.some((x) => mod.identidade.sameAgendaIdentity(x, identidade) && x.tarotId === form.tarotId && (x.date || hoje) === form.date && !mod.contato.agendaIsClosed(x))) return 'Este contato já tem agendamento nesta data. Abra o registro existente.';
       if (!antes) return '';
       const mudaDestino = antes.tarotId !== form.tarotId || (antes.date || hoje) !== form.date;
       const proximoTurno = mod.contato.agendaContact(antes).tags.includes('Próximo turno') && form.tarotId === antes.tarotId;
       const mudou = mod.forma.scheduleFormAgreementChanged(antes, plano, form.tarotId, form.date, hoje, false);
-      void agendaCompleta;
       if ((mudaDestino || mudou || proximoTurno) && consultas.some((x) => x.agendaItemId === 'ag-1' && x.status === 'Em curso')) return 'Finalize a consulta em andamento antes de mudar o agendamento.';
       if (mudaDestino && proximoTurno && form.date < hoje) return 'Escolha hoje ou uma data futura para o próximo turno.';
       return '';
@@ -151,7 +170,7 @@ function gerarTurno(m) {
     const direto = gerarDireto(m);
     const turno = gerarTurno(m);
     const destino = path.join(__dirname, 'apoio-gf-agenda', 'ouro-agenda-direto.json');
-    fs.writeFileSync(destino, `${JSON.stringify({ gerado: 'a partir do código do front (agenda-experience submitSchedule, agenda-intake-model, staff-presence-model, agenda-history, restriction-model, time-input, schedule-form-model, agenda-intake-context currentClosurePeriod)', direto, turno })}\n`);
+    fs.writeFileSync(destino, `${JSON.stringify({ gerado: 'a partir do código do front (agenda-experience submitSchedule, agenda-intake-model, staff-presence-model, agenda-identity, consultation-channels, agenda-history, restriction-model, time-input, schedule-form-model, agenda-intake-context currentClosurePeriod)', direto, turno })}\n`);
     const recusas = new Set(direto.map((c) => c.esperado));
     console.log(`${direto.length} casos diretos (${recusas.size} desfechos distintos), ${turno.length} casos de turno (${turno.filter((c) => c.esperado).length} com turno vigente) em ${path.relative(process.cwd(), destino)}`);
     for (const r of recusas) console.log(`   - ${r || '(sem recusa)'} : ${direto.filter((c) => c.esperado === r).length}`);

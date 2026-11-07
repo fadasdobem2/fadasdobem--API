@@ -9,6 +9,7 @@
 
 const b = require('./financeiro-base');
 const cob = require('./financeiro-cobranca');
+const fd = require('./financeiro-financiamento-dividido');
 
 const { erro } = require('./consulta-comum');
 const normalizado = (id) => (id || '').trim().toUpperCase().replace(/^C-/, '');
@@ -18,7 +19,8 @@ const consome = b.consomeCobertura;
 function minutosFinanciados(item, pagamentos) {
   return cob.financiamento(item, pagamentos).reduce((soma, lote) => {
     const p = pagamentos.find((x) => x.id === lote.paymentId);
-    return soma + Math.max(0, Math.floor(p.cashUnitValue ? cob.principal(p) / p.cashUnitValue + 0.000001 : (lote.minutes * cob.principal(p)) / p.amount + 0.000001));
+    const disponivel = fd.valorDaFatia(lote, p); // v706: recibo dividido, só a fatia desta consulta
+    return soma + Math.max(0, Math.floor(p.cashUnitValue ? disponivel / p.cashUnitValue + 0.000001 : lote.amount > 0 ? (lote.minutes * disponivel) / lote.amount + 0.000001 : 0));
   }, 0);
 }
 

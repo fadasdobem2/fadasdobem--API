@@ -9,6 +9,7 @@
 const c = require('./agenda.controller');
 const adm = require('./agenda-admissao.controller');
 const fila = require('./agenda-fila.controller');
+const contatos = require('./agenda-contatos.controller');
 
 module.exports = [
   { metodo: 'GET', caminho: '/agenda', escrita: false, handler: c.ler },
@@ -20,6 +21,10 @@ module.exports = [
   // Quem pede é a taróloga (`canViewOwnAgenda`); a equipe só resolve.
   { metodo: 'POST', caminho: '/agenda/requests', escrita: true, capacidade: 'canViewOwnAgenda', handler: adm.registrarSolicitacao },
   { metodo: 'POST', caminho: '/agenda/requests/:id/resolve', escrita: true, handler: adm.resolverSolicitacao },
+  // v706: a equipe conduz o pedido e mantém os contatos (código IL). Mesma fatia e mesma permissão da Agenda.
+  { metodo: 'PUT', caminho: '/agenda/requests/:id', escrita: true, handler: adm.atualizarSolicitacao },
+  { metodo: 'GET', caminho: '/agenda/contacts', escrita: false, handler: contatos.lerContatos },
+  { metodo: 'PUT', caminho: '/agenda/contacts/:id', escrita: true, handler: contatos.salvarContato },
   { metodo: 'POST', caminho: '/agenda', escrita: true, handler: c.criar },
   { metodo: 'PATCH', caminho: '/agenda/:id', escrita: true, handler: c.editar },
   { metodo: 'POST', caminho: '/agenda/:id/contact', escrita: true, handler: c.contato },

@@ -32,15 +32,15 @@ async function offline() {
   const wel = r('src/gestao-fadas/_comum/dominio/welcome');
 
   console.log('Domínio das contas');
-  await passo('senha forte como o front (12+, maiúscula, minúscula, número, símbolo)', () => {
-    assert.equal(dom.senhaForte('Abcdefghij1!'), true);
-    for (const s of ['Abcdefghi1!', 'abcdefghij1!', 'ABCDEFGHIJ1!', 'Abcdefghijk!', 'Abcdefghij12', '', null]) assert.equal(dom.senhaForte(s), false, String(s));
+  await passo('senha forte como o front (v706: 15+, maiúscula, minúscula, número, símbolo)', () => {
+    assert.equal(dom.senhaForte('Abcdefghijklmn1!'), true);
+    for (const s of ['Abcdefghij1!', 'Abcdefghijkl1!', 'abcdefghijklmn1!', 'ABCDEFGHIJKLMN1!', 'Abcdefghijklmno!', 'Abcdefghijklmn12', '', null]) assert.equal(dom.senhaForte(s), false, String(s));
   });
   await passo('e-mail: mensagens do front para vazio, com espaço e sem formato', () => {
     assert.equal(dom.validarEmail(''), 'Preencha o nome e o usuário ou e-mail.');
     assert.equal(dom.validarEmail('a b@c.co'), 'Confira o usuário ou e-mail informado.');
     assert.equal(dom.validarEmail('semarroba'), 'Confira o usuário ou e-mail informado.');
-    assert.equal(dom.validarEmail('ok@fadas.test'), null);
+    assert.equal(dom.validarEmail('ok@fadasdobem.com.br'), null);
   });
   await passo('nome: espaços repetidos viram um', () => assert.equal(dom.normalizarNome('  Ana   Maria  Souza '), 'Ana Maria Souza'));
   await passo('rótulo de acesso: Ainda não acessou, Agora, Hoje, Ontem e data', () => {
@@ -67,10 +67,10 @@ async function offline() {
   });
 
   console.log('Validação das contas');
-  const novo = (x = {}) => ({ operationKey: 'chave-0001', name: 'Ana', email: 'ana@fadas.test', role: 'atendente', password: 'Abcdefghij1!', ...x });
+  const novo = (x = {}) => ({ operationKey: 'chave-0001', name: 'Ana', email: 'ana@fadasdobem.com.br', role: 'atendente', password: 'Abcdefghijklmn1!', ...x });
   await passo('criar aceita o corpo certo e normaliza e-mail e nome', () => {
-    const v = val.corpoCriar(novo({ name: ' Ana  Souza ', email: 'ANA@Fadas.Test' }));
-    assert.equal(v.name, 'Ana Souza'); assert.equal(v.email, 'ana@fadas.test');
+    const v = val.corpoCriar(novo({ name: ' Ana  Souza ', email: 'ANA@Fadasdobem.Com.Br' }));
+    assert.equal(v.name, 'Ana Souza'); assert.equal(v.email, 'ana@fadasdobem.com.br');
   });
   await passo('criar recusa: campo extra, papel desconhecido, chave curta (400) e regras do front (422)', () => {
     rejeita(() => val.corpoCriar(novo({ hash: 'x' })), 400, 'INVALID_INPUT');

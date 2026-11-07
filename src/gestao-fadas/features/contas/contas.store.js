@@ -13,6 +13,8 @@ const { paraConta } = require('../../_comum/dominio/contas');
 const SELECT = `SELECT u.id, u.email, u.role AS produto, u.is_active, u.blocked_at, u.last_login_at,
   COALESCE(sp.display_name, spec.display_name, u.email) AS nome, spec.slug, spec.commission_percent_default AS comissao,
   p.tarot_id, p.cadastro_ativo, e.legacy_id, e.avatar, COALESCE(e.revisao, 0) AS revisao,
+  COALESCE(e.acesso_pendente, false) AS acesso_pendente, e.convite_hash, e.convite_tipo, e.convite_email, e.convite_papel, e.convite_emitido, e.convite_expira,
+  e.convite_usado, e.convite_revogado, COALESCE(e.ver_minutagem, false) AS ver_minutagem, COALESCE(e.permissoes_trilha, '[]'::jsonb) AS permissoes_trilha,
   COALESCE((SELECT array_agg(r.role_id) FROM access_user_roles r WHERE r.user_id = u.id), ARRAY[]::varchar[]) AS papeis
 FROM users u
 LEFT JOIN staff_profiles sp ON sp.user_id = u.id AND sp.deleted_at IS NULL

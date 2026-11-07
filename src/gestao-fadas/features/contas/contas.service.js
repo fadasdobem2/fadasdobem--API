@@ -8,39 +8,33 @@
  *   - senha: SÓ hash bcrypt (o mesmo custo do login da A); nunca em log, auditoria, resposta ou `gf_operacoes` (a impressão da operação usa HMAC);
  *   - bloquear/trocar senha revoga os refresh tokens da conta (o access é validado contra o banco a cada pedido);
  *   - idempotência por `operationKey`, revisão otimista `expectedRevision` (409 VERSION_CHANGED), auditoria na MESMA transação.
- * Convite com link/token NÃO existe aqui: o front não tem o conceito (Maturacao/33, seção 3).
+ * v706: a conta nasce por CONVITE (sem senha; `contas.convite.service.js`) e só aceita e-mail @fadasdobem.com.br; a senha, quando enviada, tem 15+ caracteres.
+ *   Substitui a regra antiga de 12 caracteres e o "sem convite" da Maturacao/33.
  */
 
-const bcrypt = require('bcryptjs');
-const { randomUUID, createHash, createHmac } = require('crypto');
-const AppError = require('../../../utils/AppError');
-const { resolverPerfil } = require('../../_comum/politica-acesso');
-const { AUDIT_INSERT, linhaDeAuditoria } = require('../../_comum/auditoria');
-const { contaDaRequisicao } = require('../../_comum/conta');
+const { createHash, randomBytes, randomUUID } = require('crypto');
 const dom = require('../../_comum/dominio/contas');
+const conv = require('../../_comum/dominio/contas-convite');
 const { novosDadosNoPostgres } = require('../../novo/modo');
-const { umaVez, OperacaoConflitoError } = require('../../novo/operacoes');
 const c = require('../cadastros/cadastros.comum');
 const tarologos = require('../cadastros/tarologos.service');
 const tarologosStore = require('../cadastros/tarologos.store');
 const store = require('./contas.store');
+const cs = require('./contas.convite.store');
+const convite = require('./contas.convite.service');
+const perm = require('../../_comum/dominio/contas-permissoes');
 const validar = require('./contas.validacao');
-const { emTransacaoContas } = require('./contas.banco');
+const { hashSenha, marcaSenha, exigirAdministradora, conflitoConta, naoEncontrada, resumo, gravar, respostaDe } = require('./contas.comum');
 
-const chaveAuditoria = (escopo, chave) => `cta:${createHash('sha256').update(`${escopo}:${chave}`).digest('hex').slice(0, 40)}`;
-const custoBcrypt = () => require('../../../features/auth/auth.constants').AUTH_CONFIG.bcryptCostPassword || 12;
-const hashSenha = (s) => bcrypt.hash(s, custoBcrypt());
-/** Impressão da senha para a idempotência: HMAC com segredo do servidor (a senha em claro nunca entra no corpo guardado). */
-const marcaSenha = (s) => (s === undefined ? null : createHmac('sha256', process.env.JWT_SECRET || 'gf-contas').update(s).digest('hex'));
-
-function exigirAdministradora(req, escrita) {
-  if (resolverPerfil(req) !== 'administradora') throw c.negado(escrita);
+/** Permissão "Ver minutagem total" (v706): só a administradora altera; quem não pode receber fica sem ela; grava a trilha. */
+async function aplicarMinutagem(ex, t, id, ligada, ator) {
+  if (ligada === undefined) return;
+  const linha = await store.lerUma(id, t);
+  const quem = await store.lerUma(ator, t);
+  const antes = store.dto(linha);
+  const depois = perm.definirMinutagem(antes, ligada, { id: ator, name: quem ? quem.nome : '', role: 'administradora', active: true }, new Date().toISOString(), randomUUID());
+  if (depois !== antes) await cs.gravarPermissao(ex, id, depois.permissions.viewDailyMinutes === true, depois.permissionAudit);
 }
-const conflitoConta = () => new AppError('Não foi possível salvar este cadastro. Seu rascunho foi mantido; reabra o cadastro e tente novamente.', 409, { codigo: 'VERSION_CHANGED', usarMensagem: true }, true);
-const naoEncontrada = () => c.naoEncontrado();
-
-/** O que a auditoria guarda de uma conta: nunca senha, hash nem a foto inteira. */
-const resumo = (conta) => (conta ? { name: conta.name, email: conta.email, role: conta.role, active: conta.active, ...(conta.tarotId ? { tarotId: conta.tarotId } : {}), ...(conta.legacyId ? { legacyId: conta.legacyId } : {}), temFoto: Boolean(conta.avatar) } : null);
 
 /** `GET /accounts`. */
 async function ler(req) {
@@ -50,34 +44,6 @@ async function ler(req) {
   const linhas = await store.lerLinhas();
   return { readAt: agora.toISOString(), accounts: linhas.map((l) => store.dto(l, agora)), revisions: Object.fromEntries(linhas.map((l) => [l.id, l.revisao])) };
 }
-
-/** Gravação idempotente: efeito + auditoria + gf_operacoes numa transação; `producao(ex, t)` devolve `{ antes, depois, resposta }`. */
-async function gravar(req, { escopo, operationKey, corpo, acao, entidadeId, producao }) {
-  const conta = contaDaRequisicao(req);
-  const perfil = resolverPerfil(req);
-  if (!conta || !perfil) throw c.indisponivel();
-  try {
-    const r = await emTransacaoContas(async (ex, t) => umaVez(ex, { escopo, chave: operationKey, corpo: { ...corpo, usuario: conta } }, async () => {
-      const feito = await producao(ex, t, conta);
-      await ex.execute(AUDIT_INSERT, linhaDeAuditoria(
-        { actorUserId: conta, actorRole: perfil, action: acao, entity: 'conta', entityId: feito.entidadeId || entidadeId, before: feito.antes, after: feito.depois },
-        { id: randomUUID(), agora: Date.now(), chave: chaveAuditoria(escopo, operationKey) },
-      ));
-      return feito.resposta;
-    }));
-    return r.resposta;
-  } catch (erro) {
-    if (erro instanceof OperacaoConflitoError) throw new AppError('Esta operação já foi registrada com outros dados.', 409, { codigo: 'OPERATION_KEY_CONFLICT' }, true);
-    if (erro && (erro.name === 'SequelizeUniqueConstraintError' || erro.errno === 1062 || erro.code === '23505')) throw c.regra(dom.MSG.emailEmUso);
-    if (erro && erro.codigo === 'PAPEL_AUSENTE') throw c.indisponivel();
-    throw erro;
-  }
-}
-
-const respostaDe = async (id, t, ex, agora = new Date()) => {
-  const l = await store.lerUma(id, t);
-  return { readAt: agora.toISOString(), account: store.dto(l, agora), revision: l.revisao };
-};
 
 /** `POST /accounts`. */
 async function criar(req) {
@@ -90,15 +56,16 @@ async function criar(req) {
     const vinculo = dom.conferirVinculo({ temCadastro: true, contaDoCadastroId: item.accountLinked ? 'ligada' : null, idEditando: undefined, papel: 'tarologa' });
     if (vinculo) throw c.regra(vinculo);
   }
-  const hash = await hashSenha(b.password);
-  const corpo = { role: b.role, tarotId: b.tarotId, name: b.name, email: b.email, senha: marcaSenha(b.password), legacyId: b.legacyId, temFoto: Boolean(b.avatar) };
-  return gravar(req, {
+  const pendente = b.password === undefined; // v706: sem senha, a conta nasce por convite
+  const hash = await hashSenha(pendente ? randomBytes(32).toString('hex') : b.password);
+  const corpo = { role: b.role, viewDailyMinutes: b.viewDailyMinutes, tarotId: b.tarotId, name: b.name, email: b.email, senha: marcaSenha(b.password), legacyId: b.legacyId, temFoto: Boolean(b.avatar) };
+  const resposta = await gravar(req, {
     escopo: 'contas.criar', operationKey: b.operationKey, corpo: { ...corpo, avatar: b.avatar ? createHash('sha256').update(b.avatar).digest('hex') : null }, acao: 'contas.criar',
     producao: async (ex, t, ator) => {
       const { User, Specialist } = require('../../../models');
       if (await store.emailEmUso(b.email, t)) throw c.regra(dom.MSG.emailEmUso);
       // Ordem do front (`planAccountCommand`): nome e e-mail, e-mail já cadastrado, só então a força da senha e o vínculo da taróloga.
-      validar.exigirSenhaForte(b.password);
+      if (!pendente) validar.exigirSenhaForte(b.password);
       if (b.role === 'tarologa' && !b.tarotId) throw c.regra(dom.MSG.semCadastro);
       const tarologa = b.role === 'tarologa';
       const papeis = dom.PAPEIS_DA_A[b.role];
@@ -116,10 +83,17 @@ async function criar(req) {
         await store.nomeStaff(usuario.id, b.name, t);
       }
       await store.gravarExt(ex, usuario.id, { legacyId: b.legacyId, avatar: b.avatar }, ator);
+      if (pendente) {
+        const linha = await store.lerUma(usuario.id, t);
+        if (linha.perfil === 'tarologa' && linha.cadastro_ativo === false) throw c.regra(conv.MSG.cadastroInativo);
+        await convite.emitirDentro(ex, t, { ...linha, acesso_pendente: true }, b.operationKey);
+      }
+      await aplicarMinutagem(ex, t, usuario.id, b.viewDailyMinutes, ator);
       const resposta = await respostaDe(usuario.id, t, ex);
       return { entidadeId: usuario.id, antes: null, depois: resumo(resposta.account), resposta };
     },
   });
+  return pendente ? convite.comToken(resposta, resposta.account.id, b.operationKey) : resposta;
 }
 
 /** `PATCH /accounts/:id`. */
@@ -128,7 +102,7 @@ async function editar(req) {
   const id = validar.idConta(req.params.id);
   const b = validar.corpoEditar(req.body);
   const hash = b.password === undefined ? null : await hashSenha(b.password);
-  const corpo = { id, expectedRevision: b.expectedRevision, role: b.role, name: b.name, email: b.email, senha: marcaSenha(b.password), legacyId: b.legacyId, avatar: b.avatar === undefined ? undefined : (b.avatar ? createHash('sha256').update(b.avatar).digest('hex') : null) };
+  const corpo = { id, expectedRevision: b.expectedRevision, viewDailyMinutes: b.viewDailyMinutes, role: b.role, name: b.name, email: b.email, senha: marcaSenha(b.password), legacyId: b.legacyId, avatar: b.avatar === undefined ? undefined : (b.avatar ? createHash('sha256').update(b.avatar).digest('hex') : null) };
   return gravar(req, {
     escopo: 'contas.editar', operationKey: b.operationKey, corpo, acao: 'contas.editar', entidadeId: id,
     producao: async (ex, t, ator) => {
@@ -151,7 +125,10 @@ async function editar(req) {
       if (campos.role) await store.definirPapeis(usuario, dom.PAPEIS_DA_A[b.role].rbac, t);
       if (b.name !== undefined && b.name !== antes.nome) await (antes.perfil === 'tarologa' ? store.nomeTarologa(id, b.name, t) : store.nomeStaff(id, b.name, t));
       if (hash) await store.revogarSessoes(id, t);
+      // v706 (`saveAccount`): trocar e-mail ou função invalida o convite que ainda estava aberto.
+      if (antes.convite_hash && ((b.email !== undefined && b.email !== antes.email.toLocaleLowerCase('pt-BR')) || (b.role !== undefined && b.role !== antes.perfil))) await cs.revogarConvite(ex, id, new Date().toISOString());
       await store.gravarExt(ex, id, { legacyId: b.legacyId, avatar: b.avatar }, ator);
+      await aplicarMinutagem(ex, t, id, b.viewDailyMinutes, ator);
       const resposta = await respostaDe(id, t, ex);
       return { antes: resumo(store.dto(antes)), depois: { ...resumo(resposta.account), ...(hash ? { senhaAlterada: true } : {}) }, resposta };
     },
@@ -201,6 +178,7 @@ async function definirAtivo(req) {
       }
       await usuario.update({ is_active: b.active, blocked_at: b.active ? null : new Date() }, { transaction: t });
       if (!b.active) await store.revogarSessoes(id, t);
+      await cs.revogarConvite(ex, id, new Date().toISOString()); // v706: bloquear ou reativar revoga o convite aberto
       await store.gravarExt(ex, id, {}, ator);
       const resposta = await respostaDe(id, t, ex);
       return { antes: { active: antes.ativo }, depois: { active: b.active }, resposta };

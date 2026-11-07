@@ -11,6 +11,7 @@
 const s = require('./financeiro-saldo');
 const { consomeCobertura, PRECOS_PADRAO } = require('./financeiro-base');
 const { contatoDe } = require('./agenda-contato');
+const { ehDeCliente } = require('./agenda-identidade');
 const b = require('./fila-geral-base');
 const adm = require('./admissao');
 const t = require('./painel-tempo');
@@ -32,6 +33,8 @@ function reais(valor) {
 
 /** `agendaPaymentState` (com pagamentos). */
 function estadoDePagamento(item, pagamentos, consultas = []) {
+  // v706: agendamento de contato (lead) ainda não é cliente; o pagamento só conta depois do cadastro.
+  if (!ehDeCliente(item)) return { paidAmount: 0, expectedAmount: undefined, openAmount: undefined, tone: 'unknown', shortLabel: 'Cadastro a completar', paidAt: undefined, awaitingConfirmation: false };
   const dele = consultas.filter((c) => c.clientId === item.clientId);
   const recibos = pagamentos.filter((p) => p.clientId === item.clientId && s.recebimentoConfirmado(p));
   const pertence = (id) => dele.some((c) => c.id === id && (c.agendaItemId === item.id || c.id === item.resolvedByConsultationId));
@@ -54,6 +57,7 @@ function estadoDePagamento(item, pagamentos, consultas = []) {
 /** `agendaFundingState`. */
 function estadoDeFinanciamento(item, pagamentos, consultas = [], perfil, em) {
   const pagamento = estadoDePagamento(item, pagamentos, consultas);
+  if (!ehDeCliente(item)) return { ...pagamento, coverage: s.coberturaDaCliente('', [], [], undefined, em), availableAmount: 0, receiptAvailableAmount: 0, funded: false, kind: 'missing', statusLabel: 'Cadastro a completar', shortLabel: 'Cadastro a completar', tone: 'pending' };
   const cobertura = s.coberturaDaCliente(item.clientId, pagamentos, consultas, perfil, em);
   const disponivel = Math.max(pagamento.paidAmount, Math.max(0, cobertura.balance));
   const disponivelRecibo = Math.max(pagamento.paidAmount, cobertura.confirmedAvailableBalance);
@@ -66,12 +70,12 @@ function estadoDeFinanciamento(item, pagamentos, consultas = [], perfil, em) {
 /** `queueLaunchBalance`. */
 function saldoDoLancamento(clientId, pagamentos, consultas, perfil, em) {
   const total = s.contaDaCliente(clientId, pagamentos, consultas, (perfil && perfil.credit) || 0).balance;
-  const credito = s.tarifaDeCredito(clientId, em, undefined, consultas, pagamentos, perfil, undefined, false);
+  const credito = s.tarifaDeCredito(clientId, em, undefined, consultas, pagamentos, perfil, undefined, true);
   const restante = new Map();
   for (const l of credito.availableLots) if (l.paymentId) restante.set(l.paymentId, (restante.get(l.paymentId) || 0) + l.cents);
   const pagamento = pagamentos.filter((p) => p.clientId === clientId && s.recebimentoConfirmado(p) && (restante.get(p.id) || 0) > 0).sort((p, z) => Date.parse(pg.pagoEm(z)) - Date.parse(pg.pagoEm(p)))[0] || null;
   const cents = pagamento ? restante.get(pagamento.id) || 0 : 0;
-  return { total, previousBalance: (Math.round(total * 100) - cents) / 100, payment: pagamento, paymentRemaining: cents / 100, partiallyUsed: Boolean(pagamento && cents !== Math.round(pagamento.amount * 100)), maximumMinutes: credito.availableMinutes, unitValue: credito.unitValue };
+  return { total, availableAmount: Math.min(total, credito.availableAmount), previousBalance: (Math.round(total * 100) - cents) / 100, payment: pagamento, paymentRemaining: cents / 100, partiallyUsed: Boolean(pagamento && cents !== Math.round(pagamento.amount * 100)), maximumMinutes: credito.availableMinutes, unitValue: credito.unitValue };
 }
 
 /** `readerContinuationOffer`. */
@@ -80,7 +84,7 @@ function ofertaDeContinuacao(item, consultas, pagamentos, em, perfil) {
   if (!origem) return undefined;
   const historico = consultas.map((r) => (r.tarologistFinishReport && r.tarologistFinishReport.financialCap && !r.finishReview ? { ...r, durationSeconds: Math.max(r.durationSeconds, r.tarologistFinishReport.minutes * 60) } : r));
   const credito = s.tarifaDeCredito(item.clientId, em, undefined, historico, pagamentos, perfil, undefined, true);
-  const centavos = credito.availableLots.reduce((t0, l) => t0 + l.cents, 0); const valorMinuto = credito.unitValue; const minimo = (origem.billing && origem.billing.minimumMinutes) ?? 15;
+  const centavos = credito.availableLots.reduce((t0, l) => t0 + l.cents, 0); const valorMinuto = credito.unitValue; const minimo = 1; // v706: a continuação financia-se a partir de 1 minuto (substitui o mínimo da tabela, 15).
   const minutos = credito.availableMinutes; const agora = Date.parse(em);
   const financiado = minutos >= minimo; const pausado = k.continuacaoSuspensa(item, consultas); const hoje = t.hojeDe(agora);
   const pronto = contatoDe(item).date === hoje && contatoDe(item).tags.includes('Pode agora') && !pausado;
@@ -94,6 +98,7 @@ function ofertaDeContinuacao(item, consultas, pagamentos, em, perfil) {
 function financiamentoDoLancamento(item, entrada, perfil) {
   const em = new Date(entrada.now).toISOString();
   const financeiro = estadoDeFinanciamento(item, entrada.payments, entrada.consultations, perfil, em);
+  if (!ehDeCliente(item)) return financeiro;
   const continuacao = item.continuationRequest ? ofertaDeContinuacao(item, entrada.consultations, entrada.payments, em, perfil) : undefined;
   const caixa = saldoDoLancamento(item.clientId, entrada.payments, entrada.consultations, perfil, em);
   const disponivel = Math.max(0, item.continuationRequest ? (continuacao && continuacao.availableAmount) ?? 0 : caixa.total);
@@ -120,6 +125,7 @@ function passoDaReserva(item, entrada, perfil) {
   const aviso = [...(item.contactHistory || [])].reverse().find((e) => e.attempt === contato.attempt && e.date === contato.date && e.tag === 'Avisada' && e.active);
   const avisoEm = tags.includes('Avisada') && aviso ? Date.parse(aviso.at) : null;
   const estado = { funded: financiado, paidLabel: financeiro.statusLabel, noticeAt: avisoEm, availableAmount: financeiro.availableAmount };
+  if (!ehDeCliente(item)) return { kind: 'review', label: 'Completar cadastro', detail: 'Vincule ou cadastre a cliente antes de lançar pagamento ou consulta.', ...estado, canGenerate: false };
   const tempo = q.temporizacao(item, entrada.date, entrada.now);
   if (tempo.future) return { kind: 'notice', label: 'Aguardar horário', detail: `${tempo.label}. Confirme a disponibilidade no horário combinado.`, ...estado, canGenerate: false };
   const bloqueio = bloqueioDeLancamento(item, entrada.date, entrada.now);

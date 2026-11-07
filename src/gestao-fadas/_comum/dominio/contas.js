@@ -8,6 +8,8 @@
  * Nada de I/O, nada de senha em log.
  */
 
+const { isFadasEmail, MSG: MSG_CONVITE } = require('./contas-convite');
+
 const PERFIS_EQUIPE = Object.freeze(['administradora', 'assistente', 'supervisora', 'atendente']);
 
 /** Papéis que a A grava para cada perfil de equipe: os mesmos das contas de teste e de `MAPEAMENTO_PERFIL` (Maturacao/23). */
@@ -22,7 +24,7 @@ const MSG = Object.freeze({
   nomeEmail: 'Preencha o nome e o usuário ou e-mail.',
   emailInvalido: 'Confira o usuário ou e-mail informado.',
   emailEmUso: 'Esse usuário ou e-mail já está cadastrado.',
-  senhaFraca: 'Use 12 caracteres, maiúscula, minúscula, número e símbolo. Confirme a mesma senha.',
+  senhaFraca: 'Use 15 caracteres, maiúscula, minúscula, número e símbolo. Confirme a mesma senha.',
   ultimaAdmin: 'Mantenha pelo menos uma administradora com acesso ativo. Crie ou ative outro acesso administrativo antes de alterar esta função.',
   bloquearPropria: 'Você não pode bloquear seu próprio acesso.',
   cadastroInativo: 'Ative o cadastro em Tarólogos antes de liberar o acesso.',
@@ -34,8 +36,8 @@ const MSG = Object.freeze({
 
 const FOTO_MAX_CARACTERES = 4_500_000; // 3 MB em data URL base64 (~4 MB) com folga
 
-/** `strongAccountPassword`. */
-const senhaForte = (s) => typeof s === 'string' && s.length >= 12 && /[a-z]/.test(s) && /[A-Z]/.test(s) && /\d/.test(s) && /[^A-Za-z0-9]/.test(s);
+/** `strongAccountPassword` (v706: 15 caracteres; antes 12, substituída pela Nice). */
+const senhaForte = (s) => typeof s === 'string' && s.length >= 15 && /[a-z]/.test(s) && /[A-Z]/.test(s) && /\d/.test(s) && /[^A-Za-z0-9]/.test(s);
 
 /** Nome como o front guarda: espaços repetidos viram um. */
 const normalizarNome = (n) => (typeof n === 'string' ? n.trim().replace(/\s+/g, ' ') : '');
@@ -45,6 +47,8 @@ function validarEmail(bruto) {
   const email = typeof bruto === 'string' ? bruto.trim() : '';
   if (!email) return MSG.nomeEmail;
   if (/\s/.test(email) || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 320) return MSG.emailInvalido;
+  // v706 (`saveAccount`): a conta é por convite e só aceita e-mail @fadasdobem.com.br.
+  if (!isFadasEmail(email)) return MSG_CONVITE.emailFadas;
   return null;
 }
 const emailChave = (e) => `${e}`.trim().toLocaleLowerCase('pt-BR');
@@ -79,6 +83,16 @@ function paraConta(l, agora = new Date()) {
   if (l.tarot_id) conta.tarotId = l.tarot_id;
   if (l.legacy_id) conta.legacyId = l.legacy_id;
   if (l.avatar) conta.avatar = l.avatar;
+  // v706: convite, acesso pendente e permissão adicional (o campo ausente fica ausente).
+  if (l.acesso_pendente) conta.access = 'Acesso pendente';
+  if (l.ver_minutagem === true) conta.permissions = { viewDailyMinutes: true };
+  if (Array.isArray(l.permissoes_trilha) && l.permissoes_trilha.length) conta.permissionAudit = l.permissoes_trilha;
+  if (l.convite_hash) {
+    const iso = (v) => (v ? new Date(v).toISOString() : undefined);
+    conta.demoInvitation = { accountId: l.id, tokenHash: l.convite_hash, email: l.convite_email, role: l.convite_papel, kind: l.convite_tipo, issuedAt: iso(l.convite_emitido), expiresAt: iso(l.convite_expira) };
+    if (l.convite_usado) conta.demoInvitation.usedAt = iso(l.convite_usado);
+    if (l.convite_revogado) conta.demoInvitation.revokedAt = iso(l.convite_revogado);
+  }
   return conta;
 }
 

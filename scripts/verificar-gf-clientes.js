@@ -98,15 +98,18 @@ test("assistente só nos 3 últimos dias e pelo ID exato; outro recorte ou outra
   assert.equal(plan("assistente", { balance: "credito", sort: "balance" }).balance, "credito");
 });
 
-test("supervisora em Hoje e Ontem, atendente só em Hoje, as duas com a busca da administradora e sem saldo", () => {
+test("supervisora em Hoje e Ontem, atendente em Hoje, Ontem e 7 dias (v706), as duas com a busca da administradora e sem saldo", () => {
   const sup = plan("supervisora"), att = plan("atendente");
   assert.deepEqual([sup.range, sup.pageSize], [{ mode: "hoje", start: TODAY, end: TODAY }, 30]);
   assert.deepEqual([att.range, att.pageSize], [{ mode: "hoje", start: TODAY, end: TODAY }, 20]);
   assert.deepEqual(plan("supervisora", { mode: "ontem" }).range, { mode: "ontem", start: "2026-10-25", end: "2026-10-25" });
   assert.deepEqual(plan("atendente", { mode: "hoje" }).range.start, TODAY);
+  // v706 (client-workspace-model.ts): a atendente passa a pedir Ontem e 7 dias; antes só Hoje (regra da v608 substituída).
+  assert.deepEqual(plan("atendente", { mode: "ontem" }).range, { mode: "ontem", start: "2026-10-25", end: "2026-10-25" });
+  assert.deepEqual(plan("atendente", { mode: "7dias" }).range, { mode: "7dias", start: "2026-10-20", end: TODAY });
   for (const query of [{ mode: "7dias" }, { mode: "data", start: TODAY }, { mode: "periodo", start: "2026-10-20", end: TODAY }, { start: TODAY },
     { balance: "todos" }, { balance: "credito" }, { sort: "balance" }]) assert.equal(denied("supervisora", query), "scope", `sup ${JSON.stringify(query)}`);
-  for (const query of [{ mode: "ontem" }, { mode: "7dias" }, { start: TODAY }, { balance: "debito" }, { sort: "balance", direction: "asc" }]) {
+  for (const query of [{ mode: "data", start: TODAY }, { mode: "periodo", start: "2026-10-20", end: TODAY }, { start: TODAY }, { balance: "debito" }, { sort: "balance", direction: "asc" }]) {
     assert.equal(denied("atendente", query), "scope", `att ${JSON.stringify(query)}`);
   }
   for (const role of ["supervisora", "atendente"]) {
@@ -324,12 +327,12 @@ const consultationsOf = (role, query = {}, expanded = false, rows = longHistory)
   model.buildRealClientConsultationHistory({ role, expanded, nowLocal: NOW, clientId: "120", rows, query: { page: 1, ...query } });
 const newest = k => longHistory.slice(-k).reverse().map(c => c.id);
 
-test("histórico de consultas: alcance da v608 por perfil antes da busca, da ordenação e das páginas de 15, com historyScope", () => {
+test("histórico de consultas: alcance da v608 por perfil antes da busca, da ordenação e das páginas de 10 (v706), com historyScope", () => {
   const admin = consultationsOf("administradora");
-  assert.deepEqual([admin.historyScope, admin.page, admin.items.length], [{ kind: "complete" }, { number: 1, size: 15, totalItems: 25 }, 15]);
-  assert.deepEqual(admin.items.map(c => c.id), newest(15));
-  assert.equal(consultationsOf("administradora", { page: 2 }).items.length, 10);
-  assert.throws(() => consultationsOf("administradora", { page: 3 }), page.PageOutOfRange);
+  assert.deepEqual([admin.historyScope, admin.page, admin.items.length], [{ kind: "complete" }, { number: 1, size: 10, totalItems: 25 }, 10]);
+  assert.deepEqual(admin.items.map(c => c.id), newest(10));
+  assert.equal(consultationsOf("administradora", { page: 3 }).items.length, 5);
+  assert.throws(() => consultationsOf("administradora", { page: 4 }), page.PageOutOfRange);
   assert.deepEqual(consultationsOf("assistente").historyScope, { kind: "complete" });
   const att = consultationsOf("atendente"), sup = consultationsOf("supervisora");
   assert.deepEqual([att.historyScope, att.page.totalItems, att.items.map(c => c.id)], [{ kind: "recent", limit: 10 }, 10, newest(10)]);
@@ -384,7 +387,7 @@ test("histórico de pagamentos: R5 revista com os gêmeos pelo ID, operação in
   assert.deepEqual(result.summary, { confirmedTotal: "57.25", informedTotal: "50.00", counts: { confirmado: 2, informado: 1, "nao-localizado": 1, "conferir-origem": 1 } });
   const cut = receiptsModel.buildRealReceiptsCut({ ...sources, range: { start: "2026-10-01", end: "2026-10-31" }, by: "paid" });
   assert.deepEqual(Object.keys(result.summary), Object.keys(cut.summary));
-  assert.deepEqual(result.page, { number: 1, size: 15, totalItems: 6 });
+  assert.deepEqual(result.page, { number: 1, size: 10, totalItems: 6 });
   assert.deepEqual(receiptsOf("administradora", sources, { q: "Confirmado nº 401" }).items.map(r => r.key), ["tbl_pagtoinformado:401"]);
   assert.deepEqual(receiptsOf("administradora", sources, { q: "conferir" }).items.map(r => r.key), ["tbl_pagtoinformado:404"]);
   assert.equal(receiptsOf("administradora", sources, { q: "banco x" }).page.totalItems, 6);
@@ -400,23 +403,24 @@ test("histórico de pagamentos: as últimas 10 da atendente e 20 da supervisora,
   const att = receiptsOf("atendente", sources), sup = receiptsOf("supervisora", sources), all = receiptsOf("supervisora", sources, {}, true);
   assert.deepEqual([att.historyScope, att.page.totalItems, att.items[0].paidOn, att.summary.confirmedTotal], [{ kind: "recent", limit: 10 }, 10, "2026-09-22", "100.00"]);
   assert.deepEqual([sup.historyScope, sup.page.totalItems, sup.summary.counts.confirmado], [{ kind: "recent", limit: 20 }, 20, 20]);
-  assert.deepEqual([all.historyScope, all.page.totalItems, all.items.at(-1)?.paidOn], [{ kind: "complete" }, 23, "2026-09-08"]);
-  assert.equal(receiptsOf("administradora", sources, { page: 2 }).items.at(-1).paidOn, null);
+  assert.deepEqual([all.historyScope, all.page.totalItems, all.items.at(-1)?.paidOn], [{ kind: "complete" }, 23, "2026-09-13"]);
+  assert.equal(receiptsOf("administradora", sources, { page: 3 }).items.at(-1).paidOn, null);
   assert.ok(att.items.every(r => r.origins.length === 2));
 });
 
-test("histórico: a página da v608 por perfil, as 10 da atendente e as 20 da supervisora numa página só, e 15 no histórico completo", () => {
-  // client-profile-history.tsx: pageSize = limited ? (atendente ? 10 : 20) : 15, sobre o alcance de visibleClientHistory.
+test("histórico: a página da v706 é sempre de 10; o alcance (atendente 10, supervisora 20, demais completo) não mudou", () => {
+  // client-profile-history.tsx v706: const pageSize=10, sobre o alcance de visibleClientHistory. Substitui a v608 (10/20 numa página só e 15 no completo).
   const sup = consultationsOf("supervisora"), att = consultationsOf("atendente");
-  assert.deepEqual([sup.page, sup.items.map(c => c.id)], [{ number: 1, size: 20, totalItems: 20 }, newest(20)]);
-  assert.throws(() => consultationsOf("supervisora", { page: 2 }), page.PageOutOfRange);
+  assert.deepEqual([sup.page, sup.items.map(c => c.id)], [{ number: 1, size: 10, totalItems: 20 }, newest(10)]);
+  assert.deepEqual(consultationsOf("supervisora", { page: 2 }).items.map(c => c.id), newest(20).slice(10));
+  assert.throws(() => consultationsOf("supervisora", { page: 3 }), page.PageOutOfRange);
   assert.deepEqual(att.page, { number: 1, size: 10, totalItems: 10 });
-  assert.deepEqual(consultationsOf("supervisora", {}, true).page, { number: 1, size: 15, totalItems: 25 });
+  assert.deepEqual(consultationsOf("supervisora", {}, true).page, { number: 1, size: 10, totalItems: 25 });
   const informed = Array.from({ length: 22 }, (_, i) => pay(INF, 700 + i, 130, `2026-09-${String(i + 1).padStart(2, "0")} 00:00:00`));
   const sources = src({ informed });
-  assert.deepEqual([receiptsOf("supervisora", sources).page, receiptsOf("supervisora", sources).items.length], [{ number: 1, size: 20, totalItems: 20 }, 20]);
+  assert.deepEqual([receiptsOf("supervisora", sources).page, receiptsOf("supervisora", sources).items.length], [{ number: 1, size: 10, totalItems: 20 }, 10]);
   assert.deepEqual(receiptsOf("atendente", sources).page, { number: 1, size: 10, totalItems: 10 });
-  assert.deepEqual(receiptsOf("administradora", sources).page, { number: 1, size: 15, totalItems: 22 });
+  assert.deepEqual(receiptsOf("administradora", sources).page, { number: 1, size: 10, totalItems: 22 });
 });
 
 // The date filter of client-profile-history.tsx (v608): "Todas as datas" by default, Hoje, Ontem, 7 dias, Data and Período,
@@ -452,14 +456,14 @@ test("histórico de consultas: o recorte de datas pelo dia operacional do iníci
   const admin = consultationsOf("administradora");
   assert.deepEqual(consultationsOf("administradora", { range: rangeOf({ mode: "data", start: "2026-09-03" }) }).items.map(c => c.id), [longHistory[2].id]);
   const period = consultationsOf("administradora", { range: rangeOf({ mode: "periodo", start: "2026-09-25", end: "2026-09-20" }) });
-  assert.deepEqual([period.page, period.items[0].situation], [{ number: 1, size: 15, totalItems: 6 }, "em-curso"]);
+  assert.deepEqual([period.page, period.items[0].situation], [{ number: 1, size: 10, totalItems: 6 }, "em-curso"]);
   assert.deepEqual(consultationsOf("administradora", { range: rangeOf({ mode: "hoje" }) }).items, []);
   assert.equal(consultationsOf("administradora", { range: null }).page.totalItems, 25);
   // The attendant's ten are 09-16 to 09-25 and the supervisor's twenty 09-06 to 09-25: the cut never reaches past them.
   assert.equal(consultationsOf("atendente", { range: rangeOf({ mode: "data", start: "2026-09-10" }) }).page.totalItems, 0);
   assert.equal(consultationsOf("atendente", { range: rangeOf({ mode: "periodo", start: "2026-09-01", end: "2026-09-30" }) }).page.totalItems, 10);
   const sup = consultationsOf("supervisora", { range: rangeOf({ mode: "periodo", start: "2026-09-01", end: "2026-09-10" }) });
-  assert.deepEqual([sup.page, sup.items.map(c => c.id)], [{ number: 1, size: 20, totalItems: 5 }, longHistory.slice(5, 10).reverse().map(c => c.id)]);
+  assert.deepEqual([sup.page, sup.items.map(c => c.id)], [{ number: 1, size: 10, totalItems: 5 }, longHistory.slice(5, 10).reverse().map(c => c.id)]);
   assert.equal(consultationsOf("supervisora", { range: rangeOf({ mode: "periodo", start: "2026-09-01", end: "2026-09-10" }) }, true).page.totalItems, 10);
   // With the search, the reader of the Tarólogos tab and the order; the totals stay those of the scope, as with the search.
   const early = rangeOf({ mode: "periodo", start: "2026-09-01", end: "2026-09-10" });

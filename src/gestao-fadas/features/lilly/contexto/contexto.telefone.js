@@ -94,8 +94,10 @@ function nonoDigito(observado, armazenado) {
 
 /** `'exact'` (decisão do painel), `'ninth_digit'` ou `''`. */
 function comoCasa(observado, armazenado) {
-  if (clientPhoneMatches(observado, armazenado)) return 'exact';
-  return nonoDigito(observado, armazenado) ? 'ninth_digit' : '';
+  // A regra do painel (v706) aceita o 9 inicial nos dois sentidos e o devolve como 'exact'; a Lilly casa por fullPhone (8 não casa com 9),
+  // então a diferença só pelo nono dígito (mesmo DDD, os dois com DDD) precisa sair marcada 'ninth_digit'. Checar antes do painel.
+  if (nonoDigito(observado, armazenado)) return 'ninth_digit';
+  return clientPhoneMatches(observado, armazenado) ? 'exact' : '';
 }
 
 module.exports = { soDigitos, ultimos8: (v) => soDigitos(v).slice(-8), normalizarObservado, textoParaLilly, telefonesDoCadastro, comoCasa, nonoDigito };

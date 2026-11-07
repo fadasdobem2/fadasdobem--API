@@ -37,9 +37,9 @@ function mutante(arquivo, de, para) {
   return m.exports;
 }
 
-const entradaDe = (c) => ({ agenda: c.agenda, consultations: c.consultas, profiles: [c.perfil], intakeEvents: c.eventos, restrictions: c.restricoes, now: c.now, date: c.hoje });
+const entradaDe = (c) => ({ agenda: c.agenda, consultations: c.consultas, profiles: [c.perfil], intakeEvents: c.eventos, restrictions: c.restricoes, now: c.now, date: c.hoje, contacts: c.contatos || [], exigirModalidade: Boolean(c.exigirModalidade) });
 const pedidoDe = (c) => ({ antes: c.antes || undefined, id: 'ag-1', solicitacao: c.pedido || undefined, tarologoDesconhecido: false,
-  depois: { clientId: c.form.clientId, tarotId: c.form.tarotId, date: c.form.date, standbyDate: c.form.standbyDate, scheduledTime: c.form.scheduledTime, contactPlan: c.plano } });
+  depois: { clientId: c.form.clientId, leadId: c.form.leadId, channel: c.form.channel, requestedMinutes: c.form.requestedMinutes, tarotId: c.form.tarotId, date: c.form.date, standbyDate: c.form.standbyDate, scheduledTime: c.form.scheduledTime, contactPlan: c.plano } });
 function mensagemDireta(modulo, c) {
   try { modulo.validarAgendamentoDireto(entradaDe(c), pedidoDe(c)); return ''; } catch (e) { return e.message; }
 }
@@ -52,13 +52,13 @@ async function offline() {
   const fech = r(`${DOMINIO}/agenda-fechamento`);
 
   console.log('Ouro do front: agendamento direto (submitSchedule)');
-  await passo('600 casos: a primeira recusa sai IGUAL à do front (mesma frase, mesma ordem)', () => {
+  await passo('1500 casos: a primeira recusa sai IGUAL à do front (mesma frase, mesma ordem)', () => {
     const c = primeiraDivergencia(direto, ouro);
     assert.equal(c, undefined, c && `esperado "${c.esperado}", saiu "${mensagemDireta(direto, c)}"`);
   });
   await passo('o ouro cobre as recusas do front: identidade, restrição, horário, agenda fechada (4 formas), cadastro inativo, solicitação, Se der hoje, consulta em curso, próximo turno', () => {
     const msgs = new Set(ouro.direto.map((c) => c.esperado));
-    for (const trecho of ['Para outra cliente', 'Indisponível', 'Digite um horário válido', 'Agenda fechada neste turno', 'Agenda fechada, inclusive para encaixes', 'Agenda fechada para novos agendamentos hoje', 'O turno de retorno terminou',
+    for (const trecho of ['A identificação deste agendamento mudou', 'Selecione uma cliente ou um contato', 'Localize a cliente ou informe', 'Este contato mudou', 'Complete o WhatsApp do contato', 'Este contato já tem agendamento', 'Escolha um meio de consulta válido', 'Informe os minutos solicitados', 'Indisponível', 'Digite um horário válido', 'Agenda fechada neste turno', 'Agenda fechada, inclusive para encaixes', 'Agenda fechada para novos agendamentos hoje', 'O turno de retorno terminou',
       'Escolha um horário entre o retorno', 'cadastro inativo', 'Esta solicitação pertence', 'Esta solicitação já tem', 'Se der hoje pertence', 'Finalize a consulta em andamento', 'próximo turno', '']) {
       assert.ok([...msgs].some((m) => m.includes(trecho) || (trecho === '' && m === '')), `o ouro não tem: ${trecho}`);
     }
@@ -73,7 +73,13 @@ async function offline() {
   console.log('Mutantes: o ouro tem de pegar cada troca de regra');
   const D = `${DOMINIO}/agenda-agendamento-direto.js`;
   const mutantes = [
-    ['sem a checagem de identidade', D, 'if (antes && antes.clientId !== clientId) recusar(', 'if (false) recusar('],
+    ['sem a checagem de identidade da edição', D, '(antes && !mesmaIdentidade(antes, identidade) ?', '(false ?'],
+    ['identidade sem exigir cliente OU contato', D, 'erroDeIdentidade(identidade, entrada.contacts) ||', ''],
+    ['minutos pedidos sem a checagem', D, 'if (minutos) recusar(minutos);', ''],
+    ['meio de consulta sem a checagem', D, 'entrada.exigirModalidade && !MODALIDADES.includes(depois.channel)', 'false'],
+    ['contato sem WhatsApp completo aceito', D, "recusar('Complete o WhatsApp do contato, com DDD e número.')", ''],
+    ['contato já agendado na data aceito', D, "if (!antes && depois.leadId &&", 'if (false && depois.leadId &&'],
+    ['solicitação sem conferir a identidade (só cliente)', D, '!mesmaIdentidade(identidadeDoPedido(pedido), identidade)', 'pedido.clientId !== clientId'],
     ['restrição ignorada', D, 'estaRestrita(entrada.restrictions || [], clientId, depois.tarotId)', 'false'],
     ['restrição também sem mudança de alvo', D, 'if ((!antes || antes.clientId !== clientId || antes.tarotId !== depois.tarotId || (antes.date || hoje) !== data) && estaRestrita', 'if (estaRestrita'],
     ['frase "Indisponivel" sem acento', D, "recusar('Indisponível')", "recusar('Indisponivel')"],

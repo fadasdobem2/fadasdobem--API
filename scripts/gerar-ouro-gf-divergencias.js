@@ -42,7 +42,8 @@ function item(i) {
   const sorte = aleatorio();
   if (sorte < 0.25) base.status = 'Em conferência';
   else if (sorte < 0.4) Object.assign(base, { status: 'Resolvida', resolvedBy: 'Clara', resolvedAt: iso(AGORA - minutos(300)), decision: 'Conferido.' });
-  else if (sorte < 0.6) Object.assign(base, { status: 'Arquivada', statusBeforeArchive: sorteio(['Pendente', 'Resolvida']), archivedAt: iso(AGORA - minutos(200)), archivedBy: 'Osíris', archiveReason: 'Motivo.' });
+  else if (sorte < 0.5) Object.assign(base, { status: 'Arquivada', statusBeforeArchive: sorteio(['Pendente', 'Resolvida']), archivedAt: iso(AGORA - minutos(200)), archivedBy: 'Osíris', archiveReason: 'Motivo.' }); // arquivo ANTIGO (legado)
+  else if (sorte < 0.62) Object.assign(base, { status: 'Arquivada', statusBeforeArchive: sorteio(['Pendente', 'Em conferência']), archivedAt: iso(AGORA - minutos(200)), archivedBy: 'Osíris', readerCancelledAt: iso(AGORA - minutos(200)), readerCancelledBy: 'Osíris' }); // cancelada na v706
   if (base.status === 'Arquivada' && base.statusBeforeArchive === 'Resolvida') Object.assign(base, { resolvedBy: 'Clara', resolvedAt: iso(AGORA - minutos(400)), decision: 'Conferido.' });
   if (chance(0.15)) Object.assign(base, { deletedAt: iso(AGORA - minutos(100)), deletedBy: 'Osíris', deleteReason: 'Engano.' });
   if (base.deletedAt && chance(0.3)) Object.assign(base, { readerTrashClearedAt: iso(AGORA - minutos(50)), readerTrashClearedBy: 'Osíris' });
@@ -64,13 +65,21 @@ async function main() {
     for (let i = 0; i < 400; i += 1) {
       const lista = Array.from({ length: 1 + Math.floor(aleatorio() * 3) }, (_, k) => item(i * 10 + k));
       const alvo = lista[0];
+      // v706: reforça o caso que o front aceita só em parte (restaurar resolvida excluída; recusar cancelada ou aberta excluída).
+      if (i % 5 === 0) {
+        const forma = sorteio(['resolvida', 'resolvida', 'cancelada', 'aberta']);
+        if (forma === 'resolvida') Object.assign(alvo, { status: 'Resolvida', resolvedBy: 'Clara', resolvedAt: iso(AGORA - minutos(300)), decision: 'Conferido.', deletedAt: iso(AGORA - minutos(100)), deletedBy: 'Osíris', deleteReason: 'Engano.' });
+        if (forma === 'cancelada') Object.assign(alvo, { status: 'Arquivada', statusBeforeArchive: 'Pendente', archivedAt: iso(AGORA - minutos(200)), archivedBy: 'Osíris', readerCancelledAt: iso(AGORA - minutos(200)), readerCancelledBy: 'Osíris', deletedAt: iso(AGORA - minutos(100)), deletedBy: 'Osíris', deleteReason: 'Engano.' });
+        if (forma === 'aberta') Object.assign(alvo, { deletedAt: iso(AGORA - minutos(100)), deletedBy: 'Osíris', deleteReason: 'Engano.' });
+        delete alvo.readerTrashClearedAt; delete alvo.readerTrashClearedBy;
+      }
       const at = iso(AGORA + minutos(i));
       const contexto = { tarotId: TAROT, actor: 'Osíris', at, version: estado.divergenceVersion(alvo) };
-      const mudanca = sorteio([
+      const mudanca = (i % 5 === 0 && chance(0.7) ? () => ({ kind: 'restore' }) : sorteio([
         () => ({ kind: 'edit', values: { note: 'Nova nota.', minutes: sorteio([12, 30, 45]), date: '2026-10-19', time: sorteio(['10:00', '11:15']), channel: 'Telefone' } }),
-        () => ({ kind: 'archive', reason: 'Já conferi.' }), () => ({ kind: 'delete', reason: 'Enviei por engano.' }),
+        () => ({ kind: 'cancel' }), () => ({ kind: 'delete', reason: 'Enviei por engano.' }),
         () => ({ kind: 'comment', text: 'Mais um detalhe.' }), () => ({ kind: 'restore' }), () => ({ kind: 'trash' }),
-      ])();
+      ]))();
       const r = mudanca.kind === 'trash'
         ? tentar(() => modelo.clearReaderDivergenceTrash(lista, [{ id: alvo.id, version: estado.divergenceVersion(alvo) }], { tarotId: TAROT, actor: 'Osíris', at }))
         : tentar(() => modelo.changeReaderDivergence(lista, alvo.id, mudanca, contexto));

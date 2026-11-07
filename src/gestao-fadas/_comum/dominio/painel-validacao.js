@@ -9,6 +9,7 @@
  */
 
 const { contatoDe, encerrado, ativoNoDia } = require('./agenda-contato');
+const { mesmaIdentidade } = require('./agenda-identidade');
 const b = require('./fila-geral-base');
 const adm = require('./admissao');
 const c = require('./consulta-comum');
@@ -40,7 +41,7 @@ function validarDestinoGeral(entrada, itemId, tarotId, aprovacao, lancamentoDaEq
   if (!leitora) recusar('Selecione um tarólogo ativo.');
   if (leitora.reservation && leitora.reservation.id !== item.id) recusar(`${leitora.name} já está reservada para ${leitora.reservation.clientId} · ${leitora.reservation.client}. Escolha outra taróloga.`);
   if (!lancamentoDaEquipe && !leitora.freeNow) recusar('A disponibilidade mudou. Confira os tarólogos livres novamente.');
-  if (entrada.agenda.some((o) => o.id !== item.id && o.clientId === item.clientId && !encerrado(o))) recusar('A cliente já tem outro agendamento. Confira sua ficha.');
+  if (entrada.agenda.some((o) => o.id !== item.id && mesmaIdentidade(o, item) && !encerrado(o))) recusar('A cliente já tem outro agendamento. Confira sua ficha.');
   const admissao = adm.admissaoVigente(entrada.intakeEvents || [], tarotId, data, agora);
   const alvo = { tarotId, date: data, clientId: item.clientId };
   const perfil = entrada.profiles.find((r) => r.id === tarotId);
@@ -69,7 +70,7 @@ function validarAgendamento(entrada, itemId, tarotId, data = entrada.date, horar
   const item = entrada.agenda.find((r) => r.id === itemId);
   if (item && estaRestrita(entrada.restrictions || [], item.clientId, tarotId)) recusar('Indisponível');
   if (!item || !fluxoDoPainel(entrada).general.some((r) => r.id === itemId)) recusar('Esta cliente não está mais disponível na Fila Geral.');
-  if (entrada.agenda.some((o) => o.id !== item.id && o.clientId === item.clientId && !encerrado(o))) recusar('A cliente já tem outro agendamento. Confira sua ficha.');
+  if (entrada.agenda.some((o) => o.id !== item.id && mesmaIdentidade(o, item) && !encerrado(o))) recusar('A cliente já tem outro agendamento. Confira sua ficha.');
   const equipe = equipeDePresenca(entrada.profiles, entrada.overrides || {}, entrada.accounts || [], entrada.consultations, data, { hoje: t.hojeDe(entrada.now), proprioId: entrada.selfId, proprioEstado: entrada.selfStatus });
   const leitora = equipe.find((r) => r.id === tarotId);
   if (!leitora) recusar('Escolha a taróloga para o agendamento.');

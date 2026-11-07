@@ -52,7 +52,7 @@ const LEGADO = [{ idTarologo: 9001, nmuTarologo: 'Tarólogo A', ativo: 1 }, { id
   const lerContas = async () => (await chamar('GET', '/accounts')).j;
   const achar = async (email) => (await lerContas()).accounts.find((a) => a.email === email);
   const um = async (sql) => (await sequelize.query(sql))[0];
-  const criar = (extra = {}) => chamar('POST', '/accounts', { operationKey: n(), name: 'Pessoa Teste', email: `pessoa.${Date.now()}.${Math.random().toString(36).slice(2, 6)}@fadas.test`, role: 'atendente', password: SENHA, ...extra });
+  const criar = (extra = {}) => chamar('POST', '/accounts', { operationKey: n(), name: 'Pessoa Teste', email: `pessoa.${Date.now()}.${Math.random().toString(36).slice(2, 6)}@fadasdobem.com.br`, role: 'atendente', password: SENHA, ...extra });
 
   console.log('Esquema');
   await passo('gf_contas_ext existe e a migração roda de novo sem erro', async () => {
@@ -89,8 +89,8 @@ const LEGADO = [{ idTarologo: 9001, nmuTarologo: 'Tarólogo A', ativo: 1 }, { id
 
   console.log('Criar');
   const k1 = n();
-  const email1 = `assistente.${Date.now()}@fadas.test`;
-  const c1 = await chamar('POST', '/accounts', { operationKey: k1, name: '  Ana   Souza ', email: email1.toUpperCase().replace('@FADAS.TEST', '@fadas.test'), role: 'assistente', password: SENHA, legacyId: ' 4321 ' });
+  const email1 = `assistente.${Date.now()}@fadasdobem.com.br`;
+  const c1 = await chamar('POST', '/accounts', { operationKey: k1, name: '  Ana   Souza ', email: email1.toUpperCase().replace('@FADAS.TEST', '@fadasdobem.com.br'), role: 'assistente', password: SENHA, legacyId: ' 4321 ' });
   await passo('cria assistente: 200, nome normalizado, e-mail minúsculo, ID antigo, papel RBAC e produto como no seed', async () => {
     assert.equal(c1.status, 200, c1.t);
     const a = c1.j.account;
@@ -108,7 +108,7 @@ const LEGADO = [{ idTarologo: 9001, nmuTarologo: 'Tarólogo A', ativo: 1 }, { id
     assert.equal(await bcrypt.compare(SENHA, u.password_hash), true); assert.equal(await bcrypt.compare(SENHA2, u.password_hash), false);
   });
   await passo('mesma chave e mesmo corpo repete a resposta sem criar de novo; outro corpo com a mesma chave: 409 OPERATION_KEY_CONFLICT', async () => {
-    const igual = await chamar('POST', '/accounts', { operationKey: k1, name: '  Ana   Souza ', email: email1.toUpperCase().replace('@FADAS.TEST', '@fadas.test'), role: 'assistente', password: SENHA, legacyId: ' 4321 ' });
+    const igual = await chamar('POST', '/accounts', { operationKey: k1, name: '  Ana   Souza ', email: email1.toUpperCase().replace('@FADAS.TEST', '@fadasdobem.com.br'), role: 'assistente', password: SENHA, legacyId: ' 4321 ' });
     assert.equal(igual.status, 200); assert.equal(igual.j.account.id, idAss);
     assert.equal((await um(`SELECT count(*)::int AS n FROM users WHERE lower(email) = '${email1.toLowerCase()}'`))[0].n, 1);
     const outro = await chamar('POST', '/accounts', { operationKey: k1, name: 'Ana Souza', email: email1, role: 'assistente', password: SENHA2, legacyId: '4321' });
@@ -116,7 +116,7 @@ const LEGADO = [{ idTarologo: 9001, nmuTarologo: 'Tarólogo A', ativo: 1 }, { id
   });
   await passo('regras do front: e-mail repetido (maiúsculas), senha fraca, e-mail inválido, nome vazio: 422 com a mensagem do front', async () => {
     const rep = await criar({ email: email1.toUpperCase() }); assert.equal(rep.status, 422); assert.equal(rep.j.error.message, 'Esse usuário ou e-mail já está cadastrado.');
-    const fraca = await criar({ password: 'curta' }); assert.equal(fraca.status, 422); assert.equal(fraca.j.error.message, 'Use 12 caracteres, maiúscula, minúscula, número e símbolo. Confirme a mesma senha.');
+    const fraca = await criar({ password: 'curta' }); assert.equal(fraca.status, 422); assert.equal(fraca.j.error.message, 'Use 15 caracteres, maiúscula, minúscula, número e símbolo. Confirme a mesma senha.');
     const sem = await criar({ password: 'semsimbolo12345A' }); assert.equal(sem.status, 422);
     const inv = await criar({ email: 'sem arroba' }); assert.equal(inv.status, 422); assert.equal(inv.j.error.message, 'Confira o usuário ou e-mail informado.');
     const nome = await criar({ name: '   ' }); assert.equal(nome.status, 422); assert.equal(nome.j.error.message, 'Preencha o nome e o usuário ou e-mail.');
@@ -160,7 +160,7 @@ const LEGADO = [{ idTarologo: 9001, nmuTarologo: 'Tarólogo A', ativo: 1 }, { id
   await passo('e-mail de outra conta: 422; trocar o próprio e-mail ou a conta de outro para um livre: 200', async () => {
     const dono = await chamar('PATCH', `/accounts/${idAss}`, { operationKey: n(), expectedRevision: rev, email: (await lerContas()).accounts.find((a) => a.id === admin).email });
     assert.equal(dono.status, 422);
-    const livre = await chamar('PATCH', `/accounts/${idAss}`, { operationKey: n(), expectedRevision: rev, email: `novo.${Date.now()}@fadas.test` });
+    const livre = await chamar('PATCH', `/accounts/${idAss}`, { operationKey: n(), expectedRevision: rev, email: `novo.${Date.now()}@fadasdobem.com.br` });
     assert.equal(livre.status, 200); rev = livre.j.revision;
   });
   await passo('id inexistente: 404; id malformado: 404; corpo com campo desconhecido: 400', async () => {
@@ -211,22 +211,22 @@ const LEGADO = [{ idTarologo: 9001, nmuTarologo: 'Tarólogo A', ativo: 1 }, { id
 
   console.log('Taróloga do catálogo');
   await passo('libera o acesso de quem está no catálogo: usuário TAROLOGA, specialist e vínculo no catálogo, na mesma gravação', async () => {
-    const x = await chamar('POST', '/accounts', { operationKey: n(), name: 'Tarólogo A', email: `tarologo.a.${Date.now()}@fadas.test`, role: 'tarologa', tarotId: '9001', password: SENHA });
+    const x = await chamar('POST', '/accounts', { operationKey: n(), name: 'Tarólogo A', email: `tarologo.a.${Date.now()}@fadasdobem.com.br`, role: 'tarologa', tarotId: '9001', password: SENHA });
     assert.equal(x.status, 200, x.t);
     assert.equal(x.j.account.role, 'tarologa'); assert.equal(x.j.account.tarotId, '9001'); assert.equal(x.j.account.commission, '30%'); assert.equal(x.j.account.active, true);
     const [s] = await um(`SELECT slug FROM specialists WHERE user_id = '${x.j.account.id}'`);
     assert.equal(s.slug, 'conta-9001');
     assert.equal((await um("SELECT conta_slug FROM gf_tarologos_perfil WHERE tarot_id = '9001'"))[0].conta_slug, 'conta-9001');
-    const dup = await chamar('POST', '/accounts', { operationKey: n(), name: 'Tarólogo A', email: `outro.${Date.now()}@fadas.test`, role: 'tarologa', tarotId: '9001', password: SENHA });
+    const dup = await chamar('POST', '/accounts', { operationKey: n(), name: 'Tarólogo A', email: `outro.${Date.now()}@fadasdobem.com.br`, role: 'tarologa', tarotId: '9001', password: SENHA });
     assert.equal(dup.status, 422); assert.equal(dup.j.error.message, 'Esta profissional já possui acesso. Abra o cadastro existente.');
     const t = (await lerContas()).accounts.find((a) => a.tarotId === '9001');
     const troca = await chamar('PATCH', `/accounts/${t.id}`, { operationKey: n(), expectedRevision: 1, role: 'atendente' });
     assert.equal(troca.status, 422); assert.equal(troca.j.error.message, 'O acesso deve continuar vinculado à profissional.');
   });
   await passo('cadastro inexistente: 422; cadastro inativo cria a conta BLOQUEADA e só ativa depois que o cadastro ativar', async () => {
-    const nao = await chamar('POST', '/accounts', { operationKey: n(), name: 'X', email: `x.${Date.now()}@fadas.test`, role: 'tarologa', tarotId: '7777', password: SENHA });
+    const nao = await chamar('POST', '/accounts', { operationKey: n(), name: 'X', email: `x.${Date.now()}@fadasdobem.com.br`, role: 'tarologa', tarotId: '7777', password: SENHA });
     assert.equal(nao.status, 422); assert.equal(nao.j.error.message, 'O cadastro desta profissional não foi encontrado.');
-    const inativo = await chamar('POST', '/accounts', { operationKey: n(), name: 'Tarólogo C', email: `c.${Date.now()}@fadas.test`, role: 'tarologa', tarotId: '9003', password: SENHA });
+    const inativo = await chamar('POST', '/accounts', { operationKey: n(), name: 'Tarólogo C', email: `c.${Date.now()}@fadasdobem.com.br`, role: 'tarologa', tarotId: '9003', password: SENHA });
     assert.equal(inativo.status, 200, inativo.t); assert.equal(inativo.j.account.active, false);
   });
 

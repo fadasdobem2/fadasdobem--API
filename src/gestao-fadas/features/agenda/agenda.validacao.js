@@ -45,12 +45,15 @@ function corpoComando(corpo) {
   return { operationKey: chaveOperacao(corpo.operationKey), expectedVersion: v, ...delta(corpo) };
 }
 
-/** Corpo de `POST /agenda`: `{ operationKey, id, tarotId, clientId, client, date, set?, append? }`. */
+/** Corpo de `POST /agenda`: `{ operationKey, id, tarotId, clientId | leadId, client, date, set?, append? }`. */
 function corpoCriacao(corpo) {
   if (!ehObjeto(corpo)) throw invalido('corpo');
+  // v706: o agendamento tem cliente OU contato (`leadId`); com contato, `clientId` vai vazio e o nome (`client`) é do contato, vindo do servidor.
+  const leadId = corpo.leadId === undefined ? undefined : idItem(corpo.leadId);
+  if (leadId && corpo.clientId) throw invalido('clientId');
   const base = {
-    id: idItem(corpo.id), tarotId: campo('tarotId', idTarologo(corpo.tarotId)), clientId: campo('clientId', corpo.clientId),
-    client: campo('client', corpo.client), date: ehDataCivil(corpo.date) ? corpo.date : (() => { throw invalido('date'); })(),
+    id: idItem(corpo.id), tarotId: campo('tarotId', idTarologo(corpo.tarotId)), clientId: leadId ? '' : campo('clientId', corpo.clientId), ...(leadId ? { leadId } : {}),
+    client: leadId && !corpo.client ? 'Contato' : campo('client', corpo.client), date: ehDataCivil(corpo.date) ? corpo.date : (() => { throw invalido('date'); })(),
   };
   return { operationKey: chaveOperacao(corpo.operationKey), ...base, ...delta(corpo) };
 }

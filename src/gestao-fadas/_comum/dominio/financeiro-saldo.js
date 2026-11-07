@@ -7,6 +7,7 @@
  * COM contexto financeiro). Ouro do código real do front.
  */
 
+const { arredondamentoDosLotes, minutosInteiros } = require('./credito-arredondamento');
 const b = require('./financeiro-base');
 const c = require('./financeiro-cobranca');
 
@@ -20,10 +21,12 @@ const debitoDaConsulta = (item, pagamentos) => c.acerto(item, pagamentos).debit;
 
 /** `clientCashAccount` (cash-ledger.ts:83). `abertura` em REAIS (saldo de partida, negativo = dívida). */
 function contaDaCliente(clientId, pagamentos, consultas, abertura = 0) {
-  const proprios = pagamentos.filter((p) => p.clientId === clientId);
+  // v706: recibo sem ID (`unidentified`) não entra em conta nenhuma; sem ID de cliente não há conta.
+  if (!String(clientId).trim()) return { balance: 0, received: 0, consumed: 0, adjustments: 0 };
+  const proprios = pagamentos.filter((p) => !p.unidentified && p.clientId === clientId);
   const creditos = proprios.filter(recebimentoConfirmado).reduce((s, p) => s + emCentavos(p.amount), 0);
   const consumo = consultas.filter((i) => i.clientId === clientId).reduce((s, i) => s + emCentavos(debitoDaConsulta(i, pagamentos)), 0);
-  const movimentos = pagamentos.flatMap((p) => (p.movements || []).filter((m) => (m.kind === 'balance-transfer' ? efeitoDaTransferencia(m, clientId) !== 0 : p.clientId === clientId))
+  const movimentos = pagamentos.filter((p) => !p.unidentified).flatMap((p) => (p.movements || []).filter((m) => (m.kind === 'balance-transfer' ? efeitoDaTransferencia(m, clientId) !== 0 : p.clientId === clientId))
     .map((m) => ({ payment: m.kind === 'balance-transfer' ? { ...p, clientId } : p, movement: m })));
   const ajustes = movimentos.reduce((s, { payment, movement }) => s + emCentavos(efeitoNaConta(payment, movement)), 0);
   const balance = (emCentavos(abertura) + creditos - consumo + ajustes) / 100;
@@ -80,7 +83,7 @@ function tarifaDeCredito(clientId, em, minutosPedidos, consultas, pagamentos, pe
     if (k.status === 'Em curso' && cov && cov.kind === 'Crédito') reservaMinutos = Math.max(reservaMinutos, ac.chargeable);
     const lotesDaTarifa = k.billing && k.billing.tariff && k.billing.tariff.creditLots;
     const alocacao = !k.specialPrice && !(cov && cov.kind === 'Complemento' && cov.complementMode === 'prepaid') && lotesDaTarifa && lotesDaTarifa.length
-      ? b.alocarLotes(lotesDaTarifa, k.status === 'Em curso' ? reservaMinutos : ac.chargeable, k.billing.tariff.unitValue) : undefined;
+      ? b.alocarLotes(lotesDaTarifa, k.status === 'Em curso' ? reservaMinutos : ac.chargeable, k.billing.tariff.unitValue, k.billing.tariff.creditRounding) : undefined;
     const reservado = reservaMinutos ? Math.round(((alocacao ? alocacao.amount : reservaMinutos * c.valorDoMinutoDaConsulta(k, proprios))) * 100)
       : !cov ? proprios.filter((p) => p.linkedConsultationId === k.id && Date.parse(b.pagoEm(p)) <= limite).reduce((s, p) => s + Math.round(p.amount * 100), 0) : 0;
     const descontoCents = k.launchTimeDecision && k.launchTimeDecision.kind === 'discount' ? ((k.billing && k.billing.chargeAdjustments) || []).reduce((s, r) => s + Math.max(0, Math.round(r.amount * 100)), 0) : 0;
@@ -135,15 +138,30 @@ function tarifaDeCredito(clientId, em, minutosPedidos, consultas, pagamentos, pe
       divida += preciso;
     }
   }
+  // Recibos confirmados ligados a mais tempo pendente ficam reservados até a conferência decidir; não criam saldo nem dívida (v706).
+  if (reservarEmCurso) {
+    for (const k of consultas) {
+      if (k.clientId !== clientId || k.id === exceptoId || !k.financialReview || !['awaiting-contact', 'awaiting-payment'].includes(k.financialReview.status)) continue;
+      const rev = k.financialReview;
+      if (Date.parse(rev.at) > limite) continue;
+      const faturado = c.acerto(k, proprios).debit;
+      const informado = c.acerto({ ...k, status: 'Concluída', durationSeconds: rev.reportedMinutes * 60, financialReview: { ...rev, status: 'approved' } }, proprios).debit;
+      const ligados = new Set(proprios.filter((p) => p.linkedConsultationId === k.id).map((p) => p.id));
+      const separados = lotes.filter((l) => l.paymentId && ligados.has(l.paymentId) && l.cents > 0);
+      const reservado = Math.min(Math.max(0, Math.round((informado - faturado) * 100)), separados.reduce((s, l) => s + l.cents, 0));
+      if (reservado > 0) consumir(separados, reservado, undefined, false, false);
+    }
+  }
   const disponiveis = lotes.filter((l) => l.cents > 0);
   const minutosExatos = disponiveis.reduce((s, l) => s + l.minutes, 0);
-  const minutosDisponiveis = Math.max(0, Math.floor(minutosExatos + 0.000001));
+  const arredondamento = arredondamentoDosLotes(disponiveis);
+  const minutosDisponiveis = arredondamento ? minutosInteiros(minutosExatos) : Math.max(0, Math.floor(minutosExatos + 0.000001));
   const pedidos = minutosPedidos && minutosPedidos > 0 ? minutosPedidos : minutosDisponiveis || minutosExatos;
   const selecao = b.alocarLotes(disponiveis, Math.min(pedidos, minutosExatos));
   const usados = selecao.allocations;
   const minutosSelecionados = usados.reduce((s, l) => s + l.usedMinutes, 0);
   return {
-    unitValue: minutosSelecionados > 0 ? selecao.rawAmount / minutosSelecionados : 2.96, availableMinutes: minutosDisponiveis, exactAvailableMinutes: minutosExatos,
+    unitValue: minutosSelecionados > 0 ? selecao.rawAmount / minutosSelecionados : 2.96, availableMinutes: minutosDisponiveis, exactAvailableMinutes: minutosExatos, creditRounding: arredondamento,
     availableAmount: disponiveis.reduce((s, l) => s + l.cents, 0) / 100,
     knownMinutes: disponiveis.filter((l) => l.minutesKnown).reduce((s, l) => s + l.minutes, 0),
     unknownAmount: disponiveis.filter((l) => !l.minutesKnown).reduce((s, l) => s + l.cents, 0) / 100,
@@ -160,7 +178,7 @@ function coberturaDaCliente(clientId, pagamentos, consultas, perfil, em) {
   const posPaga = Boolean(perfil) && perfil.paymentProfile === 'Pós-pago';
   const beneficios = b.beneficiosDisponiveis(clientId, perfil, consultas, undefined, em).filter((i) => i.remaining > 0);
   const minutosDeBeneficio = beneficios.reduce((s, i) => s + i.remaining, 0);
-  const recebimentos = pagamentos.filter((p) => p.clientId === clientId && p.status !== 'Cancelado' && Math.max(0, arredondar(p.amount + (p.movements || []).reduce((s, m) => s + (m.kind === 'balance-transfer' ? efeitoDaTransferencia(m, clientId) : m.creditEffect), 0))) > 0);
+  const recebimentos = pagamentos.filter((p) => !p.unidentified && p.clientId === clientId && p.status !== 'Cancelado' && Math.max(0, arredondar(p.amount + (p.movements || []).reduce((s, m) => s + (m.kind === 'balance-transfer' ? efeitoDaTransferencia(m, clientId) : m.creditEffect), 0))) > 0);
   const temConfirmado = recebimentos.some(recebimentoConfirmado); const aguardando = recebimentos.some((p) => !recebimentoConfirmado(p));
   const confirmadoDisponivel = Math.max(0, contaDaCliente(clientId, pagamentos, consultas).balance);
   return { balance: saldo, postpaid: posPaga, benefitMinutes: minutosDeBeneficio, hasConfirmedReceipt: temConfirmado, confirmedAvailableBalance: confirmadoDisponivel, awaitingConfirmation: aguardando,

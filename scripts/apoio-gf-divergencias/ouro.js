@@ -6,7 +6,8 @@ const fs = require('fs');
 const path = require('path');
 const dom = require('../../src/gestao-fadas/_comum/dominio/divergencias');
 
-const CLASSE = { edit: ['edicao', 'arquivo'], archive: ['arquivo'], delete: ['exclusao'], comment: ['comentario'], restore: ['restauracao', 'desarquivar'], trash: ['lixeira'] };
+// v706: 'arquivo'/'desarquivar' foram SUBSTITUÍDOS por 'cancelamento' (cancelar o pedido em análise) e 'restauracao' (só resolvida excluída).
+const CLASSE = { edit: ['edicao'], cancel: ['cancelamento'], delete: ['exclusao'], comment: ['comentario'], restore: ['restauracao'], trash: ['lixeira'] };
 const clonar = (x) => JSON.parse(JSON.stringify(x));
 
 function verificar(arquivo = path.join(__dirname, 'ouro-divergencias-front.json')) {

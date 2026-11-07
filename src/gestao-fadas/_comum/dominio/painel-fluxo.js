@@ -9,6 +9,7 @@
  */
 
 const { contatoDe, encerrado, ativoNoDia } = require('./agenda-contato');
+const { ehDeCliente } = require('./agenda-identidade');
 const b = require('./fila-geral-base');
 const fg = require('./fila-geral');
 const adm = require('./admissao');
@@ -32,7 +33,7 @@ function fluxoDoPainel(entrada, ignoradas = new Set()) {
   const continuacaoDe = new Map(continuacoes.map((r) => [r.source.tarotId, r]));
   const entrou = (i) => t.entradaOriginal(i, date) ?? Infinity;
   const abertos = agenda.filter((item) => !encerrado(item) && !k.continuacaoArquivada(item, consultations) && item.workflowStatus !== 'Em consulta'
-    && !consultations.some((v) => !ignoradas.has(v.id) && v.clientId === item.clientId && emCurso(v))
+    && !consultations.some((v) => !ignoradas.has(v.id) && ehDeCliente(item) && v.clientId === item.clientId && emCurso(v))
     && !b.consultasQueCasam(item, consultations, date).some((v) => !ignoradas.has(v.id) && !b.correspondenciaMantida(item, v)))
     .sort((p, z) => (entrou(p) - entrou(z)) || (p.position - z.position));
   const esperando = abertos.filter((item) => ativoNoDia(item, date, date));

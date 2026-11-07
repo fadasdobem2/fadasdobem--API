@@ -87,6 +87,7 @@ function rotaCadastro(provedor) {
         if (!sessao.editor) return negarEditor(res, sessao.ausente);
       }
       if (req.method === 'GET') {
+        if (q.intakeLinks === '1') return responder(res, await cadastro.listarNovosLinks());
         if (q.approved === '1') return responder(res, await cadastro.lerAprovados());
         if (q.id || q.tarotId) return responder(res, await cadastro.lerFicha({ id: q.id ? String(q.id) : '', tarotId: q.tarotId ? String(q.tarotId) : '' }));
         return responder(res, await cadastro.lerLista());
@@ -97,7 +98,7 @@ function rotaCadastro(provedor) {
       if (corpo.action !== undefined) {
         sessao = await sessaoDeEditor(provedor, req);
         if (!sessao.editor) return negarEditor(res, sessao.ausente);
-        return responder(res, await cadastro.criarLink(req, corpo, origemDoGate(req)));
+        return responder(res, await cadastro.acao(req, corpo, origemDoGate(req)));
       }
       return responder(res, await cadastro.receberEnvio(corpo));
     } catch (e) {

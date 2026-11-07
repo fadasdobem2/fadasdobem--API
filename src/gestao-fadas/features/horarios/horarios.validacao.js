@@ -134,10 +134,10 @@ function corpoSemanal(corpo) {
   const semana = {};
   for (const [dia, horas] of Object.entries(corpo.weeklySchedule)) {
     if (!DIAS_SEMANA.includes(dia)) throw invalido('weeklySchedule');
-    // `registration-model.ts:120-125` do front: vazio ou uma das frases sem horário passam; o resto precisa de 1 a 3 períodos válidos.
+    // `registration-model.ts` (`validatedSchedule`, v706: inclui "por escala") do front: vazio ou uma das frases sem horário passam; o resto precisa de 1 a 3 períodos válidos.
     texto(horas, `weeklySchedule.${dia}`, { max: 240, vazio: true });
     const t = horas.trim();
-    if (t && !/^(folga|não atende|não vou atender|horário não informado|horário a informar|sem horário informado)$/i.test(t)) {
+    if (t && !/^(folga|não atende|não vou atender|horário não informado|horário a informar|sem horário informado|por escala)$/i.test(t)) {
       const lista = periodosDoTexto(t).map((p) => ({ start: p.start, end: p.end }));
       try { if (!lista.length) throw new Error('x'); periodos(lista, { tarologa: true }); } catch (_e) { throw regra(`Confira os horários de ${dia}. Use períodos como 9h às 12h e 14h às 18h, ou Folga.`); }
     }

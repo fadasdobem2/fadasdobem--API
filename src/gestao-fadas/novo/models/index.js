@@ -32,12 +32,14 @@ const fabricas = [
   require('./gf_agenda_ordem_comandos.model'),
   require('./gf_agenda_admissoes.model'),
   require('./gf_agenda_solicitacoes.model'),
+  require('./gf_agenda_contatos.model'),
   require('./gf_consultas_ext.model'),
   require('./gf_consultas_eventos.model'),
   require('./gf_tarologos_perfil.model'),
   require('./gf_cadastros_tarologo.model'),
   require('./gf_cadastros_tarologo_envios.model'),
   require('./gf_cadastros_tarologo_links.model'),
+  require('./gf_cadastros_tarologo_novos_links.model'),
   require('./gf_clientes_ext.model'),
   require('./gf_precos_versoes.model'),
   require('./gf_pagamentos.model'),
@@ -65,6 +67,9 @@ const fabricas = [
   require('./gf_lilly_pagamento_refs.model'),
   require('./gf_lilly_cotacoes.model'),
   require('./gf_lilly_avisos.model'),
+  require('./gf_ponto_turnos.model'),
+  require('./gf_ponto_escalas.model'),
+  require('./gf_ponto_eventos.model'),
 ];
 
 function registrar(sequelize) {

@@ -29,6 +29,7 @@ async function rodarServico({ chamar, como, sequelize, passo, assert }) {
       if (p.guardar && p.guardar.token && r.j && r.j.url) tokens[p.guardar.token] = r.j.url.split('token=')[1];
       const simbolos = [...Object.entries(ids).map(([k, v]) => [`<id:${k}>`, v]), ...Object.entries(tokens).map(([k, v]) => [`<token:${k}>`, v])];
       const obtido = normalizar(r.j, simbolos);
+      if (r.status === 410 && obtido && obtido.code) delete obtido.code; // v706: o 410 agora diz POR QUE (used/expired/revoked/invalid), como o armazenamento do formulário; o serviço D1 antigo não diz (o texto é o mesmo)
       assert.equal(r.status, p.status, `${p.n}: status ${r.status} (front ${p.status}) ${r.t}`);
       assert.ok(JSON.stringify(obtido) === JSON.stringify(p.esperado) || diferencas(obtido, p.esperado).length === 0, `${p.n}: corpo diferente do front | ${diferencas(obtido, p.esperado).join(' | ')}`);
     }

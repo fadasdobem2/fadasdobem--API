@@ -29,22 +29,22 @@ async function offline() {
   try {
     console.log('Entrada');
     await passo('JSON (lista e { contas }) e CSV (vírgula e ponto e vírgula, BOM, aspas) viram a mesma lista', () => {
-      const lista = [{ nome: 'Ana Paula', email: 'ANA@fadas.test', papel: 'Atendente' }, { nome: 'Bia', email: 'bia@fadas.test', papel: 'assistente', legacyId: '77' }];
+      const lista = [{ nome: 'Ana Paula', email: 'ANA@fadasdobem.com.br', papel: 'Atendente' }, { nome: 'Bia', email: 'bia@fadasdobem.com.br', papel: 'assistente', legacyId: '77' }];
       fs.writeFileSync(path.join(tmp, 'a.json'), JSON.stringify(lista));
       fs.writeFileSync(path.join(tmp, 'b.json'), JSON.stringify({ contas: lista }));
-      fs.writeFileSync(path.join(tmp, 'c.csv'), '﻿nome;email;papel;legacyId\n"Ana Paula";ANA@fadas.test;Atendente;\nBia;bia@fadas.test;assistente;77\n');
-      fs.writeFileSync(path.join(tmp, 'd.csv'), 'Nome,E-mail,Papel\n"Souza, Ana",ana@fadas.test,atendente\n');
+      fs.writeFileSync(path.join(tmp, 'c.csv'), '﻿nome;email;papel;legacyId\n"Ana Paula";ANA@fadasdobem.com.br;Atendente;\nBia;bia@fadasdobem.com.br;assistente;77\n');
+      fs.writeFileSync(path.join(tmp, 'd.csv'), 'Nome,E-mail,Papel\n"Souza, Ana",ana@fadasdobem.com.br,atendente\n');
       const a = entrada.validar(entrada.lerArquivo(path.join(tmp, 'a.json')));
-      assert.deepEqual(a.erros, []); assert.equal(a.contas[0].email, 'ana@fadas.test'); assert.equal(a.contas[0].papel, 'atendente'); assert.equal(a.contas[1].legacyId, '77');
+      assert.deepEqual(a.erros, []); assert.equal(a.contas[0].email, 'ana@fadasdobem.com.br'); assert.equal(a.contas[0].papel, 'atendente'); assert.equal(a.contas[1].legacyId, '77');
       assert.deepEqual(entrada.validar(entrada.lerArquivo(path.join(tmp, 'b.json'))).contas, a.contas);
       assert.deepEqual(entrada.validar(entrada.lerArquivo(path.join(tmp, 'c.csv'))).contas.map((c) => [c.nome, c.email, c.papel, c.legacyId]), a.contas.map((c) => [c.nome, c.email, c.papel, c.legacyId]));
       assert.equal(entrada.validar(entrada.lerArquivo(path.join(tmp, 'd.csv'))).contas[0].nome, 'Souza, Ana');
     });
     await passo('recusa: papel inválido, e-mail inválido e repetido, nome vazio, tarologa sem tarotId, tarotId em papel de equipe, lista vazia', () => {
       const r = entrada.validar([
-        { nome: 'A', email: 'a@x.co', papel: 'gestora' }, { nome: 'B', email: 'b', papel: 'atendente' },
-        { nome: 'C', email: 'c@x.co', papel: 'atendente' }, { nome: 'C2', email: 'C@x.co', papel: 'atendente' },
-        { nome: ' ', email: 'd@x.co', papel: 'atendente' }, { nome: 'E', email: 'e@x.co', papel: 'tarologa' }, { nome: 'F', email: 'f@x.co', papel: 'atendente', tarotId: '9001' },
+        { nome: 'A', email: 'a@fadasdobem.com.br', papel: 'gestora' }, { nome: 'B', email: 'b', papel: 'atendente' },
+        { nome: 'C', email: 'c@fadasdobem.com.br', papel: 'atendente' }, { nome: 'C2', email: 'C@fadasdobem.com.br', papel: 'atendente' },
+        { nome: ' ', email: 'd@fadasdobem.com.br', papel: 'atendente' }, { nome: 'E', email: 'e@fadasdobem.com.br', papel: 'tarologa' }, { nome: 'F', email: 'f@fadasdobem.com.br', papel: 'atendente', tarotId: '9001' },
       ]);
       assert.equal(r.erros.length, 6); assert.equal(r.contas.length, 1);
       assert.equal(entrada.validar([]).erros.length, 1);

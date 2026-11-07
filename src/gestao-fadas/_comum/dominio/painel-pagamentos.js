@@ -32,7 +32,7 @@ const pagoEm = (p) => { const v = p.paidAt || p.informedAt; return DATA.test(v) 
 const diaDoRegistro = (instante) => (Number.isFinite(Date.parse(instante)) ? diaOperacionalDe(Date.parse(instante)) : '');
 
 const confirmado = s.recebimentoConfirmado;
-const valorDaConsulta = (p) => Math.max(0, s.arredondar(p.amount + (p.movements || []).reduce((t, m) => t + (m.kind === 'balance-transfer' ? s.efeitoDaTransferencia(m, p.clientId) : m.creditEffect), 0)));
+const valorDaConsulta = (p) => p.unidentified ? 0 : Math.max(0, s.arredondar(p.amount + (p.movements || []).reduce((t, m) => t + (m.kind === 'balance-transfer' ? s.efeitoDaTransferencia(m, p.clientId) : m.creditEffect), 0)));
 
 /** `paymentContactState`. */
 function contatoDoPagamento(p, data) {
@@ -46,11 +46,12 @@ function contatoDoPagamento(p, data) {
 const contato = (p, data, agora) => { const c = contatoDoPagamento(p, data); return c.state === 'asked' && Date.parse(c.askedAt) > agora ? { ...c, state: 'unasked', askedAt: undefined } : c; };
 
 /** `unassignedPayments`: `perfis` = `{ [clientId]: ClientProfile }`, `cadastros` = `{ [clientId]: { createdAt } }`. */
-function pagamentosSemAgenda(pagamentos, consultas, agenda, perfis, cadastros, data, agora, preco = PRECOS_PADRAO) {
+function pagamentosSemAgenda(pagamentos, consultas, agenda, perfis, cadastros, data, agora, preco = PRECOS_PADRAO, datasDoRecibo) {
   const comAgenda = new Set(agenda.filter((i) => !require('./agenda-contato').encerrado(i)).map((i) => i.clientId));
   const emCurso = new Set(consultas.filter((i) => i.status === 'Em curso' && !i.tarologistFinishReport).map((i) => i.clientId));
-  const grupos = new Map(); const ontem = somarDia(data, -1);
-  pagamentos.filter((p) => { const em = pagoEmConhecido(p); const dia = em ? diaDoRegistro(em) : ''; return Boolean(em && (dia === data || dia === ontem) && confirmado(p) && !comAgenda.has(p.clientId) && !emCurso.has(p.clientId)); })
+  // v706: as datas de recibo escolhidas só FILTRAM a lista; cobertura e contato seguem o dia real e a conta completa da cliente.
+  const grupos = new Map(); const datas = new Set(datasDoRecibo ?? [data, somarDia(data, -1)]);
+  pagamentos.filter((p) => { const em = pagoEmConhecido(p); const dia = em ? diaDoRegistro(em) : ''; return Boolean(em && datas.has(dia) && confirmado(p) && !comAgenda.has(p.clientId) && !emCurso.has(p.clientId)); })
     .forEach((p) => grupos.set(p.clientId, [...(grupos.get(p.clientId) || []), p]));
   return [...grupos].flatMap(([clientId, linhas0]) => {
     let linhas = linhas0; const perfil = perfis[clientId];

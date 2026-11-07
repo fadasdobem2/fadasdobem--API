@@ -48,10 +48,31 @@ function nome(v) {
   return n;
 }
 
+function minutagem(v) {
+  if (v === undefined) return undefined;
+  if (typeof v !== 'boolean') throw c.invalido('viewDailyMinutes');
+  return v;
+}
+
+/** `POST /accounts/:id/invitation` e `.../invitation/cancel`. */
+function corpoConvite(b) {
+  if (!c.ehObjeto(b)) throw c.invalido('corpo');
+  somente(b, ['operationKey', 'expectedRevision']);
+  return { operationKey: c.chaveOperacao(b.operationKey), expectedRevision: c.revisao(b.expectedRevision) };
+}
+
+/** `POST /invitations/resolve` e `/invitations/accept` (públicas): o token é a impressão do link, 64 hexadecimais. */
+function corpoPublico(b, comSenha) {
+  if (!c.ehObjeto(b)) throw c.invalido('corpo');
+  somente(b, comSenha ? ['token', 'password'] : ['token']);
+  if (typeof b.token !== 'string' || !/^[a-f0-9]{64}$/.test(b.token)) throw c.invalido('token');
+  return comSenha ? { token: b.token, password: senhaForma(b.password) } : { token: b.token };
+}
+
 /** `POST /accounts`: equipe (`role` de equipe) ou acesso de tarólogo do catálogo (`tarotId`, `role: tarologa`). */
 function corpoCriar(b) {
   if (!c.ehObjeto(b)) throw c.invalido('corpo');
-  somente(b, ['operationKey', 'name', 'email', 'role', 'password', 'legacyId', 'avatar', 'tarotId']);
+  somente(b, ['operationKey', 'name', 'email', 'role', 'password', 'legacyId', 'avatar', 'tarotId', 'viewDailyMinutes']);
   if (!TODOS.includes(b.role)) throw c.invalido('role');
   const operationKey = c.chaveOperacao(b.operationKey);
   const tarologa = b.role === 'tarologa';
@@ -61,19 +82,19 @@ function corpoCriar(b) {
   if (!tarologa && b.tarotId !== undefined) throw c.invalido('tarotId');
   return {
     operationKey, role: b.role, tarotId: tarologa && b.tarotId !== undefined ? idCatalogo(b.tarotId) : undefined, name, email,
-    password: senhaForma(b.password), legacyId: legacyId(b.legacyId), avatar: foto(b.avatar),
+    password: b.password === undefined ? undefined : senhaForma(b.password), legacyId: legacyId(b.legacyId), avatar: foto(b.avatar), viewDailyMinutes: minutagem(b.viewDailyMinutes),
   };
 }
 
 /** `PATCH /accounts/:id`. */
 function corpoEditar(b) {
   if (!c.ehObjeto(b)) throw c.invalido('corpo');
-  somente(b, ['operationKey', 'expectedRevision', 'name', 'email', 'role', 'password', 'legacyId', 'avatar']);
+  somente(b, ['operationKey', 'expectedRevision', 'name', 'email', 'role', 'password', 'legacyId', 'avatar', 'viewDailyMinutes']);
   if (b.role !== undefined && !TODOS.includes(b.role)) throw c.invalido('role');
   return {
     operationKey: c.chaveOperacao(b.operationKey), expectedRevision: c.revisao(b.expectedRevision), role: b.role,
     name: b.name === undefined ? undefined : nome(b.name), email: b.email === undefined ? undefined : emailEntrada(b.email),
-    password: b.password === undefined ? undefined : senhaForma(b.password), legacyId: legacyId(b.legacyId), avatar: foto(b.avatar),
+    password: b.password === undefined ? undefined : senhaForma(b.password), legacyId: legacyId(b.legacyId), avatar: foto(b.avatar), viewDailyMinutes: minutagem(b.viewDailyMinutes),
   };
 }
 
@@ -92,4 +113,4 @@ function corpoAtivo(b) {
   return { operationKey: c.chaveOperacao(b.operationKey), expectedRevision: c.revisao(b.expectedRevision), active: b.active };
 }
 
-module.exports = { exigirSenhaForte, idConta, corpoCriar, corpoEditar, corpoSenha, corpoAtivo };
+module.exports = { corpoConvite, corpoPublico, exigirSenhaForte, idConta, corpoCriar, corpoEditar, corpoSenha, corpoAtivo };

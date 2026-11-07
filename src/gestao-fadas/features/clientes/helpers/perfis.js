@@ -15,6 +15,7 @@
  */
 
 const { MAPEAMENTO_PERFIL } = require('../../../_comum/politica-acesso');
+const { DATAS_POR_FUNCAO } = require('../../../_comum/dominio/cliente-lista-datas');
 
 const PERFIS = Object.freeze(['administradora', 'assistente', 'supervisora', 'atendente', 'tarologa']);
 
@@ -53,8 +54,7 @@ const clientRolePolicy = (role) => ({
   canSearchDetails: role !== 'assistente' && role !== 'tarologa',
   canSeeBalance: role === 'assistente' || role === 'administradora',
   canSeeDateCounts: role === 'administradora',
-  dates: role === 'administradora' ? ['ontem', 'hoje', '7dias', 'data', 'periodo']
-    : role === 'supervisora' ? ['ontem', 'hoje'] : role === 'assistente' ? ['3dias'] : ['hoje'],
+  dates: DATAS_POR_FUNCAO(role),
   pageSize: role === 'administradora' ? 50 : role === 'atendente' ? 20 : 30,
 });
 

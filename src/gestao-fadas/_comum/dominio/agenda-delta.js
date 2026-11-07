@@ -11,6 +11,7 @@
 const { GRUPOS, RESERVADOS, AUTOR_DA_HISTORIA, TIPO_DO_EVENTO } = require('./agenda-grupos');
 const regras = require('./agenda-regras');
 const { ehDataCivil, limpar } = require('./agenda-contato');
+const { registrarAvisoManual } = require('./agenda-aviso-manual');
 
 const { ErroDeRegra } = regras;
 const invalido = (m) => new ErroDeRegra(m || 'Confira os dados informados e tente novamente.');
@@ -114,7 +115,12 @@ function aplicarDelta(item, bruto, grupo, ator, agora = new Date()) {
     const ids = new Set(atuais.map((e) => e.id));
     const novos = [];
     for (const bruto of lista) {
-      const e = carimbar(historia, elementoNovo(historia, bruto), ator);
+      let e = carimbar(historia, elementoNovo(historia, bruto), ator);
+      if (historia === 'manualNotices') {
+        // v706: quem avisou é a conta da sessão; o aviso só vale para a cliente/contato do agendamento e num agendamento ainda aberto.
+        e = { ...e, actorId: ator.id };
+        try { registrarAvisoManual([{ ...proximo, manualNotices: atuais }], proximo.id, e); } catch (erro) { throw invalido(erro.message); }
+      }
       if (ids.has(e.id)) throw invalido('Esta ação já foi registrada.'); // o mesmo evento nunca entra duas vezes
       ids.add(e.id); novos.push(e);
     }
@@ -149,7 +155,7 @@ function aplicarDelta(item, bruto, grupo, ator, agora = new Date()) {
 function itemNovo(c, ator, servidor) {
   const { proximaPosicao } = require('./agenda-contato');
   const base = {
-    id: c.id, publicNumber: servidor.numero, tarotId: c.tarotId, clientId: c.clientId, client: c.client, date: c.date, createdAt: servidor.agora.toISOString(), createdBy: ator.nome,
+    id: c.id, publicNumber: servidor.numero, tarotId: c.tarotId, clientId: c.clientId, ...(c.leadId ? { leadId: c.leadId } : {}), client: c.client, date: c.date, createdAt: servidor.agora.toISOString(), createdBy: ator.nome,
     response: 'Aguardando resposta', contact: { attempt: 1, date: c.date, tags: [] }, paymentPending: false,
     position: proximaPosicao(servidor.abertos, c.tarotId, c.date, servidor.hoje),
   };

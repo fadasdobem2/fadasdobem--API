@@ -10,6 +10,7 @@
  */
 
 const { contatoDe, encerrado, ativoNoDia } = require('./agenda-contato');
+const { ehDeCliente } = require('./agenda-identidade');
 const b = require('./fila-geral-base');
 const k = require('./painel-continuacao');
 const s = require('./financeiro-saldo');
@@ -39,7 +40,7 @@ function historicoDeEspera(item) {
 }
 
 function reciboDaEspera(item, reg, inicio, now, p) {
-  if (p.clientId !== item.clientId || p.status === 'Cancelado' || pg.valorDaConsulta(p) <= 0) return false;
+  if (!ehDeCliente(item) || p.clientId !== item.clientId || p.status === 'Cancelado' || pg.valorDaConsulta(p) <= 0) return false;
   const em = Date.parse(p.informedAt);
   if (!Number.isFinite(em) || em < inicio || em > now) return false;
   if (p.linkedConsultationId) return reg.consultations.some((v) => v.id === p.linkedConsultationId && v.agendaItemId === item.id);
@@ -103,7 +104,7 @@ const emCurso = (v) => v.status === 'Em curso' && !v.tarologistFinishReport;
 function esperaComum(item, entrada, perfil) {
   if (item.continuationRequest || encerrado(item) || item.workflowStatus === 'Em consulta' || k.contatoParado(item)) return vazia();
   if (!ativoNoDia(item, entrada.date, entrada.date) || (b.instantePedido(item, entrada.date) ?? 0) > entrada.now) return vazia();
-  if (entrada.consultations.some((v) => emCurso(v) && v.clientId === item.clientId)) return vazia();
+  if (ehDeCliente(item) && entrada.consultations.some((v) => emCurso(v) && v.clientId === item.clientId)) return vazia();
   const contato = contatoDe(item);
   const eventos = (item.contactHistory || []).filter((e) => e.attempt === contato.attempt && e.date === contato.date);
   const aviso = ultimo(eventos, (e) => e.tag === 'Avisada'); const promessa = ultimo(eventos, (e) => e.tag === 'Vai pagar');

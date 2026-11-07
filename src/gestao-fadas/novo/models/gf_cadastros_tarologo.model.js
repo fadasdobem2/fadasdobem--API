@@ -19,6 +19,7 @@ module.exports = definir({
     aprovado_revisao: { type: DataTypes.INTEGER, allowNull: true },
     aprovado_em: { type: DataTypes.DATE, allowNull: true },
     aprovado_por: { type: DataTypes.STRING(120), allowNull: true },
+    envio_original: { type: DataTypes.JSONB, allowNull: true },
     criado_em: { type: DataTypes.DATE, allowNull: false, defaultValue: literal('CURRENT_TIMESTAMP') },
     atualizado_em: { type: DataTypes.DATE, allowNull: false, defaultValue: literal('CURRENT_TIMESTAMP') },
     atualizado_por: { type: DataTypes.STRING(120), allowNull: false },

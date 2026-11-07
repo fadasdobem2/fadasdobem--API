@@ -8,10 +8,11 @@
  */
 
 const d = require('./recados');
+const dep = require('./recados-departamentos');
 const { erro, estavel, igual, versaoDe, validarTexto, validarPeriodo, detalhes, equipe, visivel, raiz } = d;
 
-const IGNORADAS = ['readsByAccount', 'readAt', 'readBy', 'readById', 'historicalRead', 'incomingToViewer', 'pinnedByAccount', 'prioritizedByAccount', 'archivedByAccount', 'excludedDates'];
-const CONTEUDO = ['text', 'formatting', 'subject', 'startDate', 'endDate', 'originalQuote', 'originalQuoteFormatting', 'updatedAt', 'deletedAt', 'revisions'];
+const IGNORADAS = ['readsByAccount', 'readAt', 'readBy', 'readById', 'historicalRead', 'incomingToViewer', 'pinnedByAccount', 'prioritizedByAccount', 'archivedByAccount', 'excludedDates', 'readResetsByAccount'];
+const CONTEUDO = ['text', 'formatting', 'subject', 'startDate', 'endDate', 'clientId', 'clientName', 'originalQuote', 'originalQuoteFormatting', 'updatedAt', 'deletedAt', 'revisions'];
 const ESPECIAIS = ['importance', 'agendaApplications', 'notifiedAt', 'notifiedBy'];
 const ID = /^[A-Za-z0-9._:-]{1,64}$/;
 const NAO_IDENTIFICADA = 'Não foi possível identificar esta alteração.';
@@ -25,10 +26,28 @@ function validarDelivery(dv, conta, contas) {
   if (!objeto(dv) || !['board', 'message'].includes(dv.kind) || !['staff', 'tarologist', 'person', 'tarologists'].includes(dv.audience)) throw erro('Escolha a finalidade e os destinatários.');
   if (dv.senderId !== conta.id || !txt(dv.label) || !Array.isArray(dv.recipientIds) || !Array.isArray(dv.excludedIds) || dv.recipientIds.length > 500 || dv.excludedIds.length > 500
     || [...dv.recipientIds, ...dv.excludedIds].some((x) => !txt(x, 64))) throw erro(NAO_IDENTIFICADA);
+  if (dv.compositionMode !== undefined) return validarComposicao(dv, conta);
   if (dv.kind === 'board' && dv.audience !== 'staff') throw erro(NAO_IDENTIFICADA);
   if (dv.kind === 'message' && !dv.recipientIds.length) throw erro('Nenhuma conta ativa receberia esta mensagem. Revise os destinatários e as exceções.');
   if (dv.audience === 'tarologists' && !require('../politica-acesso').permissoesDoPerfil(conta.papel).canEditProfessionalProfile) throw erro('O envio para todos os tarólogos é reservado ao administrativo.');
   if (contas && dv.recipientIds.some((x) => !contas.has(x))) throw erro('Escolha a pessoa do atendimento.');
+}
+
+/** Composição unificada (v646+): o modo decide a finalidade; departamentos seguem a hierarquia da conta que envia. */
+function validarComposicao(dv, conta) {
+  const modo = dv.compositionMode;
+  if (!['department', 'person', 'tarologist'].includes(modo)) throw erro('Escolha para quem é o recado.');
+  if (modo === 'person') {
+    if (dv.kind !== 'message' || dv.audience !== 'person' || dv.departments !== undefined || !dv.recipientIds.length) throw erro(modo === 'person' && !dv.recipientIds.length ? 'Escolha as pessoas da equipe que receberão a mensagem.' : NAO_IDENTIFICADA);
+    return;
+  }
+  const deptos = dv.departments;
+  if (dv.kind !== 'board' || !Array.isArray(deptos) || deptos.length > 10 || deptos.some((x) => !dep.ehDepartamento(x)) || new Set(deptos).size !== deptos.length) throw erro(NAO_IDENTIFICADA);
+  if (!deptos.length) throw erro('Escolha pelo menos um departamento.');
+  if (modo === 'tarologist' && deptos.includes('tarologos')) throw erro('Escolha os departamentos da equipe que verão o recado.');
+  if (dv.audience !== (deptos.length === 1 && deptos[0] === 'tarologos' ? 'tarologists' : 'staff')) throw erro(NAO_IDENTIFICADA);
+  const permitidos = dep.departamentosPermitidos(conta);
+  if (deptos.some((x) => !permitidos.includes(x))) throw erro('Esta conta não pode enviar recados para este departamento.');
 }
 
 /** Campos que um recado novo (raiz ou resposta) traz do front; o resto o servidor define. */
@@ -58,8 +77,12 @@ function criar({ pedido, conta, agora, todas, contas }) {
     validarDelivery(p.delivery, conta, contas);
     nota.delivery = p.delivery;
     if (p.delivery.kind === 'board') {
-      if (!txt(p.subjectTarotId, 64) || p.subjectTarotId !== p.tarotId) throw erro('Escolha sobre qual tarólogo é o recado.');
-      nota.subjectTarotId = p.subjectTarotId;
+      if (p.delivery.compositionMode !== undefined && p.delivery.compositionMode !== 'tarologist') {
+        if (p.subjectTarotId !== undefined || p.tarotId !== `departments:${p.delivery.departments.join(',')}`) throw erro(NAO_IDENTIFICADA);
+      } else {
+        if (!txt(p.subjectTarotId, 64) || p.subjectTarotId !== p.tarotId) throw erro('Escolha sobre qual tarólogo é o recado.');
+        nota.subjectTarotId = p.subjectTarotId;
+      }
       nota.originalQuote = validarTexto(p.originalQuote ?? '', 'Mensagem original');
       if (p.originalQuoteFormatting !== undefined) nota.originalQuoteFormatting = p.originalQuoteFormatting;
     }
@@ -68,7 +91,7 @@ function criar({ pedido, conta, agora, todas, contas }) {
       nota.importance = { byId: conta.id, at: agora };
     }
   }
-  const per = validarPeriodo({ subject: p.subject ?? 'Diversos', startDate: p.startDate ?? p.date, endDate: p.endDate ?? p.startDate ?? p.date });
+  const per = validarPeriodo({ subject: p.subject ?? 'Diversos', startDate: p.startDate ?? p.date, endDate: p.endDate ?? p.startDate ?? p.date, clientId: p.clientId, clientName: p.clientName });
   return { ...nota, ...per };
 }
 const { dataValida } = d;
@@ -113,7 +136,7 @@ function editar({ antes, pedido, conta, agora }) {
   if (!remove) {
     texto = validarTexto(pedido.text, rotulo, true);
   } else if (pedido.text !== antes.text) throw erro(NAO_IDENTIFICADA);
-  const per = antes.replyToId || remove ? detalhes(antes) : validarPeriodo({ subject: pedido.subject ?? detalhes(antes).subject, startDate: pedido.startDate ?? detalhes(antes).startDate, endDate: pedido.endDate ?? detalhes(antes).endDate });
+  const per = antes.replyToId || remove ? detalhes(antes) : validarPeriodo({ subject: pedido.subject ?? detalhes(antes).subject, startDate: pedido.startDate ?? detalhes(antes).startDate, endDate: pedido.endDate ?? detalhes(antes).endDate, clientId: pedido.clientId, clientName: pedido.clientName });
   if (antes.replyToId && !igual({ subject: pedido.subject, startDate: pedido.startDate, endDate: pedido.endDate }, per)) throw erro(NAO_IDENTIFICADA);
   let citacao = {};
   if (!tarologista && antes.delivery && antes.delivery.kind === 'board' && !antes.replyToId) {
@@ -125,11 +148,12 @@ function editar({ antes, pedido, conta, agora }) {
   const nova = nv[nv.length - 1];
   if (!objeto(nova) || nova.version !== versaoDe(antes) || nova.text !== antes.text) throw erro(NAO_IDENTIFICADA);
   const versao = proximaVersao(antes, agora);
-  const item = { ...antes, ...per, ...citacao, text: texto, updatedAt: versao, revisions: [...rv, { ...nova, at: versao, by: conta.nome }] };
+  const item = { ...antes, clientId: undefined, clientName: undefined, ...per, ...citacao, text: texto, updatedAt: versao, revisions: [...rv, { ...nova, at: versao, by: conta.nome }] };
   if (pedido.formatting !== undefined) item.formatting = pedido.formatting; else delete item.formatting;
   if (remove) item.deletedAt = agora;
   delete item.notifiedAt; delete item.notifiedBy;
   if (!citacao.originalQuote && antes.originalQuote === undefined) delete item.originalQuote;
+  if (item.clientId === undefined) { delete item.clientId; delete item.clientName; }
   return item;
 }
 

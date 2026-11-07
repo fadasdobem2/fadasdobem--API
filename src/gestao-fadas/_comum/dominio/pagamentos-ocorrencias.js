@@ -9,6 +9,7 @@
  */
 
 const L = require('./pagamentos-livro');
+const { podeRegistrarSaida, MSG_SAIDA, MSG_DECISAO } = require('./pagamentos-saidas');
 const B = require('./pagamentos-ocorrencias-base');
 const { registrarMovimento, creditoDaDevolucao } = require('./pagamentos-movimento');
 const { devolverCreditoRestante } = require('./pagamentos-credito');
@@ -36,7 +37,11 @@ function conferirDispensa(estado, entrada, ator, papel, em) {
 
 /** `recordFinancialOccurrence(state, input, actor, role, at)`; `perfil` = perfil de crédito da cliente (o do servidor). */
 function registrarOcorrencia(estado, entrada, ator, papel, em, opcoes = {}) {
-  B.validarAtor(ator, papel, em); B.validarIdOperacao(entrada.operationId); B.validarIdOperacao(entrada.id);
+  // v706: a saída exige a permissão da conta; a decisão de cobrança continua só com assistente e administradora.
+  if (!podeRegistrarSaida(papel, opcoes.conta)) erro(MSG_SAIDA);
+  B.validarAtor(ator, papel, em, false);
+  if (papel !== 'administradora' && papel !== 'assistente' && (entrada.chargeDecision !== 'pending' || entrada.waiverAmount)) erro(MSG_DECISAO);
+  B.validarIdOperacao(entrada.operationId); B.validarIdOperacao(entrada.id);
   const assinatura = opcoes.assinatura || B.calcularAssinatura(entrada);
   const p = B.pagamentoDe(estado, entrada.paymentId);
   const anterior = (p.financialOccurrences || []).find((x) => x.id === entrada.id);

@@ -10,6 +10,7 @@
 
 const { randomUUID } = require('crypto');
 const { contatoDe, encerrado, ativoNoDia } = require('./agenda-contato');
+const { ehDeCliente } = require('./agenda-identidade');
 const { normalizar: normalizarFormatacao } = require('./texto-formatado');
 const { limparAdiamento, registrarMudancaDeAgendamento } = require('./fila-geral');
 const { lerPlano, normalizarRelogio } = require('./agenda-etiqueta');
@@ -101,7 +102,7 @@ function montarAgendamento(entrada, itemId, tarotId, detalhes, perfil, ator, nov
   const cobertura = s.coberturaDaCliente(item.clientId, entrada.payments || [], entrada.consultations, perfil, new Date(entrada.now).toISOString()); const em = new Date(entrada.now).toISOString();
   const texto = `${detalhes.observation}`.trim() || 'Sem observações.';
   const agendado = { ...item, tarotId, date: detalhes.date, scheduledTime: detalhes.time || undefined, requestedTime: detalhes.requestedTime || undefined, observation: texto,
-    observationFormatting: normalizarFormatacao(texto, 'observationFormatting' in detalhes ? detalhes.observationFormatting : item.observationFormatting), paymentPending: !cobertura.canConsult, position: indice + 1, positionOverrides: undefined,
+    observationFormatting: normalizarFormatacao(texto, 'observationFormatting' in detalhes ? detalhes.observationFormatting : item.observationFormatting), paymentPending: ehDeCliente(item) && !cobertura.canConsult, position: indice + 1, positionOverrides: undefined,
     standbyDate: undefined, forwardedAt: undefined, forwardedBy: undefined, forwardedDate: undefined, contact: { ...contatoDe(item), date: detalhes.date } };
   const atualizado = registrarMudancaDeAgendamento(item, plano ? aplicarPlano(agendado, plano, { actor: ator, at: em, date: detalhes.date, reschedule: true, releaseReservation: true }, novoId) : agendado, ator, em, novoId);
   const ids = fila.map((r) => r.id); ids.splice(indice, 0, item.id);

@@ -62,7 +62,7 @@ function refazerOcorrencia(antes, depois, ator, agora, contexto) {
   const estado = { payments: contexto.payments.map((p) => (p.id === antes.id ? antes : p)), consultations: contexto.consultations };
   const { entrada, assinatura } = entradaDaAssinatura(comando, contexto);
   const rodar = (nome, em) => {
-    const r = comando.funcao(estado, entrada, nome, ator.perfil, em, { assinatura });
+    const r = comando.funcao(estado, entrada, nome, ator.perfil, em, { assinatura, conta: ator.conta });
     const p = r.payments.find((x) => x.id === antes.id);
     if (!p || r === estado) recusa();
     return p;
@@ -92,7 +92,7 @@ function dadosDaTransferencia(perna) {
   if (!t || typeof t.operationId !== 'string' || typeof perna.operationSignature !== 'string') recusa();
   let a; try { a = JSON.parse(perna.operationSignature); } catch { recusa(); }
   if (!a || a.source !== t.sourceClientId || a.target !== t.targetClientId || !Number.isSafeInteger(a.amount)) recusa();
-  return { id: t.operationId, source: a.source, target: a.target, amount: a.amount / 100, note: a.note, reversalOf: a.reversalOf, nomes: { [a.source]: t.sourceClient, [a.target]: t.targetClient } };
+  return { id: t.operationId, source: a.source, target: a.target, amount: a.amount / 100, note: a.note, reversalOf: a.reversalOf, nomes: { [a.source]: t.sourceClient, [a.target]: t.targetClient }, autorizacao: t.authorization, resumoDaAutorizacao: a.authorization };
 }
 
 /**
@@ -107,10 +107,10 @@ function refazerTransferencia(antes, depois, ator, agora, contexto) {
   const semPernas = (p) => (p.movements && p.movements.some((m) => m.balanceTransfer && m.balanceTransfer.operationId === dados.id) ? { ...p, movements: p.movements.filter((m) => !(m.balanceTransfer && m.balanceTransfer.operationId === dados.id)) } : p);
   const pagamentos = contexto.payments.map((p) => (p.id === antes.id ? antes : p)).map(semPernas);
   const estado = { payments: pagamentos, consultations: contexto.consultations };
-  const entrada = { id: dados.id, sourceClientId: dados.source, targetClientId: dados.target, amount: dados.amount, note: dados.note, ...(dados.reversalOf ? { reversalOf: dados.reversalOf } : {}) };
+  const entrada = { id: dados.id, sourceClientId: dados.source, targetClientId: dados.target, amount: dados.amount, note: dados.note, ...(dados.autorizacao ? { authorization: dados.autorizacao } : {}), ...(dados.reversalOf ? { reversalOf: dados.reversalOf } : {}) };
   const nomes = {}; for (const id of [dados.source, dados.target]) if (contexto.nomes[id]) nomes[id] = dados.nomes[id];
   const rodar = (nome, em) => {
-    const r = T.transferirSaldo(estado, entrada, { profiles: contexto.perfis, names: nomes, regularMinuteValue: contexto.valorRegular, actor: nome, role: ator.perfil, at: em });
+    const r = T.transferirSaldo(estado, entrada, { profiles: contexto.perfis, names: nomes, regularMinuteValue: contexto.valorRegular, actor: nome, role: ator.perfil, at: em, resumoDaAutorizacao: dados.autorizacao ? undefined : dados.resumoDaAutorizacao });
     const p = r.payments.find((x) => x.id === antes.id);
     if (!p || r === estado) recusa();
     return p;

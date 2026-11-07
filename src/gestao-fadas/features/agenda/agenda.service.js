@@ -23,6 +23,7 @@ const admissao = require('./agenda-admissao.service');
 const painel = require('../../_comum/dominio/painel-validacao');
 const painelContexto = require('./agenda-painel.contexto');
 const direto = require('./agenda-direto.service');
+const contatosStore = require('./agenda-contatos.store');
 const { rotuloDaCliente, definirLeitorDeRotulo } = require('./agenda-cliente');
 const FILA_GERAL = 'afila';
 
@@ -58,8 +59,8 @@ async function ler(req) {
 async function criar(req) {
   const a = comum.ator(req, true);
   const c = validar.corpoCriacao(req.body);
-  if (!(await verificarCliente(c.clientId))) throw new AppError('Cadastro de cliente não encontrado.', 404, { codigo: 'CLIENT_NOT_FOUND' }, true);
-  const rotulo = await rotuloDaCliente(c.clientId); // o nome da cliente é o do legado, não o do navegador (Maturacao/56, C2)
+  if (!c.leadId && !(await verificarCliente(c.clientId))) throw new AppError('Cadastro de cliente não encontrado.', 404, { codigo: 'CLIENT_NOT_FOUND' }, true);
+  const rotuloCliente = c.leadId ? undefined : await rotuloDaCliente(c.clientId); // o nome da cliente é o do legado, não o do navegador (Maturacao/56, C2)
   return comum.gravar(req, a, {
     escopo: 'agenda.criar', operationKey: c.operationKey, corpo: c, acao: 'agenda.criar',
     producao: async (ex) => {
@@ -70,13 +71,16 @@ async function criar(req) {
       const numero = await store.proximoNumero(ex);
       let r;
       try { r = itemNovo(c, a, { abertos, numero, agora, hoje: hojeOperacional() }); } catch (e) { throw traduzir(e); }
-      const item = { ...r.item, client: rotulo };
+      // v706: com contato, o nome é o do contato gravado no servidor (o agendamento tem cliente OU contato).
+      const contato = c.leadId ? (await contatosStore.contatoTravado(ex, c.leadId) || {}).item : undefined;
+      if (c.leadId && (!contato || contato.archived || contato.clientId || contato.classification === 'client')) throw comum.regra('Este contato mudou. Localize a pessoa novamente antes de salvar.');
+      const item = { ...r.item, client: c.leadId ? contato.name : rotuloCliente };
       await direto.conferir(ex, { antes: undefined, item, grupo: 'agendamento', set: c.set, agora: agora.getTime() });
       await store.inserir(ex, item, numero, a.nome, c.operationKey);
-      await store.inserirEvento(ex, { idAgenda: item.id, tipo: 'criacao', ref: null, a, dados: { tarotId: item.tarotId, clientId: item.clientId, date: item.date }, versao: 1, operationKey: c.operationKey });
+      await store.inserirEvento(ex, { idAgenda: item.id, tipo: 'criacao', ref: null, a, dados: { tarotId: item.tarotId, clientId: item.clientId || null, leadId: item.leadId || null, date: item.date }, versao: 1, operationKey: c.operationKey });
       for (const e of r.eventos) await store.inserirEvento(ex, { idAgenda: item.id, tipo: e.tipo, ref: e.ref, a, dados: e.dados, versao: 1, operationKey: c.operationKey });
       const fila = await store.abertosDe(ex, [item.tarotId]);
-      return { entidadeId: item.id, antes: null, depois: { tarotId: item.tarotId, clientId: item.clientId, date: item.date, publicNumber: numero }, resposta: resposta.gravacao([{ item, version: 1 }], fila, [item.tarotId]) };
+      return { entidadeId: item.id, antes: null, depois: { tarotId: item.tarotId, clientId: item.clientId || null, leadId: item.leadId || null, date: item.date, publicNumber: numero }, resposta: resposta.gravacao([{ item, version: 1 }], fila, [item.tarotId]) };
     },
   });
 }
@@ -100,7 +104,7 @@ async function comando(req, grupo) {
       try { r = aplicarDelta(atual.item, c, grupo, a); } catch (e) { throw traduzir(e); }
       let item = r.item;
       // Agendar a cliente da FILA GERAL para uma taróloga (`scheduleGeneralMatch`): o front roda `validateGeneralScheduling` (Maturacao/39).
-      if (c.set.client !== undefined) item = { ...item, client: await rotuloDaCliente(item.clientId) }; // o nome da cliente é o do legado (Maturacao/56, C2)
+      if (c.set.client !== undefined) item = { ...item, client: item.clientId ? await rotuloDaCliente(item.clientId) : atual.item.client }; // o nome da cliente é o do legado (Maturacao/56, C2)
       const daFilaGeral = atual.item.tarotId === FILA_GERAL && item.tarotId !== FILA_GERAL;
       // Agendamento direto e edição: o servidor repete o que o front decide ao salvar (Maturacao/56, C1). A Fila Geral -> tarólogo tem a validação abaixo.
       if (!daFilaGeral) await direto.conferir(ex, { antes: atual.item, item, grupo, set: c.set, agora: Date.now() });

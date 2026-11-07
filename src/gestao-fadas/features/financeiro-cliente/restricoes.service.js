@@ -4,8 +4,9 @@
  * Restrições cliente x taróloga (Maturacao/29 seção 10). Uma linha por restrição (`gf_restricoes`), com a história embutida (só cresce) e um
  * índice único parcial: UMA restrição ativa por (cliente, taróloga, quem pediu).
  *   - leitura: a equipe lê todas; a taróloga só as DELA pedidas por ela (`restrictionsVisibleTo`, restriction-model.ts);
- *   - gravação (`PUT /restrictions/:id`): a equipe cria, edita e remove (`canManageConsultations`); a taróloga só REMOVE a própria
- *     ("Para incluir ou alterar uma restrição, comunique ao atendimento"). O servidor confere a sequência da história, o que não muda
+ *   - gravação (`PUT /restrictions/:id`): a equipe cria, edita e remove (`canManageConsultations`); a taróloga REMOVE a própria e, desde a v706,
+ *     INCLUI a própria restrição de uma cliente dela (consulta dela que não deu erro, ou restrição dela já acessível); ALTERAR uma existente segue
+ *     com o atendimento ("Esta restrição já está na lista. Para alterar o motivo, comunique ao atendimento") — regra antiga "só remove" SUBSTITUÍDA. O servidor confere a sequência da história, o que não muda
  *     (cliente, taróloga, quem pediu), carimba autor e instante dos eventos manuais e valida a queixa que originou a restrição contra a consulta;
  *   - idempotência `operationKey`, revisão `expectedVersion` (0 = nova; 409 `VERSION_CHANGED`), auditoria e `gf_operacoes` na MESMA transação.
  */
@@ -16,6 +17,14 @@ const dom = require('../../_comum/dominio/restricoes');
 const f = require('./fin.comum');
 
 const ACOES = ['created', 'edited', 'removed'];
+const DETALHES = ['reasonCode', 'message', 'occurredOn'];
+
+/** Relato da restrição (v706): campos opcionais, mas coerentes quando vêm. */
+function formaDoRelato(o, onde) {
+  const tem = DETALHES.filter((c) => o[c] !== undefined);
+  if (!tem.length) return;
+  if (tem.length !== 3 || typeof o.reasonCode !== 'string' || typeof o.message !== 'string' || typeof o.occurredOn !== 'string') throw f.invalido(onde);
+}
 const comoItem = (l) => ({ ...f.textoDe(l), id: l.id });
 let verificarCliente = async (id) => require('../clientes/clientes.service').clienteExiste(id);
 const definirVerificadorDeCliente = (fn) => { verificarCliente = fn; };
@@ -27,11 +36,13 @@ function forma(r) {
   if (r.requestedBy !== undefined && !['client', 'tarologist'].includes(r.requestedBy)) throw f.invalido('record.requestedBy');
   if (typeof r.reason !== 'string' || r.reason.length > 1000) throw f.regra('Use até 1.000 caracteres no motivo.');
   if (typeof r.active !== 'boolean') throw f.invalido('record.active');
+  formaDoRelato(r, 'record');
   f.instante(r.createdAt, 'record.createdAt'); f.instante(r.updatedAt, 'record.updatedAt');
   if (!Array.isArray(r.history) || !r.history.length || r.history.length > 500) throw f.invalido('record.history');
   for (const e of r.history) {
     if (!f.ehObjeto(e) || !ACOES.includes(e.action) || typeof e.actor !== 'string' || !e.actor.trim() || typeof e.reason !== 'string' || e.reason.length > 1000) throw f.invalido('record.history');
     f.instante(e.at, 'record.history.at');
+    formaDoRelato(e, 'record.history');
   }
   if (r.complaintConsultationIds !== undefined && (!Array.isArray(r.complaintConsultationIds) || r.complaintConsultationIds.length > 200 || r.complaintConsultationIds.some((x) => typeof x !== 'string' || !x))) throw f.invalido('record.complaintConsultationIds');
   return r;
@@ -56,6 +67,19 @@ function carimbar(antes, pedido, a, agora, queixaNova) {
   const ativa = ultimo.action !== 'removed';
   const motivo = ativa ? ultimo.reason : (history.slice().reverse().find((e) => e.action !== 'removed') || ultimo).reason;
   return { ...pedido, requestedBy: pedido.requestedBy ?? (antes && antes.requestedBy), active: ativa, reason: motivo, history, updatedAt: ultimo.at, updatedBy: ultimo.actor, createdAt: antes ? antes.createdAt : history[0].at, createdBy: antes ? antes.createdBy : history[0].actor };
+}
+
+/** Cliente "dela" (`ownRestrictionClientIds`): consulta dela que não deu erro, ou restrição dela, pedida por ela, já existente. */
+async function conferirClienteDaTarologa(ex, tarotId, clientId) {
+  const [c] = await ex.execute("SELECT 1 AS ok FROM gf_consultas_ext WHERE id_tarologo = ? AND id_cliente = ? AND COALESCE(item ->> 'status', '') <> 'Erro' LIMIT 1", [tarotId, clientId]);
+  if (c[0]) return;
+  const [r] = await ex.execute("SELECT 1 AS ok FROM gf_restricoes WHERE id_tarologo = ? AND id_cliente = ? AND solicitante = 'tarologist' LIMIT 1", [tarotId, clientId]);
+  if (!r[0]) throw f.regra('Esta cliente não está disponível para seu acesso.');
+}
+
+/** Motivo da lista de quem pediu, mensagem de 1 a 5.000 e data do fato não futura (mesmas frases do front). */
+function conferirRelato(e, quem) {
+  try { dom.conferirDetalhes(quem, e.reason, e, new Date().toISOString()); } catch (x) { if (x instanceof dom.RestricaoInvalidaError) throw f.regra(x.message); throw x; }
 }
 
 /** Sequência válida da história: `created`, depois `edited` enquanto ativa, e `removed` encerra. */
@@ -118,7 +142,9 @@ async function gravar(req) {
       // Quem pode: a taróloga só remove a própria; a equipe gerencia.
       for (const e of novos) {
         if (!dom.podeGerenciar(a.perfil, a.proprio, pedido.tarotId, quem)) throw f.negado(true);
-        if (a.tarologa && e.action !== 'removed') throw f.regra('Para incluir ou alterar uma restrição, comunique ao atendimento.');
+        if (a.tarologa && e.action === 'edited') throw f.regra('Esta restrição já está na lista. Para alterar o motivo, comunique ao atendimento.');
+        if (a.tarologa && e.action === 'created') await conferirClienteDaTarologa(ex, a.proprio, pedido.clientId);
+        if (e.reasonCode !== undefined) conferirRelato(e, quem);
       }
       const queixaNova = a.equipe && await conferirQueixas(ex, antes, pedido);
       const agora = new Date().toISOString();

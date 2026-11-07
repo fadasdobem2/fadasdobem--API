@@ -7,10 +7,12 @@
  * catálogo (`gf_tarologos_perfil`) na MESMA transação, com auditoria. Nada toca o legado.
  */
 
-const { createHash, randomBytes, randomUUID } = require('crypto');
+const { randomBytes, randomUUID } = require('crypto');
 const { AUDIT_INSERT, linhaDeAuditoria } = require('../../_comum/auditoria');
 const { contaDaRequisicao } = require('../../_comum/conta');
-const { validarCadastro, perfilPublico, projecaoDoLink, projecaoAprovada, CadastroInvalidoError } = require('../../_comum/dominio/cadastro-tarologo');
+const { validarCadastro, perfilPublico, projecaoDoLink, projecaoAprovada, CadastroInvalidoError, horarios } = require('../../_comum/dominio/cadastro-tarologo');
+const { hojeOperacional } = require('../../_comum/dia-operacional');
+const links = require('./cadastro-tarologo.links');
 const { lendoNovo } = require('../../novo/leitura');
 const { emTransacao, escritaHabilitada } = require('../../novo/escritor');
 const store = require('./cadastro-tarologo.store');
@@ -21,11 +23,11 @@ const { montarItem } = require('../../_comum/dominio/catalogo-tarologos');
 
 const ID = /^[A-Za-z0-9_-]{1,100}$/;
 const TOKEN = /^[a-f0-9]{64}$/;
-const sha = (v) => createHash('sha256').update(v, 'utf8').digest('hex');
+const sha = links.sha;
 const revisaoValida = (v) => Number.isSafeInteger(v) && v >= 0;
 const R = (corpo, status = 200) => ({ status, corpo });
 const conflito = () => R({ error: 'O cadastro mudou desde sua abertura. Seu rascunho foi mantido; recarregue a ficha antes de salvar.' }, 409);
-const linkInvalido = () => R({ error: 'Este link não está disponível. Peça um novo link à administração.' }, 410);
+const linkInvalido = links.linkIndisponivel;
 const falhaDeServico = () => R({ error: 'Não foi possível salvar ou carregar o cadastro. Seu rascunho foi mantido. Tente novamente.' }, 503);
 const confirmacao = (e) => R({ id: e.id_cadastro, status: 'pending', receivedAt: store.iso(e.recebido_em) });
 
@@ -68,9 +70,15 @@ async function lerAprovados() {
 
 async function lerPorToken(token, agora = new Date()) {
   if (!TOKEN.test(token)) return linkInvalido();
-  const link = await emTransacaoLeitura((ex) => store.linkValido(ex, sha(token), agora.toISOString()));
-  if (!link) return linkInvalido();
-  return R({ valid: true, professionalName: link.dados.professionalName, expiresAt: store.iso(link.expira_em), data: projecaoDoLink(link.dados) });
+  const hash = sha(token); const em = agora.toISOString();
+  return emTransacaoLeitura(async (ex) => {
+    const novo = await store.novoLinkPorHash(ex, hash);
+    if (novo) { const falha = links.falhaDoLink(novo, em); return falha ? linkInvalido(falha) : R({ valid: true, kind: 'intake', expiresAt: store.iso(novo.expira_em) }); }
+    const link = await store.linkDeAtualizacaoPorHash(ex, hash);
+    const falha = !link || Number(link.revisao) !== Number(link.revisao_emitida) ? 'invalid' : links.falhaDoLink({ consumido_em: link.consumido_em, expira_em: link.expira_em }, em);
+    if (falha) return linkInvalido(falha);
+    return R({ valid: true, professionalName: link.dados.professionalName, expiresAt: store.iso(link.expira_em), data: projecaoDoLink(link.dados) });
+  });
 }
 
 /** Leituras que passam por SQL (join do link) usam o executor do banco novo, mesmo com a escrita desligada. */
@@ -79,7 +87,9 @@ const emTransacaoLeitura = (fn) => emTransacao(fn);
 /** Projeção da ficha aprovada no catálogo de tarólogos (mesma transação). */
 async function projetarNoCatalogo(ex, { tarotId, registroId, revisao, publico, por }) {
   const atual = await catalogo.perfilTravado(ex, tarotId);
-  const oficial = Object.entries(publico.weeklySchedule).filter(([, h]) => h && h.trim()).map(([dia, h]) => `${OFICIAL[dia]}: ${h}`);
+  // v706: o horário oficial é o vigente HOJE (base + versões por vigência), não o mapa proposto.
+  const vigente = horarios.horarioNaData({ weeklySchedule: publico.weeklyScheduleBase || publico.weeklySchedule, weeklyScheduleVersions: publico.weeklyScheduleVersions }, hojeOperacional());
+  const oficial = Object.entries(vigente).filter(([, h]) => h && h.trim()).map(([dia, h]) => `${OFICIAL[dia]}: ${h}`);
   const campos = {
     nome: publico.professionalName, avatar: publico.avatar || null, cadastro_ativo: atual && atual.cadastro_ativo !== null ? atual.cadastro_ativo : true,
     perfil: { ...((atual && atual.perfil) || {}), biography: publico.biography, definitions: publico.definitions, oracles: publico.oracles, techniques: publico.techniques, spreads: publico.spreads, channels: publico.channels, themes: publico.themes, official: oficial, registrationId: registroId, registrationRevision: revisao },
@@ -95,6 +105,16 @@ async function projetarNoCatalogo(ex, { tarotId, registroId, revisao, publico, p
   // Espelho no legado (Maturacao/45): o nome aprovado é o do catálogo; só quem já existe em `tbl_tarologos` (`id_legado`) é espelhado. Criar tarólogo no legado: pergunta aberta.
   await espelho.tarologos.registrar(ex, tarotId, ['nome']);
   return montarItem({ legado: null, perfil: { ...(atual || { tarot_id: tarotId, conta_slug: null }), ...campos, registro_id: registroId, registro_revisao: revisao, revisao: atual ? atual.revisao + 1 : 1 }, ext: null });
+}
+
+/** `approvedData(previous) || previous.data` quando a ficha está pendente; senão `previous.data` (registration-demo-storage). */
+function pontoDeComparacao(linha) {
+  const dados = store.json(linha.dados);
+  if (linha.status !== 'pending') return dados;
+  const privado = store.json(linha.aprovado_dados); const publico = store.json(linha.aprovado_publico);
+  if (!privado || !publico) return dados;
+  const { tarotId: _t, ...camposPublicos } = publico;
+  return { ...privado, ...camposPublicos };
 }
 
 /** PUT (editor): grava a ficha com revisão otimista; aprovando, projeta no catálogo e audita na mesma transação. */
@@ -114,8 +134,6 @@ async function salvar(req, payload, hoje = new Date()) {
   const agora = hoje.toISOString();
   const por = nomeDe(req);
   const aprovando = payload.status === 'approved';
-  const publico = aprovando ? perfilPublico(dados, tarotId) : null;
-  const privado = publico ? Object.fromEntries(Object.entries(dados).filter(([k]) => !(k in publico))) : null;
   const posteriores = []; // espelho no legado: depois do commit
   const resposta = await emTransacao(async (ex) => {
     ex.posCommit = posteriores;
@@ -124,7 +142,16 @@ async function salvar(req, payload, hoje = new Date()) {
     if (anterior && anterior.tarot_id && anterior.tarot_id !== tarotId) return R({ error: 'O vínculo profissional desta ficha não pode ser substituído.' }, 409);
     if (tarotId && (await store.donoDoTarot(ex, tarotId, id))) return R({ error: 'Já existe um cadastro para esta profissional. Abra a ficha existente.' }, 409);
     if (anterior ? Number(anterior.revisao) !== payload.revision : payload.revision !== 0) return conflito();
-    const c = { id, dados, status: payload.status, tarotId, aprovando, aprovadoDados: privado, aprovadoPublico: publico, agora, por };
+    // v706 (`prepareRegistrationSchedule`): o mapa editável é o horário PROPOSTO; base e versões preservam as datas já combinadas.
+    // O ponto de comparação é a ficha aprovada quando a atual está pendente (`approvedData || data`), senão a própria ficha.
+    let dadosFinais;
+    try { dadosFinais = validarCadastro(horarios.prepararHorario(dados, anterior ? pontoDeComparacao(anterior) : undefined, hojeOperacional(hoje)), { hoje: hoje.toISOString().slice(0, 10) }); } catch (e) {
+      if (e instanceof CadastroInvalidoError) return R({ error: e.message }, 400);
+      throw e;
+    }
+    const publico = aprovando ? perfilPublico(dadosFinais, tarotId) : null;
+    const privado = publico ? Object.fromEntries(Object.entries(dadosFinais).filter(([k]) => !(k in publico))) : null;
+    const c = { id, dados: dadosFinais, status: payload.status, tarotId, aprovando, aprovadoDados: privado, aprovadoPublico: publico, agora, por };
     if (anterior) await store.atualizarCadastro(ex, c); else await store.inserirCadastro(ex, c);
     const novaRevisao = (anterior ? Number(anterior.revisao) : 0) + 1;
     if (aprovando) await projetarNoCatalogo(ex, { tarotId, registroId: id, revisao: novaRevisao, publico, por });
@@ -140,6 +167,13 @@ async function salvar(req, payload, hoje = new Date()) {
   });
   for (const tarefa of posteriores) { try { await tarefa(); } catch (e) { console.error('[gf-cadastro-tarologo] tarefa posterior falhou:', (e && e.message) || e); } }
   return resposta;
+}
+
+/** POST com `action` (editor): `create-intake-link`, `cancel-intake-link` e `create-update-link`. */
+async function acao(req, payload, origem, hoje = new Date()) {
+  if (payload.action === 'create-intake-link') return links.criar(req, origem, hoje);
+  if (payload.action === 'cancel-intake-link') return links.cancelar(req, payload, hoje);
+  return criarLink(req, payload, origem, hoje);
 }
 
 /** POST action `create-update-link` (editor). */
@@ -168,6 +202,7 @@ async function receberEnvio(payload, hoje = new Date()) {
     throw e;
   }
   const token = payload.token;
+  // Sem link o serviço antigo da Nice (D1) ainda aceita o envio; o formulário da v706 sempre manda o link (pergunta aberta à Nice: exigir link sempre?).
   if (token !== undefined && (typeof token !== 'string' || !TOKEN.test(token))) return linkInvalido();
   if (!escritaHabilitada()) return falhaDeServico();
   const chaveHash = sha(payload.idempotencyKey); const tokenHash = token ? sha(token) : '';
@@ -179,20 +214,30 @@ async function receberEnvio(payload, hoje = new Date()) {
     const previo = await store.envioPorChave(ex, chaveHash);
     if (previo) return previo.impressao === impressao ? confirmacao(previo) : R({ error: 'Este envio já foi utilizado com outros dados. Reabra o formulário para enviar uma nova resposta.' }, 409);
     let id;
-    if (tokenHash) {
-      const link = await store.linkValido(ex, tokenHash, agora, true);
-      if (!link) return linkInvalido();
-      await store.travar(ex, `gf_cadastro:${link.id_cadastro}`);
-      id = link.id_cadastro;
-      dados.commissionRate = link.dados.commissionRate; dados.paymentSchedule = link.dados.paymentSchedule;
-      await store.atualizarPorLink(ex, id, dados, agora, link.revisao_emitida);
-    } else {
+    const novo = tokenHash ? await store.novoLinkPorHash(ex, tokenHash, true) : null;
+    if (!tokenHash) {
       id = randomUUID();
       await store.inserirCadastro(ex, { id, dados, status: 'pending', tarotId: null, aprovando: false, aprovadoDados: null, aprovadoPublico: null, agora, por: 'public-form' });
+    } else if (novo) {
+      // Link para NOVO perfil: cria a ficha pendente, preserva o primeiro envio e consome o link na mesma transação.
+      const falha = links.falhaDoLink(novo, agora);
+      if (falha) return linkInvalido(falha);
+      id = randomUUID();
+      await store.inserirCadastro(ex, { id, dados, status: 'pending', tarotId: null, aprovando: false, aprovadoDados: null, aprovadoPublico: null, agora, por: 'public-form', envioOriginal: { data: dados, receivedAt: agora } });
+      await store.consumirNovoLink(ex, novo.id, id, agora);
+    } else {
+      const link = await store.linkDeAtualizacaoPorHash(ex, tokenHash, true);
+      const falha = !link || Number(link.revisao) !== Number(link.revisao_emitida) ? 'invalid' : links.falhaDoLink({ consumido_em: link.consumido_em, expira_em: link.expira_em }, agora);
+      if (falha) return linkInvalido(falha);
+      await store.travar(ex, `gf_cadastro:${link.id_cadastro}`);
+      id = link.id_cadastro;
+      const final = horarios.horarioDoEnvioPorLink(dados, link.dados);
+      final.commissionRate = link.dados.commissionRate; final.paymentSchedule = link.dados.paymentSchedule;
+      await store.atualizarPorLink(ex, id, final, agora, link.revisao_emitida);
     }
     await store.inserirEnvio(ex, chaveHash, impressao, id, agora);
     return confirmacao({ id_cadastro: id, recebido_em: agora });
   });
 }
 
-module.exports = { lerLista, lerFicha, lerAprovados, lerPorToken, salvar, criarLink, receberEnvio, definirVerificadorLegado, projecaoAprovada, sha };
+module.exports = { acao, listarNovosLinks: links.listar, lerLista, lerFicha, lerAprovados, lerPorToken, salvar, criarLink, receberEnvio, definirVerificadorLegado, projecaoAprovada, sha };

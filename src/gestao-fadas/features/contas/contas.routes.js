@@ -9,4 +9,6 @@ module.exports = [
   { metodo: 'PATCH', caminho: '/accounts/:id', escrita: true, handler: c.editar },
   { metodo: 'POST', caminho: '/accounts/:id/password', escrita: true, handler: c.senha },
   { metodo: 'POST', caminho: '/accounts/:id/active', escrita: true, handler: c.ativo },
+  { metodo: 'POST', caminho: '/accounts/:id/invitation', escrita: true, handler: c.convidar },
+  { metodo: 'POST', caminho: '/accounts/:id/invitation/cancel', escrita: true, handler: c.cancelarConvite },
 ];

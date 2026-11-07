@@ -8,11 +8,12 @@
  */
 
 const { permissoesDoPerfil } = require('../politica-acesso');
+const dep = require('./recados-departamentos');
 
 class RecadoInvalidoError extends Error {}
 const erro = (mensagem) => new RecadoInvalidoError(mensagem);
 
-const ASSUNTOS = ['Mudança de horário', 'Escala', 'Folga', 'Consulta', 'Conexão', 'Equipamento', 'Licença'];
+const ASSUNTOS = ['Mudança de horário', 'Escala', 'Folga', 'Consulta', 'Sobre cliente', 'Conexão', 'Equipamento', 'Licença'];
 const LIMITE_TEXTO = 4000;
 
 /** `validateText` (domain/input-validation.ts) com `multiline`: devolve o texto aparado ou lança com o rótulo na frente. */
@@ -30,27 +31,50 @@ function validarTexto(valor, rotulo, obrigatorio = false) {
 const dataValida = (d) => typeof d === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(d) && Number.isFinite(Date.parse(`${d}T12:00:00Z`)) && new Date(`${d}T12:00:00Z`).toISOString().slice(0, 10) === d;
 
 /** `validateNoteDetails`. */
-function validarPeriodo(d) {
+function validarPeriodo(d, opcoes = {}) {
   if (d.subject !== 'Diversos' && d.subject !== 'Horário' && !ASSUNTOS.includes(d.subject)) throw erro('Escolha a que se refere o recado.');
   if (!dataValida(d.startDate) || !dataValida(d.endDate)) throw erro('Informe as datas de início e fim do recado.');
   if (d.endDate < d.startDate) throw erro('A data final não pode ser anterior à inicial.');
-  return d;
+  const periodo = { subject: d.subject, startDate: d.startDate, endDate: d.endDate };
+  if (d.subject !== 'Sobre cliente') return periodo;
+  // v706: "Sobre cliente" exige a cliente escolhida (ID e nome); só o ID escolhido no cadastro estabelece o vínculo.
+  const clientId = typeof d.clientId === 'string' ? d.clientId.trim() : '';
+  const clientName = typeof d.clientName === 'string' ? d.clientName.trim() : '';
+  if ((!clientId || !clientName) && !opcoes.permitirClienteIncompleto) throw erro('Busque e selecione a cliente do recado.');
+  if (clientId.length > 200 || clientName.length > 300) throw erro('Selecione uma cliente válida.');
+  return { ...periodo, ...(clientId && clientName ? { clientId, clientName } : {}) };
+}
+
+/** `resolveNoteClientDetails`: o nome enviado é só exibição; vale o ID presente no cadastro (`clientes` = `[{ id, name }]`). */
+function resolverCliente(d, clientes = []) {
+  const conferido = validarPeriodo(d, { permitirClienteIncompleto: true });
+  if (conferido.subject !== 'Sobre cliente') return conferido;
+  const clientId = typeof d.clientId === 'string' ? d.clientId.trim() : '';
+  const cliente = clientes.find((c) => c.id === clientId);
+  if (!cliente || !cliente.id || !String(cliente.name).trim()) throw erro('Busque e selecione uma cliente disponível no cadastro.');
+  return { ...conferido, clientId: cliente.id, clientName: cliente.name };
 }
 
 /** `operationalNoteDetails`: assunto e período do recado (data do recado, ou do instante em São Paulo, quando faltam). */
 function detalhes(n) {
   const sp = (iso) => new Date(Date.parse(iso) - 3 * 3600000).toISOString().slice(0, 10);
   const startDate = n.startDate ?? n.date ?? sp(n.at);
-  return { subject: n.subject ?? 'Diversos', startDate, endDate: n.endDate ?? startDate };
+  return { subject: n.subject ?? 'Diversos', startDate, endDate: n.endDate ?? startDate, ...(n.subject === 'Sobre cliente' ? { clientId: n.clientId, clientName: n.clientName } : {}) };
 }
 
 const equipe = (papel) => Boolean(papel && permissoesDoPerfil(papel).canManageConsultations);
 
 /** `canViewOperationalNote` com conta: `conta = { id, papel, tarotId }`. */
 function visivel(nota, conta) {
-  if (!nota.delivery) return conta.papel === 'tarologa' ? Boolean(conta.tarotId && nota.tarotId === conta.tarotId) : equipe(conta.papel);
+  if (conta.active === false) return false;
+  if (!nota.delivery) return conta.papel === 'tarologa' ? Boolean(conta.tarotId && nota.tarotId === conta.tarotId) : equipe(conta.papel) && dep.notaEmDepartamentosPermitidos(nota, conta);
   const d = nota.delivery;
-  if (d.kind === 'board') return equipe(conta.papel);
+  if (d.kind === 'board') {
+    // Quem publicou revê a própria publicação em Enviadas, mesmo que outro departamento a receba (v706).
+    if (d.senderId === conta.id) return true;
+    return equipe(conta.papel) ? dep.notaEmDepartamentosPermitidos(nota, conta)
+      : (d.departments || []).includes('tarologos') && !(d.excludedIds || []).includes(conta.id) && (d.recipientIds || []).includes(conta.id);
+  }
   if (d.senderId === conta.id) return true;
   return !(d.excludedIds || []).includes(conta.id) && (d.recipientIds || []).includes(conta.id);
 }
@@ -110,4 +134,4 @@ function montar(item, pessoais, contaId) {
   return saida;
 }
 
-module.exports = { RecadoInvalidoError, erro, ASSUNTOS, validarTexto, validarPeriodo, dataValida, detalhes, equipe, visivel, raiz, visiveisPara, estavel, igual, versaoDe, montar };
+module.exports = { RecadoInvalidoError, erro, ASSUNTOS, validarTexto, validarPeriodo, resolverCliente, dataValida, detalhes, equipe, visivel, raiz, visiveisPara, estavel, igual, versaoDe, montar };

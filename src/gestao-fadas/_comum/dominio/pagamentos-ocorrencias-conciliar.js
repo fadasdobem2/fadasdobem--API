@@ -34,6 +34,7 @@ function regularizarOcorrencia(estado, entrada, ator, papel, em, opcoes = {}) {
   const p = B.pagamentoDe(estado, entrada.paymentId); const o = B.ocorrenciaDe(p, entrada.occurrenceId); const assinatura = opcoes.assinatura || B.calcularAssinatura(entrada);
   if (B.repetida(o, entrada.operationId, assinatura)) return estado;
   const nota = L.validarObservacao(entrada.note, 'Observação da regularização', true); const valor = B.valorPositivo(entrada.amount); const recibo = B.pagamentoDe(estado, entrada.settlementPaymentId);
+  if (p.unidentified || recibo.unidentified || !p.clientId) erro('Identifique a cliente antes de regularizar uma cobrança.');
   if (recibo.clientId !== p.clientId || recibo.id === p.id || !recebimentoConfirmado(recibo)) erro('Selecione outro recebimento confirmado da mesma cliente.');
   if (recibo.linkedConsultationId && recibo.linkedConsultationId !== o.consultationId) erro('Este recebimento já está vinculado a outra consulta.');
   if (entrada.creditProfile && entrada.creditProfile.clientId !== p.clientId) erro('Confira a cliente do recebimento.');

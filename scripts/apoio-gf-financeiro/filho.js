@@ -317,12 +317,17 @@ const r = (p) => path.join(raiz, p);
     assert.equal((await gravarR('rest-9', 0, R('rest-9', { clientId: '999999' }))).status, 404);
     const novo = await gravarR('rest-10', 0, R('rest-10')); assert.equal(novo.status, 200, 'depois de removida, o par pode ser restringido de novo');
   });
-  await passo('taróloga: lê SÓ as dela pedidas por ela; remove a própria; não inclui, não edita, não remove a do cliente nem a de outra', async () => {
+  await passo('taróloga: lê SÓ as dela pedidas por ela; remove a própria; só inclui de cliente dela (v706), não edita, não remove a do cliente nem a de outra', async () => {
     como('tarologa', { tarotId: '9001' });
     const lista = await lerR(); assert.equal(lista.status, 200, lista.t); assert.deepEqual(lista.j.items.map((i) => i.id), ['rest-2'], 'rest-10 é pedida pelo cliente e fica oculta');
-    assert.equal((await gravarR('rest-t1', 0, R('rest-t1', { requestedBy: 'tarologist', clientId: '900014' }))).status, 422);
+    const t1 = await gravarR('rest-t1', 0, R('rest-t1', { requestedBy: 'tarologist', clientId: '900019' })); assert.equal(t1.status, 422); assert.equal(t1.j.error.message, 'Esta cliente não está disponível para seu acesso.');
     const minha = lista.j.items[0];
-    const edita = await gravarR('rest-2', 1, { ...minha, reason: 'x', history: [...minha.history, { action: 'edited', at: '2000-01-01T00:00:00.000Z', actor: 'Hacker', reason: 'x' }] }); assert.equal(edita.status, 422); assert.equal(edita.j.error.message, 'Para incluir ou alterar uma restrição, comunique ao atendimento.');
+    // v706: de cliente dela (consulta dela), com o relato (motivo da lista da taróloga, mensagem e data do fato), ela inclui; motivo de cliente ou data futura, não.
+    const comRelato = (id, relato) => { const r = R(id, { requestedBy: 'tarologist', clientId: '900014' }); return { ...r, ...relato, history: [{ ...r.history[0], ...relato }] }; };
+    const futuro = await gravarR('rest-t2', 0, comRelato('rest-t2', { reasonCode: 'naoa', message: 'Mensagem.', occurredOn: '2099-01-01' })); assert.equal(futuro.status, 422); assert.equal(futuro.j.error.message, 'Confira a data do relato.');
+    const motivoErrado = await gravarR('rest-t2', 0, comRelato('rest-t2', { reasonCode: 'canc', message: 'Mensagem.', occurredOn: '2026-01-02' })); assert.equal(motivoErrado.status, 422);
+    const inclui = await gravarR('rest-t2', 0, comRelato('rest-t2', { reasonCode: 'naoa', message: 'Mensagem.', occurredOn: '2026-01-02' })); assert.equal(inclui.status, 200, inclui.t); assert.equal(inclui.j.items[0].history[0].actor, 'Osíris'); assert.equal(inclui.j.items[0].reasonCode, 'naoa');
+    const edita = await gravarR('rest-2', 1, { ...minha, reason: 'x', history: [...minha.history, { action: 'edited', at: '2000-01-01T00:00:00.000Z', actor: 'Hacker', reason: 'x' }] }); assert.equal(edita.status, 422); assert.equal(edita.j.error.message, 'Esta restrição já está na lista. Para alterar o motivo, comunique ao atendimento.'); // v706: a taróloga inclui a própria (de cliente dela), mas não altera
     const doCliente = (await (async () => { como('atendente'); const l = await lerR(); como('tarologa', { tarotId: '9001' }); return l; })()).j.items.find((i) => i.id === 'rest-10');
     assert.equal((await gravarR('rest-10', 1, { ...doCliente, active: false, history: [...doCliente.history, { action: 'removed', at: '2000-01-01T00:00:00.000Z', actor: 'Hacker', reason: '' }] })).status, 403);
     como('tarologa2', { tarotId: '9002' });

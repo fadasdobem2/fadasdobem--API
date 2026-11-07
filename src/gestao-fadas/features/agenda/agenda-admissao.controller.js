@@ -10,5 +10,6 @@ module.exports = {
   registrarAdmissao: catchAsyncRoute(async (req, res) => responderSucesso(res, await service.registrarAdmissao(req), 'Admissão registrada.', 200)),
   lerSolicitacoes: catchAsyncRoute(async (req, res) => responderSucesso(res, await service.lerSolicitacoes(req), 'Solicitações de consulta.', 200)),
   registrarSolicitacao: catchAsyncRoute(async (req, res) => responderSucesso(res, await service.registrarSolicitacao(req), 'Solicitação registrada.', 200)),
+  atualizarSolicitacao: catchAsyncRoute(async (req, res) => responderSucesso(res, await service.atualizarSolicitacao(req), 'Solicitação atualizada.', 200)),
   resolverSolicitacao: catchAsyncRoute(async (req, res) => responderSucesso(res, await service.resolverSolicitacao(req), 'Solicitação resolvida.', 200)),
 };

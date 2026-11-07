@@ -10,6 +10,8 @@
  *     `domain/payment-dates.ts` (paymentPaidAt), `domain/pricing.ts` (tabela padrão e vigência).
  */
 
+const { minutosDeArredondamento } = require('./credito-arredondamento');
+
 // --- domain/consultation-status.ts ---------------------------------------------------------------------------------------
 const PAGA_REPASSE = new Set(['Concluída', 'Cancelada', 'Desistiu']);
 const COBERTURA = new Set(['Em curso', 'Finalizada pelo tarólogo', 'Concluída', 'Cancelada', 'Desistiu']);
@@ -60,7 +62,7 @@ function beneficiosDisponiveis(clientId, perfil, consultas, exceptoId, em = new 
 
 // --- domain/credit-lots.ts -----------------------------------------------------------------------------------------------
 /** Consome minutos pelo preço da compra; a última fração leva a sobra de arredondamento. */
-function alocarLotes(lotes, minutosPedidos, valorReserva = 2.96) {
+function alocarLotes(lotes, minutosPedidos, valorReserva = 2.96, arredondamento) {
   let restante = Math.max(0, minutosPedidos); let centavos = 0; let bruto = 0;
   const alocacoes = [];
   for (const lote of lotes) {
@@ -72,8 +74,11 @@ function alocarLotes(lotes, minutosPedidos, valorReserva = 2.96) {
     centavos += usadosCents; bruto += usados * lote.unitValue; restante -= usados;
     if (restante <= 0.0000001) break;
   }
+  // A fração autorizada só existe depois de usados todos os centavos capturados (v706).
+  const arredondados = Math.min(Math.max(0, restante), minutosDeArredondamento(lotes, arredondamento));
+  restante -= arredondados;
   if (restante > 0.0000001) { centavos += Math.round(restante * valorReserva * 100); bruto += restante * valorReserva; }
-  return { amount: centavos / 100, rawAmount: bruto, allocations: alocacoes, uncoveredMinutes: Math.max(0, restante) };
+  return { amount: centavos / 100, rawAmount: bruto, allocations: alocacoes, roundedMinutes: arredondados, uncoveredMinutes: restante > 0.0000001 ? restante : 0 };
 }
 function fatiarLotes(lotes, deslocamento, minutos = Infinity) {
   let pula = Math.max(0, deslocamento); let restante = Math.max(0, minutos);

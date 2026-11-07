@@ -18,10 +18,10 @@ const CLI = r('scripts/criar-contas-equipe.js');
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'ceq-'));
 
 const CONTAS = [
-  { nome: 'Ana Admin', email: 'ana.admin@fadas.test', papel: 'administradora' },
-  { nome: 'Bia Assistente', email: 'bia.assistente@fadas.test', papel: 'assistente' },
-  { nome: 'Cris Supervisora', email: 'cris.supervisora@fadas.test', papel: 'supervisora', legacyId: '9901' },
-  { nome: 'Dani Atendente', email: 'dani.atendente@fadas.test', papel: 'atendente' },
+  { nome: 'Ana Admin', email: 'ana.admin@fadasdobem.com.br', papel: 'administradora' },
+  { nome: 'Bia Assistente', email: 'bia.assistente@fadasdobem.com.br', papel: 'assistente' },
+  { nome: 'Cris Supervisora', email: 'cris.supervisora@fadasdobem.com.br', papel: 'supervisora', legacyId: '9901' },
+  { nome: 'Dani Atendente', email: 'dani.atendente@fadasdobem.com.br', papel: 'atendente' },
 ];
 
 const cli = (args, envExtra = {}) => {
@@ -60,9 +60,9 @@ const modo = (arq) => (fs.statSync(arq).mode & 0o777).toString(8);
     const x = cli([ARQ, `--saida=${s1}`, '--executar']); saida1 = x.saida;
     assert.equal(x.status, 0, x.saida); assert.match(x.saida, /criadas 4/);
     assert.equal(await contar(), antesUsuarios + 4);
-    const l = await um("SELECT u.email, u.is_active, array_agg(r.role_id) AS papeis FROM users u LEFT JOIN access_user_roles r ON r.user_id = u.id WHERE u.email LIKE '%@fadas.test' GROUP BY u.id ORDER BY u.email");
-    assert.deepEqual(l.map((c) => [c.email, c.papeis[0], c.is_active]), [['ana.admin@fadas.test', 'admin', true], ['bia.assistente@fadas.test', 'assistente', true], ['cris.supervisora@fadas.test', 'supervisora', true], ['dani.atendente@fadas.test', 'atendente', true]]);
-    const [ext] = await um("SELECT e.legacy_id FROM gf_contas_ext e JOIN users u ON u.id = e.user_id WHERE u.email = 'cris.supervisora@fadas.test'");
+    const l = await um("SELECT u.email, u.is_active, array_agg(r.role_id) AS papeis FROM users u LEFT JOIN access_user_roles r ON r.user_id = u.id WHERE u.email LIKE '%@fadasdobem.com.br' GROUP BY u.id ORDER BY u.email");
+    assert.deepEqual(l.map((c) => [c.email, c.papeis[0], c.is_active]), [['ana.admin@fadasdobem.com.br', 'admin', true], ['bia.assistente@fadasdobem.com.br', 'assistente', true], ['cris.supervisora@fadasdobem.com.br', 'supervisora', true], ['dani.atendente@fadasdobem.com.br', 'atendente', true]]);
+    const [ext] = await um("SELECT e.legacy_id FROM gf_contas_ext e JOIN users u ON u.id = e.user_id WHERE u.email = 'cris.supervisora@fadasdobem.com.br'");
     assert.equal(ext.legacy_id, '9901');
   });
   await passo('arquivo de credenciais tem permissão 600 e uma linha por conta nova', () => {
@@ -83,12 +83,12 @@ const modo = (arq) => (fs.statSync(arq).mode & 0o777).toString(8);
   });
   await passo('as contas entram no GET /accounts do serviço com os papéis certos (equipe)', async () => {
     const store = require(r('src/gestao-fadas/features/contas/contas.store'));
-    const l = (await store.lerLinhas()).filter((c) => c.email.endsWith('@fadas.test'));
+    const l = (await store.lerLinhas()).filter((c) => c.email.endsWith('@fadasdobem.com.br'));
     assert.deepEqual(l.map((c) => c.perfil).sort(), ['administradora', 'assistente', 'atendente', 'supervisora']);
   });
 
   console.log('Idempotência');
-  const hashes = async () => JSON.stringify(await um("SELECT email, password_hash FROM users WHERE email LIKE '%@fadas.test' ORDER BY email"));
+  const hashes = async () => JSON.stringify(await um("SELECT email, password_hash FROM users WHERE email LIKE '%@fadasdobem.com.br' ORDER BY email"));
   await passo('repetir NÃO duplica nem troca senha, e não cria arquivo de credenciais', async () => {
     const antes = await hashes(); const s2 = path.join(tmp, 'cred2.csv');
     const x = cli([ARQ, `--saida=${s2}`, '--executar']);
@@ -99,7 +99,7 @@ const modo = (arq) => (fs.statSync(arq).mode & 0o777).toString(8);
     const outro = path.join(tmp, 'outro.json'); fs.writeFileSync(outro, JSON.stringify([{ ...CONTAS[3], papel: 'supervisora' }]));
     const x = cli([outro, `--saida=${path.join(tmp, 'c3.csv')}`, '--executar']);
     assert.equal(x.status, 0, x.saida); assert.match(x.saida, /NÃO alterado/);
-    const [u] = await um("SELECT r.role_id FROM users u JOIN access_user_roles r ON r.user_id = u.id WHERE u.email = 'dani.atendente@fadas.test'");
+    const [u] = await um("SELECT r.role_id FROM users u JOIN access_user_roles r ON r.user_id = u.id WHERE u.email = 'dani.atendente@fadasdobem.com.br'");
     assert.equal(u.role_id, 'atendente');
   });
   await passo('--redefinir-senha troca só com a opção, gera nova senha forte, grava no arquivo 600 e encerra sessões', async () => {
@@ -117,22 +117,22 @@ const modo = (arq) => (fs.statSync(arq).mode & 0o777).toString(8);
 
   console.log('Entradas inválidas');
   await passo('papel inválido: nada é gravado (exit 1)', async () => {
-    const f = path.join(tmp, 'ruim.json'); fs.writeFileSync(f, JSON.stringify([{ nome: 'X', email: 'x@fadas.test', papel: 'chefe' }, { nome: 'Y', email: 'y@fadas.test', papel: 'atendente' }]));
+    const f = path.join(tmp, 'ruim.json'); fs.writeFileSync(f, JSON.stringify([{ nome: 'X', email: 'x@fadasdobem.com.br', papel: 'chefe' }, { nome: 'Y', email: 'y@fadasdobem.com.br', papel: 'atendente' }]));
     const n = await contar(); const x = cli([f, `--saida=${path.join(tmp, 'r.csv')}`, '--executar']);
     assert.equal(x.status, 1); assert.match(x.saida, /papel inválido/); assert.equal(await contar(), n);
   });
   await passo('e-mail repetido no arquivo: recusado (exit 1); e-mail de cliente já existente: PROBLEMA sem gravar', async () => {
-    const f = path.join(tmp, 'rep.json'); fs.writeFileSync(f, JSON.stringify([{ nome: 'X', email: 'dup@fadas.test', papel: 'atendente' }, { nome: 'Y', email: 'DUP@fadas.test', papel: 'atendente' }]));
+    const f = path.join(tmp, 'rep.json'); fs.writeFileSync(f, JSON.stringify([{ nome: 'X', email: 'dup@fadasdobem.com.br', papel: 'atendente' }, { nome: 'Y', email: 'DUP@fadasdobem.com.br', papel: 'atendente' }]));
     assert.equal(cli([f, `--saida=${path.join(tmp, 'r2.csv')}`]).status, 1);
-    await sequelize.query("INSERT INTO users (id, email, password_hash, role, is_active, created_at, updated_at) VALUES (gen_random_uuid(), 'cliente@fadas.test', 'x', 'CLIENTE', true, now(), now())");
-    const g = path.join(tmp, 'cli.json'); fs.writeFileSync(g, JSON.stringify([{ nome: 'Cliente', email: 'cliente@fadas.test', papel: 'atendente' }]));
+    await sequelize.query("INSERT INTO users (id, email, password_hash, role, is_active, created_at, updated_at) VALUES (gen_random_uuid(), 'cliente@fadasdobem.com.br', 'x', 'CLIENTE', true, now(), now())");
+    const g = path.join(tmp, 'cli.json'); fs.writeFileSync(g, JSON.stringify([{ nome: 'Cliente', email: 'cliente@fadasdobem.com.br', papel: 'atendente' }]));
     const n = await contar(); const x = cli([g, `--saida=${path.join(tmp, 'r3.csv')}`, '--executar']);
     assert.equal(x.status, 1); assert.match(x.saida, /fora da equipe/); assert.equal(await contar(), n);
   });
   await passo('CSV com ponto e vírgula funciona de ponta a ponta', async () => {
-    const f = path.join(tmp, 'e.csv'); fs.writeFileSync(f, 'nome;email;papel\nEva Atendente;eva@fadas.test;atendente\n');
+    const f = path.join(tmp, 'e.csv'); fs.writeFileSync(f, 'nome;email;papel\nEva Atendente;eva@fadasdobem.com.br;atendente\n');
     const s = path.join(tmp, 'cs.csv'); const x = cli([f, `--saida=${s}`, '--executar']);
-    assert.equal(x.status, 0, x.saida); assert.equal(lerCred(s)[0].email, 'eva@fadas.test'); assert.equal(modo(s), '600');
+    assert.equal(x.status, 0, x.saida); assert.equal(lerCred(s)[0].email, 'eva@fadasdobem.com.br'); assert.equal(modo(s), '600');
   });
 
   console.log('Recusas de segurança');
@@ -154,10 +154,10 @@ const modo = (arq) => (fs.statSync(arq).mode & 0o777).toString(8);
     const tarologos = require(r('src/gestao-fadas/features/cadastros/tarologos.service'));
     tarologos.definirFonteLegado({ listar: async () => [{ idTarologo: 9001, nmuTarologo: 'Tarólogo A', ativo: 1 }], obter: async (id) => (id === 9001 ? { idTarologo: 9001, nmuTarologo: 'Tarólogo A', ativo: 1 } : null) });
     const { executar } = require(r('scripts/apoio-gf-contas-equipe/executar'));
-    const c = [{ nome: 'Taró A', email: 'taro.a@fadas.test', papel: 'tarologa', tarotId: '9001' }]; const s = path.join(tmp, 'tar.csv');
+    const c = [{ nome: 'Taró A', email: 'taro.a@fadasdobem.com.br', papel: 'tarologa', tarotId: '9001' }]; const s = path.join(tmp, 'tar.csv');
     const linhas = []; const a = await executar({ contas: c, args: { executar: true, saida: s }, log: (m) => linhas.push(m), fechar: false });
     assert.equal(a.criada, 1, linhas.join('\n')); assert.equal(modo(s), '600');
-    const [t] = await um("SELECT p.tarot_id FROM gf_tarologos_perfil p JOIN specialists sp ON sp.slug = p.conta_slug JOIN users u ON u.id = sp.user_id WHERE u.email = 'taro.a@fadas.test'");
+    const [t] = await um("SELECT p.tarot_id FROM gf_tarologos_perfil p JOIN specialists sp ON sp.slug = p.conta_slug JOIN users u ON u.id = sp.user_id WHERE u.email = 'taro.a@fadasdobem.com.br'");
     assert.equal(t.tarot_id, '9001');
     const n = await contar(); const b = await executar({ contas: c, args: { executar: true, saida: path.join(tmp, 'tar2.csv') }, log: () => {}, fechar: false });
     assert.equal(b.criada, 0); assert.equal(b.existente, 1); assert.equal(await contar(), n);

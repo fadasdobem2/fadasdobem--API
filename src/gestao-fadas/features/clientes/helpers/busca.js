@@ -6,6 +6,7 @@
  */
 
 const { normalizeSearch } = require('./valores');
+const { clientPhoneMatches } = require('../../../_comum/dominio/cliente-busca-telefone');
 
 // --- client-input-format ----------------------------------------------------------------------------------
 
@@ -66,26 +67,6 @@ const emptyClientSearch = () => ({ query: '', id: '', name: '', phone: '', email
 const hasClientSearch = (search) => Object.values(search).some((value) => value.trim());
 const normalize = (text) => normalizeSearch(text).trim().replace(/\s+/g, ' ');
 const termsMatch = (query, text) => normalize(query).split(' ').every((term) => normalize(text).includes(term));
-
-function phoneParts(value) {
-  let digits = value.replace(/\D/g, '');
-  const explicitInternational = value.trim().startsWith('+');
-  const brazil = digits.startsWith('55') && ((digits.length === 12 || digits.length === 13) || (explicitInternational && (digits.length === 10 || digits.length === 11)));
-  if (brazil) digits = digits.slice(2);
-  return { digits, foreign: explicitInternational && !brazil };
-}
-
-function clientPhoneMatches(query, stored) {
-  if (!/^[+\d\s().-]+$/.test(query.trim())) return false;
-  const q = phoneParts(query);
-  const s = phoneParts(stored);
-  if (!q.digits || !s.digits) return false;
-  if (q.foreign || s.foreign) return q.digits === s.digits;
-  if (q.digits.length === 8 || q.digits.length === 9) {
-    return s.digits === q.digits || ((s.digits.length === 10 || s.digits.length === 11) && s.digits.slice(2) === q.digits);
-  }
-  return q.digits.length >= 10 && q.digits === s.digits;
-}
 
 function clientBirthMatches(query, stored) {
   const q = parseClientBirthDate(query);

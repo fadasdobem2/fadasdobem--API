@@ -79,6 +79,7 @@ function repetida(o, idOperacao, assinatura) {
 function validarIdOperacao(id) { if (!id || String(id).trim().length < 3) erro('Não foi possível identificar a operação.'); }
 function consultaDa(estado, p, id) {
   if (!id) return undefined;
+  if (p.unidentified || !p.clientId) erro('Identifique a cliente antes de vincular uma consulta.');
   const item = estado.consultations.find((x) => x.id === id && x.clientId === p.clientId);
   if (!item) erro('A consulta precisa pertencer à mesma cliente do pagamento.');
   return item;

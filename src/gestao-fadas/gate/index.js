@@ -22,6 +22,7 @@ const { payoutsOff } = require('./payouts-off');
 const { criarRotasPublicas } = require('./rotas-publicas');
 const { criarRotasOperacoes } = require('./rotas-operacoes');
 const { criarRotasHorarios } = require('./rotas-horarios');
+const { criarRotasPonto } = require('./rotas-ponto');
 const { criarRotasAgenda } = require('./rotas-agenda');
 const { criarRotasPresenca } = require('./rotas-presenca');
 const { criarRotasConsulta } = require('./rotas-consulta');
@@ -61,6 +62,7 @@ function criarGate({ provedorDeSessao, verificarLegado, extras = rotasExtras } =
   router.use(criarRotasAuth(provedor));
   router.use(criarRotasContas(provedor));
   router.use(criarRotasHorarios(provedor));
+  router.use(criarRotasPonto(provedor)); // `/staff-clock` (ponto e escala da equipe); desligada, passa adiante para a rota do front
   router.use(criarRotasAgenda(provedor));
   router.use(criarRotasPresenca(provedor));
   router.use(criarRotasConsulta(provedor));

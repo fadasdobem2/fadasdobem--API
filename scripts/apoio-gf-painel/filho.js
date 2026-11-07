@@ -114,7 +114,7 @@ const HOJE = () => require(r('src/gestao-fadas/_comum/dia-operacional')).hojeOpe
   console.log('Solicitações de consulta');
   await passo('a taróloga pede (tarotId, dia e instante do servidor); pedido repetido da mesma cliente é o mesmo; a equipe NÃO pede', async () => {
     como('osiris');
-    const pedido = (id) => chamar('POST', '/agenda/requests', { operationKey: n(), request: { id, tarotId: 'nyx', clientId: '900015', client: 'Cliente 900015', date: '2000-01-01', at: '2000-01-01T00:00:00.000Z', note: ' quer hoje ' } });
+    const pedido = (id) => chamar('POST', '/agenda/requests', { operationKey: n(), request: { id, tarotId: 'nyx', clientId: '900015', client: 'Cliente 900015', at: '2000-01-01T00:00:00.000Z', note: ' quer hoje ' } });
     const a = await pedido('sol-1'); assert.equal(a.status, 200, a.t);
     const s = a.j.items[0]; assert.equal(s.tarotId, 'osiris'); assert.equal(s.date, hoje); assert.notEqual(s.at, '2000-01-01T00:00:00.000Z'); assert.equal(s.note, 'quer hoje');
     const b = await pedido('sol-2'); assert.equal(b.status, 200); assert.equal(b.j.items[0].id, 'sol-1');

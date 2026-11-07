@@ -48,7 +48,8 @@ async function abertosDe(ex, tarotIds) {
 const travarFila = (ex, tarotId) => ex.execute('SELECT pg_advisory_xact_lock(hashtext(?))', [`gf_agenda:fila:${tarotId}`]);
 
 function colunasDoItem(item) {
-  return [item.tarotId, item.clientId, item.date || item.standbyDate || null, item.position, item.agendaOutcome || null, JSON.stringify(semReservados(item))];
+  // v706: o agendamento tem cliente OU contato; a ausência é NULA no banco (nunca um ID fictício).
+  return [item.tarotId, item.clientId || null, item.date || item.standbyDate || null, item.position, item.agendaOutcome || null, JSON.stringify(semReservados(item)), item.leadId || null];
 }
 /** `id` e `publicNumber` vivem em colunas; o resto do item vai inteiro no jsonb. */
 function semReservados(item) {
@@ -59,8 +60,8 @@ function semReservados(item) {
 async function inserir(ex, item, numero, criadoPor, operationKey) {
   const c = colunasDoItem(item);
   await ex.execute(
-    'INSERT INTO gf_agenda (id, numero_publico, id_tarologo, id_cliente, data_operacional, posicao, agenda_outcome, item, version, criado_por, operation_key) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?)',
-    [item.id, numero, c[0], c[1], c[2], c[3], c[4], c[5], criadoPor, operationKey],
+    'INSERT INTO gf_agenda (id, numero_publico, id_tarologo, id_cliente, data_operacional, posicao, agenda_outcome, item, version, criado_por, operation_key, id_contato) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?)',
+    [item.id, numero, c[0], c[1], c[2], c[3], c[4], c[5], criadoPor, operationKey, c[6]],
   );
 }
 
@@ -68,8 +69,8 @@ async function inserir(ex, item, numero, criadoPor, operationKey) {
 async function atualizar(ex, item, versaoNova) {
   const c = colunasDoItem(item);
   await ex.execute(
-    'UPDATE gf_agenda SET id_tarologo = ?, id_cliente = ?, data_operacional = ?, posicao = ?, agenda_outcome = ?, item = ?, version = ?, atualizado_em = CURRENT_TIMESTAMP WHERE id = ?',
-    [c[0], c[1], c[2], c[3], c[4], c[5], versaoNova, item.id],
+    'UPDATE gf_agenda SET id_tarologo = ?, id_cliente = ?, data_operacional = ?, posicao = ?, agenda_outcome = ?, item = ?, version = ?, id_contato = ?, atualizado_em = CURRENT_TIMESTAMP WHERE id = ?',
+    [c[0], c[1], c[2], c[3], c[4], c[5], versaoNova, c[6], item.id],
   );
 }
 

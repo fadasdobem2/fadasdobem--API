@@ -11,10 +11,11 @@
 const CONTATO_CAMPOS = ['contact', 'contactPlan', 'workflowStatus', 'response', 'agendaOutcome', 'resolvedAt', 'resolvedByConsultationId', 'refundRequest',
   'queueDeferral', 'queueReservation', 'reservationClock', 'immediateReservationRelease', 'forwardedDate', 'forwardedAt', 'forwardedBy', 'standbyDate',
   'contactReturn', 'queuePaymentWait'];
-const CONTATO_HISTORIAS = ['contactHistory', 'queueDeferralHistory', 'queueReservationHistory', 'forwardingHistory', 'contactReturnHistory'];
+const CONTATO_HISTORIAS = ['contactHistory', 'queueDeferralHistory', 'queueReservationHistory', 'forwardingHistory', 'contactReturnHistory',
+  'manualNotices']; // v706: aviso de agenda declarado pela atendente (agenda-aviso-manual.js)
 
 const AGENDAMENTO_CAMPOS = ['tarotId', 'clientId', 'client', 'channel', 'date', 'time', 'scheduledTime', 'requestedTime', 'paymentPending', 'paymentExpectedAmount',
-  'paymentAmount', 'unlinkedPaymentAmount', 'requestedMinutes', 'requestId', 'position', 'continuationRequest', 'formerContinuationRequest', 'dismissedConsultationIds'];
+  'paymentAmount', 'unlinkedPaymentAmount', 'requestedMinutes', 'requestId', 'referral', 'position', 'continuationRequest', 'formerContinuationRequest', 'dismissedConsultationIds'];
 
 const GRUPOS = Object.freeze({
   contato: { set: CONTATO_CAMPOS, append: CONTATO_HISTORIAS, restaura: false },
@@ -32,17 +33,18 @@ const GRUPOS = Object.freeze({
 });
 
 /** Campos que o servidor monta ou que só o comando de ordem muda. */
-const RESERVADOS = Object.freeze(['id', 'publicNumber', 'createdAt', 'createdBy', 'orderCommand', 'positionOverrides', 'version']);
+// v706: `leadId`, `sourceLeadId` e `identityHistory` (cliente OU contato) só mudam pelo servidor (criação com contato e vínculo/desfazer do contato).
+const RESERVADOS = Object.freeze(['id', 'publicNumber', 'createdAt', 'createdBy', 'orderCommand', 'positionOverrides', 'version', 'leadId', 'sourceLeadId', 'identityHistory']);
 
 /** Histórias e o campo que carrega o NOME de quem agiu (o servidor o carimba com a sessão). */
 const AUTOR_DA_HISTORIA = Object.freeze({
   contactHistory: 'actor', observationHistory: 'actor', departures: 'actor', incidents: 'actor', resolutionHistory: 'actor', scheduleHistory: 'actor',
-  requestedWaitHistory: 'by', queueDeferralHistory: 'by', queueReservationHistory: 'by', forwardingHistory: 'by', contactReturnHistory: 'by',
+  requestedWaitHistory: 'by', manualNotices: 'actorName', queueDeferralHistory: 'by', queueReservationHistory: 'by', forwardingHistory: 'by', contactReturnHistory: 'by',
 });
 
 /** Tipo do evento em `gf_agenda_eventos` por história. */
 const TIPO_DO_EVENTO = Object.freeze({
-  contactHistory: 'contato', queueDeferralHistory: 'contato', queueReservationHistory: 'contato', forwardingHistory: 'contato', contactReturnHistory: 'contato',
+  contactHistory: 'contato', manualNotices: 'contato', queueDeferralHistory: 'contato', queueReservationHistory: 'contato', forwardingHistory: 'contato', contactReturnHistory: 'contato',
   observationHistory: 'observacao', requestedWaitHistory: 'prazo', departures: 'saida', incidents: 'saida', resolutionHistory: 'resolucao', scheduleHistory: 'agendamento',
 });
 

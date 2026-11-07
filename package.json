@@ -83,7 +83,23 @@
     "gerar:ouro-gf-prazos": "node scripts/gerar-ouro-gf-prazos.js",
     "verificar:gf-painel-cobertura": "node scripts/verificar-gf-painel-cobertura.js",
     "verificar:gf-consulta-componente": "node scripts/verificar-gf-consulta-componente.js",
-    "gerar:ouro-gf-consulta-componente": "node scripts/gerar-ouro-gf-consulta-componente.js"
+    "gerar:ouro-gf-consulta-componente": "node scripts/gerar-ouro-gf-consulta-componente.js",
+    "verificar:gf-clientes-v706": "node scripts/verificar-gf-clientes-v706.js",
+    "gerar:ouro-gf-clientes-v706": "node scripts/gerar-ouro-gf-clientes-v706.js",
+    "verificar:gf-contas-v706": "node scripts/verificar-gf-contas-v706.js",
+    "verificar:gf-contas-convite": "node scripts/verificar-gf-contas-convite.js",
+    "gerar:ouro-gf-contas-v706": "node scripts/gerar-ouro-gf-contas-v706.js",
+    "verificar:gf-ponto": "node scripts/verificar-gf-ponto.js",
+    "gerar:ouro-gf-ponto": "node scripts/gerar-ouro-gf-ponto.js",
+    "verificar:gf-restricoes": "node scripts/verificar-gf-restricoes.js",
+    "gerar:ouro-gf-restricoes": "node scripts/gerar-ouro-gf-restricoes.js",
+    "verificar:gf-cadastros-horarios": "node scripts/verificar-gf-cadastros-horarios.js",
+    "gerar:ouro-gf-cadastros-horarios": "node scripts/gerar-ouro-gf-cadastros-horarios.js",
+    "gerar:ouro-gf-divergencias": "node scripts/gerar-ouro-gf-divergencias.js",
+    "verificar:gf-agenda-pedido": "node scripts/verificar-gf-agenda-pedido.js",
+    "gerar:ouro-gf-agenda-pedido": "node scripts/gerar-ouro-gf-agenda-pedido.js",
+    "verificar:gf-area5-v706": "node scripts/verificar-gf-area5-v706.js",
+    "gerar:ouro-gf-area5-v706": "node scripts/gerar-ouro-gf-area5-v706.js"
   },
   "engines": {
     "node": ">=18"

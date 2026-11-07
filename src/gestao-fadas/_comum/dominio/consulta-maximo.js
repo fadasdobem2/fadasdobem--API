@@ -7,6 +7,7 @@
  */
 
 const cob = require('./financeiro-cobranca');
+const { minutosDeArredondamento } = require('./credito-arredondamento');
 const b = require('./financeiro-base');
 const { minutosDoPagamento } = require('./consulta-tarifa');
 
@@ -50,7 +51,7 @@ function mapaDeMaximos(consultas, pagamentos, perfis = {}) {
       const principal = Math.max(0, p.amount + (p.movements || []).filter((m) => Date.parse(m.occurredAt) <= e.at).reduce((n, m) => n + m.creditEffect, 0));
       return soma + (p.amount > 0 ? (minutosDoPagamento(p, unidade) * principal) / p.amount : 0);
     }, 0) : 0;
-    const minutosDosLotes = lotes && lotes.length ? Math.floor(lotes.reduce((s, l) => s + l.minutes, 0) + pendentesForaDosLotes + 0.000001) : undefined;
+    const minutosDosLotes = lotes && lotes.length ? Math.floor(lotes.reduce((s, l) => s + l.minutes, 0) + minutosDeArredondamento(lotes, c.billing && c.billing.tariff && c.billing.tariff.creditRounding) + pendentesForaDosLotes + 0.000001) : undefined;
     const beneficio = minutosDeBeneficio(c.coverage); const dinheiro = beneficio ?? minutosDosLotes ?? acessivel(valor, unidade);
     const minutos = dinheiro === undefined ? undefined : dinheiro + ((c.minuteBenefits || []).reduce((s, x) => s + x.minutes, 0));
     resultado.set(c.id, gravado !== undefined ? { minutes: gravado, includesPending: c.maximumIncludesPendingAtStart === true }

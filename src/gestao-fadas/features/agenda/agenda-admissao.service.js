@@ -25,6 +25,7 @@ const adm = require('./agenda-admissao.store');
 const ciclo = require('../consultas-ciclo/ciclo.store');
 const contexto = require('./agenda-painel.contexto');
 const { turnoVigente, TURNO_ENCERRADO } = require('../../_comum/dominio/agenda-fechamento');
+const pedidos = require('./agenda-pedidos.service');
 
 const invalido = (c) => new AppError('Dados inválidos.', 400, { codigo: 'INVALID_INPUT', campo: c }, true);
 const ehObjeto = (v) => typeof v === 'object' && v !== null && !Array.isArray(v);
@@ -108,39 +109,10 @@ async function registrarAdmissao(req) {
   });
 }
 
-function corpoSolicitacao(c) {
-  if (!ehObjeto(c) || !ehObjeto(c.request)) throw invalido('corpo');
-  const r = c.request;
-  if (typeof r.id !== 'string' || !/^[A-Za-z0-9._:-]{1,64}$/.test(r.id)) throw invalido('request.id');
-  if (typeof r.clientId !== 'string' || !/^[A-Za-z0-9._:-]{1,64}$/.test(r.clientId)) throw invalido('request.clientId');
-  if (typeof r.client !== 'string' || !r.client.trim() || r.client.length > 160) throw invalido('request.client');
-  if (r.note !== undefined && (typeof r.note !== 'string' || r.note.length > 500)) throw invalido('request.note'); // o campo da tela tem maxLength 500 (agenda-intake-context.tsx)
-  return { operationKey: validar.chaveOperacao(c.operationKey), request: r };
-}
-
-/** `POST /agenda/requests`: a PRÓPRIA taróloga avisa que uma cliente quer consulta. */
-async function registrarSolicitacao(req) {
-  const tarotId = `${(req.user && req.user.tarotId) || ''}`;
-  const base = comum.ator(req, false, { aceitaTarologa: true });
-  if (!tarotId) throw comum.negado(true);
-  const a = { ...base, perfil: 'tarologa' };
-  const c = corpoSolicitacao(req.body);
-  const r = c.request;
-  if (!(await verificarCliente(r.clientId))) throw new AppError('Cadastro de cliente não encontrado.', 404, { codigo: 'CLIENT_NOT_FOUND' }, true);
-  return comum.gravar(req, a, {
-    escopo: 'agenda.solicitacao', operationKey: c.operationKey, corpo: { ...c, tarotId }, acao: 'agenda.solicitacao',
-    producao: async (ex) => {
-      const hoje = hojeOperacional();
-      // O mesmo pedido da mesma cliente à mesma taróloga, ainda sem agenda, é o mesmo pedido (agenda-intake-context.tsx:90).
-      const antigos = await adm.solicitacaoAberta(ex, tarotId, r.clientId);
-      const existente = antigos.find((x) => !x.item.agendaId);
-      if (existente) return { entidadeId: existente.item.id, antes: null, depois: { repetida: true }, resposta: leitura([existente.item], { [existente.item.id]: existente.version }) };
-      const item = { id: r.id, tarotId, clientId: r.clientId, client: r.client.trim(), date: hoje, at: new Date().toISOString(), note: (r.note || '').trim() };
-      await adm.inserirSolicitacao(ex, item, a.nome, c.operationKey);
-      return { entidadeId: item.id, antes: null, depois: { tarotId, clientId: item.clientId }, resposta: leitura([item], { [item.id]: 1 }) };
-    },
-  });
-}
+/** `POST /agenda/requests`: a PRÓPRIA taróloga pede consulta (cliente pelo ID ou contato pelo WhatsApp). Regras em `agenda-pedidos.service.js`. */
+const registrarSolicitacao = (req) => pedidos.registrarPedido(req, { verificarCliente: (id) => verificarCliente(id) });
+/** `PUT /agenda/requests/:id`: a equipe conduz o pedido (etapa, identificação, contato, lugar na fila). */
+const atualizarSolicitacao = (req) => pedidos.atualizarPedido(req, { verificarCliente: (id) => verificarCliente(id) });
 
 /** `POST /agenda/requests/:id/resolve`: a equipe liga o pedido ao agendamento (resolvedAt e resolvedBy são do servidor). */
 async function resolverSolicitacao(req) {
@@ -163,4 +135,4 @@ async function resolverSolicitacao(req) {
   });
 }
 
-module.exports = { paraOPainel, lerAdmissoes, lerSolicitacoes, registrarAdmissao, registrarSolicitacao, resolverSolicitacao, definirVerificadorDeCliente };
+module.exports = { paraOPainel, lerAdmissoes, lerSolicitacoes, registrarAdmissao, registrarSolicitacao, atualizarSolicitacao, resolverSolicitacao, definirVerificadorDeCliente };

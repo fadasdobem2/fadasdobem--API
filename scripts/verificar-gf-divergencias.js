@@ -80,6 +80,26 @@ async function offline() {
     recusa(() => dom.conferirTransicao(arq, { ...arq, status: 'Resolvida', resolvedBy: 'C', resolvedAt: '2026-10-30T14:00:00.000Z', decision: 'x' }, eq));
     recusa(() => dom.conferirTransicao({ ...base, deletedAt: '2026-10-30T13:00:00.000Z', deletedBy: 'Osíris', deleteReason: 'x' }, { ...base, deletedAt: undefined }, eq));
   });
+  await passo('v706: cancelar substitui arquivar; só resolvida excluída se restaura; cancelada não é aberta; minutos iguais não editam', () => {
+    const snap = (x) => ({ reason: x.reason, status: x.status });
+    const ev = (acao, antes, depois) => [{ id: 'h', at: '2026-10-30T13:00:00.000Z', actor: 'Osíris', action: acao, before: snap(antes), after: snap(depois) }];
+    const canc = { ...base, status: 'Arquivada', statusBeforeArchive: 'Pendente', readerCancelledAt: '2026-10-30T13:00:00.000Z', readerCancelledBy: 'Osíris', archivedAt: '2026-10-30T13:00:00.000Z', archivedBy: 'Osíris', history: ev('Pedido cancelado', base, { ...base, status: 'Arquivada' }) };
+    assert.equal(dom.conferirTransicao(base, canc, tar), 'cancelamento'); assert.equal(dom.aberta(canc), false); assert.equal(dom.estado.aba(canc), 'excluidas');
+    recusa(() => dom.conferirTransicao(base, { ...canc, history: ev('Retirada e arquivada', base, { ...base, status: 'Arquivada' }), readerCancelledAt: undefined, readerCancelledBy: undefined }, tar));
+    recusa(() => dom.conferirTransicao(canc, { ...canc, reason: 'Editar', history: [...canc.history, ...ev('Relato editado', canc, canc)] }, tar), 'cancelado');
+    const resolvida = { ...base, status: 'Resolvida', resolvedBy: 'Clara', resolvedAt: '2026-10-30T12:30:00.000Z', decision: 'Conferido.' };
+    const excl = { ...resolvida, deletedAt: '2026-10-30T13:00:00.000Z', deletedBy: 'Osíris', deleteReason: 'Engano.' };
+    const rest = { ...excl, deletedAt: undefined, deletedBy: undefined, deleteReason: undefined, history: ev('Restaurada', excl, resolvida) };
+    assert.equal(dom.conferirTransicao(excl, rest, tar), 'restauracao');
+    const abertaExcl = { ...base, deletedAt: '2026-10-30T13:00:00.000Z', deletedBy: 'Osíris', deleteReason: 'Engano.' };
+    recusa(() => dom.conferirTransicao(abertaExcl, { ...base, history: ev('Restaurada', abertaExcl, base) }, tar), 'restaurar');
+    recusa(() => dom.conferirTransicao({ ...canc, deletedAt: '2026-10-30T14:00:00.000Z', deletedBy: 'Osíris', deleteReason: 'x' }, { ...canc, history: ev('Restaurada', canc, canc) }, tar));
+    const min = { ...base, issueType: 'Minutagem incorreta', recordedMinutes: 12, reportedMinutes: 30 };
+    recusa(() => dom.conferirTransicao(min, { ...min, reportedMinutes: 12, history: ev('Relato editado', min, min) }, tar), 'Cancelar pedido');
+    assert.equal(dom.conferirTransicao(min, { ...min, reportedMinutes: 45, history: ev('Relato editado', min, min) }, tar), 'edicao');
+    assert.equal(dom.visivelDaTarologa({ ...base, deletedAt: '2026-10-30T13:00:00.000Z', readerTrashClearedAt: '2026-10-30T14:00:00.000Z' }, '9001'), false);
+    assert.equal(dom.visivelDaTarologa({ ...canc, readerTrashClearedAt: '2026-10-30T14:00:00.000Z' }, '9001'), false);
+  });
   await passo('Financeira: a equipe reescreve a aberta da mesma consulta (razão e autor novos) e não troca a consulta; resolver é decisão financeira', () => {
     const f = { ...base, kind: 'Financeira', area: 'Consulta', issueType: undefined, consultationId: 'C-1', reportedBy: 'Clara' };
     assert.equal(dom.conferirTransicao(f, { ...f, reason: 'Nova razão.', reportedBy: 'Laya', createdAt: '2026-10-30T15:00:00.000Z' }, eq), 'reescrita');

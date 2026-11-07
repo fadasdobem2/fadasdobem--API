@@ -9,6 +9,7 @@
 
 const L = require('./pagamentos-livro');
 const saldo = require('./financeiro-saldo');
+const A = require('./pagamentos-transferencia-autorizacao');
 
 const { erro, centavos } = L;
 
@@ -39,16 +40,23 @@ function fatias(lotes, cents) {
 function transferirSaldo(estado, entrada, contexto) {
   if (contexto.role !== 'administradora' && contexto.role !== 'assistente') erro('A transferência de saldo está disponível para administradora e assistente.');
   const origem = String(entrada.sourceClientId).trim(); const destino = String(entrada.targetClientId).trim();
-  const ator = L.validarNome(contexto.actor, 'Responsável'); const nota = L.validarObservacao(entrada.note, 'Pedido do titular', true);
+  const ator = L.validarNome(contexto.actor, 'Responsável');
+  // v706: a autorização da cliente (texto/imagem) substitui o pedido do titular; sem ela, vale o pedido em texto como antes.
+  // `contexto.resumoDaAutorizacao` serve ao servidor ao refazer uma perna que não guarda os bytes das imagens.
+  const autorizacao = A.normalizarAutorizacao(entrada.authorization);
+  const resumo = autorizacao ? A.resumoDaAutorizacao(autorizacao) : contexto.resumoDaAutorizacao;
+  const nota = resumo ? A.notaDaAutorizacao(resumo) : L.validarObservacao(entrada.note, 'Pedido do titular', true);
   if (!contexto.names[origem] || !contexto.names[destino]) erro('Localize os dois cadastros antes de transferir o saldo.');
   if (origem === destino) erro('Escolha outra cliente para receber o saldo.');
   if (!entrada.id || !Number.isFinite(Date.parse(contexto.at))) erro('Não foi possível identificar esta transferência. Abra novamente.');
   const valor = centavos(entrada.amount);
   if (!Number.isSafeInteger(valor) || valor <= 0 || Math.abs(entrada.amount * 100 - valor) > 0.000001) erro('Informe um valor positivo com até duas casas decimais.');
-  const assinatura = JSON.stringify({ source: origem, target: destino, amount: valor, note: nota, actor: ator, reversalOf: entrada.reversalOf });
+  // Os bytes das imagens são comparados à parte numa repetição, sem copiar em toda assinatura de lote.
+  const assinatura = JSON.stringify({ source: origem, target: destino, amount: valor, note: nota, actor: ator, reversalOf: entrada.reversalOf, authorization: resumo });
   const existentes = estado.payments.flatMap((p) => p.movements || []).filter((m) => m.balanceTransfer && m.balanceTransfer.operationId === entrada.id);
   if (existentes.length) {
-    if (existentes.every((m) => m.operationSignature === assinatura) && existentes.reduce((s, m) => s + centavos(m.amount), 0) === valor) return estado;
+    const gravada = (existentes.find((m) => m.balanceTransfer.authorization) || { balanceTransfer: {} }).balanceTransfer.authorization;
+    if (existentes.every((m) => m.operationSignature === assinatura) && existentes.reduce((s, m) => s + centavos(m.amount), 0) === valor && JSON.stringify(gravada) === JSON.stringify(autorizacao)) return estado;
     erro('Esta operação já foi registrada com outros dados. Abra novamente.');
   }
   const disponivel = saldoTransferivel(origem, estado, contexto.profiles[origem], contexto.regularMinuteValue, contexto.at);
@@ -70,7 +78,7 @@ function transferirSaldo(estado, entrada, contexto) {
     const v = lote.cents / 100;
     const movimento = {
       id: `${entrada.id}:${indice + 1}`, kind: 'balance-transfer', amount: v, bankEffect: 0, creditEffect: p.clientId === origem ? -v : p.clientId === destino ? v : 0, occurredAt: contexto.at, recordedAt: contexto.at, actor: ator, note: nota,
-      operationSignature: assinatura, ruleVersion: 1, balanceTransfer: { operationId: entrada.id, sourceClientId: origem, sourceClient: contexto.names[origem], targetClientId: destino, targetClient: contexto.names[destino], lot: lote, ...(entrada.reversalOf ? { reversalOf: entrada.reversalOf } : {}) },
+      operationSignature: assinatura, ruleVersion: 1, balanceTransfer: { operationId: entrada.id, sourceClientId: origem, sourceClient: contexto.names[origem], targetClientId: destino, targetClient: contexto.names[destino], lot: lote, ...(indice === 0 && autorizacao ? { authorization: autorizacao } : {}), ...(entrada.reversalOf ? { reversalOf: entrada.reversalOf } : {}) },
     };
     return { paymentId: p.id, movement: movimento };
   });

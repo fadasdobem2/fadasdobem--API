@@ -3,13 +3,14 @@
 /**
  * Admissão do turno (domínio puro): porte versionado de `agenda/agenda-intake-model.ts` do front do suspiro (Maturacao/29 seção 11):
  * `currentIntake` (:13), `intakeExpired` (:12), `operationalTime` (:21), `intakeReturnIsOpen` (:31), `isStandbyOn` (:34),
- * `intakeAdmissionError` (:57), `intakeStartError` (:80), mais `staffPresenceChoice`/`presenceStartError`/`presenceAdmissionError`
+ * `intakeAdmissionError` (:57, v706: a identidade é cliente OU contato, `mesmaIdentidade`), `intakeStartError` (:80), mais `staffPresenceChoice`/`presenceStartError`/`presenceAdmissionError`
  * (`tarologas/staff-presence-model.ts:15-27` e `:67-86`). O calendário de demonstração não existe aqui: o instante é o real.
  */
 
 const { encerrado, dataDeOrigem, ativoNoDia } = require('./agenda-contato');
 const { somarDias } = require('./horarios');
 const { FILA_GERAL } = require('./fila-geral-base');
+const { mesmaIdentidade } = require('./agenda-identidade');
 
 const MODOS = Object.freeze(['open', 'no_more', 'until_end', 'on_return', 'count']);
 const proximoDia = (data) => somarDias(data, 1);
@@ -30,7 +31,7 @@ const emEncaixe = (item, data) => item.standbyDate === data && dataDeOrigem(item
 
 function erroDeAdmissao(evento, antes, alvo, agora = Date.now()) {
   if (!evento || evento.mode === 'open' || intakeExpirou(evento, agora) || evento.date !== (alvo.standbyDate || alvo.date) || evento.tarotId !== alvo.tarotId) return '';
-  if (antes && antes.tarotId === alvo.tarotId && antes.clientId === alvo.clientId && dataDeOrigem(antes, evento.date) === alvo.date && antes.standbyDate === alvo.standbyDate && (!evento.closeScope || (evento.agendaIds || []).includes(antes.id))) return '';
+  if (antes && antes.tarotId === alvo.tarotId && mesmaIdentidade(antes, alvo) && dataDeOrigem(antes, evento.date) === alvo.date && antes.standbyDate === alvo.standbyDate && (!evento.closeScope || (evento.agendaIds || []).includes(antes.id))) return '';
   if (evento.mode === 'no_more') {
     if (evento.closeScope === 'shift') {
       const marcado = instanteDoRelogio(alvo.date, alvo.scheduledTime);

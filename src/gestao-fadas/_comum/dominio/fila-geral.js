@@ -64,8 +64,8 @@ function limparAdiamento(item, ator, em) {
   return { ...item, queueDeferral: undefined, queueDeferralHistory: [...(item.queueDeferralHistory ?? []), { ...atual, at: em, by: ator, active: false }] };
 }
 
-// agenda-history.ts:9-31
-const fotoDoAgendamento = (item) => ({ standbyDate: item.standbyDate, date: item.date || '2026-09-01', scheduledTime: item.scheduledTime || '', requestedTime: item.requestedTime || '', tarotId: item.tarotId,
+// agenda-history.ts:9-31 (v706: o retrato do agendamento passa a guardar canal e minutos pedidos)
+const fotoDoAgendamento = (item) => ({ channel: item.channel, requestedMinutes: item.requestedMinutes, standbyDate: item.standbyDate, date: item.date || '2026-09-01', scheduledTime: item.scheduledTime || '', requestedTime: item.requestedTime || '', tarotId: item.tarotId,
   ...(item.contactPlan ? { contactPlan: { ...item.contactPlan, shift: item.contactPlan.shift ? { ...item.contactPlan.shift } : undefined } } : {}) });
 function registrarMudancaDeAgendamento(antes, depois, ator, em, novoId = randomUUID) {
   if (antes.clientId !== `${depois.clientId}`.trim()) throw new Error('Para outra cliente, cancele este agendamento e crie um novo.');

@@ -119,7 +119,7 @@ const r = (p) => path.join(raiz, p);
     assert.equal(ok.status, 200, ok.t); assert.equal(ok.j.versions['ag-d8b'], 2);
   });
   await passo('PATCH para outra cliente: 422 com a frase do front', async () => {
-    recusa(await editar('ag-d1', 2, { clientId: '900099' }), 422, 'Para outra cliente, cancele este agendamento e crie um novo.');
+    recusa(await editar('ag-d1', 2, { clientId: '900099' }), 422, 'A identificação deste agendamento mudou. Feche e abra novamente para conferir.');
   });
   await passo('PATCH para tarólogo inativo ou com restrição: 422; para outro livre, passa e a posição vem do servidor', async () => {
     recusa(await editar('ag-d1', 2, { tarotId: 'nyx' }), 422, 'Nyx está com o cadastro inativo. Selecione outro tarólogo ou reative o cadastro.');

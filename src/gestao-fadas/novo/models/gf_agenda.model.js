@@ -12,7 +12,8 @@ module.exports = definir({
     id: { type: DataTypes.STRING(64), allowNull: false, primaryKey: true },
     numero_publico: { type: DataTypes.INTEGER, allowNull: false },
     id_tarologo: { type: DataTypes.STRING(64), allowNull: false },
-    id_cliente: { type: DataTypes.STRING(64), allowNull: false },
+    id_cliente: { type: DataTypes.STRING(64), allowNull: true },
+    id_contato: { type: DataTypes.STRING(64), allowNull: true },
     data_operacional: { type: DataTypes.DATEONLY, allowNull: false },
     posicao: { type: DataTypes.INTEGER, allowNull: false },
     agenda_outcome: { type: DataTypes.STRING(12), allowNull: true },
@@ -27,5 +28,6 @@ module.exports = definir({
     { name: 'uq_agenda_numero_publico', fields: ['numero_publico'], unique: true },
     { name: 'gf_agenda_dia_tarologo', fields: ['data_operacional', 'id_tarologo'] },
     { name: 'gf_agenda_cliente', fields: ['id_cliente'] },
+    { name: 'gf_agenda_contato', fields: ['id_contato'] },
   ],
 });
