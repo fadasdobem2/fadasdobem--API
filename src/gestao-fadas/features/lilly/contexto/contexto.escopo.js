@@ -51,7 +51,9 @@ function derivarEscopo(body) {
     referencias: Object.fromEntries(['reference', 'mpPaymentId', 'externalTransactionId', 'endToEndId'].map((k) => [k, texto(data[k], 160)]).filter(([, v]) => v)),
     telefone: telefoneObservado(body.conversation),
     // Sem conversa nem cliente e fora do relógio/revisão: não há de onde escopar o que é da conversa. Fica incompleto (NÃO RESPONDIDO pelo contrato).
-    semConversa: !relogio && !revisaoDaManha && conversas.length === 0 && !clientId,
+    // Exceção: a pergunta administrativa (`type:'query'`, só leitura) é do dia inteiro ("Osíris está?") e a Lilly manda `conversationId` vazio
+    // quando não há conversa selecionada; sem isso toda pergunta de presença sairia "não consegui conferir" (achado da integração com a Lilly real).
+    semConversa: !relogio && !revisaoDaManha && tipo !== 'query' && conversas.length === 0 && !clientId,
     revisaoDaManha,
     verificaCapacidade: relogio && event.capacityCheck === true,
   };

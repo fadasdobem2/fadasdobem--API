@@ -27,10 +27,10 @@ async function conferirTarologo(tarologistId) {
 
 /**
  * @param {object} acao   ação da Lilly
- * @param {{exigirCliente?:boolean, exigirVinculo?:boolean, exigirTarologo?:boolean, exigirConta?:boolean, executor?:object}} [o]
+ * @param {{exigirCliente?:boolean, exigirVinculo?:boolean, vinculoOpcional?:boolean, exigirTarologo?:boolean, exigirConta?:boolean, executor?:object}} [o]
  * @returns {Promise<{recusa: null|{allowed:false, reason:string}, vinculo?: object|null}>}
  */
-async function conferirBaseComVinculo(acao, { exigirCliente = false, exigirVinculo = false, exigirTarologo = false, exigirConta = false, executor = avulso } = {}) {
+async function conferirBaseComVinculo(acao, { exigirCliente = false, exigirVinculo = false, vinculoOpcional = false, exigirTarologo = false, exigirConta = false, executor = avulso } = {}) {
   if (exigirConta && !cfg.contaDeServico()) return { recusa: nao('A conta de serviço da Lilly não está configurada no Gestão.') };
   const conversa = texto(acao.conversationId);
   if (!conversa) return { recusa: nao('A ação não informa a conversa.') };
@@ -44,6 +44,11 @@ async function conferirBaseComVinculo(acao, { exigirCliente = false, exigirVincu
     if (!vinculo || vinculo.clientId !== cliente) return { recusa: nao('A conversa não está vinculada a esta cliente (vínculo ativo e verificado).') };
   }
   if (exigirVinculo && !cliente) return { recusa: nao('A ação não informa a cliente.') };
+  // Conversa do TARÓLOGO (ex.: start_consultation): a cliente não tem vínculo com ela. Sem vínculo passa; vínculo com OUTRA cliente recusa.
+  if (cliente && vinculoOpcional && !exigirVinculo) {
+    vinculo = await vinculos.buscarAtivoDaConversa(executor, conversa);
+    if (vinculo && vinculo.clientId !== cliente) return { recusa: nao('A conversa está vinculada a outra cliente.') };
+  }
   if (exigirTarologo) {
     const t = texto(acao.tarologistId);
     if (!t) return { recusa: nao('A ação não informa o tarólogo.') };

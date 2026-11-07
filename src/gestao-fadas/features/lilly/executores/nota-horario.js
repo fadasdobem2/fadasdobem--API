@@ -54,6 +54,9 @@ function registrarNotaHorario() {
     async executar(acao, { executor, chave }) {
       const { motivo, nota } = normalizar(acao);
       if (motivo) recusar('INVALID_INPUT', motivo);
+      // O execute também confere o tarólogo (antes só o validate conferia: nota de tarólogo inexistente era gravada).
+      const recusa = await conferirBase(acao, { exigirTarologo: true, executor });
+      if (recusa) recusar('LILLY_TAROLOGIST_NOT_ACTIVE', recusa.reason);
       const resultado = await gravarNotaHorario(executor, {
         id: `SN-${sha(`${nota.scheduleId}|${nota.eventoOrigem}`).slice(0, 40)}`, tarologistId: nota.tarologistId, date: nota.date, scheduleId: nota.scheduleId,
         expectedAt: nota.expectedAt, status: nota.status, text: nota.text, conversationId: nota.conversationId, messageId: nota.eventoOrigem, at: new Date().toISOString(),

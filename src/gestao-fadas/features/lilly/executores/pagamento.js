@@ -7,7 +7,8 @@
  * cliente); `proposalId`; `humanConfirmed` ou `providerConfirmed`; valor `^\d{1,12}(\.\d{1,2})?$`; referência do provedor única
  * (cruzando tipos), proposta única e autorização única. Grava as referências em `gf_lilly_pagamento_refs`.
  * Tabela `gf_lilly_pagamentos` NÃO foi criada: `gf_lilly_pagamento_refs` já guarda proposta, autorização e referências.
- * NÃO RESPONDIDO (doc 60): pagamento sem `mpPaymentId` nem `endToEndId` (que banco registrar): RECUSADO até a Nice decidir.
+ * NÃO RESPONDIDO (doc 60): pagamento sem `mpPaymentId` nem `endToEndId` (que banco registrar): RECUSADO até a Nice decidir. Exceção de compatibilidade:
+ * `providerConfirmed:true` com `reference` (é como a Lilly manda o ID do Mercado Pago).
  */
 
 const pagamentos = require('../../financeiro-cliente/pagamentos.service');
@@ -33,7 +34,11 @@ function normalizar(acao) {
   if (!texto(p.sourceEventId)) return { motivo: 'Informe o evento de origem do pagamento.' };
   const { refs, invalido } = referenciasDe(p);
   if (invalido) return { motivo: 'Uma das referências do pagamento é longa demais.' };
-  if (!refs.mpPaymentId && !refs.endToEndId) return { motivo: 'Pagamento sem referência do Mercado Pago ou Pix (mpPaymentId ou endToEndId) ainda depende de decisão.', code: 'LILLY_PAYMENT_REFERENCE_REQUIRED' };
+  // A Lilly NUNCA manda `mpPaymentId`: no fluxo de comprovante conferido no Mercado Pago ela manda o ID do pagamento em `reference` (+ `endToEndId`
+  // às vezes; payment-receipt-flow.mjs:276). Com `providerConfirmed:true`, `reference` é a referência do provedor. Só com confirmação humana
+  // (`reference` vinda do texto) continua exigindo mpPaymentId/endToEndId (decisão 4).
+  const referenciaDoProvedor = refs.mpPaymentId || refs.endToEndId || (p.providerConfirmed === true ? refs.reference : undefined);
+  if (!referenciaDoProvedor) return { motivo: 'Pagamento sem referência do Mercado Pago ou Pix (mpPaymentId ou endToEndId) ainda depende de decisão.', code: 'LILLY_PAYMENT_REFERENCE_REQUIRED' };
   const date = texto(p.date);
   if (date && !(DATA.test(date) ? !Number.isNaN(Date.parse(`${date}T12:00:00Z`)) : INSTANTE.test(date) && !Number.isNaN(Date.parse(date)))) return { motivo: 'A data do pagamento é inválida.' };
   if (p.payerName !== undefined && (typeof p.payerName !== 'string' || p.payerName.length > 200)) return { motivo: 'O nome do pagador é inválido.' };

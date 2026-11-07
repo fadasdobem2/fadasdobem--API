@@ -7,6 +7,8 @@
  *  - o relógio é o do SERVIDOR: `startedAt` devolvido é o gravado pelo serviço, nunca o horário da mensagem (que vai para a auditoria);
  *  - mensagem anterior à preparação não inicia; consulta já iniciada = 409 `LILLY_STATE_CHANGED` com o `startedAt` real (não reinicia o relógio);
  *  - responde só depois do commit da transação do serviço (a confirmação sai da guarda, depois do efeito).
+ * A conversa da ação é a do TARÓLOGO (engine.mjs:794 manda `conversationId` do evento dele): a cliente não precisa de vínculo com ela (achado da
+ * integração com a Lilly real); só se a conversa estiver vinculada a OUTRA cliente a ação é recusada.
  * NÃO RESPONDIDO: conferir `expectedVersion` na MESMA transação do início (o serviço não aceita versão): a leitura é logo antes da chamada.
  */
 
@@ -65,14 +67,14 @@ function registrarStartConsultation() {
   registrar('start_consultation', {
     async validar(acao) {
       const n = normalizar(acao); if (n.motivo) return nao(n.motivo);
-      const { recusa } = await conferirBaseComVinculo(acao, { exigirCliente: true, exigirVinculo: true, exigirTarologo: true, exigirConta: true });
+      const { recusa } = await conferirBaseComVinculo(acao, { exigirCliente: true, vinculoOpcional: true, exigirTarologo: true, exigirConta: true });
       if (recusa) return recusa;
       const c = await conferir(avulso, acao, n); if (c.motivo) return nao(c.motivo);
       return permitido(acao);
     },
     async executar(acao, { executor, chave }) {
       const n = normalizar(acao); if (n.motivo) recusar('INVALID_INPUT', n.motivo);
-      const { recusa } = await conferirBaseComVinculo(acao, { exigirCliente: true, exigirVinculo: true, exigirTarologo: true, exigirConta: true, executor });
+      const { recusa } = await conferirBaseComVinculo(acao, { exigirCliente: true, vinculoOpcional: true, exigirTarologo: true, exigirConta: true, executor });
       if (recusa) recusar('LILLY_START_NOT_ALLOWED', recusa.reason);
       const c = await conferir(executor, acao, n); if (c.motivo) recusar(c.code, c.motivo, c.status);
       const r = await chamarServico(() => ciclo.iniciar(pedidoDeServico({ params: { id: n.consultationId }, body: { operationKey: chaveDaOperacao(chave, 'inicio') } })));
