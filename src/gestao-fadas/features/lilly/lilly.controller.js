@@ -2,10 +2,10 @@
 
 /**
  * Controllers finos da fatia Lilly. Cada rota só valida a forma do pedido e chama o serviço do assunto (eventos/, acoes/, notas/).
- * O contexto (snapshot) ainda responde incompleto; ações sem executor registrado são recusadas (403 desligada, 422 sem executor).
+ * O contexto (snapshot) vem dos montadores de contexto/; ações sem executor registrado são recusadas (403 desligada, 422 sem executor).
  */
 
-const { envelope } = require('./contexto/contexto.base');
+const { montarContexto, registrar } = require('./contexto/contexto.servico');
 const { normalizarChave } = require('./idempotencia/chave');
 const { falha, sucesso } = require('./lilly.respostas');
 const { enviarJson } = require('../../gate/http');
@@ -19,9 +19,20 @@ const definirDependencias = (d) => { dependencias.eventos = { ...d }; };
 
 const objeto = (v) => v && typeof v === 'object' && !Array.isArray(v);
 
-function contexto(req, res) {
+/**
+ * `POST /lilly/context`: corpo inválido = 400. O snapshot é montado por `contexto/contexto.servico.js`; falha de UMA fonte vira `complete:false`
+ * naquele assunto (200). Falha inesperada do conjunto = 500 sem detalhe (a Lilly trata 5xx como incerto); só o nome do erro vai ao registro.
+ */
+async function contexto(req, res) {
   if (!objeto(req.body) || !objeto(req.body.event)) return falha(res, 400, 'INVALID_INPUT', 'Informe o evento do contexto.');
-  return sucesso(res, { ...envelope(), clients: [], tarologists: [], appointments: [], consultations: [], payments: [], links: [], messages: [] });
+  try {
+    const { snapshot, cobertura } = await montarContexto(req.body);
+    registrar(req.body.event.type, snapshot, cobertura);
+    return sucesso(res, snapshot);
+  } catch (e) {
+    console.error('[lilly] falha inesperada no contexto:', e && e.name);
+    return falha(res, 500, 'LILLY_INTERNAL', 'Falha interna.');
+  }
 }
 
 /** Handlers async: falha inesperada vira 500 sem detalhe (a Lilly trata 5xx em POST como incerto e concilia). Erro com `status`/`code` próprios sai como veio. */

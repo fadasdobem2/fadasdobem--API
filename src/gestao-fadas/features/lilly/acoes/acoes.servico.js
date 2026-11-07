@@ -10,6 +10,7 @@ const { obter } = require('./acoes.registro');
 const { executarUmaVez } = require('./acoes.guarda');
 const { conciliar } = require('./acoes.conciliacao');
 const { AcaoRecusadaError } = require('./acoes.erros');
+require('../executores'); // registra os executores e validadores de cada kind
 
 const erro = (status, code, message) => ({ status, corpo: { error: { code, message } } });
 const ok = (corpo, status = 200) => ({ status, corpo });

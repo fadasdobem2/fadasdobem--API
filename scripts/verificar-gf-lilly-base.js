@@ -65,8 +65,9 @@ async function chamar(metodo, caminho, { token = TOKEN, corpo, cabecalhos = {}, 
     const desligada = await chamar('POST', '/lilly/actions', { corpo: { action: { kind: 'schedule' } }, cabecalhos: { 'Idempotency-Key': longa } });
     assert.equal(desligada.status, 403); assert.equal(desligada.corpo.error.code, 'LILLY_ACTIONS_DISABLED'); ok('ações desligadas: 403 (nunca executa), chave longa aceita');
     process.env.GF_LILLY_ACOES_ENABLED = 'true';
-    const naoSuportada = await chamar('POST', '/lilly/actions', { corpo: { action: { kind: 'schedule' } }, cabecalhos: { 'Idempotency-Key': 'chave-valida-123' } });
-    assert.equal(naoSuportada.status, 422); ok('ações ligadas mas ainda sem executor: 422 (nunca 5xx)');
+    // Mudou de propósito: `schedule` agora TEM executor (features/lilly/executores). O 422 "sem executor" passou a ser provado com um kind só-Umbler (nunca executa no Gestão).
+    const naoSuportada = await chamar('POST', '/lilly/actions', { corpo: { action: { kind: 'note' } }, cabecalhos: { 'Idempotency-Key': 'chave-valida-123' } });
+    assert.equal(naoSuportada.status, 422); ok('ações ligadas mas kind sem executor no Gestão (só-Umbler): 422 (nunca 5xx)');
 
     // Mudou de propósito: conciliação e notas leem o banco novo; sem armazenamento a resposta é 503 (nunca "não executada" por engano).
     const conc = await chamar('GET', `/lilly/actions/${encodeURIComponent(longa)}`);
@@ -98,7 +99,7 @@ async function chamar(metodo, caminho, { token = TOKEN, corpo, cabecalhos = {}, 
   const t = traduzirStatusConsulta;
   assert.equal(t({ status: 'Em curso', awaitingTarologistStart: true }), 'prepared');
   assert.equal(t({ status: 'Em curso' }), 'in_progress'); assert.equal(t({ status: 'Concluída' }), 'completed');
-  assert.equal(t({ status: 'Cancelada' }), 'cancelled'); assert.equal(t({ status: 'Finalizada pelo tarólogo' }), 'in_progress');
+  assert.equal(t({ status: 'Cancelada' }), 'cancelled'); assert.equal(t({ status: 'Finalizada pelo tarólogo' }), 'ended'); assert.equal(t({ status: 'Anulada' }), 'cancelled');
   assert.equal(t({ status: 'algo novo' }), 'unknown'); assert.equal(t(), 'unknown'); ok('status da consulta: tradução e desconhecido vira unknown');
 
   limpar(); servidor.close();

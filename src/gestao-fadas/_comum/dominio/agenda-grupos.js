@@ -14,7 +14,7 @@ const CONTATO_CAMPOS = ['contact', 'contactPlan', 'workflowStatus', 'response', 
 const CONTATO_HISTORIAS = ['contactHistory', 'queueDeferralHistory', 'queueReservationHistory', 'forwardingHistory', 'contactReturnHistory'];
 
 const AGENDAMENTO_CAMPOS = ['tarotId', 'clientId', 'client', 'channel', 'date', 'time', 'scheduledTime', 'requestedTime', 'paymentPending', 'paymentExpectedAmount',
-  'paymentAmount', 'unlinkedPaymentAmount', 'requestId', 'position', 'continuationRequest', 'formerContinuationRequest', 'dismissedConsultationIds'];
+  'paymentAmount', 'unlinkedPaymentAmount', 'requestedMinutes', 'requestId', 'position', 'continuationRequest', 'formerContinuationRequest', 'dismissedConsultationIds'];
 
 const GRUPOS = Object.freeze({
   contato: { set: CONTATO_CAMPOS, append: CONTATO_HISTORIAS, restaura: false },
