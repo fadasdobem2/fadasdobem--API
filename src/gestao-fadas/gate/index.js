@@ -35,6 +35,7 @@ const { criarRotasFicha } = require('./rotas-ficha');
 const { criarRotasEstadoFinanceiro } = require('./rotas-estado-financeiro');
 const { criarRotasContas } = require('./rotas-contas');
 const { criarRotasConfig } = require('./rotas-config');
+const { criarRotasLilly } = require('./rotas-lilly');
 const rotasExtras = require('./rotas-extras');
 
 /** Provedor por env `GATE_SESSAO`: `nativa` (login da A) ou `proxy-b` (padrão, não quebra o que existe). */
@@ -55,6 +56,7 @@ function criarGate({ provedorDeSessao, verificarLegado, extras = rotasExtras } =
   router.use('/payouts', payoutsOff);
   router.use(criarRotasCadastros(provedor)); // antes das públicas: com a flag ligada atende /tarologos-cadastro
   router.use(criarRotasConfig(provedor)); // antes das públicas: com GF_FATIA_CONFIG atende /welcome (leitura, editor e PUT)
+  router.use(criarRotasLilly()); // antes das públicas: o serviço Lilly usa token, não sessão
   router.use(criarRotasPublicas());
   router.use(criarRotasAuth(provedor));
   router.use(criarRotasContas(provedor));
