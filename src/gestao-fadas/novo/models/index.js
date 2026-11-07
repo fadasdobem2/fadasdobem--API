@@ -58,6 +58,13 @@ const fabricas = [
   require('./gf_legado_intencoes.model'),
   require('./gf_legado_verificacoes.model'),
   require('./gf_migracao_historicos.model'),
+  require('./gf_lilly_vinculos.model'),
+  require('./gf_lilly_eventos.model'),
+  require('./gf_lilly_acoes.model'),
+  require('./gf_lilly_notas_horario.model'),
+  require('./gf_lilly_pagamento_refs.model'),
+  require('./gf_lilly_cotacoes.model'),
+  require('./gf_lilly_avisos.model'),
 ];
 
 function registrar(sequelize) {

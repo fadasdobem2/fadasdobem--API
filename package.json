@@ -21,6 +21,7 @@
     "verificar:financeiro": "node scripts/verificar-financeiro-webhooks.js && node scripts/verificar-financeiro-saques-sessoes.js && node scripts/verificar-financeiro-pagamentos.js",
     "verificar:umbler": "node scripts/verificar-umbler-provider.js",
     "verificar:gf-lilly-base": "node scripts/verificar-gf-lilly-base.js",
+    "verificar:gf-lilly-dados": "node scripts/verificar-gf-lilly-dados.js",
     "verificar:gf-gate": "node scripts/verificar-gf-gate.js",
     "verificar:gf-banco-novo": "node scripts/verificar-gf-banco-novo.js",
     "verificar:gf-horarios": "node scripts/verificar-gf-horarios.js",

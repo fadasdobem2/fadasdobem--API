@@ -1,14 +1,21 @@
 'use strict';
 
 /**
- * Controllers finos da fatia Lilly. Cada rota só valida a forma do pedido e chama o serviço do assunto; nesta etapa (fundação) as
- * rotas respondem com o contrato certo e SEM efeito: contexto incompleto, evento não resolvido, validação negada, ação recusada.
+ * Controllers finos da fatia Lilly. Cada rota só valida a forma do pedido e chama o serviço do assunto (eventos/, acoes/, notas/).
+ * O contexto (snapshot) ainda responde incompleto; ações sem executor registrado são recusadas (403 desligada, 422 sem executor).
  */
 
 const { envelope } = require('./contexto/contexto.base');
 const { normalizarChave } = require('./idempotencia/chave');
-const { acoesLiberadas } = require('./lilly.config');
 const { falha, sucesso } = require('./lilly.respostas');
+const { enviarJson } = require('../../gate/http');
+const acoes = require('./acoes/acoes.servico');
+const { resolverEvento: resolverEventoServico } = require('./eventos/eventos.resolver');
+const { listarNotasDoHorario } = require('./notas/notas-horario.servico');
+
+/** Dependências trocáveis em teste (leitor da Umbler, verificador de eventos do site). */
+const dependencias = { eventos: {} };
+const definirDependencias = (d) => { dependencias.eventos = { ...d }; };
 
 const objeto = (v) => v && typeof v === 'object' && !Array.isArray(v);
 
@@ -17,37 +24,47 @@ function contexto(req, res) {
   return sucesso(res, { ...envelope(), clients: [], tarologists: [], appointments: [], consultations: [], payments: [], links: [], messages: [] });
 }
 
-function resolverEvento(req, res) {
+/** Handlers async: falha inesperada vira 500 sem detalhe (a Lilly trata 5xx em POST como incerto e concilia). Erro com `status`/`code` próprios sai como veio. */
+const seguro = (fn) => async (req, res) => {
+  try {
+    return await fn(req, res);
+  } catch (e) {
+    if (e && Number.isInteger(e.status) && e.status >= 400 && e.status < 600 && typeof e.code === 'string') return falha(res, e.status, e.code, e.message);
+    if (e && e.name === 'BancoNovoError') return falha(res, 503, 'LILLY_STORAGE_UNAVAILABLE', 'Armazenamento indisponível.');
+    console.error('[lilly] falha inesperada:', e && e.name);
+    return falha(res, 500, 'LILLY_INTERNAL', 'Falha interna.');
+  }
+};
+
+const responder = (res, r) => enviarJson(res, r.status, r.corpo);
+
+const resolverEvento = seguro(async (req, res) => {
   const { provider, event } = req.body || {};
   if (!['umbler', 'fadas'].includes(provider) || !objeto(event)) return falha(res, 400, 'INVALID_INPUT', 'Informe o provedor e o evento.');
-  return falha(res, 422, 'LILLY_EVENT_UNRESOLVED', 'A resolução de eventos ainda não está habilitada.');
-}
+  return responder(res, await resolverEventoServico({ provider, event }, dependencias.eventos));
+});
 
-function validarAcao(req, res) {
+const validarAcao = seguro(async (req, res) => {
   if (!objeto(req.body) || !objeto(req.body.action) || typeof req.body.action.kind !== 'string') return falha(res, 400, 'INVALID_INPUT', 'Informe a ação.');
-  return sucesso(res, { allowed: false, reason: 'A validação de ações ainda não está habilitada.' });
-}
+  const { action, conversation, legacyBotRequest } = req.body;
+  return responder(res, await acoes.validarAcao({ action, conversation, legacyBotRequest }));
+});
 
-function executarAcao(req, res) {
+const executarAcao = seguro(async (req, res) => {
   const chave = normalizarChave(req.get('idempotency-key'));
   if (!chave) return falha(res, 400, 'INVALID_INPUT', 'Informe a chave de idempotência.');
   if (!objeto(req.body) || !objeto(req.body.action) || typeof req.body.action.kind !== 'string') return falha(res, 400, 'INVALID_INPUT', 'Informe a ação.');
-  if (!acoesLiberadas()) return falha(res, 403, 'LILLY_ACTIONS_DISABLED', 'As ações da Lilly estão desligadas.');
-  return falha(res, 422, 'LILLY_ACTION_UNSUPPORTED', 'Esta ação ainda não está habilitada.');
-}
+  return responder(res, await acoes.executarAcao({ chaveBruta: chave.original, action: req.body.action }));
+});
 
-function conciliarAcao(req, res) {
-  const chave = normalizarChave(req.params.chave);
-  if (!chave) return falha(res, 400, 'INVALID_INPUT', 'Informe a chave de idempotência.');
-  return sucesso(res, { committed: false, state: 'not_executed' });
-}
+const conciliarAcao = seguro(async (req, res) => responder(res, await acoes.conciliarAcao(req.params.chave)));
 
-function notasDoHorario(req, res) {
+const notasDoHorario = seguro(async (req, res) => {
   const { tarologistId, date } = req.query;
   if (typeof tarologistId !== 'string' || !tarologistId.trim() || typeof date !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
     return falha(res, 400, 'INVALID_INPUT', 'Informe o tarólogo e a data (AAAA-MM-DD).');
   }
-  return sucesso(res, { notes: [] });
-}
+  return sucesso(res, await listarNotasDoHorario({ tarologistId, date }));
+});
 
-module.exports = { contexto, resolverEvento, validarAcao, executarAcao, conciliarAcao, notasDoHorario };
+module.exports = { contexto, resolverEvento, validarAcao, executarAcao, conciliarAcao, notasDoHorario, definirDependencias };

@@ -80,6 +80,39 @@ const listarRobos = () => chamar(() => http().get('/v1/bots/', { params: { organ
 
 const listarWebhooks = () => chamar(() => http().get('/v1/webhooks/', { params: { organizationId: organizacao() } }));
 
+/**
+ * Leituras para conferir um evento (webhook): devolvem só o que o `events/resolve` precisa, sem copiar o resto da conversa.
+ * Os nomes dos campos são os da Umbler (`organization`, `contact`, `eventAtUTC`...), os mesmos que o serviço Lilly lê.
+ */
+async function lerConversa(chatId) {
+  const chat = await chamar(() => http().get(`/v1/chats/${enc(chatId)}/`, { params: { organizationId: organizacao() } }));
+  const org = chat && (chat.organization?.id ?? chat.organizationId);
+  return {
+    organizationId: org == null ? '' : `${org}`,
+    contact: { id: chat?.contact?.id == null ? '' : `${chat.contact.id}`, tags: Array.isArray(chat?.contact?.tags) ? chat.contact.tags : [] },
+  };
+}
+
+async function lerMensagem(chatId, messageId) {
+  const m = await chamar(() => http().get(`/v1/messages/${enc(messageId)}/`, { params: { organizationId: organizacao() } }));
+  return {
+    id: `${m?.id ?? ''}`,
+    isPrivate: m?.isPrivate === true,
+    source: m?.source ?? null,
+    sentByOrganizationMember: m?.sentByOrganizationMember ?? null,
+    fromContact: m?.fromContact === true,
+    content: typeof m?.content === 'string' ? m.content : '',
+    eventAt: m?.eventAtUTC ?? m?.eventAt ?? null,
+    botInstance: m?.botInstance ?? null,
+    automated: m?.automated === true,
+    metadata: m?.metadata ?? null,
+    file: m?.file ?? null,
+  };
+}
+
+/** Leitor completo que o `events/resolve` usa por padrão. */
+const leitorDeEventos = { lerConversa, lerMensagem };
+
 /* ---------- Escrita (desligada por padrão) ---------- */
 
 /** Nota no contato, visível só para a equipe. `content` é texto puro. */
@@ -98,5 +131,8 @@ module.exports = {
   listarCamposPersonalizados,
   listarRobos,
   listarWebhooks,
+  lerConversa,
+  lerMensagem,
+  leitorDeEventos,
   criarNota,
 };

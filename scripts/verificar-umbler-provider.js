@@ -47,6 +47,19 @@ let n = 0; const ok = (m) => { n += 1; console.log(`ok ${n} - ${m}`); };
   const e = await falha(() => u.listarNotas('C1'), 'UMBLER_HTTP', 'erro HTTP traduzido');
   assert.equal(e.status, 500); assert.ok(!e.message.includes(TOKEN) && !e.message.includes('dado-de-cliente') && !JSON.stringify(e).includes('dado-de-cliente')); ok('erro não vaza token nem corpo');
 
+  // leitura para conferir evento
+  resposta = { status: 200, data: { organization: { id: 'ORG1' }, contact: { id: 'K1', tags: [{ id: 't' }], phone: '5588999990000' } } };
+  const conversa = await u.lerConversa('chat 1');
+  assert.deepEqual(conversa, { organizationId: 'ORG1', contact: { id: 'K1', tags: [{ id: 't' }] } });
+  assert.equal(JSON.stringify(conversa).includes('5588999990000'), false);
+  assert.equal(chamadas.at(-1).url, '/v1/chats/chat%201/'); ok('lerConversa: só organização e contato (sem telefone), id escapado');
+  resposta = { status: 200, data: { id: 'M1', isPrivate: true, source: 'Member', sentByOrganizationMember: { id: 'U1' }, fromContact: false, content: 'zx', eventAtUTC: '2026-11-07T10:00:00Z', automated: false, extra: 'nao-sai' } };
+  const msg = await u.lerMensagem('chat1', 'M1');
+  assert.equal(msg.isPrivate, true); assert.equal(msg.eventAt, '2026-11-07T10:00:00Z'); assert.equal(msg.content, 'zx'); assert.equal('extra' in msg, false); ok('lerMensagem: campos que o resolve usa, e nada além');
+  resposta = { status: 404, data: {} };
+  const e404 = await falha(() => u.lerMensagem('chat1', 'M2'), 'UMBLER_HTTP', 'mensagem inexistente'); assert.equal(e404.status, 404); ok('mensagem inexistente: erro com status 404 (vira 422 no resolve)');
+  resposta = { status: 200, data: { ok: true } };
+
   // webhook
   const passa = (headers) => new Promise((res) => verifyUmblerWebhook({ get: (h) => headers[h] }, {}, (err) => res(err ? err.statusCode || err.status : 'next')));
   limpar();

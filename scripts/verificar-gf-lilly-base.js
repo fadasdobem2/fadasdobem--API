@@ -52,9 +52,10 @@ async function chamar(metodo, caminho, { token = TOKEN, corpo, cabecalhos = {}, 
     assert.equal((await chamar('POST', '/lilly/context', { corpo: {} })).status, 400); ok('contexto sem evento: 400');
 
     assert.equal((await chamar('POST', '/lilly/events/resolve', { corpo: { provider: 'x', event: {} } })).status, 400);
-    const res422 = await chamar('POST', '/lilly/events/resolve', { corpo: { provider: 'umbler', event: { id: '1' } } });
-    assert.equal(res422.status, 422); assert.equal(res422.corpo.error.code, 'LILLY_EVENT_UNRESOLVED');
-    assert.equal((await chamar('POST', '/lilly/events/resolve', { corpo: { provider: 'fadas', event: { id: '1' } } })).status, 422); ok('resolve: aceita umbler e fadas, recusa em 4xx (nunca 5xx)');
+    // Mudou de propósito (fatia de dados): o resolve agora valida o webhook e confere na Umbler/banco (verificar-gf-lilly-dados.js cobre o fluxo completo).
+    const semTipo = await chamar('POST', '/lilly/events/resolve', { corpo: { provider: 'umbler', event: { id: '1' } } });
+    assert.equal(semTipo.status, 400); assert.equal(semTipo.corpo.error.code, 'INVALID_INPUT');
+    assert.equal((await chamar('POST', '/lilly/events/resolve', { corpo: { provider: 'fadas', event: { id: '1' } } })).status, 400); ok('resolve: aceita umbler e fadas, forma inválida é 400 (nunca 5xx)');
 
     const val = await chamar('POST', '/lilly/actions/validate', { corpo: { action: { kind: 'schedule' } } });
     assert.equal(val.status, 200); assert.equal(val.corpo.allowed, false); assert.ok(val.corpo.reason); ok('validate: allowed:false com motivo (200)');
@@ -67,12 +68,13 @@ async function chamar(metodo, caminho, { token = TOKEN, corpo, cabecalhos = {}, 
     const naoSuportada = await chamar('POST', '/lilly/actions', { corpo: { action: { kind: 'schedule' } }, cabecalhos: { 'Idempotency-Key': 'chave-valida-123' } });
     assert.equal(naoSuportada.status, 422); ok('ações ligadas mas ainda sem executor: 422 (nunca 5xx)');
 
+    // Mudou de propósito: conciliação e notas leem o banco novo; sem armazenamento a resposta é 503 (nunca "não executada" por engano).
     const conc = await chamar('GET', `/lilly/actions/${encodeURIComponent(longa)}`);
-    assert.equal(conc.status, 200); assert.equal(conc.corpo.committed, false); assert.equal(conc.corpo.state, 'not_executed'); ok('reconciliação: committed:false e state not_executed');
+    assert.equal(conc.status, 503); assert.equal(conc.corpo.error.code, 'LILLY_STORAGE_UNAVAILABLE'); ok('reconciliação sem banco: 503 (o caso com banco está em verificar-gf-lilly-dados.js)');
 
     assert.equal((await chamar('GET', '/lilly/schedule-notes?tarologistId=9001')).status, 400);
     const notas = await chamar('GET', '/lilly/schedule-notes?tarologistId=9001&date=2026-11-07');
-    assert.equal(notas.status, 200); assert.deepEqual(notas.corpo, { notes: [] }); ok('notas do horário: valida a forma e devolve lista vazia verdadeira');
+    assert.equal(notas.status, 503); ok('notas do horário: valida a forma; sem banco 503');
 
     assert.equal((await chamar('POST', '/lilly/context', { bruto: '{nao-e-json' })).status, 400); ok('JSON malformado: 400');
     assert.equal((await chamar('PUT', '/lilly/context', { corpo: {} })).status, 405); ok('método errado: 405');

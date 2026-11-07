@@ -237,6 +237,34 @@ const CHECKS = {
     ['chk_migracao_historicos_credito', 'credito_centavos >= 0'], ['chk_migracao_historicos_debito', 'debito_centavos >= 0'],
     ['chk_migracao_historicos_item', "jsonb_typeof(item) = 'object'"], ['chk_migracao_historicos_criado_por', nt('criado_por')], ['chk_migracao_historicos_operation_key', nv('operation_key')],
   ],
+  gf_lilly_vinculos: [
+    ['chk_lilly_vinculos_id', nv('id')], ['chk_lilly_vinculos_cliente', "id_cliente ~ '^[1-9][0-9]{0,9}$'"], ['chk_lilly_vinculos_contato', nv('umbler_contact_id')],
+    ['chk_lilly_vinculos_conversa', nv('umbler_conversation_id')], ['chk_lilly_vinculos_attribution', "attribution IS NULL OR jsonb_typeof(attribution) = 'object'"],
+  ],
+  gf_lilly_eventos: [
+    ['chk_lilly_eventos_id', nv('id')], ['chk_lilly_eventos_source', "source IN ('umbler', 'site')"], ['chk_lilly_eventos_conversa', 'conversation_id IS NULL OR ' + nv('conversation_id')],
+    ['chk_lilly_eventos_actor', "actor IN ('client', 'contact', 'staff', 'tarologist', 'lilly', 'system')"],
+    ['chk_lilly_eventos_data', "jsonb_typeof(data) = 'object'"], ['chk_lilly_eventos_staff', 'staff_authorized = false OR (actor = \'staff\' AND internal = true AND staff_id IS NOT NULL)'],
+  ],
+  gf_lilly_acoes: [
+    ['chk_lilly_acoes_chave', nv('chave_interna')], ['chk_lilly_acoes_original', nt('chave_original')], ['chk_lilly_acoes_hash', "hash_corpo ~ '^[0-9a-f]{64}$'"],
+    ['chk_lilly_acoes_kind', nv('kind')], ['chk_lilly_acoes_estado', "estado IN ('em_execucao', 'confirmada', 'recusada', 'incerta')"],
+    ['chk_lilly_acoes_resultado', "resultado IS NULL OR jsonb_typeof(resultado) = 'object'"],
+  ],
+  gf_lilly_notas_horario: [
+    ['chk_lilly_notas_id', nv('id')], ['chk_lilly_notas_tarologo', nv('tarologist_id')], ['chk_lilly_notas_status', "status IN ('waiting', 'arrived', 'resolved')"],
+    ['chk_lilly_notas_texto', nt('texto')], ['chk_lilly_notas_fim', 'ends_at IS NULL OR expected_at IS NULL OR ends_at >= expected_at'],
+  ],
+  gf_lilly_pagamento_refs: [
+    ['chk_lilly_refs_pagamento', nv('payment_id')], ['chk_lilly_refs_reference', 'reference IS NULL OR ' + nv('reference')],
+  ],
+  gf_lilly_cotacoes: [
+    ['chk_lilly_cotacoes_id', nv('id')], ['chk_lilly_cotacoes_conversa', nv('conversation_id')], ['chk_lilly_cotacoes_cliente', "id_cliente IS NULL OR id_cliente ~ '^[1-9][0-9]{0,9}$'"],
+    ['chk_lilly_cotacoes_valor', 'amount_centavos >= 0'], ['chk_lilly_cotacoes_minutos', 'minutes > 0'],
+  ],
+  gf_lilly_avisos: [
+    ['chk_lilly_avisos_id', nv('id')], ['chk_lilly_avisos_conversa', nv('conversation_id')], ['chk_lilly_avisos_cliente', "id_cliente IS NULL OR id_cliente ~ '^[1-9][0-9]{0,9}$'"],
+  ],
   gf_operacoes: [['chk_operacoes_chave', nv('chave')], ['chk_operacoes_escopo', nv('escopo')], ['chk_operacoes_hash', "hash_corpo ~ '^[0-9a-f]{64}$'"]],
   gf_welcome: [['chk_welcome_id', nv('id')], ['chk_welcome_revisao', 'revisao >= 1']],
   gf_contas_ext: [
