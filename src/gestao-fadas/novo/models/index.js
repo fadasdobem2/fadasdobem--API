@@ -72,6 +72,9 @@ const fabricas = [
   require('./gf_ponto_escalas.model'),
   require('./gf_ponto_eventos.model'),
   require('./gf_lilly_mais_tempo.model'),
+  require('./gf_email_config.model'),
+  require('./gf_email_eventos.model'),
+  require('./gf_formas_atendimento_dia.model'),
 ];
 
 function registrar(sequelize) {

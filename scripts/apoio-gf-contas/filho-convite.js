@@ -63,8 +63,8 @@ const LEGADO = [{ idTarologo: 9001, nmuTarologo: 'Tarólogo A', ativo: 1 }, { id
   const FORTE = 'Convite!Senha#2026z';
 
   console.log('Regras novas da v706 na criação');
-  await passo('e-mail fora do Fadas: 422 com o texto do front; senha de 14 caracteres: 422 com 15 caracteres', async () => {
-    const a = await convidar({ email: 'pessoa@exemplo.com' }); assert.equal(a.status, 422); assert.equal(a.j.error.message, 'Use o e-mail do Fadas (@fadasdobem.com.br)');
+  await passo('e-mail inválido: 422 com o texto do front (v711: qualquer e-mail válido serve, o domínio não dá acesso); senha de 14 caracteres: 422 com 15 caracteres', async () => {
+    const a = await convidar({ email: 'pessoa..x@exemplo.com' }); assert.equal(a.status, 422); assert.equal(a.j.error.message, 'Informe um e-mail válido.');
     const b = await criar({ password: 'Abcdefghijkl1!' }); assert.equal(b.status, 422); assert.equal(b.j.error.message, 'Use 15 caracteres, maiúscula, minúscula, número e símbolo. Confirme a mesma senha.');
     const c = await criar({ password: 'Abcdefghijklm1!' }); assert.equal(c.status, 200, c.t);
   });

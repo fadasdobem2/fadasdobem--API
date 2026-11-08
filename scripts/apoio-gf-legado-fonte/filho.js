@@ -68,19 +68,19 @@ const LEGADO = [{ idTarologo: 9001, nmuTarologo: 'Tarólogo Fictício A', ativo:
   console.log('Cliente: legado primeiro');
   let rev = 0; const antes13 = { ...U.get(900013) };
   await passo('editar nome, WhatsApp, nascimento e Pré/Pós: o LEGADO recebe os 3 campos; o Postgres guarda só Pré/Pós e a revisão (dados sem os campos do legado); resposta igual à de antes', async () => {
-    const e = await editar('900013', { name: 'Nome Novo', whatsapp: '11 99999-0000', birthDate: '05/03/1980', paymentProfile: 'Pós-pago' }, 0);
+    const e = await editar('900013', { name: 'Nome Novo', whatsapp: '11 99999-0000', birthDate: '05/03/1980', paymentProfile: 'Pré-pago' }, 0);
     assert.equal(e.status, 200, e.t); rev = e.j.extension.revision; assert.equal(rev, 1);
-    assert.equal(e.j.extension.name, 'Nome Novo'); assert.equal(e.j.extension.whatsapp, '11 99999-0000'); assert.equal(e.j.extension.birthDate, '05/03/1980'); assert.equal(e.j.extension.paymentProfile, 'Pós-pago');
+    assert.equal(e.j.extension.name, 'Nome Novo'); assert.equal(e.j.extension.whatsapp, '11 99999-0000'); assert.equal(e.j.extension.birthDate, '05/03/1980'); assert.equal(e.j.extension.paymentProfile, 'Pré-pago');
     const u = U.get(900013); assert.equal(u.nome_id, 'Nome Novo'); assert.equal(u.whats, '11 99999-0000'); assert.equal(u.datanascimento, '1980-03-05 00:00:00');
     assert.equal(u.nome2, antes13.nome2); assert.equal(u.cpf, antes13.cpf); assert.equal(u.saldo, antes13.saldo); assert.equal(u.horanascimento, antes13.horanascimento);
-    const l = await linhaC('900013'); assert.deepEqual(dados(l), {}); assert.equal(l.pp, 'Pós-pago'); assert.equal(l.e, 'espelhada'); assert.deepEqual(l.p, []);
+    const l = await linhaC('900013'); assert.deepEqual(dados(l), {}); assert.equal(l.pp, 'Pré-pago'); assert.equal(l.e, 'espelhada'); assert.deepEqual(l.p, []);
     const i = await intencoes('clientes', '900013'); assert.equal(i.length, 1); assert.equal(i[0].estado, 'concluida'); assert.equal(i[0].l, '900013');
     const [a] = await q("SELECT antes, depois FROM gf_auditoria WHERE acao = 'cadastros.cliente.editar' AND entidade_id = '900013' ORDER BY ocorrido_em DESC LIMIT 1", {});
     assert.equal((typeof a.depois === 'string' ? JSON.parse(a.depois) : a.depois).legado.nome_id, 'Nome Novo'); assert.equal((typeof a.antes === 'string' ? JSON.parse(a.antes) : a.antes) === null, false === true);
   });
   await passo('leitura: GET /catalog/clients traz só o novo (Pré/Pós, revisão); nome, WhatsApp e nascimento vêm do legado (a fusão mostra o do legado, inclusive o que o ASP muda depois)', async () => {
     const g = await chamar('GET', '/catalog/clients?ids=900013'); const x = g.j.extensions['900013'];
-    assert.equal(x.paymentProfile, 'Pós-pago'); assert.equal(x.revision, 1); assert.equal(x.name, undefined); assert.equal(x.whatsapp, undefined);
+    assert.equal(x.paymentProfile, 'Pré-pago'); assert.equal(x.revision, 1); assert.equal(x.name, undefined); assert.equal(x.whatsapp, undefined);
     U.get(900013).nome_id = 'O ASP renomeou';
     const ov = extensao.sobrepor({ id: 900013, nome_id: U.get(900013).nome_id, whats: U.get(900013).whats }, (await extensao.extensoesPorId(['900013'])).get('900013')); assert.equal(ov.nome_id, 'O ASP renomeou');
     U.get(900013).nome_id = 'Nome Novo';
@@ -102,7 +102,7 @@ const LEGADO = [{ idTarologo: 9001, nmuTarologo: 'Tarólogo Fictício A', ativo:
     const antes = await linhaC('900013'); const ops = await contagem('gf_operacoes'); const aud = await contagem('gf_auditoria'); const chave = n();
     falso.estado.falhar = true; const e = await editar('900013', { name: 'Não deve gravar', paymentProfile: 'Pré-pago' }, rev, chave); falso.estado.falhar = null;
     assert.equal(e.status, 503, e.t); assert.equal(e.j.error.code, 'SERVICE_UNAVAILABLE'); assert.match(e.j.error.message, /acessar o serviço/, 'a mensagem que o front já tem para 503');
-    const depois = await linhaC('900013'); assert.equal(Number(depois.revisao), Number(antes.revisao)); assert.equal(depois.pp, 'Pós-pago');
+    const depois = await linhaC('900013'); assert.equal(Number(depois.revisao), Number(antes.revisao)); assert.equal(depois.pp, 'Pré-pago');
     assert.equal(await contagem('gf_operacoes'), ops); assert.equal(await contagem('gf_auditoria'), aud); assert.equal(U.get(900013).nome_id, 'Nome Novo');
     const i = await intencoes('clientes', '900013'); assert.equal(i[i.length - 1].estado, 'revertida');
     const ok = await editar('900013', { name: 'Gravou agora', paymentProfile: 'Pré-pago' }, rev, chave); assert.equal(ok.status, 200, ok.t); rev = ok.j.extension.revision; assert.equal(U.get(900013).nome_id, 'Gravou agora');

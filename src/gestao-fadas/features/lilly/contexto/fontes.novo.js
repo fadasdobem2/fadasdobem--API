@@ -120,6 +120,16 @@ function ultimaConsultaPorCliente(clientIds) {
   }));
 }
 
+/**
+ * Formas de atendimento informadas PARA O DIA (v711, `serviceModesToday` no snapshot): as mesmas linhas do painel (`/professional-services`).
+ * Sem leitura ou sem tabela, devolve vazio: a Lilly cai no padrão do cadastro (como o front sem linha do dia), nunca inventa um meio.
+ */
+async function formasDoDia(dia) {
+  try {
+    return await lendoNovo((m) => m.GfFormasAtendimentoDia.findAll({ where: { data_operacional: dia }, order: [['tarologo_id', 'ASC']], limit: 2001, raw: true }));
+  } catch { return []; }
+}
+
 module.exports = {
-  agenda, consultas, consultasParaRetorno, presenca, horarios, pagamentos, precosVersoes, restricoes, divergencias, clientesExt, clientesNovosPorIds, clientesNovosPorTelefone, clientesExtPorTelefone, ultimaConsultaPorCliente,
+  agenda, consultas, consultasParaRetorno, presenca, horarios, pagamentos, precosVersoes, restricoes, divergencias, clientesExt, clientesNovosPorIds, clientesNovosPorTelefone, clientesExtPorTelefone, ultimaConsultaPorCliente, formasDoDia,
 };

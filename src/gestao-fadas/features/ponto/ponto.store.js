@@ -58,6 +58,20 @@ async function turnosDoDia(data, inicio, fim) {
   return porConta;
 }
 
+/**
+ * Presença INFORMADA x DETECTADA (v711): o que o diário de ações confirmadas prova do trabalho no dia operacional (primeira e última ação, quantas),
+ * lido do diário que só acrescenta (nenhuma segunda gravação pode perder ou duplicar presença). Só entram ações até `agora`.
+ * Devolve `Map(idConta -> { operationalDate, firstActivityAt, lastActivityAt, activityCount })`; `idConta` opcional restringe a uma conta.
+ */
+async function atividadeDoDia(data, inicio, fim, agora, idConta) {
+  const l = await ler(
+    `SELECT id_conta, MIN(ocorreu_em) AS primeira, MAX(ocorreu_em) AS ultima, COUNT(*) AS total FROM gf_ponto_eventos
+     WHERE ocorreu_em >= :inicio::timestamptz AND ocorreu_em < :fim::timestamptz AND ocorreu_em <= :agora::timestamptz${idConta ? ' AND id_conta = :conta' : ''} GROUP BY id_conta`,
+    { inicio, fim, agora: new Date(agora).toISOString(), conta: idConta || null },
+  );
+  return new Map(l.map((x) => [x.id_conta, { operationalDate: data, firstActivityAt: new Date(x.primeira).toISOString(), lastActivityAt: new Date(x.ultima).toISOString(), activityCount: Number(x.total) }]));
+}
+
 async function escalaDe(idConta) {
   const [l] = await ler('SELECT conteudo, revisao FROM gf_ponto_escalas WHERE id_conta = :c', { c: idConta });
   return { roster: l ? json(l.conteudo) : null, revision: l ? Number(l.revisao) : 0 };
@@ -77,4 +91,4 @@ async function gravarEscala(ex, idConta, autor, escala, revisao) {
   return r.affectedRows === 1;
 }
 
-module.exports = { json, ler, turnoAtual, turnoParaGravar, inserirTurno, atualizarTurno, turnosDoPeriodo, turnosDoDia, escalaDe, escalas, gravarEscala };
+module.exports = { json, ler, turnoAtual, turnoParaGravar, inserirTurno, atualizarTurno, turnosDoPeriodo, turnosDoDia, atividadeDoDia, escalaDe, escalas, gravarEscala };

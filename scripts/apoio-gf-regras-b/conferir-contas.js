@@ -6,6 +6,11 @@ const fs = require('fs');
 const path = require('path');
 const dom = require('../../src/gestao-fadas/_comum/dominio/contas');
 const val = require('../../src/gestao-fadas/features/contas/contas.validacao');
+const conv = require('../../src/gestao-fadas/_comum/dominio/contas-convite');
+
+/** Frase da regra antiga (só @fadasdobem.com.br). A v711 trocou por `isAccountEmail`; o front removeu o `real-accounts-plan.ts` que gerou este ouro, então ele não regenera: aqui esse trecho vale a regra nova. */
+const FRASE_ANTIGA = 'Use o e-mail do Fadas (@fadasdobem.com.br)';
+const FRASE_NOVA = 'Informe um e-mail válido.';
 
 const UUID = '11111111-1111-4111-8111-111111111111';
 const tentar = (fn) => { try { return { ok: fn() }; } catch (e) { return { erro: e.message, status: e.statusCode || e.status }; } };
@@ -25,11 +30,17 @@ function servidor(draft, contas) {
 
 function conferir() {
   const ouro = JSON.parse(fs.readFileSync(path.join(__dirname, 'ouro-contas.json'), 'utf8'));
-  const r = { aceitos: 0, recusas: 0, senhas: 0, falhas: [] };
+  const r = { aceitos: 0, recusas: 0, obsoletos: 0, senhas: 0, falhas: [] };
   ouro.cenarios.forEach((c, i) => {
     const d = c.draft;
     const s = servidor(d, ouro.contas);
-    if (c.esperado.error !== undefined) {
+    if (c.esperado.error === FRASE_ANTIGA) {
+      // v711: o domínio não decide; vale o formato (`isAccountEmail`, o mesmo do front atual). Fora do formato recusa com a frase nova; dentro, essa recusa não existe.
+      const valido = conv.isAccountEmail(`${d.email}`.trim().toLowerCase());
+      if (!valido && s.erro === FRASE_NOVA) r.obsoletos += 1;
+      else if (valido && s.erro !== FRASE_NOVA && s.erro !== FRASE_ANTIGA) r.obsoletos += 1;
+      else r.falhas.push(`#${i} regra nova do e-mail: "${d.email}" servidor "${s.erro || 'aceitou'}"`);
+    } else if (c.esperado.error !== undefined) {
       if (s.erro === c.esperado.error) r.recusas += 1; else r.falhas.push(`#${i} front "${c.esperado.error}" servidor "${s.erro || 'aceitou'}"`);
     } else if (s.erro) r.falhas.push(`#${i} o front aceita (${c.esperado.kind}) e o servidor recusou: ${s.erro}`);
     else {

@@ -62,7 +62,7 @@ async function offline() {
     dizErro(() => cad.validarCadastro(publico({ weeklySchedule: { sexta: '15h às 9h' } })), 'Confira os horários de sexta.');
   });
   await passo('canais, competências, percentual e calendário de pagamento (edição da gestão)', () => {
-    dizErro(() => cad.validarCadastro(publico({ channels: ['Zap'] })), 'Os canais disponíveis são Chat e Voz.');
+    dizErro(() => cad.validarCadastro(publico({ channels: ['Zap'] })), 'As formas disponíveis são PABX, Áudio e Texto.');
     dizErro(() => cad.validarCadastro(publico({ capabilityGroups: { outro: [] } })), 'Grupo de competências inválido.');
     dizErro(() => cad.validarCadastro(publico({ capabilityGroups: { tarot: ['a'] }, capabilityNone: ['tarot'] })), 'Confira as competências');
     dizErro(() => cad.validarCadastro(publico({ commissionRate: 101 })), 'O percentual de repasse deve ficar entre 0 e 100');
@@ -78,7 +78,7 @@ async function offline() {
   await passo('projeções: perfil público, link individual (lista branca) e ficha aprovada', () => {
     const d = cad.validarCadastro(publico({ commissionRate: 40, biography: 'Oi', oracles: ['Tarot'] }));
     const p = cad.perfilPublico(d, '9005');
-    assert.deepEqual(Object.keys(p).sort(), ['avatar', 'biography', 'channels', 'definitions', 'equipment', 'gallery', 'oracles', 'portrait', 'professionalName', 'spreads', 'tarotId', 'techniques', 'themes', 'weeklySchedule']);
+    assert.deepEqual(Object.keys(p).sort(), ['avatar', 'biography', 'channels', 'definitions', 'equipment', 'gallery', 'oracles', 'portrait', 'professionalName', 'serviceModes', 'spreads', 'tarotId', 'techniques', 'themes', 'weeklySchedule']);
     const l = cad.projecaoDoLink(d);
     assert.ok(!('commissionRate' in l) && !('paymentSchedule' in l) && l.fullName === 'Ana de Souza');
     const a = cad.projecaoAprovada({ id: 'f1', revisao: 3, dados: d, tarotId: '9005' });

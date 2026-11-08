@@ -8,7 +8,7 @@
  * Nada de I/O, nada de senha em log.
  */
 
-const { isFadasEmail, MSG: MSG_CONVITE } = require('./contas-convite');
+const { isAccountEmail, MSG: MSG_CONVITE } = require('./contas-convite');
 
 const PERFIS_EQUIPE = Object.freeze(['administradora', 'assistente', 'supervisora', 'atendente']);
 
@@ -47,8 +47,8 @@ function validarEmail(bruto) {
   const email = typeof bruto === 'string' ? bruto.trim() : '';
   if (!email) return MSG.nomeEmail;
   if (/\s/.test(email) || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 320) return MSG.emailInvalido;
-  // v706 (`saveAccount`): a conta é por convite e só aceita e-mail @fadasdobem.com.br.
-  if (!isFadasEmail(email)) return MSG_CONVITE.emailFadas;
+  // v711 (`saveAccount`): a conta é por convite e aceita qualquer e-mail válido (antes só @fadasdobem.com.br).
+  if (!isAccountEmail(email)) return MSG_CONVITE.emailInvalido;
   return null;
 }
 const emailChave = (e) => `${e}`.trim().toLocaleLowerCase('pt-BR');

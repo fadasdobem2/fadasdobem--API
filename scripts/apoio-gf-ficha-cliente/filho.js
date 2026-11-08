@@ -62,8 +62,8 @@ const r = (p) => path.join(raiz, p);
     assert.equal(a.j.accounts['900013'].balanceCents, 5000);
   });
   await passo('atendente edita Pré/Pós, tratar por e WhatsApp (revisão 0 -> 1); resposta traz a extensão', async () => {
-    const x = await editar('900013', 0, { paymentProfile: 'Pós-pago', treatAs: 'Má', whatsapp: '11 98888-7777' });
-    assert.equal(x.status, 200, x.t); assert.equal(x.j.extension.revision, 1); assert.equal(x.j.extension.paymentProfile, 'Pós-pago'); assert.equal(x.j.extension.treatAs, 'Má');
+    const x = await editar('900013', 0, { paymentProfile: 'Pré-pago', treatAs: 'Má', whatsapp: '11 98888-7777' });
+    assert.equal(x.status, 200, x.t); assert.equal(x.j.extension.revision, 1); assert.equal(x.j.extension.paymentProfile, 'Pré-pago'); assert.equal(x.j.extension.treatAs, 'Má');
   });
   await passo('supervisora, assistente e administradora também editam (cada uma com a revisão lida)', async () => {
     let rev = 1;

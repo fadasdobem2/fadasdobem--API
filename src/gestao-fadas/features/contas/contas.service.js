@@ -8,7 +8,7 @@
  *   - senha: SÓ hash bcrypt (o mesmo custo do login da A); nunca em log, auditoria, resposta ou `gf_operacoes` (a impressão da operação usa HMAC);
  *   - bloquear/trocar senha revoga os refresh tokens da conta (o access é validado contra o banco a cada pedido);
  *   - idempotência por `operationKey`, revisão otimista `expectedRevision` (409 VERSION_CHANGED), auditoria na MESMA transação.
- * v706: a conta nasce por CONVITE (sem senha; `contas.convite.service.js`) e só aceita e-mail @fadasdobem.com.br; a senha, quando enviada, tem 15+ caracteres.
+ * v706: a conta nasce por CONVITE (sem senha; `contas.convite.service.js`) e aceita qualquer e-mail válido (v711); a senha, quando enviada, tem 15+ caracteres.
  *   Substitui a regra antiga de 12 caracteres e o "sem convite" da Maturacao/33.
  */
 

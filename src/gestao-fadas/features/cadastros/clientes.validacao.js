@@ -45,6 +45,12 @@ function validarMudancas(m) {
   }
   // Nome completo, CPF, e-mail, telefones e endereço (banco novo): as mesmas conferências do editor do front.
   try { Object.assign(s, validarFicha(m)); } catch (e) { throw falha(e.message); }
+  // v711 (registration-repository.mjs, `registrationWriteData`): "Não possui e-mail" é declaração explícita; informar um e-mail a desfaz.
+  if (m.noEmail !== undefined) {
+    if (typeof m.noEmail !== 'boolean') throw falha('Confira a informação de e-mail.');
+    s.noEmail = m.noEmail;
+  }
+  if (s.email) s.noEmail = false;
   if (!Object.keys(s).length) throw falha('Nenhuma alteração informada.');
   return s;
 }

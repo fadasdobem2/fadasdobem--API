@@ -10,6 +10,8 @@
 const { Model, DataTypes, ValidationErrorItem } = require('sequelize');
 const { CHECKS, CHECKS_ESPELHO, CHECKS_LILLY_V708, CHECKS_LILLY_V710 } = require('../esquema-checks');
 const { CHECKS_FICHA_DADOS } = require('../esquema-checks-ficha');
+const { CHECKS_EMAIL } = require('../esquema-checks-email');
+const { CHECKS_FORMAS } = require('../esquema-checks-formas');
 
 /** `timestamp` SEM fuso (relógio de parede, como o DATETIME do MySQL). Fábrica, não `class extends` (ver _estrutura-pg.js). */
 function TimestampSemFuso() {
@@ -44,7 +46,7 @@ function hooks(sequelize, tabela, extras) {
     },
     afterSync: async () => {
       if (existiam.get(tabela)) return;
-      for (const [nome, expr] of [...(CHECKS[tabela] || []), ...(CHECKS_ESPELHO[tabela] || []), ...(CHECKS_LILLY_V708[tabela] || []), ...(CHECKS_LILLY_V710[tabela] || []), ...(CHECKS_FICHA_DADOS[tabela] || [])]) {
+      for (const [nome, expr] of [...(CHECKS[tabela] || []), ...(CHECKS_ESPELHO[tabela] || []), ...(CHECKS_LILLY_V708[tabela] || []), ...(CHECKS_LILLY_V710[tabela] || []), ...(CHECKS_FICHA_DADOS[tabela] || []), ...(CHECKS_EMAIL[tabela] || []), ...(CHECKS_FORMAS[tabela] || [])]) {
         await sequelize.query(`ALTER TABLE "${tabela}" ADD CONSTRAINT "${nome}" CHECK (${expr})`, { logging: false });
       }
       for (const sql of extras) await sequelize.query(sql, { logging: false });

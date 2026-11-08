@@ -35,9 +35,11 @@ function statusDePresenca(p) {
 const primeira = (escalas, id, data) => escalas.filter((e) => e.tarologistId === id && e.date === data && e.status !== 'off' && e.startsAt).sort((a, b) => Date.parse(a.startsAt) - Date.parse(b.startsAt));
 
 /**
- * @param {{ catalogo: object[], presencas: object[], escalas: object[], citados: Set<string>, hoje: string, amanha: string }} e
+ * v711: `serviceModes` (padrão do cadastro) e `serviceModesToday` (formas do dia, `gf_formas_atendimento_dia`) quando existem; a Lilly decide o canal com elas.
+ * @param {{ catalogo: object[], presencas: object[], escalas: object[], citados: Set<string>, hoje: string, amanha: string, formas?: object[] }} e
  */
-function montarTarologos({ catalogo, presencas, escalas, citados, hoje, amanha }) {
+function montarTarologos({ catalogo, presencas, escalas, citados, hoje, amanha, formas = [] }) {
+  const formasDoDia = new Map(formas.map((f) => [`${f.tarologo_id}`, f]));
   const presenca = new Map(presencas.map((p) => [`${p.id_tarologo}`, p]));
   const lista = catalogo.filter((t) => `${t.id}` !== FILA_GERAL && (t.registrationActive !== false || citados.has(`${t.id}`)));
   if (lista.length > LIMITES.TAROLOGOS) throw new LimiteExcedido('tarologists');
@@ -49,7 +51,12 @@ function montarTarologos({ catalogo, presencas, escalas, citados, hoje, amanha }
     const turno = hojeP[0];
     const temEscalaAmanha = escalas.some((e) => e.tarologistId === id && e.date === amanha); // sem escala definida: não afirma que não trabalha
     const tratamento = tratamentoExplicito(t);
-    return { ...(tratamento !== undefined ? { nameArticle: tratamento } : {}), ...sem({
+    const meios = formasDoDia.get(id);
+    const habituais = t.directory && Array.isArray(t.directory.serviceModes) ? t.directory.serviceModes : undefined;
+    return { ...(tratamento !== undefined ? { nameArticle: tratamento } : {}),
+      ...(habituais ? { serviceModes: habituais } : {}),
+      ...(t.directory && t.directory.umblerContact && t.directory.umblerContact.contactId ? { umblerContact: t.directory.umblerContact } : {}),
+      ...(meios ? { serviceModesToday: { date: meios.data_operacional, modes: typeof meios.formas === 'string' ? JSON.parse(meios.formas) : meios.formas, updatedAt: new Date(meios.atualizado_em).toISOString(), updatedBy: meios.atualizado_por } } : {}), ...sem({
       id,
       name: t.name,
       status: p ? statusDePresenca(p) : undefined,

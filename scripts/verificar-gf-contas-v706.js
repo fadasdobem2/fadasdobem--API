@@ -20,7 +20,7 @@ const igual = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 function conferir(impl) {
   const f = [];
   const nao = (msg) => f.push(msg);
-  for (const x of ouro.emails) if (impl.conv.isFadasEmail(x.e) !== x.esperado) nao(`e-mail ${JSON.stringify(x.e)}`);
+  for (const x of ouro.emails) if (impl.conv.isAccountEmail(x.e) !== x.esperado) nao(`e-mail ${JSON.stringify(x.e)}`);
   for (const x of ouro.senhas) if (impl.dom.senhaForte(x.s) !== x.esperado) nao(`senha ${JSON.stringify(x.s)}`);
   for (const x of ouro.criacoes) {
     const r = tentar(() => impl.conv.criarConvite(x.conta, x.kind, x.token || '0'.repeat(64), x.agora === null ? Number.NaN : x.agora));
@@ -70,8 +70,11 @@ passo(`o servidor reproduz o front em ${Object.values(ouro).filter(Array.isArray
 console.log('Mutantes: regra errada tem de ser recusada pelo ouro');
 const mutante = (nome, impl) => passo(`mutante recusado: ${nome}`, () => assert.ok(conferir(impl).length > 0, 'o ouro aceitou o mutante'));
 mutante('senha com 12 caracteres (regra antiga)', com('dom', { senhaForte: (s) => typeof s === 'string' && s.length >= 12 && /[a-z]/.test(s) && /[A-Z]/.test(s) && /\d/.test(s) && /[^A-Za-z0-9]/.test(s) }));
-mutante('e-mail do Fadas sem ancorar o domínio', com('conv', { isFadasEmail: (e) => typeof e === 'string' && e.includes('@fadasdobem.com.br') }));
-mutante('e-mail do Fadas aceita qualquer domínio', com('conv', { isFadasEmail: (e) => typeof e === 'string' && /^[^\s@]+@[^\s@]+$/.test(e.trim()) }));
+mutante('e-mail só do domínio do Fadas (regra antiga)', com('conv', { isAccountEmail: (e) => typeof e === 'string' && /^[^\s@]+@fadasdobem\.com\.br$/.test(e.trim().toLowerCase()) }));
+mutante('e-mail aceita qualquer coisa com arroba', com('conv', { isAccountEmail: (e) => typeof e === 'string' && /^[^\s@]+@[^\s@]+$/.test(e.trim()) }));
+mutante('e-mail com caractere de controle aceito', com('conv', { isAccountEmail: (e) => typeof e === 'string' && conv.isAccountEmail(e.replace(/[\u0000-\u001f\u007f]/g, '')) }));
+mutante('e-mail sem limite de 254', com('conv', { isAccountEmail: (e) => typeof e === 'string' && !/[\u0000-\u001f\u007f]/.test(e) && /^(?!\.)(?!.*\.\.)([A-Z0-9_'+\-.]*)[A-Z0-9_+-]@([A-Z0-9][A-Z0-9-]*\.)+[A-Z]{2,}$/i.test(e.trim()) }));
+mutante('e-mail sem aparar as pontas', com('conv', { isAccountEmail: (e) => typeof e === 'string' && !/[\u0000-\u001f\u007f]/.test(e) && e.length <= 254 && /^(?!\.)(?!.*\.\.)([A-Z0-9_'+\-.]*)[A-Z0-9_+-]@([A-Z0-9][A-Z0-9-]*\.)+[A-Z]{2,}$/i.test(e) }));
 mutante('convite vale 72 horas', com('conv', { criarConvite: (c, k, t, a) => { const x = conv.criarConvite(c, k, t, a); return { ...x, expiresAt: new Date(a + 72 * 3600 * 1000).toISOString() }; } }));
 mutante('convite revogado ainda vale', com('conv', { resolverConvite: (cs, t, a) => conv.resolverConvite(cs.map((c) => (c.demoInvitation ? { ...c, demoInvitation: { ...c.demoInvitation, revokedAt: undefined } } : c)), t, a) }));
 mutante('convite usado vale de novo', com('conv', { resolverConvite: (cs, t, a) => conv.resolverConvite(cs.map((c) => (c.demoInvitation ? { ...c, demoInvitation: { ...c.demoInvitation, usedAt: undefined } } : c)), t, a) }));
@@ -79,9 +82,9 @@ mutante('convite não vence', com('conv', { resolverConvite: (cs, t) => conv.res
 mutante('conta inativa aceita o convite', com('conv', { resolverConvite: (cs, t, a) => conv.resolverConvite(cs.map((c) => ({ ...c, active: true })), t, a) }));
 mutante('resgate não libera o acesso pendente', com('conv', { resgatarConvite: (c, t, a) => { const r = conv.resgatarConvite(c, t, a); return r.status === 'accepted' ? { ...r, account: { ...r.account, access: c.access } } : r; } }));
 mutante('revogar não marca a data', com('conv', { revogarConvite: (c) => c }));
-mutante('acesso pendente pode entrar', com('conv', { podeEntrar: (c, ok2) => Boolean(c && c.active && conv.isFadasEmail(c.email) && ok2 && !(c.demoInvitation && c.demoInvitation.kind === 'first-access' && !c.demoInvitation.usedAt)) }));
-mutante('primeiro convite sem uso pode entrar', com('conv', { podeEntrar: (c, ok2) => Boolean(c && c.active && conv.isFadasEmail(c.email) && c.access !== 'Acesso pendente' && ok2) }));
-mutante('e-mail fora do Fadas pode entrar', com('conv', { podeEntrar: (c, ok2) => Boolean(c && c.active && c.access !== 'Acesso pendente' && ok2 && !(c.demoInvitation && c.demoInvitation.kind === 'first-access' && !c.demoInvitation.usedAt)) }));
+mutante('acesso pendente pode entrar', com('conv', { podeEntrar: (c, ok2) => Boolean(c && c.active && conv.isAccountEmail(c.email) && ok2 && !(c.demoInvitation && c.demoInvitation.kind === 'first-access' && !c.demoInvitation.usedAt)) }));
+mutante('primeiro convite sem uso pode entrar', com('conv', { podeEntrar: (c, ok2) => Boolean(c && c.active && conv.isAccountEmail(c.email) && c.access !== 'Acesso pendente' && ok2) }));
+mutante('e-mail inválido pode entrar', com('conv', { podeEntrar: (c, ok2) => Boolean(c && c.active && c.access !== 'Acesso pendente' && ok2 && !(c.demoInvitation && c.demoInvitation.kind === 'first-access' && !c.demoInvitation.usedAt)) }));
 mutante('supervisora vê a minutagem sempre (regra antiga)', com('per', { veMinutagemTotal: (r, i = {}) => r === 'administradora' || r === 'assistente' || r === 'supervisora' || ((r === 'atendente') && i.viewDailyMinutes === true) }));
 mutante('atendente vê com a permissão desligada', com('per', { veMinutagemTotal: (r, i = {}) => per.veMinutagemTotal(r, { viewDailyMinutes: r === 'atendente' ? true : i.viewDailyMinutes }) }));
 mutante('assistente depende da permissão', com('per', { veMinutagemTotal: (r, i = {}) => r === 'administradora' || ((r === 'supervisora' || r === 'atendente' || r === 'assistente') && i.viewDailyMinutes === true) }));
@@ -112,9 +115,10 @@ passo('só a impressão do token é guardada: 64 hexadecimais e diferente do tok
   const t = 'a'.repeat(64); const c = conv.criarConvite({ id: 'u', email: 'a@fadasdobem.com.br', role: 'atendente' }, 'first-access', t, 1);
   assert.match(c.tokenHash, /^[0-9a-f]{64}$/); assert.notEqual(c.tokenHash, t); assert.ok(!JSON.stringify(c).includes(t));
 });
-passo('textos: senha fraca fala em 15 caracteres; e-mail fora do Fadas tem o texto do front', () => {
+passo('textos: senha fraca fala em 15 caracteres; qualquer e-mail válido serve (v711) e o inválido tem o texto do front', () => {
   assert.equal(dom.MSG.senhaFraca, 'Use 15 caracteres, maiúscula, minúscula, número e símbolo. Confirme a mesma senha.');
-  assert.equal(dom.validarEmail('ana@exemplo.com'), 'Use o e-mail do Fadas (@fadasdobem.com.br)');
+  assert.equal(dom.validarEmail('ana@exemplo.com'), null);
+  assert.equal(dom.validarEmail('a..b@exemplo.com'), 'Informe um e-mail válido.');
   assert.equal(dom.validarEmail('ana@fadasdobem.com.br'), null);
   assert.equal(dom.validarEmail('a b@fadasdobem.com.br'), 'Confira o usuário ou e-mail informado.');
 });

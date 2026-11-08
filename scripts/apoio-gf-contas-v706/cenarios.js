@@ -8,7 +8,8 @@ const j = (v) => JSON.parse(JSON.stringify(v === undefined ? null : v));
 const tentar = async (fn) => { try { return { ok: j(await fn()) }; } catch (e) { return { erro: e instanceof Error ? e.message : String(e) }; } };
 
 const EMAILS = ['ana@fadasdobem.com.br', 'ANA@FADASDOBEM.COM.BR', '  ana@fadasdobem.com.br  ', 'ana@fadasdobem.com', 'ana@fadasdobem.com.br.evil.com', 'ana@evil.fadasdobem.com.br', '@fadasdobem.com.br',
-  'a b@fadasdobem.com.br', 'ana@@fadasdobem.com.br', 'ana@exemplo.com', 'ana', '', ' ', 'ana@demonstracao.invalid', 'ana.silva+x@fadasdobem.com.br', 'ana@fadasdobem.com.br\n'];
+  'a b@fadasdobem.com.br', 'ana@@fadasdobem.com.br', 'ana@exemplo.com', 'ana', '', ' ', 'ana@demonstracao.invalid', 'ana.silva+x@fadasdobem.com.br', 'ana@fadasdobem.com.br\n',
+  'ana@exemplo.com', 'ANA@Exemplo.Com.BR', ' ana@exemplo.com ', 'a..b@exemplo.com', '.a@exemplo.com', 'a.@exemplo.com', 'a@exemplo', 'a@x.c', 'a@-x.com', 'a@x_y.com', "o'brien@exemplo.com", 'ana@sub.exemplo.com.br', 'josé@exemplo.com', 'ana@exemplo.com\u0000', 'ana@exemplo.com\t', `${'a'.repeat(246)}@exemplo.com`, `${'a'.repeat(250)}@exemplo.com`, 'a b@exemplo.com', 'ana@exemplo.123'];
 const SENHAS = ['', 'curta', 'Abcdefghij1!', 'Abcdefghijkl1!', 'Abcdefghijklm1!', 'Abcdefghijklmn1!', 'abcdefghijklmn1!', 'ABCDEFGHIJKLMN1!', 'Abcdefghijklmno!', 'Abcdefghijklmn12',
   'Ação#Forte12345', 'x'.repeat(14) + 'A1!', 'Valida#Senha1234', 'Valida#Senha123', ' Valida#Senha1234 '];
 const PAPEIS = ['administradora', 'assistente', 'supervisora', 'atendente', 'tarologa'];
@@ -20,8 +21,8 @@ const CRED = { scheme: 'PBKDF2-SHA256', salt: 'a'.repeat(32), digest: 'b'.repeat
 async function montar(f) {
   const ouro = { agora: AGORA, emails: [], senhas: [], criacoes: [], resolucoes: [], resgates: [], revogacoes: [], entradas: [], minutagem: [], validas: [], escritas: [], verMinutagem: [] };
 
-  for (const e of EMAILS) ouro.emails.push({ e, esperado: f.conv.isFadasEmail(e) });
-  ouro.emails.push({ e: null, esperado: f.conv.isFadasEmail(null) }, { e: 7, esperado: f.conv.isFadasEmail(7) });
+  for (const e of EMAILS) ouro.emails.push({ e, esperado: f.conv.isAccountEmail(e) });
+  ouro.emails.push({ e: null, esperado: f.conv.isAccountEmail(null) }, { e: 7, esperado: f.conv.isAccountEmail(7) });
   for (const s of SENHAS) ouro.senhas.push({ s, esperado: f.cred.strongAccountPassword(s) });
 
   // Emissão: o token é o do front; o servidor tem de produzir o mesmo convite a partir dele.
@@ -80,7 +81,7 @@ async function montar(f) {
   // Quem pode entrar. Cadastro ativo é o real do front (perfil/diretório).
   const perfil = (id, nome, ativo) => ({ id, name: nome, registrationActive: ativo });
   const cenariosEntrada = [];
-  for (const role of PAPEIS) for (const active of [true, false]) for (const email of ['ana@fadasdobem.com.br', 'ana@exemplo.com']) for (const access of ['Acesso pendente', 'Ainda não acessou']) {
+  for (const role of PAPEIS) for (const active of [true, false]) for (const email of ['ana@fadasdobem.com.br', 'ana@exemplo.com', 'ana@exemplo']) for (const access of ['Acesso pendente', 'Ainda não acessou']) {
     for (const inv of [undefined, { ...base.invitation, kind: 'first-access' }, { ...base.invitation, kind: 'first-access', usedAt: 'x' }, { ...base.invitation, kind: 'reset-password' }]) {
       for (const cad of role === 'tarologa' ? ['ativo', 'inativo', 'sem'] : ['sem']) {
         const c = conta({ role, active, email, access, ...(inv ? { demoInvitation: inv } : {}), ...(role === 'tarologa' ? { tarotId: 't1' } : {}) });

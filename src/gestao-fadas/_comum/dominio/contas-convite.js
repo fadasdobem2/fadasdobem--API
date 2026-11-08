@@ -2,7 +2,7 @@
 
 /**
  * Convite de acesso da equipe (v706). Regras do CÓDIGO do front, com as mesmas mensagens e estados:
- *   features/auth/demo-invitations.ts (isFadasEmail, createDemoInvitation, resolveDemoInvitation, redeemDemoInvitation, revokeDemoInvitation),
+ *   features/auth/demo-invitations.ts (isAccountEmail, createDemoInvitation, resolveDemoInvitation, redeemDemoInvitation, revokeDemoInvitation),
  *   features/auth/account-access.ts (accountCanEnter) e a escolha do tipo em `saveAccount` (shell/home-experience.tsx).
  * Puro: o token e o relógio chegam por parâmetro. Aqui o token só existe como impressão SHA-256; o servidor nunca guarda o token.
  * Substituída: a credencial PBKDF2 do demo (`demoCredential`). No servidor a senha é o hash bcrypt de `users`; a regra de força é a mesma.
@@ -13,7 +13,7 @@ const { createHash } = require('crypto');
 const DURACAO_MS = 48 * 60 * 60 * 1000;
 const TIPOS = Object.freeze(['first-access', 'reset-password']);
 const MSG = Object.freeze({
-  emailFadas: 'Use o e-mail do Fadas (@fadasdobem.com.br)',
+  emailInvalido: 'Informe um e-mail válido.',
   selecione: 'Selecione uma conta para gerar o convite.',
   validade: 'Não foi possível determinar a validade do convite.',
   emailConvite: 'Informe um e-mail válido para gerar o convite.',
@@ -22,15 +22,23 @@ const MSG = Object.freeze({
 });
 
 const emailNormal = (e) => `${e}`.trim().toLocaleLowerCase('pt-BR');
-/** `isFadasEmail`. */
-const isFadasEmail = (email) => typeof email === 'string' && /^[^\s@]+@fadasdobem\.com\.br$/.test(emailNormal(email));
+/**
+ * `isAccountEmail` (features/auth/account-email.ts, v711): o endereço identifica a conta e o domínio NÃO dá acesso (antes só valia @fadasdobem.com.br).
+ * `z.string().trim().max(254).email()` do zod 3 (mesma expressão), sem caractere de controle.
+ */
+const EMAIL_ZOD = /^(?!\.)(?!.*\.\.)([A-Z0-9_'+\-.]*)[A-Z0-9_+-]@([A-Z0-9][A-Z0-9-]*\.)+[A-Z]{2,}$/i;
+const isAccountEmail = (email) => {
+  if (typeof email !== 'string' || /[\u0000-\u001f\u007f]/.test(email)) return false;
+  const aparado = email.trim();
+  return aparado.length <= 254 && EMAIL_ZOD.test(aparado);
+};
 /** Impressão do token (hex de 64), a única coisa guardada. */
 const impressaoDoToken = (token) => createHash('sha256').update(token, 'utf8').digest('hex');
 
 /** `createDemoInvitation` sem o sorteio: o token (hex de 64) vem de fora. Devolve só o convite que se guarda. */
 function criarConvite(conta, kind, token, agora) {
   const email = emailNormal(conta.email);
-  if (!isFadasEmail(email)) throw new Error(MSG.emailFadas);
+  if (!isAccountEmail(email)) throw new Error(MSG.emailInvalido);
   if (!conta.id) throw new Error(MSG.selecione);
   if (!Number.isFinite(agora)) throw new Error(MSG.validade);
   return {
@@ -48,7 +56,7 @@ function resolverConvite(contas, token, agora) {
   const conta = achadas[0]; const convite = conta.demoInvitation;
   const emitido = Date.parse(convite.issuedAt); const expira = Date.parse(convite.expiresAt);
   if (!TIPOS.includes(convite.kind) || !Number.isFinite(emitido) || !Number.isFinite(expira) || expira <= emitido || expira - emitido > DURACAO_MS || emitido > agora) return { status: 'invalid' };
-  if (!isFadasEmail(conta.email) || !isFadasEmail(convite.email)) return { status: 'invalid' };
+  if (!isAccountEmail(conta.email) || !isAccountEmail(convite.email)) return { status: 'invalid' };
   if (convite.accountId !== conta.id || convite.email !== emailNormal(conta.email) || convite.role !== conta.role) return { status: 'changed' };
   if (convite.usedAt) return { status: 'used' };
   if (convite.revokedAt) return { status: 'revoked' };
@@ -91,10 +99,10 @@ function conferirGeracao({ email, cadastroAtivo, existente, completando }) {
   return null;
 }
 
-/** `accountCanEnter`: ativa, e-mail do Fadas, acesso já criado (nem pendente, nem primeiro convite sem uso) e cadastro ativo. */
+/** `accountCanEnter`: ativa, e-mail válido, acesso já criado (nem pendente, nem primeiro convite sem uso) e cadastro ativo. */
 function podeEntrar(conta, cadastroAtivo) {
-  return Boolean(conta && conta.active && isFadasEmail(conta.email) && conta.access !== 'Acesso pendente'
+  return Boolean(conta && conta.active && isAccountEmail(conta.email) && conta.access !== 'Acesso pendente'
     && !(conta.demoInvitation && conta.demoInvitation.kind === 'first-access' && !conta.demoInvitation.usedAt) && cadastroAtivo);
 }
 
-module.exports = { DURACAO_MS, TIPOS, MSG, isFadasEmail, impressaoDoToken, criarConvite, resolverConvite, resgatarConvite, revogarConvite, tipoDoConvite, conferirGeracao, podeEntrar };
+module.exports = { DURACAO_MS, TIPOS, MSG, isAccountEmail, impressaoDoToken, criarConvite, resolverConvite, resgatarConvite, revogarConvite, tipoDoConvite, conferirGeracao, podeEntrar };

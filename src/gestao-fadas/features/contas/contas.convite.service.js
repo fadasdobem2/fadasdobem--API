@@ -57,7 +57,7 @@ async function emitir(req) {
       const antes = usuario && await store.lerUma(id, t);
       if (!antes) throw naoEncontrada();
       if ((await store.revisaoAtual(ex, id)) !== b.expectedRevision) throw conflitoConta();
-      if (!conv.isFadasEmail(antes.email)) throw c.regra(conv.MSG.emailFadas);
+      if (!conv.isAccountEmail(antes.email)) throw c.regra(conv.MSG.emailInvalido);
       const msg = conv.conferirGeracao({ email: antes.email, cadastroAtivo: antes.perfil === 'tarologa' ? antes.cadastro_ativo !== false : undefined, existente: { active: antes.ativo }, completando: Boolean(antes.acesso_pendente) });
       if (msg) throw c.regra(msg);
       const convite = await emitirDentro(ex, t, antes, b.operationKey);
@@ -136,4 +136,4 @@ async function aceitarPublico(req) {
   });
 }
 
-module.exports = { emitir, cancelar, resolverPublico, aceitarPublico, emitirDentro, comToken };
+module.exports = { emitir, cancelar, resolverPublico, aceitarPublico, emitirDentro, comToken, resolverLinha, contaDoFront };

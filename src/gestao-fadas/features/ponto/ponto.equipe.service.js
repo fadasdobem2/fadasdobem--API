@@ -8,12 +8,12 @@ const { atendentes } = require('./ponto.identidade');
 const { PontoErro } = require('./ponto.erro');
 const store = require('./ponto.store');
 
-async function equipeNoDia(req) {
+async function equipeNoDia(req, relogio = Date.now) {
   const data = req.query.date;
   if (!validStaffDate(data)) throw new PontoErro('Informe uma data válida.', 400);
   const { startAt, endAt } = operationalWindow(data);
-  const [pessoas, escalas, turnos] = await Promise.all([atendentes(), store.escalas(), store.turnosDoDia(data, startAt, endAt)]);
-  return { status: 200, corpo: { team: pessoas.map((p) => ({ accountId: p.id, roster: escalas.get(p.id), shifts: turnos.get(p.id) || [] })) } };
+  const [pessoas, escalas, turnos, atividade] = await Promise.all([atendentes(), store.escalas(), store.turnosDoDia(data, startAt, endAt), store.atividadeDoDia(data, startAt, endAt, relogio())]);
+  return { status: 200, corpo: { team: pessoas.map((p) => ({ accountId: p.id, roster: escalas.get(p.id), shifts: turnos.get(p.id) || [], activity: atividade.get(p.id) || null })) } };
 }
 
 async function turnos(req, idConta) {

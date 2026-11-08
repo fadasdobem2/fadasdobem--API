@@ -137,9 +137,11 @@ const ENDERECO = { street: 'Rua B', number: '2', complement: '', district: 'Cent
   });
 
   console.log('Pré/Pós: só Pós -> Pré, definitivo');
-  await passo('sem regime aceita Pós; Pós -> Pré vale e carimba; repetir Pré é sem efeito', async () => {
+  await passo('sem regime NÃO vai para Pós (v711); Pós antigo -> Pré vale e carimba; repetir Pré é sem efeito', async () => {
     const a = await patch(E, 0, { paymentProfile: 'Pós-pago' });
-    assert.equal(a.status, 200, a.t);
+    assert.equal(a.status, 422, a.t); assert.equal(a.j.error.message, 'A cliente pode passar para Pré. Depois disso, não volta para Pós.');
+    // O Pós de verdade vem da planilha de saldos (migração), nunca do editor: aqui ele é semeado como a carga o deixaria.
+    await sequelize.query("INSERT INTO gf_clientes_ext (id_cliente, perfil_pagamento, dados, revisao, atualizado_por, operation_key) VALUES (:id, 'Pós-pago', '{}', 1, 'semente', 'semente-pos-ficha-dados')", { replacements: { id: E } });
     const b = await patch(E, 1, { paymentProfile: 'Pré-pago' });
     assert.equal(b.status, 200, b.t); assert.equal(b.j.extension.paymentProfile, 'Pré-pago');
     const em = b.j.extension.paymentProfileUpdatedAt;
@@ -150,12 +152,12 @@ const ENDERECO = { street: 'Rua B', number: '2', complement: '', district: 'Cent
     const antes = await linha(E);
     for (const mud of [{ paymentProfile: 'Pós-pago' }, { paymentProfile: '' }, { paymentProfile: 'Pós-pago', email: 'eva@exemplo.com' }]) {
       const x = await patch(E, 3, mud);
-      assert.equal(x.status, 422, JSON.stringify(mud)); assert.equal(x.j.error.code, 'RULE_VIOLATION'); assert.match(x.j.error.message, /Pré e não volta a ser Pós/);
+      assert.equal(x.status, 422, JSON.stringify(mud)); assert.equal(x.j.error.code, 'RULE_VIOLATION'); assert.match(x.j.error.message, /não volta para Pós/);
     }
     assert.deepEqual(await linha(E), antes);
   });
   await passo('o histórico não muda com a troca: a linha de auditoria da troca fica e a ordem das revisões segue', async () => {
-    assert.ok(await contar("SELECT COUNT(*) AS n FROM gf_auditoria WHERE entidade_id = '900025' AND acao = 'cadastros.cliente.editar'") >= 3);
+    assert.ok(await contar("SELECT COUNT(*) AS n FROM gf_auditoria WHERE entidade_id = '900025' AND acao = 'cadastros.cliente.editar'") >= 2);
   });
 
   console.log('Auditoria e legado');

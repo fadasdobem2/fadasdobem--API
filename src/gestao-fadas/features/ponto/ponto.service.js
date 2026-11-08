@@ -53,6 +53,11 @@ async function comSessao(req, relogio = Date.now) {
     if (req.method === 'PUT') exigirCorpo(req);
     return escalaService.propria(req, pessoa, relogio);
   }
+  if (recurso === 'presence') {
+    if (pessoa.role === 'administradora') throw new PontoErro('Consulte a presença da equipe no relatório administrativo.', 403);
+    if (req.method !== 'GET' || req.query.accountId !== undefined) throw new PontoErro('A presença pessoal usa a identidade da sessão.', 400);
+    return { status: 200, corpo: { presence: await atividadeService.presencaAte(pessoa.id, relogio()) } };
+  }
   if (recurso === 'current') {
     if (pessoa.role === 'administradora') throw new PontoErro('Somente a própria atendente pode acessar seu ponto.', 403);
     if (req.method === 'GET') return relogioService.lerAtual(pessoa);
@@ -60,7 +65,7 @@ async function comSessao(req, relogio = Date.now) {
     throw new PontoErro('Método não permitido.', 405);
   }
   if (pessoa.role !== 'administradora') throw new PontoErro('A consulta de equipe exige acesso administrativo.', 403);
-  if (recurso === 'team-day' && req.method === 'GET') return equipeService.equipeNoDia(req);
+  if (recurso === 'team-day' && req.method === 'GET') return equipeService.equipeNoDia(req, relogio);
   const idConta = req.query.accountId;
   if (!(await atendentes()).some((p) => p.id === idConta)) throw new PontoErro('Atendente não encontrada.', 404);
   if (recurso === 'activity' && req.method === 'GET') return atividadeService.ler(req, idConta, tokenDeRecepcao());

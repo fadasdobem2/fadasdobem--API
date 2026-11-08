@@ -102,7 +102,7 @@ async function montarContexto(body, deps = {}) {
   let tarologists = [];
   if (fonteTar) {
     try {
-      tarologists = montarTarologos({ catalogo: fonteTar.catalogo, presencas: fonteTar.presencas, escalas, citados, hoje, amanha });
+      tarologists = montarTarologos({ catalogo: fonteTar.catalogo, presencas: fonteTar.presencas, escalas, citados, hoje, amanha, formas: await f.formasDoDia(hoje) });
       cob.itens.tarologists.contagem = tarologists.length;
     } catch (e) { cob.itens.tarologists = { ok: false, contagem: 0, motivo: e instanceof LimiteExcedido ? 'limite' : 'falha' }; }
   }

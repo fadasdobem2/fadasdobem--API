@@ -35,6 +35,8 @@ const { criarRotasPendencias } = require('./rotas-pendencias');
 const { criarRotasFicha } = require('./rotas-ficha');
 const { criarRotasEstadoFinanceiro } = require('./rotas-estado-financeiro');
 const { criarRotasContas } = require('./rotas-contas');
+const { criarRotasEmail } = require('./rotas-email');
+const { criarRotasFormas } = require('./rotas-formas');
 const { criarRotasConfig } = require('./rotas-config');
 const { criarRotasLilly } = require('./rotas-lilly');
 const rotasExtras = require('./rotas-extras');
@@ -61,6 +63,8 @@ function criarGate({ provedorDeSessao, verificarLegado, extras = rotasExtras } =
   router.use(criarRotasPublicas());
   router.use(criarRotasAuth(provedor));
   router.use(criarRotasContas(provedor));
+  router.use(criarRotasEmail(provedor)); // `/email` (configuração, convite e recuperação por e-mail); desligada, passa adiante
+  router.use(criarRotasFormas(provedor)); // `/professional-services` (formas de atendimento de hoje); desligada, passa adiante
   router.use(criarRotasHorarios(provedor));
   router.use(criarRotasPonto(provedor)); // `/staff-clock` (ponto e escala da equipe); desligada, passa adiante para a rota do front
   router.use(criarRotasAgenda(provedor));

@@ -11,6 +11,7 @@ const { createHash, timingSafeEqual } = require('crypto');
 const { emTransacao } = require('../../novo/escritor');
 const { PontoErro } = require('./ponto.erro');
 const store = require('./ponto.store');
+const { operationalDateAt, operationalWindow } = require('../../_comum/dominio/operacao-calendario');
 
 const CATEGORIAS = ['agenda', 'cliente', 'consulta', 'mais-tempo', 'pagamento', 'profissional', 'recado'];
 const CAMPOS_TEXTO = ['actorName', 'clientId', 'clientName', 'tarotId', 'tarotName', 'sourceEventId', 'commandId'];
@@ -65,7 +66,7 @@ async function receber(req, token, atendentes, agora) {
   const bruto = req.body && req.body.event;
   const evento = validarEvento(bruto, atendentes, agora);
   const conteudo = chaveDoValor(evento);
-  return emTransacao(async (ex) => {
+  const recibo = await emTransacao(async (ex) => {
     const [r] = await ex.execute(
       'INSERT INTO gf_ponto_eventos (id, id_conta, ocorreu_em, recebido_em, conteudo) VALUES (?, ?, ?, ?, ?) ON CONFLICT (id) DO NOTHING',
       [evento.id, evento.actorId, evento.at, new Date(agora).toISOString(), conteudo],
@@ -75,6 +76,15 @@ async function receber(req, token, atendentes, agora) {
     if (chaveDoValor(store.json(linhas[0].conteudo)) !== conteudo) throw new PontoErro('Já existe um evento diferente com este ID.', 409);
     return { status: 200, corpo: { id: evento.id, created: false } };
   });
+  // Depois de confirmar: o recibo devolve a presença detectada JÁ com este evento (v711).
+  return { ...recibo, corpo: { ...recibo.corpo, presence: await presencaAte(evento.actorId, agora) } };
+}
+
+/** Presença detectada da conta no dia operacional de `agora` (v711: o recibo da recepção devolve `presence`, ou null). */
+async function presencaAte(idConta, agora) {
+  const data = operationalDateAt(new Date(agora));
+  const { startAt, endAt } = operationalWindow(data);
+  return (await store.atividadeDoDia(data, startAt, endAt, agora, idConta)).get(idConta) || null;
 }
 
 async function ler(req, idConta, token) {
@@ -93,4 +103,4 @@ async function ler(req, idConta, token) {
   return { status: 200, corpo: { events: linhas.map((l) => store.json(l.conteudo)), coverage: 'confirmed-events-received' } };
 }
 
-module.exports = { receber, ler, chaveDoValor, instante };
+module.exports = { receber, ler, presencaAte, chaveDoValor, instante };

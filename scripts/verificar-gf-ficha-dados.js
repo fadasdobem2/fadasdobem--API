@@ -99,7 +99,13 @@ function offline() {
   });
   passo('validarMudancas (PATCH): junta identidade e ficha com as mensagens 422 do front; só ficha também é uma alteração', () => {
     const m = cli.validarMudancas({ email: ' a@b.com ', cpf: '529.982.247-25', name: 'Ana' });
-    assert.deepStrictEqual(m, { name: 'Ana', email: 'a@b.com', cpf: '529.982.247-25' });
+    assert.deepStrictEqual(m, { name: 'Ana', email: 'a@b.com', cpf: '529.982.247-25', noEmail: false }); // v711: informar e-mail desfaz o "não possui e-mail"
+    assert.deepStrictEqual(cli.validarMudancas({ noEmail: true }), { noEmail: true });
+    assert.deepStrictEqual(cli.validarMudancas({ noEmail: true, email: 'a@b.com' }), { email: 'a@b.com', noEmail: false });
+    assert.throws(() => cli.validarMudancas({ noEmail: 'sim' }), (e) => e.message === 'Confira a informação de e-mail.');
+    const ficha = require('../src/gestao-fadas/features/cadastros/clientes.ficha');
+    assert.deepStrictEqual(ficha.colunasDaFicha({ noEmail: true }), [['sem_email', true], ['email', null]]);
+    assert.deepStrictEqual(ficha.colunasDaFicha({ noEmail: false }), [['sem_email', false]]);
     assert.throws(() => cli.validarMudancas({ email: 'x' }), (e) => e.message === 'Confira o e-mail: nome@dominio.com.');
     assert.throws(() => cli.validarMudancas({}), (e) => /Nenhuma alteração/.test(e.message));
   });
@@ -185,12 +191,13 @@ function offline() {
   }
 
   console.log('Pré/Pós: só Pós -> Pré, definitivo');
-  const MATRIZ = [['', '', true], ['', 'Pré-pago', true], ['', 'Pós-pago', true], [null, 'Pós-pago', true], ['Pós-pago', 'Pós-pago', true], ['Pós-pago', 'Pré-pago', true], ['Pós-pago', '', true],
+  // v711 (assertClientPaymentTransition do front): o único destino novo é Pré; sem regime NÃO vai para Pós e Pós não volta a "não informado".
+  const MATRIZ = [['', '', true], ['', 'Pré-pago', true], ['', 'Pós-pago', false], [null, 'Pós-pago', false], [null, '', true], ['Pós-pago', 'Pós-pago', true], ['Pós-pago', 'Pré-pago', true], ['Pós-pago', '', false],
     ['Pré-pago', 'Pré-pago', true], ['Pré-pago', 'Pós-pago', false], ['Pré-pago', '', false], ['Pré-pago', null, false]];
   const sobreRegime = (fn) => MATRIZ.filter(([de, para, esperado]) => fn(de, para) !== esperado);
   passo('tabela de transições: Pós -> Pré vale; Pré -> Pós e Pré -> "não informado" são recusados; sem regime aceita qualquer um; repetir é sem efeito', () => {
     assert.deepStrictEqual(sobreRegime(regime.regimePodeMudar), []);
-    assert.match(regime.MENSAGEM, /Pré e não volta a ser Pós/);
+    assert.match(regime.MENSAGEM, /não volta para Pós/);
   });
   passo('o front aceita os três valores em qualquer sentido (não impõe a regra): a regra de sentido é só da API; valor fora da lista segue "Selecione Pré ou Pós."', () => {
     const aceita = ouro.regime.filter((c) => c.front === 'aceita').map((c) => c.v);

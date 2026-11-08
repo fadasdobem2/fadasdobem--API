@@ -10,6 +10,7 @@
  */
 
 const { CadastroInvalidoError, tratamentoDoProfissional, texto: textoDoCadastro, lista: listaDoCadastro, objeto: objetoDoCadastro, GRUPOS_SEM, GRUPOS_COMPETENCIA } = require('./cadastro-tarologo');
+const formas = require('./formas-atendimento');
 const { campoDoPerfilVale } = require('../../legado-escrita/fusao');
 
 /** Campos do `TarologistDirectoryProfile` que a edição pode gravar (nome, id e situação do cadastro vão em colunas próprias). */
@@ -17,7 +18,7 @@ const LISTAS = ['oracles', 'techniques', 'spreads', 'definitions', 'channels', '
 const TEXTOS = { birthDate: 40, realFirstName: 120, personalWhatsapp: 45, avatarWhatsapp: 45, biography: 10000, profileCommandId: 100, registrationId: 100 };
 const GRUPOS = ['definitions', 'tarot', 'cartomancy', 'astrology', 'numerology', 'oracles', 'spreads', 'practices'];
 /** Campos que só a ficha pública do diretório não mostra (privados): saem para quem não é da gestão do cadastro. */
-const PRIVADOS = ['birthDate', 'realFirstName', 'personalWhatsapp', 'avatarWhatsapp', 'contactEmail'];
+const PRIVADOS = ['birthDate', 'realFirstName', 'personalWhatsapp', 'avatarWhatsapp', 'contactEmail', 'umblerContact'];
 
 /**
  * `tbl_tarologos.meus_horarios` é HTML solto do sistema antigo (`<div>`, `<br>`, `<b>`, quebras e tabs). O front lê `profile.official` como
@@ -71,7 +72,11 @@ function validarDiretorio(entrada) {
     if (saida.capabilityNone.some((k) => !GRUPOS_SEM.includes(k))) throw invalido('Grupo de competências inválido.');
     if (saida.capabilityNone.some((k) => saida.capabilityGroups && saida.capabilityGroups[k] && saida.capabilityGroups[k].length)) throw invalido('Confira as competências: uma categoria não pode estar vazia e selecionada ao mesmo tempo.');
   }
-  if (saida.channels && saida.channels.some((c) => c !== 'Chat' && c !== 'Voz')) throw invalido('Os canais disponíveis são Chat e Voz.');
+  if (saida.channels && saida.channels.some((c) => !['Chat', 'Voz', 'PABX', 'Áudio', 'Texto'].includes(c))) throw invalido('As formas disponíveis são PABX, Áudio e Texto.');
+  try {
+    if (entrada.serviceModes !== undefined) saida.serviceModes = formas.validateServiceModes(entrada.serviceModes);
+    if (entrada.umblerContact !== undefined) { const c = formas.validateUmblerContact(entrada.umblerContact); if (c) saida.umblerContact = c; }
+  } catch (e) { throw invalido(e.message); }
   return saida;
 }
 
@@ -127,6 +132,7 @@ function montarItem({ legado, perfil, ext }) {
   const oficial = Array.isArray(dados.official) && dados.official.length ? dados.official : horariosDoLegado(legado && legado.meus_horarios);
   const operacional = {
     id, name: nome, registrationActive: cadastroAtivo, official: oficial, today: '', note: '',
+    ...(Array.isArray(dados.serviceModes) ? { serviceModes: dados.serviceModes } : {}),
     status: statusDoLegado(legado && legado.status), online: false,
     ...(avatar ? { avatar } : {}),
     ...(perfil && perfil.registro_id ? { registrationId: perfil.registro_id, registrationRevision: perfil.registro_revisao || 0 } : {}),

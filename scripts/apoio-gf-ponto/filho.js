@@ -160,7 +160,7 @@ const r = (p) => path.join(raiz, p);
   });
   await passo('evento novo 201, repetido 200, outro conteúdo com o mesmo ID 409; sem autoria ou de página recebem 400', async () => {
     const h = { authorization: `Bearer ${TOKEN}` };
-    const a = await ing(evento1, h); assert.equal(a.status, 201, JSON.stringify(a.j)); assert.deepEqual(a.j, { id: evento1.event.id, created: true });
+    const a = await ing(evento1, h); assert.equal(a.status, 201, JSON.stringify(a.j)); assert.equal(a.j.id, evento1.event.id); assert.equal(a.j.created, true); assert.equal(a.j.presence.activityCount, 1, 'v711: o recibo traz a presença detectada'); assert.deepEqual(Object.keys(a.j).sort(), ['created', 'id', 'presence']);
     const b = await ing(evento1, h); assert.equal(b.status, 200); assert.equal(b.j.created, false);
     texto(await ing(ev({ detail: 'mudou' }), h), 409, /evento diferente/);
     texto(await ing(ev({ id: 'x2', actorId: uAdm }), h), 400, /confirmados/); texto(await ing(ev({ id: 'x3', actorKind: 'system' }), h), 400);

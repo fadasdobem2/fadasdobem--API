@@ -73,11 +73,11 @@ const LEGADO = [{ idTarologo: 9001, nmuTarologo: 'Tarólogo Fictício A', ativo:
   ligar(false);
   let rev = 0;
   await passo('edição com o espelho desligado: 200, legado intocado, estado nao_espelhada, campos anotados em legado_pendentes, extensão igual à de antes', async () => {
-    const e = await editar('900013', { name: 'Nome Novo', whatsapp: '11 99999-0000', paymentProfile: 'Pós-pago' }, 0);
+    const e = await editar('900013', { name: 'Nome Novo', whatsapp: '11 99999-0000', paymentProfile: 'Pré-pago' }, 0);
     assert.equal(e.status, 200, e.t); rev = e.j.extension.revision;
     assert.equal(JSON.stringify(U.get(900013)), antes13); assert.equal(falso.estado.updates, 0);
     const l = await linhaC('900013'); assert.equal(l.e, 'nao_espelhada'); assert.deepEqual(l.p.sort(), ['name', 'whatsapp']);
-    const g = await chamar('GET', '/catalog/clients?ids=900013'); assert.equal(g.j.extensions['900013'].name, 'Nome Novo'); assert.equal(g.j.extensions['900013'].paymentProfile, 'Pós-pago');
+    const g = await chamar('GET', '/catalog/clients?ids=900013'); assert.equal(g.j.extensions['900013'].name, 'Nome Novo'); assert.equal(g.j.extensions['900013'].paymentProfile, 'Pré-pago');
     const ov = extensao.sobrepor({ id: 900013, nome_id: 'Do legado', whats: null }, (await extensao.extensoesPorId(['900013'])).get('900013')); assert.equal(ov.nome_id, 'Nome Novo'); assert.equal(ov.whats, '11 99999-0000');
   });
   await passo('a carga inicial NÃO é automática: a reconciliação normal ignora nao_espelhada; só o comando (incluirNaoEspelhadas) as vê', async () => {

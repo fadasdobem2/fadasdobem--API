@@ -7,12 +7,13 @@
  */
 
 const horarios = require('./cadastro-tarologo-horarios');
+const formas = require('./formas-atendimento');
 
 const DIAS = ['domingo', 'segunda', 'terca', 'quarta', 'quinta', 'sexta', 'sabado'];
 const ORCAMENTO_FOTOS = 500000;
 const GRUPOS_COMPETENCIA = ['definitions', 'tarot', 'cartomancy', 'astrology', 'numerology', 'oracles', 'spreads', 'practices'];
 const GRUPOS_SEM = ['tarot', 'cartomancy', 'astrology', 'numerology', 'oracles'];
-const PRIVADOS = ['weeklyScheduleEffectiveFrom', 'weeklyScheduleBase', 'weeklyScheduleVersions', 'commissionRate', 'paymentSchedule', 'role', 'active', 'password', 'passwordHash', 'account', 'accountId', 'login', 'permissions', 'tarotId', 'status'];
+const PRIVADOS = ['umblerContact', 'weeklyScheduleEffectiveFrom', 'weeklyScheduleBase', 'weeklyScheduleVersions', 'commissionRate', 'paymentSchedule', 'role', 'active', 'password', 'passwordHash', 'account', 'accountId', 'login', 'permissions', 'tarotId', 'status'];
 
 class CadastroInvalidoError extends Error {}
 const falha = (m) => new CadastroInvalidoError(m);
@@ -144,7 +145,12 @@ function validarCadastro(entrada, { publica = false, hoje = new Date().toISOStri
     if (r.capabilityNone.some((k) => !GRUPOS_SEM.includes(k))) throw falha('Grupo de competências inválido.');
     if (r.capabilityNone.some((k) => r.capabilityGroups && r.capabilityGroups[k] && r.capabilityGroups[k].length)) throw falha('Confira as competências: uma categoria não pode estar vazia e selecionada ao mesmo tempo.');
   }
-  if (r.channels.some((c) => c !== 'Chat' && c !== 'Voz')) throw falha('Os canais disponíveis são Chat e Voz.');
+  // v711: "Formas de atendimento" (PABX, Áudio, Texto); Chat e Voz continuam aceitos como canais históricos.
+  if (r.channels.some((c) => !['Chat', 'Voz', 'PABX', 'Áudio', 'Texto'].includes(c))) throw falha('As formas disponíveis são PABX, Áudio e Texto.');
+  try {
+    r.serviceModes = dados.serviceModes === undefined ? formas.habitualServiceModes(r) : formas.validateServiceModes(dados.serviceModes);
+    if (!publica) r.umblerContact = formas.validateUmblerContact(dados.umblerContact);
+  } catch (e) { throw falha(e.message); }
   const ajudaHorario = { texto, objeto, periodos: (t) => { const ps = periodosDoTexto(t); validarPeriodos(ps); return ps; }, formatar: formatarPeriodos, falha };
   r.weeklySchedule = horarios.semanaValida(dados.weeklySchedule, ajudaHorario);
   if (!publica) horarios.vigencias(dados, r, ajudaHorario);
@@ -184,7 +190,7 @@ function validarCadastro(entrada, { publica = false, hoje = new Date().toISOStri
 function perfilPublico(d, tarotId) {
   return {
     tarotId, professionalName: d.professionalName, ...(Object.prototype.hasOwnProperty.call(d, 'nameArticle') ? { nameArticle: d.nameArticle } : {}), avatar: d.avatar, portrait: d.portrait || '', gallery: [...(d.gallery || [])], biography: d.biography,
-    definitions: [...d.definitions], oracles: [...d.oracles], techniques: [...d.techniques], spreads: [...d.spreads], channels: [...d.channels],
+    definitions: [...d.definitions], oracles: [...d.oracles], techniques: [...d.techniques], spreads: [...d.spreads], channels: [...d.channels], serviceModes: formas.habitualServiceModes(d),
     equipment: [...d.equipment], themes: [...d.themes], weeklySchedule: { ...d.weeklySchedule },
     ...(d.weeklyScheduleEffectiveFrom ? { weeklyScheduleEffectiveFrom: d.weeklyScheduleEffectiveFrom } : {}),
     ...(d.weeklyScheduleBase ? { weeklyScheduleBase: JSON.parse(JSON.stringify(d.weeklyScheduleBase)) } : {}),
@@ -202,6 +208,7 @@ function projecaoDoLink(salvo) {
     address: { street: a.street, number: a.number, complement: a.complement, district: a.district, city: a.city, state: a.state, postalCode: a.postalCode, raw: a.raw },
     bank: { name: b.name, agency: b.agency, agencyDigit: b.agencyDigit, account: b.account, accountDigit: b.accountDigit, accountType: b.accountType, pixType: b.pixType, pix: b.pix, holderName: b.holderName, holderDocument: b.holderDocument },
     definitions: [...d.definitions], oracles: [...d.oracles], techniques: [...d.techniques], spreads: [...d.spreads], channels: [...d.channels],
+    ...(salvo.serviceModes ? { serviceModes: [...salvo.serviceModes] } : {}),
     equipment: [...d.equipment], themes: [...d.themes], weeklySchedule: { ...d.weeklySchedule }, preferredPaymentMethod: d.preferredPaymentMethod,
     ...(salvo.paymentMethods ? { paymentMethods: [...salvo.paymentMethods] } : {}),
     ...(salvo.capabilityGroups ? { capabilityGroups: JSON.parse(JSON.stringify(salvo.capabilityGroups)) } : {}),
@@ -211,7 +218,7 @@ function projecaoDoLink(salvo) {
 
 /** `approvedRegistrationProjection`: a ficha aprovada que o diretório recebe (`GET ?approved=1`). */
 function projecaoAprovada({ id, revisao, dados, tarotId }) {
-  return { ...perfilPublico(dados, tarotId), registrationId: id, revision: revisao, commissionRate: dados.commissionRate, paymentBank: dados.bank.name, paymentSchedule: dados.paymentSchedule };
+  return { ...perfilPublico(dados, tarotId), registrationId: id, revision: revisao, umblerContact: dados.umblerContact, commissionRate: dados.commissionRate, paymentBank: dados.bank.name, paymentSchedule: dados.paymentSchedule };
 }
 
 module.exports = {
