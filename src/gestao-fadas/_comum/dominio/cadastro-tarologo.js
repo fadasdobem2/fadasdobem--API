@@ -96,11 +96,20 @@ function calendarioDePagamento(v) {
   return { kind: 'monthdays', days: [...v.days].sort((a, b) => a - b), ...(v.weekendPolicy ? { weekendPolicy: v.weekendPolicy } : {}) };
 }
 
+/** `normalizeProfessionalNameArticle` (professional-treatment.ts): 'o', 'a' ou null (neutro; '' e null viram null). Nunca deduzido do nome. */
+function tratamentoDoProfissional(v) {
+  if (v === undefined) return undefined;
+  if (v === null || v === '') return null;
+  if (v === 'o' || v === 'a') return v;
+  throw falha('Escolha o tratamento nas mensagens: o tarólogo, a taróloga ou não informado.');
+}
+
 /** `validateRegistrationData`. `publica`: o envio do formulário (sem campos de repasse/acesso, com os obrigatórios). */
 function validarCadastro(entrada, { publica = false, hoje = new Date().toISOString().slice(0, 10) } = {}) {
   const dados = objeto(entrada);
   if (publica && PRIVADOS.some((c) => Object.prototype.hasOwnProperty.call(dados, c))) throw falha('O formulário não pode alterar repasse, acesso ou aprovação.');
   const r = cadastroVazio();
+  if (Object.prototype.hasOwnProperty.call(dados, 'nameArticle')) r.nameArticle = tratamentoDoProfissional(dados.nameArticle);
   for (const k of ['professionalName', 'fullName', 'phone', 'phone2', 'cpf', 'birthDate', 'email']) r[k] = texto(dados[k], k, 200);
   if (!r.professionalName) throw falha('Informe o nome profissional.');
   if (r.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(r.email)) throw falha('Confira o e-mail informado.');
@@ -174,7 +183,7 @@ function validarCadastro(entrada, { publica = false, hoje = new Date().toISOStri
 /** `publicProfessionalProfile`: o que atravessa para o diretório quando a ficha é aprovada. */
 function perfilPublico(d, tarotId) {
   return {
-    tarotId, professionalName: d.professionalName, avatar: d.avatar, portrait: d.portrait || '', gallery: [...(d.gallery || [])], biography: d.biography,
+    tarotId, professionalName: d.professionalName, ...(Object.prototype.hasOwnProperty.call(d, 'nameArticle') ? { nameArticle: d.nameArticle } : {}), avatar: d.avatar, portrait: d.portrait || '', gallery: [...(d.gallery || [])], biography: d.biography,
     definitions: [...d.definitions], oracles: [...d.oracles], techniques: [...d.techniques], spreads: [...d.spreads], channels: [...d.channels],
     equipment: [...d.equipment], themes: [...d.themes], weeklySchedule: { ...d.weeklySchedule },
     ...(d.weeklyScheduleEffectiveFrom ? { weeklyScheduleEffectiveFrom: d.weeklyScheduleEffectiveFrom } : {}),
@@ -188,7 +197,7 @@ function projecaoDoLink(salvo) {
   const d = { ...cadastroVazio(), ...salvo };
   const a = d.address; const b = d.bank;
   return {
-    professionalName: d.professionalName, fullName: d.fullName, birthDate: d.birthDate, cpf: d.cpf, phone: d.phone, phone2: d.phone2, email: d.email,
+    professionalName: d.professionalName, ...(Object.prototype.hasOwnProperty.call(salvo, 'nameArticle') ? { nameArticle: salvo.nameArticle } : {}), fullName: d.fullName, birthDate: d.birthDate, cpf: d.cpf, phone: d.phone, phone2: d.phone2, email: d.email,
     biography: d.biography, avatar: d.avatar, portrait: d.portrait, gallery: [...d.gallery],
     address: { street: a.street, number: a.number, complement: a.complement, district: a.district, city: a.city, state: a.state, postalCode: a.postalCode, raw: a.raw },
     bank: { name: b.name, agency: b.agency, agencyDigit: b.agencyDigit, account: b.account, accountDigit: b.accountDigit, accountType: b.accountType, pixType: b.pixType, pix: b.pix, holderName: b.holderName, holderDocument: b.holderDocument },
@@ -206,5 +215,5 @@ function projecaoAprovada({ id, revisao, dados, tarotId }) {
 }
 
 module.exports = {
-  horarios, texto, lista, objeto, GRUPOS_SEM, GRUPOS_COMPETENCIA, CadastroInvalidoError, foto, cadastroVazio, validarCadastro, perfilPublico, projecaoDoLink, projecaoAprovada, cpfValido, calendarioDePagamento, ORCAMENTO_FOTOS, dois,
+  horarios, texto, lista, objeto, GRUPOS_SEM, GRUPOS_COMPETENCIA, CadastroInvalidoError, foto, cadastroVazio, validarCadastro, perfilPublico, projecaoDoLink, projecaoAprovada, cpfValido, calendarioDePagamento, ORCAMENTO_FOTOS, dois, tratamentoDoProfissional,
 };

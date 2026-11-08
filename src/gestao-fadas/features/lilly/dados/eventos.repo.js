@@ -57,6 +57,12 @@ async function buscarEventoAutorizado(executor, id, { conversationId, clientId }
   return e;
 }
 
+/** Evento de origem de uma ação v710 pelo `id` OU pelo `messageId` (a Lilly cita `e.messageId||e.id`). `null` se não há ou se é ambíguo. */
+async function buscarEventoDeOrigem(executor, ref) {
+  const [linhas] = await executor.execute(`SELECT ${COLUNAS} FROM gf_lilly_eventos WHERE id = ? OR message_id = ? ORDER BY at DESC LIMIT 2`, [ref, ref]);
+  return linhas.length === 1 || (linhas.length === 2 && linhas[0].id === ref) ? paraEvento(linhas[0]) : null;
+}
+
 async function listarPorConversa(executor, conversationId, limite = 200) {
   const [linhas] = await executor.execute(
     `SELECT ${COLUNAS} FROM gf_lilly_eventos WHERE conversation_id = ? ORDER BY at, id LIMIT ${Math.min(Math.max(Number(limite) | 0, 1), 1000)}`, [conversationId],
@@ -64,4 +70,4 @@ async function listarPorConversa(executor, conversationId, limite = 200) {
   return linhas.map(paraEvento);
 }
 
-module.exports = { buscarEvento, gravarEvento, buscarEventoAutorizado, listarPorConversa };
+module.exports = { buscarEvento, gravarEvento, buscarEventoAutorizado, buscarEventoDeOrigem, listarPorConversa };

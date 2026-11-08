@@ -7,6 +7,8 @@
  *  - `tarotId` -> `tarologistId` (a fila geral `afila` continua `afila`); `agendaOutcome` -> `status`
  *    (`Concluída` = completed, `Cancelada` = cancelled, aberto = scheduled); `posicao` -> `position`; dia operacional em `date`
  *    (`standbyDate` à parte: standby não entra na fila do dia).
+ *  - v710: `revision` (versão da linha, usada pela assinatura que a Lilly compara) e `queueReservation` (só a reserva VIGENTE da fila geral, pela regra do front
+ *    `generalReservationActive`; reserva liberada, vencida ou adiada não sai).
  *  - SEM FONTE: `amount` ("só vira valor quando houver fonte real confirmada", Maturacao/60 §3), `notePresent`, `confirmed`, `conversationId`.
  *    Observação (texto livre) nunca sai.
  */
@@ -14,6 +16,7 @@
 const { LIMITES } = require('./contexto.limites');
 const { LimiteExcedido } = require('./contexto.cobertura');
 const { instanteOperacional } = require('./contexto.tempo');
+const fg = require('../../../_comum/dominio/fila-geral');
 
 const STATUS = Object.freeze({ Concluída: 'completed', Cancelada: 'cancelled' });
 const sem = (o) => Object.fromEntries(Object.entries(o).filter(([, v]) => v !== undefined && v !== null && v !== ''));
@@ -27,7 +30,14 @@ function planoDeContato(plano) {
   return sem({ who, timing, time, callback, shift: shift && typeof shift === 'object' ? sem({ start: shift.start, end: shift.end }) : undefined });
 }
 
-function linhaParaAgendamento(l) {
+/** Reserva vigente da fila geral (`generalReservationActive`), no vocabulário da Lilly. Sem `tempo` (`{ agora, hoje }`) nada sai. */
+function reservaDaFila(i, id, tempo) {
+  if (!tempo || !i.queueReservation || !fg.reservaAtiva({ ...i, id }, tempo.hoje, tempo.agora)) return undefined;
+  const r = i.queueReservation;
+  return sem({ tarotId: r.tarotId, tarologistId: r.tarotId, at: r.at, by: r.by });
+}
+
+function linhaParaAgendamento(l, tempo) {
   const i = item(l);
   const data = dia(i.date);
   const hora = typeof i.scheduledTime === 'string' && /^\d{1,2}:\d{2}$/.test(i.scheduledTime) ? i.scheduledTime.padStart(5, '0') : undefined;
@@ -46,15 +56,19 @@ function linhaParaAgendamento(l) {
     consultationId: typeof i.resolvedByConsultationId === 'string' ? i.resolvedByConsultationId : undefined,
     createdAt: iso(l.criado_em),
     updatedAt: iso(l.atualizado_em),
+    revision: Number.isFinite(Number(l.version)) ? Number(l.version) : undefined,
+    queueReservation: reservaDaFila(i, l.id, tempo),
   });
 }
 
-/** @returns {{ appointments: object[], clientIds: string[], tarologistIds: string[], tarologoDoAgendamento: Map<string,string> }} */
-async function montarAgenda({ hoje, focoIds, appointmentId }, f) {
+/** @returns {{ linhas: object[], appointments: object[], clientIds: string[], tarologistIds: string[], tarologoDoAgendamento: Map<string,string> }} */
+async function montarAgenda({ hoje, focoIds, appointmentId, agora = Date.now() }, f) {
   const linhas = await f.agenda({ dia: hoje, clientIds: focoIds, appointmentId, limite: LIMITES.AGENDA });
   if (linhas.length > LIMITES.AGENDA) throw new LimiteExcedido('appointments');
+  const tempo = { agora, hoje };
   return {
-    appointments: linhas.map(linhaParaAgendamento),
+    linhas,
+    appointments: linhas.map((l) => linhaParaAgendamento(l, tempo)),
     clientIds: [...new Set(linhas.map((l) => `${l.id_cliente}`))],
     tarologistIds: [...new Set(linhas.map((l) => `${l.id_tarologo}`))],
     tarologoDoAgendamento: new Map(linhas.map((l) => [`${l.id}`, `${l.id_tarologo}`])),

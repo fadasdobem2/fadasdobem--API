@@ -4,7 +4,7 @@
  * `tarologists` do snapshot (Maturacao/59, 3.3): catálogo (legado `tbl_tarologos` + extensões, `tarologos.service.catalogo`), presença
  * (`gf_presenca_estado`, vocabulário traduzido) e o horário de hoje/amanhã (`schedules`). Entram os de cadastro ativo e os citados no
  * snapshot (fila, consultas, evento). O id `afila` (fila geral) nunca é tarólogo.
- *  - SEM FONTE (Maturacao/60, 10): `conversationId`, `umblerContactId`, `umblerChannelId`, `aliases`, `nameArticle`. `gf_lilly_vinculos`
+ *  - SEM FONTE (Maturacao/60, 10): `conversationId`, `umblerContactId`, `umblerChannelId`, `aliases`. `gf_lilly_vinculos`
  *    liga CLIENTE a conversa (coluna `id_cliente`); não há vínculo de tarólogo em lugar nenhum, então esses campos saem AUSENTES.
  */
 
@@ -13,6 +13,16 @@ const { LimiteExcedido } = require('./contexto.cobertura');
 
 const FILA_GERAL = 'afila';
 const sem = (o) => Object.fromEntries(Object.entries(o).filter(([, v]) => v !== undefined && v !== null && v !== ''));
+
+/**
+ * `nameArticle` EXPLÍCITO do cadastro (`directory.nameArticle`: perfil editado ou coluna `gf_tarologos_ext.name_article`): 'o', 'a' ou null (neutro,
+ * declarado). Ausente quando o cadastro nunca o informou. NUNCA deduzido do nome, da foto ou do perfil de acesso (docs/banco/22 da Nice).
+ */
+function tratamentoExplicito(t) {
+  const d = t && t.directory;
+  if (!d || !Object.prototype.hasOwnProperty.call(d, 'nameArticle')) return undefined;
+  return d.nameArticle === 'o' || d.nameArticle === 'a' ? d.nameArticle : d.nameArticle === null ? null : undefined;
+}
 
 /** Turno do Gestão -> `status` que a Lilly entende (`offline/ended`, `paused`; "Disponível" fica `available`: sem sinal de saída). */
 function statusDePresenca(p) {
@@ -38,7 +48,8 @@ function montarTarologos({ catalogo, presencas, escalas, citados, hoje, amanha }
     const amanhaP = primeira(escalas, id, amanha);
     const turno = hojeP[0];
     const temEscalaAmanha = escalas.some((e) => e.tarologistId === id && e.date === amanha); // sem escala definida: não afirma que não trabalha
-    return sem({
+    const tratamento = tratamentoExplicito(t);
+    return { ...(tratamento !== undefined ? { nameArticle: tratamento } : {}), ...sem({
       id,
       name: t.name,
       status: p ? statusDePresenca(p) : undefined,
@@ -50,7 +61,7 @@ function montarTarologos({ catalogo, presencas, escalas, citados, hoje, amanha }
       endsAt: hojeP.length ? hojeP[hojeP.length - 1].endsAt : undefined,
       worksTomorrow: temEscalaAmanha ? amanhaP.length > 0 : undefined,
       tomorrowDate: temEscalaAmanha ? amanha : undefined,
-    });
+    }) };
   });
 }
 

@@ -42,6 +42,8 @@ function proximoCodigoDeContato(contatos) {
   const maior = contatos.reduce((max, c) => Math.max(max, Number((/^I[CL]\s*(\d+)$/i.exec(c.displayCode || '') || [])[1] || 0)), 0);
   return `IL ${String(maior + 1).padStart(4, '0')}`;
 }
+const { encerrado } = require('./agenda-contato');
+const { mesmaOcorrencia } = require('./agenda-ocorrencia');
 const codigoDeContatoFormatado = (codigo) => (codigo ? codigo.replace(/^IC\s*/i, 'ID Contato ').replace(/^IL\s*/i, 'IL ') : '') || 'Contato';
 const contatoAtivo = (c) => !c.archived && !c.clientId && c.classification !== 'client';
 
@@ -73,7 +75,7 @@ function resolverContato(identidade, contatos, perfis, diretorio) {
 }
 
 /** O mesmo pedido da mesma pessoa à mesma taróloga no mesmo dia (pedido desagendado não conta). */
-function pedidoDuplicado(pedidos, candidato, contatos = []) {
+function pedidoDuplicado(pedidos, candidato, contatos = [], agenda = [], agora = Date.now()) {
   const quem = (p) => {
     const c = contatos.find((x) => x.id === p.contactId);
     const id = p.submittedIdentity;
@@ -84,7 +86,10 @@ function pedidoDuplicado(pedidos, candidato, contatos = []) {
   };
   const origem = quem(candidato);
   return pedidos.find((p) => {
-    if (p.tarotId !== candidato.tarotId || p.date !== candidato.date || (p.stage || 'ask') === 'descheduled') return false;
+    // Site v710: pedido cujo agendamento ligado já foi encerrado não repete; outro horário explícito é outro atendimento (`sameAgendaOccurrence`).
+    const ligado = agenda.find((i) => i.requestId === p.id || i.id === p.agendaId);
+    if (ligado && encerrado(ligado)) return false;
+    if (p.tarotId !== candidato.tarotId || p.date !== candidato.date || (p.stage || 'ask') === 'descheduled' || !mesmaOcorrencia(p, candidato, candidato.date, agora)) return false;
     if (candidato.clientId && p.clientId) return p.clientId === candidato.clientId;
     if (candidato.contactId && p.contactId) return p.contactId === candidato.contactId;
     const atual = quem(p);

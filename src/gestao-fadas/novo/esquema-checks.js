@@ -385,4 +385,14 @@ const CHECKS_LILLY_V708 = {
   ],
 };
 
-module.exports = { CHECKS, CHECKS_ESPELHO, CHECKS_LILLY_V708 };
+/**
+ * CHECK da coluna acrescentada pela migração 20261212000000 (Lilly v710): `gf_tarologos_ext.name_article` ('o' | 'a' | NULL). O tratamento é SEMPRE
+ * explícito do cadastro; nada o deduz do nome, da foto ou do perfil de acesso (docs/banco/22 da Nice).
+ */
+const CHECKS_LILLY_V710 = {
+  gf_tarologos_ext: [
+    ['chk_tarologos_ext_name_article', "name_article IS NULL OR name_article IN ('o', 'a')"],
+  ],
+};
+
+module.exports = { CHECKS, CHECKS_ESPELHO, CHECKS_LILLY_V708, CHECKS_LILLY_V710 };

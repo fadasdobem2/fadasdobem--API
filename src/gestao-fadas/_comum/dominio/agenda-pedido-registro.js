@@ -9,6 +9,7 @@
 
 const { encerrado, ativoNoDia } = require('./agenda-contato');
 const { pedidoCombinaComIdentidade } = require('./agenda-identidade');
+const { mesmaOcorrencia } = require('./agenda-ocorrencia');
 const { normalizarWhatsapp, proximoCodigoDeContato, contatoAtivo } = require('./agenda-pedido-identidade');
 
 const ETAPAS = Object.freeze(['ask', 'asked', 'confirmed', 'descheduled']);
@@ -67,19 +68,19 @@ function procedenciaDaMudanca(item, acao, observadoEm) {
 const agendamentoLigado = (pedido, agenda) => agenda.find((i) => i.requestId === pedido.id || i.id === pedido.agendaId);
 
 /** Sem vínculo explícito, só vale um único agendamento aberto da mesma pessoa e profissional no dia do pedido. */
-function agendamentoDoPedido(pedido, agenda) {
+function agendamentoDoPedido(pedido, agenda, agora = Date.now()) {
   const explicito = agendamentoLigado(pedido, agenda);
   if (explicito) return explicito;
-  const iguais = agenda.filter((i) => i.tarotId === pedido.tarotId && pedidoCombinaComIdentidade(pedido, i) && !encerrado(i) && ativoNoDia(i, pedido.date, pedido.date));
+  const iguais = agenda.filter((i) => i.tarotId === pedido.tarotId && pedidoCombinaComIdentidade(pedido, i) && !encerrado(i) && ativoNoDia(i, pedido.date, pedido.date) && mesmaOcorrencia(i, pedido, pedido.date, agora));
   return iguais.length === 1 ? iguais[0] : undefined;
 }
 
 /** Conciliar a identidade pode anexar um agendamento existente, nunca criar nem mover um. */
-function agendamentoElegivel(pedido, agenda, consultas = []) {
+function agendamentoElegivel(pedido, agenda, consultas = [], agora = Date.now()) {
   const explicito = agendamentoLigado(pedido, agenda);
   if (explicito) return pedidoCombinaComIdentidade(pedido, explicito) ? explicito : undefined;
   if (etapaDoPedido(pedido) === 'descheduled') return undefined;
-  const iguais = agenda.filter((i) => pedidoCombinaComIdentidade(pedido, i) && i.tarotId === pedido.tarotId && !encerrado(i) && ativoNoDia(i, pedido.date, pedido.date));
+  const iguais = agenda.filter((i) => pedidoCombinaComIdentidade(pedido, i) && i.tarotId === pedido.tarotId && !encerrado(i) && ativoNoDia(i, pedido.date, pedido.date) && mesmaOcorrencia(i, pedido, pedido.date, agora));
   if (iguais.length !== 1) return undefined;
   const c = iguais[0];
   if (c.workflowStatus === 'Em consulta' || consultas.some((v) => v.agendaItemId === c.id && v.status === 'Em curso')) return undefined;

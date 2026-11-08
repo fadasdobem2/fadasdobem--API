@@ -97,7 +97,11 @@ async function registrarPedido(req, { verificarCliente }) {
         ...(r.submittedIdentity ? { submittedIdentity: r.submittedIdentity } : {}), ...(r.referral ? { referral: true } : {}), stage: 'ask', history: [{ id: `${r.id}:submitted`, action: 'submitted', at: agora, by: a.nome, date: hoje }],
       };
       const doDia = await adm.pedidosDoDia(ex, tarotId, data);
-      const igual = pedidoDuplicado(doDia.map((x) => x.item), item, contato ? [contato] : []);
+      // Site v710: o pedido cujo agendamento ligado já foi encerrado não conta como repetido.
+      const idsDoDia = doDia.map((x) => x.item.id);
+      const [ligados] = idsDoDia.length ? await ex.execute(`SELECT id, item FROM gf_agenda WHERE id IN (${idsDoDia.map(() => '?').join(',')}) OR (item->>'requestId') IN (${idsDoDia.map(() => '?').join(',')})`, [...idsDoDia, ...idsDoDia]) : [[]];
+      const agendaLigada = ligados.map((l) => ({ ...(typeof l.item === 'string' ? JSON.parse(l.item) : l.item), id: l.id }));
+      const igual = pedidoDuplicado(doDia.map((x) => x.item), item, contato ? [contato] : [], agendaLigada, Date.now());
       if (igual) {
         if (igual.requestedTime !== item.requestedTime || (igual.channel !== item.channel && Boolean(item.channel)) || (igual.requestedMinutes !== item.requestedMinutes && item.requestedMinutes !== undefined)) {
           throw comum.regra('Já existe um pedido para esta data com dados diferentes. A equipe pode revisar o pedido existente.');

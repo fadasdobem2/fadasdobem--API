@@ -9,7 +9,7 @@
  * (`tarot-...`). A conta da taróloga se liga ao tarólogo por `conta_slug`; a sessão devolve esse id.
  */
 
-const { CadastroInvalidoError, texto: textoDoCadastro, lista: listaDoCadastro, objeto: objetoDoCadastro, GRUPOS_SEM, GRUPOS_COMPETENCIA } = require('./cadastro-tarologo');
+const { CadastroInvalidoError, tratamentoDoProfissional, texto: textoDoCadastro, lista: listaDoCadastro, objeto: objetoDoCadastro, GRUPOS_SEM, GRUPOS_COMPETENCIA } = require('./cadastro-tarologo');
 const { campoDoPerfilVale } = require('../../legado-escrita/fusao');
 
 /** Campos do `TarologistDirectoryProfile` que a edição pode gravar (nome, id e situação do cadastro vão em colunas próprias). */
@@ -56,6 +56,7 @@ function validarDiretorio(entrada) {
     saida[k] = k === 'biography' ? textoDoCadastro(entrada[k], 'Apresentação', max) : entrada[k];
     if (k !== 'biography' && entrada[k].length > max) throw invalido(`${k}: informe um texto de até ${max} caracteres.`);
   }
+  if (entrada.nameArticle !== undefined) saida.nameArticle = tratamentoDoProfissional(entrada.nameArticle);
   if (entrada.registrationRevision !== undefined) {
     if (!Number.isSafeInteger(entrada.registrationRevision) || entrada.registrationRevision < 0) throw invalido('registrationRevision inválido.');
     saida.registrationRevision = entrada.registrationRevision;
@@ -117,6 +118,8 @@ function montarItem({ legado, perfil, ext }) {
     ...(ext && ext.primeiro_nome_civil && dados.realFirstName === undefined ? { realFirstName: ext.primeiro_nome_civil } : {}),
     ...(ext && ext.personal_whatsapp && dados.personalWhatsapp === undefined ? { personalWhatsapp: ext.personal_whatsapp } : {}),
     ...(ext && ext.avatar_whatsapp && dados.avatarWhatsapp === undefined ? { avatarWhatsapp: ext.avatar_whatsapp } : {}),
+    // Tratamento explícito ('o'|'a'|null): o perfil editado vale; senão a coluna `name_article` da extensão. NUNCA deduzido do nome.
+    ...(!Object.prototype.hasOwnProperty.call(dados, 'nameArticle') && ext && (ext.name_article === 'o' || ext.name_article === 'a') ? { nameArticle: ext.name_article } : {}),
   };
   // Oráculos do legado só entram enquanto o perfil novo não tem os seus (lista vazia = ainda não editado).
   if (!Array.isArray(dados.oracles) || !dados.oracles.length) diretorio.oracles = oraculosDoLegado(legado);

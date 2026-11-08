@@ -14,6 +14,10 @@ const { registrarNotaHorario } = require('./nota-horario');
 const { registrarSoUmbler } = require('./so-umbler');
 const { registrarMaisTempo } = require('./mais-tempo');
 const { registrarTeamReply } = require('./team-reply');
+const { registrarReserva } = require('./reserva');
+const { registrarFecharConsulta } = require('./consulta.fechar');
+const { registrarContinuacao } = require('./consulta.continuar');
+const { registrarReordenar } = require('./posicao.reordenar');
 
 function registrarTodos() {
   registrarSchedule();
@@ -25,6 +29,10 @@ function registrarTodos() {
   registrarSoUmbler();
   registrarMaisTempo();
   registrarTeamReply();
+  registrarReserva();
+  registrarFecharConsulta();
+  registrarContinuacao();
+  registrarReordenar();
 }
 
 registrarTodos();

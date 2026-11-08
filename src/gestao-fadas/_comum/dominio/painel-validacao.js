@@ -19,9 +19,21 @@ const t = require('./painel-tempo');
 const { fluxoDoPainel } = require('./painel-fluxo');
 const { bloqueioDeLancamento } = require('./painel-bloqueio');
 const { equipeDePresenca } = require('./painel-presenca');
+const { exigirSemDuplicidade, DuplicidadeDeAgendaError } = require('./agenda-duplicidade');
+const { exigirSemConflitoDaFilaGeral, ConflitoDaFilaGeralError } = require('./fila-geral-conflitos');
 
 class RegraDoPainelError extends Error { constructor(mensagem) { super(mensagem); this.name = 'RegraDoPainelError'; } }
 const recusar = (mensagem) => { throw new RegraDoPainelError(mensagem); };
+
+/** `assertNoAgendaDuplicate` + `assertNoGeneralQueueConflict` (Site v710): a mensagem é a do front; o erro vira `RegraDoPainelError`. */
+function exigirDestinoLivre(entrada, item, candidato, nomeDaProfissional) {
+  const opcoes = { hoje: entrada.date, agora: entrada.now };
+  try {
+    exigirSemDuplicidade(entrada.agenda, candidato, { ...opcoes, excluirId: item.id, nomeDaProfissional: nomeDaProfissional(candidato.tarotId) });
+    exigirSemConflitoDaFilaGeral(entrada.agenda, item, candidato, { ...opcoes, nomeDaProfissional });
+  } catch (e) { if (e instanceof DuplicidadeDeAgendaError || e instanceof ConflitoDaFilaGeralError) recusar(e.message); throw e; }
+}
+const nomeDoPerfil = (entrada) => (id) => { const p = (entrada.profiles || []).find((r) => r.id === id); return p ? p.name : undefined; };
 
 /** `validateGeneralDestination`: `lancamentoDaEquipe` = `staffLaunch`. */
 function validarDestinoGeral(entrada, itemId, tarotId, aprovacao, lancamentoDaEquipe) {
@@ -41,7 +53,7 @@ function validarDestinoGeral(entrada, itemId, tarotId, aprovacao, lancamentoDaEq
   if (!leitora) recusar('Selecione um tarólogo ativo.');
   if (leitora.reservation && leitora.reservation.id !== item.id) recusar(`${leitora.name} já está reservada para ${leitora.reservation.clientId} · ${leitora.reservation.client}. Escolha outra taróloga.`);
   if (!lancamentoDaEquipe && !leitora.freeNow) recusar('A disponibilidade mudou. Confira os tarólogos livres novamente.');
-  if (entrada.agenda.some((o) => o.id !== item.id && mesmaIdentidade(o, item) && !encerrado(o))) recusar('A cliente já tem outro agendamento. Confira sua ficha.');
+  exigirDestinoLivre(entrada, item, { ...item, tarotId, date: data, scheduledTime: undefined, requestedTime: undefined, contactPlan: { who: 'staff', timing: 'none' } }, nomeDoPerfil(entrada));
   const admissao = adm.admissaoVigente(entrada.intakeEvents || [], tarotId, data, agora);
   const alvo = { tarotId, date: data, clientId: item.clientId };
   const perfil = entrada.profiles.find((r) => r.id === tarotId);
@@ -66,11 +78,12 @@ function validarLancamento(entrada, itemId, tarotId, aprovacao) {
 }
 
 /** `validateGeneralScheduling`: agendar a cliente da fila geral para uma taróloga (a abertura do formulário preserva o destino). */
-function validarAgendamento(entrada, itemId, tarotId, data = entrada.date, horarioMarcado) {
+function validarAgendamento(entrada, itemId, tarotId, data = entrada.date, horarioMarcado, plano, horarioPedido) {
   const item = entrada.agenda.find((r) => r.id === itemId);
   if (item && estaRestrita(entrada.restrictions || [], item.clientId, tarotId)) recusar('Indisponível');
   if (!item || !fluxoDoPainel(entrada).general.some((r) => r.id === itemId)) recusar('Esta cliente não está mais disponível na Fila Geral.');
-  if (entrada.agenda.some((o) => o.id !== item.id && mesmaIdentidade(o, item) && !encerrado(o))) recusar('A cliente já tem outro agendamento. Confira sua ficha.');
+  // Sem plano novo, o agendamento mantém o plano de origem; o "Se der hoje" sempre sai ao salvar (as duas guardas olham a mesma data resultante).
+  exigirDestinoLivre(entrada, item, { ...item, tarotId, date: data, scheduledTime: horarioMarcado, requestedTime: horarioPedido, contactPlan: plano ?? item.contactPlan, standbyDate: undefined }, nomeDoPerfil(entrada));
   const equipe = equipeDePresenca(entrada.profiles, entrada.overrides || {}, entrada.accounts || [], entrada.consultations, data, { hoje: t.hojeDe(entrada.now), proprioId: entrada.selfId, proprioEstado: entrada.selfStatus });
   const leitora = equipe.find((r) => r.id === tarotId);
   if (!leitora) recusar('Escolha a taróloga para o agendamento.');
@@ -81,4 +94,10 @@ function validarAgendamento(entrada, itemId, tarotId, data = entrada.date, horar
   return { item, reader: leitora };
 }
 
-module.exports = { RegraDoPainelError, bloqueioDeLancamento, validarDestinoGeral, validarEncaminhamento, validarLancamento, validarAgendamento };
+/** `validateGeneralSchedulingOpening`: abrir o formulário não apaga o horário gravado; salvar e encaminhar revalidam a proposta real. */
+function validarAberturaDoAgendamento(entrada, itemId, tarotId, data = entrada.date) {
+  const item = entrada.agenda.find((r) => r.id === itemId);
+  return validarAgendamento(entrada, itemId, tarotId, data, item && item.scheduledTime, item && item.contactPlan, item && item.requestedTime);
+}
+
+module.exports = { validarAberturaDoAgendamento, RegraDoPainelError, bloqueioDeLancamento, validarDestinoGeral, validarEncaminhamento, validarLancamento, validarAgendamento };

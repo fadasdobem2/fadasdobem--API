@@ -59,7 +59,7 @@ Verificação: `npm run verificar:gf-lilly-base` (sem banco), `npm run verificar
 - **Status:** `consultas/status.js` + ajustes do doc 60 §10 no montador (`Finalizada pelo tarólogo` => `ended`; `Anulada` => `cancelled`). Consulta preparada sai sem `startedAt`.
 - **Pix:** só de `gf_precos_versoes` (resolvido por `changedFields`); a chave de demonstração nunca sai; sem versão, `financialSettings` ausente.
 - **Fuso:** São Paulo fixo em -03:00; horário de 00h às 05h59 do dia operacional D cai no calendário de D+1.
-- **SEM FONTE (ausentes):** `handoffs`, `deliveryReceipts`, `queueDurationMetrics`, `morningReview`, `tarologistHistories`, `contact`; em tarólogos `conversationId`, `umblerContactId`, `umblerChannelId`, `aliases`, `nameArticle`; em pagamentos `allocatedAmount`; em clientes `outstandingDebt` (regra não definida); em agendamentos `amount`, `notePresent`, `confirmed`.
+- **SEM FONTE (ausentes):** `handoffs`, `deliveryReceipts`, `queueDurationMetrics`, `morningReview`, `tarologistHistories`, `contact`; em tarólogos `conversationId`, `umblerContactId`, `umblerChannelId`, `aliases`; em pagamentos `allocatedAmount`; em clientes `outstandingDebt` (regra não definida); em agendamentos `amount`, `notePresent`, `confirmed`.
 - **Privacidade:** colunas de `usuarios` só da lista branca (sem senha, login, CPF, e-mail, nascimento, endereço); texto livre (observações, motivos) nunca sai. O registro por pedido tem só tipo, `complete` e contagens por assunto.
 
 ## Executores das ações (etapa 3)
@@ -84,3 +84,21 @@ Tudo no **banco novo** (Postgres, `gf_*`); o legado MySQL continua somente leitu
 Verificação: `npm run verificar:gf-lilly-v708` (Postgres descartável; inclui mutantes refutados).
 
 **Próximas etapas:** ligar o gancho `montarContexto` do `validate` (`executores.dependencias.js`) a `contexto/contexto.servico.js` (`montarContexto(body)` devolve `{ snapshot, cobertura }`), leitura de conversa/mensagem da Umbler no provider.
+
+## Lilly v710 da Nice (reserva, fechamento, continuação, posição, cotações, nameArticle)
+
+Migração `20261212000000-gestao-fadas-lilly-v710.js` (só `gf_tarologos_ext.name_article` `'o'|'a'|NULL` + CHECK em `CHECKS_LILLY_V710`; model novo atualizado; o MySQL legado NÃO muda). Verificação: `npm run verificar:gf-lilly-v710` (ouro do código real + mutantes + Postgres descartável com o código REAL da Lilly emitindo e validando as ações); ouro: `npm run gerar:ouro-gf-lilly-v710 -- --front=<pasta com a v710 e node_modules>`.
+
+| Assunto | Onde | Regra |
+|---|---|---|
+| `nameArticle` | `catalogo-tarologos.js` (perfil editado > extensão), `cadastro-tarologo.js`, `montador.tarologos.js` | Só o que o cadastro declara (`o`, `a`, `null` neutro); ausente se nunca informado. NUNCA deduzido do nome |
+| `revision` | `contexto/revisao.js` | Inteiro seguro derivado de (id, versão, situação) dos agendamentos/consultas abertos ou do dia. Igualdade, não ordem. As ações recalculam e recusam 409 `LILLY_REVISION_CHANGED` |
+| Cotações | `contexto/cotacoes.consulta.js`, `cotacoes.posicao.js` | Fechamento: o término da equipe (`informarTerminoPelaEquipe`) roda em seco com o tempo apurado e o saldo real; continuação: cobertura real (`coberturaDaCliente`); posição: ordem do comparador do painel + revisão `queue-v1`. Ids = hash do que as define |
+| Linhas | `montador.agenda/consultas/pagamentos.js` | `revision`, `queueReservation` vigente, `effectivePosition`, `billing.funding[{paymentId,minutes}]`, `purchase`, `continuationCredit` (só se gravados; nada calculado pela tarifa) |
+| `reserve_tarologist`, `release_reservation` | `executores/reserva.js` | Serviço da Fila Geral (`route-general` modo reserve, `reservation/release`), assinatura `rowSignature`, autoria provada em evento resolvido (`v710/comum.js#provarOrigem`) |
+| `close_consultation` | `executores/consulta.fechar.js` | `GF_LILLY_FECHAR_CONSULTA_ENABLED` (desligada). `finish-by-staff` do serviço existente; tempo reapurado (`v710/fechamento.tempo.js`, ouro contra `closingTiming`) |
+| `open_continuation` | `executores/consulta.continuar.js` | `GF_LILLY_CONTINUACAO_ENABLED` (desligada). Lançamento existente com `continuation.sourceConsultationId`; a anterior fica intacta |
+| `reorder_appointment` | `executores/posicao.reordenar.js` | Comando de ordem existente (`POST /agenda/queues/:tarotId/order`); simulação antes de gravar; só `positionOverrides`/`orderCommand` mudam |
+| Agenda | `_comum/dominio/agenda-ocorrencia.js`, `agenda-duplicidade.js`, `fila-geral-conflitos.js` | Portes de `agenda-occurrence.ts`, `agenda-duplicate.ts`, `general-queue-conflicts.ts` (c0ce39e), ligados a painel-validacao, agendamento direto, pedidos e vínculo de contato |
+
+`committed:true` só sai da guarda depois do commit; recusa conhecida = 4xx guardada e repetida igual. Limites: a Lilly precisa de `tarologists[].conversationId` (SEM FONTE na API) para as Notas de fechamento/continuação; a fila considera só o comparador portado (sem prontidão por pagamento nem reserva de continuação do `createAgendaQueueLookup`).

@@ -82,7 +82,7 @@ function aplicarPlano(item, entrada, opcoes, novoId) {
 
 /** `generalMatchDestination`: cobertura da cliente e a área para onde a tela leva (consultas ou agenda). */
 function destinoDoAgendamento(entrada, itemId, tarotId, perfil, preferirAgenda = false) {
-  const { item } = v.validarAgendamento(entrada, itemId, tarotId);
+  const { item } = v.validarAberturaDoAgendamento(entrada, itemId, tarotId);
   const cobertura = s.coberturaDaCliente(item.clientId, entrada.payments || [], entrada.consultations, perfil, new Date(entrada.now).toISOString());
   const livre = fluxoDoPainel(entrada).free.some((r) => r.id === tarotId);
   return { ...cobertura, area: !preferirAgenda && cobertura.canLaunch && livre ? 'consultations' : 'agenda' };
@@ -90,7 +90,7 @@ function destinoDoAgendamento(entrada, itemId, tarotId, perfil, preferirAgenda =
 
 /** `scheduleGeneralMatch`: devolve a agenda inteira já com o agendamento composto e a ordem recalculada. */
 function montarAgendamento(entrada, itemId, tarotId, detalhes, perfil, ator, novoId = randomUUID) {
-  const { item } = v.validarAgendamento(entrada, itemId, tarotId, detalhes.date, detalhes.time);
+  const { item } = v.validarAgendamento(entrada, itemId, tarotId, detalhes.date, detalhes.time, detalhes.contactPlan, detalhes.requestedTime);
   if (!DATA.test(detalhes.date) || !Number.isFinite(Date.parse(detalhes.date)) || detalhes.date < entrada.date) throw new v.RegraDoPainelError('Escolha hoje ou uma data futura.');
   const plano = detalhes.contactPlan;
   const aviso = avisoDeDisponibilidade({ profile: entrada.profiles.find((r) => r.id === tarotId), overrides: entrada.overrides || {}, date: detalhes.date,

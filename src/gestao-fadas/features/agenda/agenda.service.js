@@ -110,7 +110,7 @@ async function comando(req, grupo) {
       if (!daFilaGeral) await direto.conferir(ex, { antes: atual.item, item, grupo, set: c.set, agora: Date.now() });
       if (grupo === 'agendamento' && atual.item.tarotId === FILA_GERAL && item.tarotId !== FILA_GERAL) {
         const entrada = await painelContexto.carregarEntrada(ex, { tarotId: item.tarotId, agora: Date.now() });
-        try { painel.validarAgendamento(entrada, id, item.tarotId, item.date || entrada.date, item.scheduledTime); } catch (e) { if (e instanceof painel.RegraDoPainelError) throw comum.regra(e.message); throw e; }
+        try { painel.validarAgendamento(entrada, id, item.tarotId, item.date || entrada.date, item.scheduledTime, item.contactPlan, item.requestedTime); } catch (e) { if (e instanceof painel.RegraDoPainelError) throw comum.regra(e.message); throw e; }
       }
       if (item.tarotId !== atual.item.tarotId && (c.set.position === undefined)) {
         item = { ...item, position: proximaPosicao(await store.abertosDe(ex, [item.tarotId]), item.tarotId, item.date || hojeOperacional(), hojeOperacional()) };

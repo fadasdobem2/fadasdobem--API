@@ -46,7 +46,8 @@ const r = (p) => path.join(raiz, p);
   const contar = async (sql) => Number((await sequelize.query(sql))[0][0].n);
   const ler = (q = '') => chamar('GET', `/agenda${q}`);
   const AGORA = () => new Date().toISOString();
-  const criar = (id, extra = {}) => chamar('POST', '/agenda', { operationKey: n(), id, tarotId: 'osiris', clientId: '900013', client: 'Cliente Teste', date: '2026-11-10', set: { time: '10:00', channel: 'WhatsApp', observation: 'Sem observações.', response: 'Aguardando resposta', contact: { attempt: 1, date: '2026-11-10', tags: [] }, paymentPending: false }, ...extra });
+  // v710: a mesma cliente com a mesma profissional e a mesma ocorrência é duplicidade; cada agendamento do roteiro tem a SUA cliente (só `ag-a1` é a 900013).
+  const criar = (id, extra = {}) => chamar('POST', '/agenda', { operationKey: n(), id, tarotId: 'osiris', clientId: id === 'ag-a1' ? '900013' : `91${String(id.split('').reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 99991, 7)).padStart(5, '0')}`, client: 'Cliente Teste', date: '2026-11-10', set: { time: '10:00', channel: 'WhatsApp', observation: 'Sem observações.', response: 'Aguardando resposta', contact: { attempt: 1, date: '2026-11-10', tags: [] }, paymentPending: false }, ...extra });
   const cmd = (rota, id, v, corpo, metodo = 'POST') => chamar(metodo, `/agenda/${id}${rota}`, { operationKey: n(), expectedVersion: v, ...corpo });
   const evContato = (id, tag, extra = {}) => ({ id, actor: 'x', at: AGORA(), date: '2026-11-10', attempt: 1, tag, active: true, before: [], after: [tag], ...extra });
 

@@ -1,14 +1,14 @@
 'use strict';
 
-/** Registro dos 15 kinds (13 + request_more_time e team_reply da Lilly v708), flag desligada (403 sem efeito) e os kinds só-Umbler (só validate; sem vínculo = allowed:false com motivo, HTTP 200). */
+/** Registro dos 20 kinds (13 + request_more_time e team_reply da Lilly v708 + 5 da v710), flag desligada (403 sem efeito) e os kinds só-Umbler (só validate; sem vínculo = allowed:false com motivo, HTTP 200). */
 
 module.exports = async ({ r, acao, exec, validar, vincular, contar, conferir, passo, chave }) => {
   const registro = require(r('src/gestao-fadas/features/lilly/acoes/acoes.registro'));
 
   console.log('Executores: registro e flag');
-  await passo('os 15 kinds estão registrados; só-Umbler sem executar()', async () => {
+  await passo('os 20 kinds estão registrados; só-Umbler sem executar()', async () => {
     const k = registro.kindsRegistrados();
-    conferir('15 kinds', k.length === 15 && [...registro.KINDS_GESTAO, ...registro.KINDS_SO_UMBLER].every((x) => k.includes(x)));
+    conferir('20 kinds', k.length === 20 && [...registro.KINDS_GESTAO, ...registro.KINDS_SO_UMBLER].every((x) => k.includes(x)));
     conferir('só-Umbler sem executar', registro.KINDS_SO_UMBLER.every((x) => registro.obter(x).soUmbler === true && !registro.obter(x).executar));
   });
   await passo('flag GF_LILLY_ACOES_ENABLED desligada: 403 e NENHUM efeito (agenda, pagamento, linha de ação)', async () => {

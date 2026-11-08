@@ -35,8 +35,9 @@ function exigirConta() {
 }
 
 /** Pseudo-requisição que os serviços da equipe entendem: a Lilly age como atendimento (perfil `atendente`), nunca com perfil maior. */
-function pedidoDeServico({ params = {}, body, query = {} } = {}) {
-  return { user: { id: exigirConta(), nome: cfg.NOME_DO_SERVICO, role: 'ATENDENTE' }, params, query, body, accessContext: { roleIds: [] } };
+function pedidoDeServico({ params = {}, body, query = {}, nome } = {}) {
+  // `nome`: quem assina no histórico da tela (a atendente que autorizou, nas ações v710 de reserva); o usuário da conta continua o de serviço.
+  return { user: { id: exigirConta(), nome: (typeof nome === 'string' && nome.trim() ? nome.trim().slice(0, 120) : cfg.NOME_DO_SERVICO), role: 'ATENDENTE' }, params, query, body, accessContext: { roleIds: [] } };
 }
 
 /** Erro de serviço (`AppError`) vira recusa 4xx com a frase do front; 5xx e erros de bug seguem como estão. */

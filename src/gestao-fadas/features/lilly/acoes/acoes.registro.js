@@ -15,7 +15,8 @@
  * - Kinds só-Umbler (note, public_reply, team_reply, mark_attention, update_contact, knowledge_proposal) registram só `validar`: nunca executam aqui.
  */
 
-const KINDS_GESTAO = ['register_client', 'update_client', 'schedule', 'remove_appointment', 'reschedule', 'payment', 'request_more_time', 'start_consultation', 'tarologist_schedule_note'];
+const KINDS_GESTAO = ['register_client', 'update_client', 'schedule', 'remove_appointment', 'reschedule', 'payment', 'request_more_time', 'start_consultation', 'tarologist_schedule_note',
+  'reserve_tarologist', 'release_reservation', 'close_consultation', 'open_continuation', 'reorder_appointment'];
 const KINDS_SO_UMBLER = ['note', 'public_reply', 'team_reply', 'mark_attention', 'update_contact', 'knowledge_proposal'];
 
 const executores = new Map();

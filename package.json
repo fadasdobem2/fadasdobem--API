@@ -26,6 +26,8 @@
     "verificar:gf-lilly-acoes": "node scripts/verificar-gf-lilly-acoes.js",
     "verificar:gf-lilly-integracao": "node scripts/verificar-gf-lilly-integracao.js",
     "verificar:gf-lilly-v708": "node scripts/verificar-gf-lilly-v708.js",
+    "verificar:gf-lilly-v710": "node scripts/verificar-gf-lilly-v710.js",
+    "gerar:ouro-gf-lilly-v710": "node scripts/gerar-ouro-gf-lilly-v710.js",
     "verificar:gf-gate": "node scripts/verificar-gf-gate.js",
     "verificar:gf-banco-novo": "node scripts/verificar-gf-banco-novo.js",
     "verificar:gf-horarios": "node scripts/verificar-gf-horarios.js",

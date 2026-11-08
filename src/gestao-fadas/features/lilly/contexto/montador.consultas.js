@@ -35,6 +35,14 @@ function minutosDe(i) {
 
 const pausas = (i) => (Array.isArray(i.pauseHistory) ? i.pauseHistory.filter((p) => p && p.startedAt).map((p) => sem({ startedAt: iso(p.startedAt), endedAt: iso(p.endedAt) })) : undefined);
 
+/** `billing.funding[]` (v710): só quais pagamentos financiam a consulta e quantos minutos cada um atribuiu (`paymentId`, `minutes`). Sem valores. */
+function financiamento(i) {
+  const lotes = i.billing && Array.isArray(i.billing.funding) ? i.billing.funding : null;
+  if (!lotes) return undefined;
+  const util = lotes.filter((x) => x && typeof x.paymentId === 'string' && x.paymentId && Number.isFinite(x.minutes) && x.minutes > 0).map((x) => ({ paymentId: x.paymentId, minutes: x.minutes }));
+  return util.length ? { funding: util } : undefined;
+}
+
 function linhaParaConsulta(l) {
   const i = item(l);
   const status = traduzirStatus(l);
@@ -62,15 +70,17 @@ function linhaParaConsulta(l) {
     performedDurationSeconds: encerrada && Number.isFinite(i.performedDurationSeconds) ? i.performedDurationSeconds : undefined,
     tarologistFinishReport: relatorio && Number.isFinite(relatorio.minutes) ? sem({ minutes: relatorio.minutes, endedAt: iso(relatorio.endedAt) }) : undefined,
     continuation: l.consulta_origem_id ? { sourceConsultationId: l.consulta_origem_id } : undefined,
+    billing: financiamento(i),
   });
 }
 
-/** @returns {{ consultations: object[], clientIds: string[], tarologistIds: string[], ids: string[] }} */
+/** @returns {{ linhas: object[], consultations: object[], clientIds: string[], tarologistIds: string[], ids: string[] }} */
 async function montarConsultas({ agora, inicioDoDiaIso, focoIds, consultationId }, f) {
   const desdeIso = new Date(agora.getTime() - LIMITES.JANELA_CONSULTAS_DIAS * DIA_MS).toISOString();
   const linhas = await f.consultas({ clientIds: focoIds, desdeIso, inicioDiaIso: inicioDoDiaIso, consultaId: consultationId, limite: LIMITES.CONSULTAS });
   if (linhas.length > LIMITES.CONSULTAS) throw new LimiteExcedido('consultations');
   return {
+    linhas,
     consultations: linhas.map(linhaParaConsulta),
     clientIds: [...new Set(linhas.map((l) => `${l.id_cliente}`))],
     tarologistIds: [...new Set(linhas.map((l) => `${l.id_tarologo}`))],

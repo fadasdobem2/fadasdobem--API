@@ -58,7 +58,7 @@ async function offline() {
   });
   await passo('o ouro cobre as recusas do front: identidade, restrição, horário, agenda fechada (4 formas), cadastro inativo, solicitação, Se der hoje, consulta em curso, próximo turno', () => {
     const msgs = new Set(ouro.direto.map((c) => c.esperado));
-    for (const trecho of ['A identificação deste agendamento mudou', 'Selecione uma cliente ou um contato', 'Localize a cliente ou informe', 'Este contato mudou', 'Complete o WhatsApp do contato', 'Este contato já tem agendamento', 'Escolha um meio de consulta válido', 'Informe os minutos solicitados', 'Indisponível', 'Digite um horário válido', 'Agenda fechada neste turno', 'Agenda fechada, inclusive para encaixes', 'Agenda fechada para novos agendamentos hoje', 'O turno de retorno terminou',
+    for (const trecho of ['A identificação deste agendamento mudou', 'Selecione uma cliente ou um contato', 'Localize a cliente ou informe', 'Este contato mudou', 'Complete o WhatsApp do contato', 'Esta cliente já está na fila', 'Escolha um meio de consulta válido', 'Informe os minutos solicitados', 'Indisponível', 'Digite um horário válido', 'Agenda fechada neste turno', 'Agenda fechada, inclusive para encaixes', 'Agenda fechada para novos agendamentos hoje', 'O turno de retorno terminou',
       'Escolha um horário entre o retorno', 'cadastro inativo', 'Esta solicitação pertence', 'Esta solicitação já tem', 'Se der hoje pertence', 'Finalize a consulta em andamento', 'próximo turno', '']) {
       assert.ok([...msgs].some((m) => m.includes(trecho) || (trecho === '' && m === '')), `o ouro não tem: ${trecho}`);
     }
@@ -78,7 +78,7 @@ async function offline() {
     ['minutos pedidos sem a checagem', D, 'if (minutos) recusar(minutos);', ''],
     ['meio de consulta sem a checagem', D, 'entrada.exigirModalidade && !MODALIDADES.includes(depois.channel)', 'false'],
     ['contato sem WhatsApp completo aceito', D, "recusar('Complete o WhatsApp do contato, com DDD e número.')", ''],
-    ['contato já agendado na data aceito', D, "if (!antes && depois.leadId &&", 'if (false && depois.leadId &&'],
+    ['duplicidade da ocorrência aceita (v710)', D, 'exigirSemDuplicidade(entrada.agenda || [], {', 'void ((entrada.agenda || []), {'],
     ['solicitação sem conferir a identidade (só cliente)', D, '!mesmaIdentidade(identidadeDoPedido(pedido), identidade)', 'pedido.clientId !== clientId'],
     ['restrição ignorada', D, 'estaRestrita(entrada.restrictions || [], clientId, depois.tarotId)', 'false'],
     ['restrição também sem mudança de alvo', D, 'if ((!antes || antes.clientId !== clientId || antes.tarotId !== depois.tarotId || (antes.date || hoje) !== data) && estaRestrita', 'if (estaRestrita'],

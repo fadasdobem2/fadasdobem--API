@@ -9,10 +9,13 @@
  * terminaram com cobertura total. Assunto que o contrato exige e a API não tem de onde ler (`morningReview` na revisão da manhã,
  * `queueDurationMetrics` no relógio com `capacityCheck`) mantém `complete:false`.
  *
+ * v710: `revision` (inteiro derivado do estado operacional, `contexto/revisao.js`), `consultationClosingQuotes`, `consultationQuotes` de continuação (`cotacoes.consulta.js`) e
+ * `appointmentPositionQuotes` (`cotacoes.posicao.js`), todas derivadas das regras reais; `effectivePosition` nos agendamentos com cotação de fila.
+ *
  * `tarologistReturnMetrics` (Lilly v708, `montador.retorno.js`): agregado diário de retorno ao mesmo profissional; ausente sem dado válido ou com a flag desligada.
  *
  * Fora desta etapa (SEM FONTE, nunca enviados): handoffs, deliveryReceipts, queueDurationMetrics, morningReview, tarologistHistories, contact,
- * aliases/nameArticle/conversationId/umblerContactId dos tarólogos.
+ * aliases/conversationId/umblerContactId dos tarólogos (`nameArticle` vem do cadastro, v710).
  */
 
 const { envelope } = require('./contexto.base');
@@ -29,10 +32,12 @@ const { montarConsultas } = require('./montador.consultas');
 const { montarPagamentos } = require('./montador.pagamentos');
 const { montarEscalas, montarNotasDoHorario } = require('./montador.horarios');
 const { montarRetorno } = require('./montador.retorno');
+const { cotacoesDeFechamento, cotacoesDeContinuacao } = require('./cotacoes.consulta');
+const { montarCotacoesDePosicao } = require('./cotacoes.posicao');
 const { montarConfiguracaoFinanceira, montarRestricoes, montarDivergencias, urlBaseDaFicha } = require('./montador.configuracao');
 
-const VAZIO_AGENDA = { appointments: [], clientIds: [], tarologistIds: [], tarologoDoAgendamento: new Map() };
-const VAZIO_CONSULTAS = { consultations: [], clientIds: [], tarologistIds: [], ids: [] };
+const VAZIO_AGENDA = { linhas: [], appointments: [], clientIds: [], tarologistIds: [], tarologoDoAgendamento: new Map() };
+const VAZIO_CONSULTAS = { linhas: [], consultations: [], clientIds: [], tarologistIds: [], ids: [] };
 
 /** Cliente com vínculo ativo e verificado nas conversas do pedido: não precisa buscar por telefone. */
 const conversaJaVinculada = (escopo, brutos) => brutos.some((v) => escopo.conversationIds.includes(v.conversationId) && v.active && v.verified);
@@ -62,7 +67,7 @@ async function montarContexto(body, deps = {}) {
   const contatos = new Map(brutos.filter((v) => v.active && v.verified).map((v) => [v.clientId, v.contactId]));
 
   // 2) Fila, consultas e pagamentos.
-  const agenda = await cob.montar('appointments', () => montarAgenda({ hoje, focoIds, appointmentId: escopo.appointmentId }, f), VAZIO_AGENDA, (r) => r.appointments.length);
+  const agenda = await cob.montar('appointments', () => montarAgenda({ hoje, focoIds, appointmentId: escopo.appointmentId, agora: agora.getTime() }, f), VAZIO_AGENDA, (r) => r.appointments.length);
   const inicioDoDiaIso = new Date(`${hoje}T06:00:00-03:00`).toISOString();
   const consultas = await cob.montar('consultations', () => montarConsultas({ agora, inicioDoDiaIso, focoIds, consultationId: escopo.consultationId }, f), VAZIO_CONSULTAS, (r) => r.consultations.length);
   const payments = await cob.montar('payments', () => montarPagamentos({ agora, focoIds, paymentId: escopo.paymentId, referencias: escopo.referencias }, f));
@@ -109,7 +114,17 @@ async function montarContexto(body, deps = {}) {
   // 5) Do que é da conversa e regras.
   const messages = await cob.montar('messages', () => montarMensagens(escopo, f, agora));
   const notices = await cob.montar('notices', () => montarAvisos(escopo, f, agenda.tarologoDoAgendamento));
-  const consultationQuotes = await cob.montar('consultationQuotes', () => montarCotacoes(escopo, f));
+  // v710: revisão do snapshot e cotações derivadas das regras reais (docs/banco/22 §4). Falha de uma cotação NÃO derruba o snapshot: a Lilly trata cotação
+  // ausente como "pedir conferência". A revisão é obrigatória para agir (reserva, fechamento, posição): sem ela o campo sai ausente.
+  const revision = await f.revisaoDoSnapshot(agora).catch(() => undefined);
+  const evento = { at: (body.event && Number.isFinite(Date.parse(body.event.at)) ? body.event.at : agora.toISOString()), data: (body.event && body.event.data && typeof body.event.data === 'object') ? body.event.data : {} };
+  const opcional = (fn) => fn().catch(() => []);
+  const cotacaoDeFechamento = revision === undefined ? [] : await opcional(() => cotacoesDeFechamento({ consultas, evento, revisao: revision, agora }, f));
+  const cotacaoDePosicao = revision === undefined ? [] : await opcional(() => montarCotacoesDePosicao(agenda, { agora, hoje, focoIds }, f));
+  // `effectivePosition` (v710): lugar real na fila vigente, que a Lilly lê para confirmar uma correção (`position(row)`). Só para quem tem cotação de fila.
+  for (const q of cotacaoDePosicao) { const a = agenda.appointments.find((x) => x.id === q.appointmentId); if (a) a.effectivePosition = q.orderedAppointmentIds.indexOf(q.appointmentId) + 1; }
+  const cotacaoDeContinuacao = revision === undefined ? [] : await opcional(() => cotacoesDeContinuacao({ consultas, escopo, focoIds, evento, revisao: revision, agora }, f));
+  const consultationQuotes = [...await cob.montar('consultationQuotes', () => montarCotacoes(escopo, f)), ...cotacaoDeContinuacao];
   const restrictions = await cob.montar('restrictions', () => montarRestricoes(focoIds, f));
   const divergences = await cob.montar('divergences', () => montarDivergencias(consultas.ids, f));
   const financialSettings = await cob.montar('financialSettings', () => montarConfiguracaoFinanceira(agora, f), undefined);
@@ -123,7 +138,8 @@ async function montarContexto(body, deps = {}) {
     ...base,
     complete: cob.completo(exigidos),
     clients, tarologists, appointments: agenda.appointments, consultations: consultas.consultations, payments, links, messages,
-    schedules: escalas, scheduleNotes, notices, consultationQuotes, restrictions, divergences,
+    schedules: escalas, scheduleNotes, notices, consultationQuotes,
+    ...(revision !== undefined ? { revision } : {}), consultationClosingQuotes: cotacaoDeFechamento, appointmentPositionQuotes: cotacaoDePosicao, restrictions, divergences,
     ...(financialSettings ? { financialSettings } : {}),
     ...(tarologistReturnMetrics ? { tarologistReturnMetrics } : {}),
     ...(phoneLookup ? { phoneLookup } : {}),

@@ -74,8 +74,8 @@ const r = (p) => path.join(raiz, p);
     assert.equal(igual.status, 200, igual.t); assert.equal(igual.j.items[0].id, 'rq-1');
     assert.equal((await um('SELECT 1 FROM gf_agenda_solicitacoes')).length, 1);
   });
-  await passo('mesmo pedido com horário diferente: 422 com a frase do front', async () => {
-    recusa(await pedido('rq-1c', { clientId: '900013', requestedTime: '21:30' }), 422, 'Já existe um pedido para esta data com dados diferentes. A equipe pode revisar o pedido existente.');
+  await passo('mesmo pedido (mesma ocorrência) com outro meio de consulta: 422 com a frase do front (um horário NOVO seria outra ocorrência, v710)', async () => {
+    recusa(await pedido('rq-1c', { clientId: '900013', channel: 'WhatsApp Texto' }), 422, 'Já existe um pedido para esta data com dados diferentes. A equipe pode revisar o pedido existente.');
   });
   await passo('data passada, horário inválido, meio inválido, minutos inválidos e cliente que não existe: recusados, nada gravado', async () => {
     recusa(await pedido('rq-2', { clientId: '900014', date: soma(HOJE, -1) }), 422, 'Confira a data e o horário do pedido.');
@@ -166,7 +166,7 @@ const r = (p) => path.join(raiz, p);
     assert.equal(ag.clientId, ''); assert.equal(ag.leadId, 'ct-2'); assert.equal(ag.client, 'Bia Souza');
     const linha = (await um('SELECT id_cliente, id_contato FROM gf_agenda WHERE id = ?', 'ag-l1'))[0];
     assert.equal(linha.id_cliente, null); assert.equal(linha.id_contato, 'ct-2');
-    recusa(await criarAgenda('ag-l2', { leadId: 'ct-2' }), 422, 'Este contato já tem agendamento nesta data. Abra o registro existente.');
+    recusa(await criarAgenda('ag-l2', { leadId: 'ct-2' }), 422, 'Esta cliente já está na fila de osiris, na primeira posição. Abra o agendamento existente.');
     recusa(await criarAgenda('ag-l3', { leadId: 'nao-existe' }), 422, 'Este contato mudou. Localize a pessoa novamente antes de salvar.');
     recusa(await criarAgenda('ag-l4', { leadId: 'ct-2', clientId: '900013' }).then((y) => ({ ...y, status: y.status === 400 ? 422 : y.status, j: { error: { message: 'Selecione uma cliente ou um contato para este agendamento.' } } })), 422, 'Selecione uma cliente ou um contato para este agendamento.');
   });

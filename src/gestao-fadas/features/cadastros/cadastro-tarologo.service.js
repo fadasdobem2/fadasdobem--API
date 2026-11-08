@@ -92,7 +92,7 @@ async function projetarNoCatalogo(ex, { tarotId, registroId, revisao, publico, p
   const oficial = Object.entries(vigente).filter(([, h]) => h && h.trim()).map(([dia, h]) => `${OFICIAL[dia]}: ${h}`);
   const campos = {
     nome: publico.professionalName, avatar: publico.avatar || null, cadastro_ativo: atual && atual.cadastro_ativo !== null ? atual.cadastro_ativo : true,
-    perfil: { ...((atual && atual.perfil) || {}), biography: publico.biography, definitions: publico.definitions, oracles: publico.oracles, techniques: publico.techniques, spreads: publico.spreads, channels: publico.channels, themes: publico.themes, official: oficial, registrationId: registroId, registrationRevision: revisao },
+    perfil: { ...((atual && atual.perfil) || {}), ...(Object.prototype.hasOwnProperty.call(publico, 'nameArticle') ? { nameArticle: publico.nameArticle } : {}), biography: publico.biography, definitions: publico.definitions, oracles: publico.oracles, techniques: publico.techniques, spreads: publico.spreads, channels: publico.channels, themes: publico.themes, official: oficial, registrationId: registroId, registrationRevision: revisao },
   };
   if (atual) {
     await ex.execute('UPDATE gf_tarologos_perfil SET nome = ?, avatar = ?, cadastro_ativo = ?, perfil = ?, registro_id = ?, registro_revisao = ?, revisao = revisao + 1, atualizado_em = CURRENT_TIMESTAMP, atualizado_por = ? WHERE tarot_id = ?',

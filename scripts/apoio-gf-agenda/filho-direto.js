@@ -127,7 +127,9 @@ const r = (p) => path.join(raiz, p);
     assert.equal(outra.status, 200, outra.t);
     await sequelize.query("INSERT INTO gf_restricoes (id, id_cliente, id_tarologo, solicitante, ativa, item, criado_por, operation_key) VALUES ('rs-2', '900021', 'osiris', 'tarologist', true, '{}', 'teste', 'op-rs-2')");
     recusa(await editar('ag-d9', 1, { tarotId: 'osiris' }), 422, 'Indisponível');
-    const mover = await editar('ag-d1', 2, { tarotId: 'estrela' });
+    // v710: a mesma cliente já está na fila de Estrela (ag-d5b) para o mesmo atendimento: duplicidade com a frase do front; em outro dia futuro sem horário é OUTRA ocorrência.
+    recusa(await editar('ag-d1', 2, { tarotId: 'estrela' }), 422, 'Esta cliente já está na fila de Estrela, na primeira posição. Abra o agendamento existente.');
+    const mover = await editar('ag-d1', 2, { tarotId: 'estrela', date: soma(AMANHA, 4) });
     assert.equal(mover.status, 200, mover.t); assert.equal(mover.j.agenda[0].tarotId, 'estrela'); assert.ok(mover.j.agenda[0].position >= 1);
   });
   await passo('PATCH que muda dia e horário de um agendamento válido continua funcionando', async () => {

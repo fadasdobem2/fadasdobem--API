@@ -125,7 +125,8 @@ function gerarTurno(m) {
     const tarologas = await l('/features/tarologas/tarologist-presence.ts');
     const identidade = await l('/features/agenda/agenda-identity.ts');
     const canais = await l('/features/domain/consultation-channels.ts');
-    const m = { cal, intake, presenca, historia, restricoes, tempo, forma, contato, tarologas, identidade, canais };
+    const duplicata = await l('/features/agenda/agenda-duplicate.ts');
+    const m = { duplicata, cal, intake, presenca, historia, restricoes, tempo, forma, contato, tarologas, identidade, canais };
 
     /** `submitSchedule` v706 (agenda-experience.tsx:1185-1230), caminho direto: devolve a PRIMEIRA recusa (ou ''), na ordem do código do front. */
     m.referencia = (mod, c) => {
@@ -146,7 +147,8 @@ function gerarTurno(m) {
       if (pedido && ((!antes && pedido.tarotId !== form.tarotId) || !mod.identidade.sameAgendaIdentity(mod.identidade.requestAgendaIdentity(pedido), identidade))) return 'Esta solicitação pertence à cliente e ao tarólogo informados. Abra um novo agendamento para outra pessoa.';
       if (pedido && !antes && mod.intake.requestAppointment(pedido, agenda)) return 'Esta solicitação já tem um agendamento. Abra o registro existente.';
       if (form.standbyDate && form.standbyDate !== form.date) return 'Se der hoje pertence à agenda de hoje. Confira a data.';
-      if (!antes && form.leadId && agenda.some((x) => mod.identidade.sameAgendaIdentity(x, identidade) && x.tarotId === form.tarotId && (x.date || hoje) === form.date && !mod.contato.agendaIsClosed(x))) return 'Este contato já tem agendamento nesta data. Abra o registro existente.';
+      // Site v710 (agenda-experience.tsx, submitSchedule): `assertNoAgendaDuplicate` (função REAL) para cliente E contato, novo ou editado.
+      try { mod.duplicata.assertNoAgendaDuplicate(agenda, { ...identidade, tarotId: form.tarotId, date: form.date, scheduledTime: form.scheduledTime || undefined, requestedTime: form.requestedTime, contactPlan: plano, requestId: pedido && pedido.id }, { today: hoje, now, excludeId: antes ? antes.id : undefined, professionalName: perfil && perfil.name }); } catch (e) { if (e.name === 'AgendaDuplicateError') return e.message; throw e; }
       if (!antes) return '';
       const mudaDestino = antes.tarotId !== form.tarotId || (antes.date || hoje) !== form.date;
       const proximoTurno = mod.contato.agendaContact(antes).tags.includes('Próximo turno') && form.tarotId === antes.tarotId;

@@ -43,17 +43,16 @@ function identidadeDoPedido(pedido) {
 }
 const pedidoCombinaComIdentidade = (pedido, item) => mesmaIdentidade(identidadeDoPedido(pedido), item);
 
-const CONFLITO = 'Esta cliente já tem outro agendamento ativo com a profissional nesta data. Confira os dois agendamentos antes de vincular o contato.';
+const CONFLITO = 'Esta cliente já tem outro agendamento ativo com a profissional para este atendimento. Confira os dois agendamentos antes de vincular o contato.';
 
 /** Atualiza só os itens deste contato, preservando ids, datas, ordem e todo o histórico. Devolve o MESMO array quando nada muda. */
-function aplicarContatoNaAgenda(agenda, contato, ator, em, hoje) {
+function aplicarContatoNaAgenda(agenda, contato, ator, em, hoje, agora = Date.now()) {
   const destino = (contato.clientId || '').trim();
   if (destino) {
     for (const item of agenda.filter((i) => i.leadId === contato.id && !encerrado(i))) {
-      const data = dataDeOrigem(item, hoje);
       const colisao = agenda.some((o) => o.id !== item.id && o.tarotId === item.tarotId && !encerrado(o)
         && (o.clientId === destino || o.leadId === contato.id)
-        && (dataDeOrigem(o, hoje) === data || (ativoNoDia(item, hoje, hoje) && ativoNoDia(o, hoje, hoje))));
+        && require('./agenda-ocorrencia').mesmaOcorrencia(item, o, hoje, agora));
       if (colisao) throw new Error(CONFLITO);
     }
   }

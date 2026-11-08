@@ -209,7 +209,7 @@ const HOJE = () => require(r('src/gestao-fadas/_comum/dia-operacional')).hojeOpe
     await criarNaFila('ag-i1', '900033');
     const b = await pat('ag-i1', await v('ag-i1'), { tarotId: 'inativa', date: hoje }); assert.equal(b.status, 422, b.t); assert.equal(b.j.error.message, 'Escolha a taróloga para o agendamento.');
     await criarNaFila('ag-d1', '900031'); await chamar('POST', '/agenda', { operationKey: n(), id: 'ag-d2', tarotId: 'osiris', clientId: '900031', client: 'Cliente 900031', date: hoje, set: { channel: 'WhatsApp', observation: '.', response: 'Aguardando resposta' } });
-    const c = await pat('ag-d1', await v('ag-d1'), { tarotId: 'nyx', date: hoje }); assert.equal(c.status, 422, c.t); assert.equal(c.j.error.message, 'A cliente já tem outro agendamento. Confira sua ficha.');
+    const c = await pat('ag-d1', await v('ag-d1'), { tarotId: 'nyx', date: hoje }); assert.equal(c.status, 422, c.t); assert.equal(c.j.error.message, 'A cliente já tem outro agendamento. Confira sua ficha antes de transferir.');
   });
   await passo('agendar para uma taróloga válida passa (agendar não exige que ela esteja livre agora)', async () => {
     await criarNaFila('ag-s1', '900032');

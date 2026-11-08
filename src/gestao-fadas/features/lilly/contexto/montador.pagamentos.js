@@ -31,6 +31,14 @@ function statusDoPostgres(l, i, confirmadoPeloProvedor = false) {
   return 'informed';
 }
 
+/** Minutos do pacote (`purchase`) e crédito de continuação gravados NO LANÇAMENTO. Nunca calculados pela tarifa geral (docs/banco/22 §5). */
+function creditoDoLancamento(i) {
+  const compra = i.purchase && Number.isFinite(i.purchase.minutes) && i.purchase.minutes > 0 ? sem({ amount: Number.isFinite(i.purchase.amount) ? i.purchase.amount : undefined, minutes: i.purchase.minutes }) : undefined;
+  const c = i.continuationCredit;
+  const ok = c && typeof c.consultationId === 'string' && c.consultationId && [c.minutesBefore, c.addedMinutes, c.minutesAfter].every((n) => Number.isFinite(n) && n >= 0);
+  return { purchase: compra, continuationCredit: ok ? { consultationId: c.consultationId, minutesBefore: c.minutesBefore, addedMinutes: c.addedMinutes, minutesAfter: c.minutesAfter } : undefined };
+}
+
 function pagamentoDoPostgres(l, refs, conversaDoEvento) {
   const i = item(l);
   const ref = refs.get(`${l.id}`);
@@ -47,6 +55,7 @@ function pagamentoDoPostgres(l, refs, conversaDoEvento) {
     createdAt: iso(l.informado_em),
     paidAt: typeof i.paidAt === 'string' ? i.paidAt : undefined,
     payerName: typeof i.payerName === 'string' ? i.payerName : undefined, authorization: typeof i.authorization === 'string' ? i.authorization : undefined,
+    ...sem(creditoDoLancamento(i)),
     method: l.metodo, bank: typeof i.bank === 'string' ? i.bank : undefined,
     ...(doProvedor ? { confirmation: 'Confirmado', providerConfirmed: true, authorizedBy: ref.authorizedBy } : {}),
     date: typeof i.paidAt === 'string' ? i.paidAt.slice(0, 10) : iso(l.informado_em).slice(0, 10),

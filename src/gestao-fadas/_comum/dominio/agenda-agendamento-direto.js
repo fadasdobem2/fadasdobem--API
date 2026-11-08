@@ -30,6 +30,7 @@ const { estaRestrita } = require('./restricoes');
 const adm = require('./admissao');
 const { RegraDoPainelError, } = require('./painel-validacao');
 const { planoNormalizado } = require('./painel-agendamento');
+const { exigirSemDuplicidade, DuplicidadeDeAgendaError } = require('./agenda-duplicidade');
 
 const recusar = (mensagem) => { throw new RegraDoPainelError(mensagem); };
 const HORARIO = /^([01]\d|2[0-3]):[0-5]\d$/;
@@ -88,7 +89,11 @@ function validarAgendamentoDireto(entrada, d) {
   if (pedido && ((!antes && pedido.tarotId !== depois.tarotId) || !mesmaIdentidade(identidadeDoPedido(pedido), identidade))) recusar('Esta solicitação pertence à cliente e ao tarólogo informados. Abra um novo agendamento para outra pessoa.');
   if (pedido && !antes && agendamentoDaSolicitacao(pedido, entrada.agenda)) recusar('Esta solicitação já tem um agendamento. Abra o registro existente.');
   if (depois.standbyDate && depois.standbyDate !== data) recusar('Se der hoje pertence à agenda de hoje. Confira a data.');
-  if (!antes && depois.leadId && (entrada.agenda || []).some((i) => chaveDeIdentidade(i) && mesmaIdentidade(i, identidade) && i.tarotId === depois.tarotId && (i.date || hoje) === data && !encerrado(i))) recusar('Este contato já tem agendamento nesta data. Abra o registro existente.');
+  // Site v710: `assertNoAgendaDuplicate` (agenda-duplicate.ts) vale para cliente E contato, novo ou editado: mesma pessoa + profissional + OCORRÊNCIA (outro horário explícito é outra consulta).
+  try {
+    exigirSemDuplicidade(entrada.agenda || [], { ...identidade, tarotId: depois.tarotId, date: data, scheduledTime: marcado || undefined, requestedTime: depois.requestedTime, contactPlan: depois.contactPlan, requestId: pedido && pedido.id },
+      { hoje, agora: entrada.now, excluirId: (antes && antes.id) || d.id, nomeDaProfissional: perfil && perfil.name });
+  } catch (e) { if (e instanceof DuplicidadeDeAgendaError) recusar(e.message); throw e; }
   if (!antes) return;
   // 9. edição
   const mudaDestino = antes.tarotId !== depois.tarotId || (antes.date || hoje) !== data;
