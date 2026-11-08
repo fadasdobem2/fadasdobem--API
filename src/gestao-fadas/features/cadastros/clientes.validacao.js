@@ -3,10 +3,11 @@
 /**
  * Validação e formato da extensão de cliente. Regras de `features/integration/legacy-client-write.ts` do front
  * (`legacyIdentityChanges`, ouro em Maturacao/44): limites 50/50/45 das colunas do legado, nascimento obrigatório e válido (ano de 1000 em diante, como `legacyLocalDateTime`), sem caractere de 4 bytes,
- * Pré/Pós. Campo ausente = preservado (nunca apagado por omissão); só "tratar por" e WhatsApp aceitam texto vazio.
+ * Pré/Pós, e os dados da ficha (nome completo, CPF, e-mail, telefones, endereço). Campo ausente = preservado (nunca apagado por omissão); só "tratar por" e WhatsApp aceitam texto vazio.
  */
 
 const AppError = require('../../../utils/AppError');
+const { validarFicha } = require('../../_comum/dominio/cliente-ficha-validacao');
 
 class TextoInvalidoError extends Error {}
 const falha = (m) => new TextoInvalidoError(m);
@@ -42,6 +43,8 @@ function validarMudancas(m) {
     if (!['', 'Pré-pago', 'Pós-pago'].includes(m.paymentProfile)) throw falha('Selecione Pré ou Pós.');
     s.paymentProfile = m.paymentProfile || null;
   }
+  // Nome completo, CPF, e-mail, telefones e endereço (banco novo): as mesmas conferências do editor do front.
+  try { Object.assign(s, validarFicha(m)); } catch (e) { throw falha(e.message); }
   if (!Object.keys(s).length) throw falha('Nenhuma alteração informada.');
   return s;
 }
@@ -62,10 +65,11 @@ function aplicar(atual, mudancas, agoraIso) {
   };
 }
 
-function paraDto(l) {
+/** `ficha` = os dados da ficha que a leitura pode mostrar a este perfil (cliente-ficha-efetivo.js); o complemento vence os `dados` da Lilly. */
+function paraDto(l, ficha = {}) {
   const dados = typeof l.dados === 'string' ? JSON.parse(l.dados) : l.dados || {};
   const em = l.perfil_pagamento_em ? new Date(l.perfil_pagamento_em).toISOString() : null;
-  return { ...dados, ...(l.perfil_pagamento ? { paymentProfile: l.perfil_pagamento } : {}), ...(em && l.perfil_pagamento ? { paymentProfileUpdatedAt: em } : {}), revision: Number(l.revisao) };
+  return { ...dados, ...ficha, ...(l.perfil_pagamento ? { paymentProfile: l.perfil_pagamento } : {}), ...(em && l.perfil_pagamento ? { paymentProfileUpdatedAt: em } : {}), revision: Number(l.revisao) };
 }
 
 module.exports = { validarMudancas, traduzirErroDeTexto, aplicar, paraDto };

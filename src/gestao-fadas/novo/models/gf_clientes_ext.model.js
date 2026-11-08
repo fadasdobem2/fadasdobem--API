@@ -25,5 +25,20 @@ module.exports = definir({
     // Lilly v708 (migração 20261211000000): situação cadastral NULL | 'dados_pendentes' | 'completo' (NÃO é o perfil Pré/Pós) e "sem e-mail" declarado.
     situacao_cadastral: { type: DataTypes.STRING(20), allowNull: true },
     sem_email: { type: DataTypes.BOOLEAN, allowNull: true },
+    // Dados da ficha (migração 20261213000000): nome completo, CPF, e-mail, telefones (lista do editor + índices) e endereço. NULL = sem complemento (vale o legado).
+    nome_completo: { type: DataTypes.STRING(255), allowNull: true },
+    cpf: { type: DataTypes.STRING(50), allowNull: true },
+    email: { type: DataTypes.STRING(50), allowNull: true },
+    telefones: { type: DataTypes.JSONB, allowNull: true },
+    telefone_consulta_idx: { type: DataTypes.SMALLINT, allowNull: true },
+    telefone_whatsapp_idx: { type: DataTypes.SMALLINT, allowNull: true },
+    end_rua: { type: DataTypes.STRING(200), allowNull: true },
+    end_numero: { type: DataTypes.STRING(20), allowNull: true },
+    end_complemento: { type: DataTypes.STRING(100), allowNull: true },
+    end_bairro: { type: DataTypes.STRING(100), allowNull: true },
+    end_cep: { type: DataTypes.STRING(24), allowNull: true },
+    end_cidade: { type: DataTypes.STRING(100), allowNull: true },
+    end_uf: { type: DataTypes.STRING(100), allowNull: true },
+    end_pais: { type: DataTypes.STRING(100), allowNull: true },
   },
 });

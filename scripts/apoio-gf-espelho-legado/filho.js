@@ -73,11 +73,11 @@ const LEGADO = [{ idTarologo: 9001, nmuTarologo: 'Tarólogo Fictício A', ativo:
   ligar(false);
   let rev = 0;
   await passo('edição com o espelho desligado: 200, legado intocado, estado nao_espelhada, campos anotados em legado_pendentes, extensão igual à de antes', async () => {
-    const e = await editar('900013', { name: 'Nome Novo', whatsapp: '11 99999-0000', paymentProfile: 'Pré-pago' }, 0);
+    const e = await editar('900013', { name: 'Nome Novo', whatsapp: '11 99999-0000', paymentProfile: 'Pós-pago' }, 0);
     assert.equal(e.status, 200, e.t); rev = e.j.extension.revision;
     assert.equal(JSON.stringify(U.get(900013)), antes13); assert.equal(falso.estado.updates, 0);
     const l = await linhaC('900013'); assert.equal(l.e, 'nao_espelhada'); assert.deepEqual(l.p.sort(), ['name', 'whatsapp']);
-    const g = await chamar('GET', '/catalog/clients?ids=900013'); assert.equal(g.j.extensions['900013'].name, 'Nome Novo'); assert.equal(g.j.extensions['900013'].paymentProfile, 'Pré-pago');
+    const g = await chamar('GET', '/catalog/clients?ids=900013'); assert.equal(g.j.extensions['900013'].name, 'Nome Novo'); assert.equal(g.j.extensions['900013'].paymentProfile, 'Pós-pago');
     const ov = extensao.sobrepor({ id: 900013, nome_id: 'Do legado', whats: null }, (await extensao.extensoesPorId(['900013'])).get('900013')); assert.equal(ov.nome_id, 'Nome Novo'); assert.equal(ov.whats, '11 99999-0000');
   });
   await passo('a carga inicial NÃO é automática: a reconciliação normal ignora nao_espelhada; só o comando (incluirNaoEspelhadas) as vê', async () => {
@@ -106,7 +106,7 @@ const LEGADO = [{ idTarologo: 9001, nmuTarologo: 'Tarólogo Fictício A', ativo:
   });
   await passo('Pré/Pós sozinho não toca o legado; repetir a MESMA operationKey não escreve de novo (idempotente); outra chave com os mesmos valores só repete o UPDATE (nunca duplica)', async () => {
     const n0 = falso.estado.updates; const t0 = U.size;
-    const p = await editar('900013', { paymentProfile: 'Pós-pago' }, rev); assert.equal(p.status, 200); rev = p.j.extension.revision; assert.equal(falso.estado.updates, n0);
+    const p = await editar('900013', { paymentProfile: 'Pré-pago' }, rev); assert.equal(p.status, 200); rev = p.j.extension.revision; assert.equal(falso.estado.updates, n0);
     const chave = n(); const corpo = { operationKey: chave, expectedRevision: rev, changes: { name: 'Nome Final' } };
     const a = await chamar('PATCH', '/catalog/clients/900013', corpo); assert.equal(a.status, 200); rev = a.j.extension.revision; assert.equal(falso.estado.updates, n0 + 1);
     const b = await chamar('PATCH', '/catalog/clients/900013', corpo); assert.equal(b.status, 200); assert.equal(falso.estado.updates, n0 + 1, 'repetição com a mesma chave não escreve');
@@ -115,7 +115,7 @@ const LEGADO = [{ idTarologo: 9001, nmuTarologo: 'Tarólogo Fictício A', ativo:
   await passo('fusão na leitura: campo espelhado vem do LEGADO (mudança do ASP aparece; a cópia velha do Postgres não cobre); Pré/Pós segue da extensão', async () => {
     U.get(900013).nome_id = 'Mudou no ASP de novo';
     const g = await chamar('GET', '/catalog/clients?ids=900013'); const ext = g.j.extensions['900013'];
-    assert.ok(!('name' in ext) && !('whatsapp' in ext) && !('birthDate' in ext)); assert.equal(ext.paymentProfile, 'Pós-pago'); assert.equal(ext.revision, rev);
+    assert.ok(!('name' in ext) && !('whatsapp' in ext) && !('birthDate' in ext)); assert.equal(ext.paymentProfile, 'Pré-pago'); assert.equal(ext.revision, rev);
     const m = await extensao.extensoesPorId(['900013']); const efetivos = m.get('900013') || {}; assert.ok(!('name' in efetivos));
     assert.equal(extensao.sobrepor({ id: 900013, nome_id: U.get(900013).nome_id }, efetivos).nome_id, 'Mudou no ASP de novo');
   });

@@ -70,7 +70,8 @@ async function obter({ role, clientId, nowLocal }) {
     const [linhas, historia, catalogos] = await Promise.all([
       lerCadastros(m, [clientId]), lerHistorias(m, [clientId], { consultas: true, recebimentos: true }), lerCatalogosReferencia(m),
     ]);
-    const [linha] = linhas;
+    // Com a ficha ligada (GF_FATIA_FICHA), o complemento do banco novo (e-mail, CPF, nome completo, endereço) vence o legado onde está preenchido.
+    const [linha] = extensao.ativa() ? await extensao.sobreporTodas(linhas) : linhas;
     return linha ? model.buildRealClientProfile({ role, nowLocal, row: linha, catalogos, ...historia }) : null;
   });
 }

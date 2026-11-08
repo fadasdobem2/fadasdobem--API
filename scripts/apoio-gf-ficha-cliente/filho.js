@@ -62,8 +62,8 @@ const r = (p) => path.join(raiz, p);
     assert.equal(a.j.accounts['900013'].balanceCents, 5000);
   });
   await passo('atendente edita Pré/Pós, tratar por e WhatsApp (revisão 0 -> 1); resposta traz a extensão', async () => {
-    const x = await editar('900013', 0, { paymentProfile: 'Pré-pago', treatAs: 'Má', whatsapp: '11 98888-7777' });
-    assert.equal(x.status, 200, x.t); assert.equal(x.j.extension.revision, 1); assert.equal(x.j.extension.paymentProfile, 'Pré-pago'); assert.equal(x.j.extension.treatAs, 'Má');
+    const x = await editar('900013', 0, { paymentProfile: 'Pós-pago', treatAs: 'Má', whatsapp: '11 98888-7777' });
+    assert.equal(x.status, 200, x.t); assert.equal(x.j.extension.revision, 1); assert.equal(x.j.extension.paymentProfile, 'Pós-pago'); assert.equal(x.j.extension.treatAs, 'Má');
   });
   await passo('supervisora, assistente e administradora também editam (cada uma com a revisão lida)', async () => {
     let rev = 1;
@@ -76,9 +76,9 @@ const r = (p) => path.join(raiz, p);
   });
   await passo('nome e nascimento editados: o nome chega ao saldo da cliente (payments/accounts) e o Pré/Pós também; o legado não muda', async () => {
     como('atendente');
-    const x = await editar('900013', 4, { name: 'Nome Editado', birthDate: '17/05/1990', paymentProfile: 'Pós-pago' }); assert.equal(x.status, 200, x.t);
+    const x = await editar('900013', 4, { name: 'Nome Editado', birthDate: '17/05/1990', paymentProfile: 'Pré-pago' }); assert.equal(x.status, 200, x.t);
     const a = await chamar('GET', '/payments/accounts?ids=900013');
-    assert.equal(a.j.accounts['900013'].name, 'Nome Editado'); assert.equal(a.j.accounts['900013'].paymentProfile, 'Pós-pago'); assert.equal(a.j.accounts['900014'], undefined);
+    assert.equal(a.j.accounts['900013'].name, 'Nome Editado'); assert.equal(a.j.accounts['900013'].paymentProfile, 'Pré-pago'); assert.equal(a.j.accounts['900014'], undefined);
     const b = await chamar('GET', '/payments/accounts?ids=900014'); assert.equal(b.j.accounts['900014'].name, 'Cliente 900014');
   });
   await passo('revisão velha é 409 VERSION_CHANGED (a tela mostra a mensagem do gate); regra é 422; cliente inexistente 404; chave repetida devolve o mesmo resultado sem gravar', async () => {

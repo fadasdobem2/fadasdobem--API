@@ -102,6 +102,8 @@
     "verificar:gf-agenda-pedido": "node scripts/verificar-gf-agenda-pedido.js",
     "gerar:ouro-gf-agenda-pedido": "node scripts/gerar-ouro-gf-agenda-pedido.js",
     "verificar:gf-area5-v706": "node scripts/verificar-gf-area5-v706.js",
+    "verificar:gf-ficha-dados": "node scripts/verificar-gf-ficha-dados.js",
+    "gerar:ouro-gf-ficha-dados": "node scripts/gerar-ouro-gf-ficha-dados.js",
     "gerar:ouro-gf-area5-v706": "node scripts/gerar-ouro-gf-area5-v706.js"
   },
   "engines": {
