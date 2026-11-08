@@ -289,6 +289,18 @@ async function regras(base, erro) {
       assert.strictEqual(r.status, 503, origem); assert.strictEqual(emitiu, false); assert.strictEqual(enviados.length, 0);
     }
   });
+  await passo('convite já emitido (inspect/accept) funciona sem a chave de e-mail; configurar, testar e enviar exigem a chave (503)', async () => {
+    const { servico } = await servicoDe();
+    const enviados = [];
+    const deps = { repo: C.repoFalso(), enviar: C.envioFalso(enviados), convites: C.convitesFalsos(erro), env: { armazenamento: true, chave: '', chaveOk: false, envioLigado: true, origem: C.ORIGEM }, agora: () => C.AGORA, uuid: () => 'id-1' };
+    const ri = await servico.tratar(deps, { recurso: 'inspect', metodo: 'POST', corpo: { token: 'a'.repeat(64) }, ator: null });
+    assert.notStrictEqual(ri.status, 503, 'inspect não pode depender da chave');
+    const adm = { id: 'admin', role: 'administradora' };
+    for (const recurso of ['settings', 'test', 'invitation']) {
+      const r = await servico.tratar(deps, { recurso, metodo: recurso === 'settings' ? 'GET' : 'POST', corpo: { accountId: 'usr1', to: 'x@example.org', purpose: 'usuarios' }, ator: adm });
+      assert.strictEqual(r.status, 503, recurso); assert.strictEqual(enviados.length, 0);
+    }
+  });
   await passo('SQL do banco novo só usa INSERT/UPDATE/SELECT em gf_* (mesma allowlist da escrita)', () => {
     const { motivoDeRecusa } = modulo('src/gestao-fadas/novo/traducao-sql.js');
     const fonte = fs.readFileSync(path.join(RAIZ, f('email.store.js')), 'utf8') + fs.readFileSync(path.join(RAIZ, 'src/gestao-fadas/features/formas/formas.store.js'), 'utf8');

@@ -112,7 +112,8 @@ async function tratar(deps, req) {
     return { status: 200, corpo: { enabled: Boolean(d.env.armazenamento) && Boolean(d.env.chaveOk), invitations: Boolean(d.convites) } };
   }
   try {
-    if (!d.env.armazenamento || !d.env.chaveOk) throw new EmailErro(MSG.naoConfigurado, 503);
+    if (!d.env.armazenamento) throw new EmailErro(MSG.naoConfigurado, 503);
+    // Link de convite já emitido não depende das credenciais de e-mail (correção v711 da Nice, 4c547e2): só do banco.
     if (['inspect', 'accept'].includes(recurso) && metodo === 'POST') {
       const b = corpoObjeto(req.corpo);
       if (!d.convites) throw new EmailErro(MSG.semConvites, 503);
@@ -120,6 +121,7 @@ async function tratar(deps, req) {
       await d.convites.accept(String(b.token ?? ''), String(b.password ?? ''), d.agora());
       return { status: 200, corpo: { status: 'accepted' } };
     }
+    if (!d.env.chaveOk) throw new EmailErro(MSG.naoConfigurado, 503);
     if (['test', 'invitation', 'recovery'].includes(recurso) && metodo === 'POST' && !d.env.envioLigado) throw new EmailErro(MSG.desligado, 503);
     if (recurso === 'recovery' && metodo === 'POST') return await recuperar(d, corpoObjeto(req.corpo));
     if (!ator || ator.role !== 'administradora') throw new EmailErro(MSG.admin, 403);
