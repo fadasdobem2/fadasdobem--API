@@ -4,7 +4,7 @@
  * Monta o `PaymentRecord` do painel para o lançamento da Lilly (Maturacao/60, item 4), com as MESMAS funções de domínio do front
  * (`pagamentos-lancamento.js`, `pagamentos-preco.js`), para o serviço `POST /payments` refazê-lo e aceitá-lo sem atalho:
  *  - `method` PIX e `bank` Mercado Pago (único meio que a Lilly confirma); sem `confirmation` (só Financeiro confirma pelo painel);
- *  - pagador = `payload.payerName` ou o nome da cliente, como o painel faz (`client-create-dialog.tsx:306`);
+ *  - pagador = `payload.payerName` (NUNCA copiado para o nome da cliente) ou, sem ele, o rótulo da cliente, como o painel faz (`client-create-dialog.tsx:306`);
  *  - `paidAt` = `payload.date` (data AAAA-MM-DD ou instante) quando vier; senão o instante do servidor;
  *  - duplicidade do painel (mesmo valor, 15 min): sem `distinctAmountConfirmed` recusa; com ele grava o evento "Duplicidade conferida".
  */
@@ -15,7 +15,7 @@ const Dup = require('../../../_comum/dominio/pagamentos-duplicidade');
 const L = require('../../../_comum/dominio/pagamentos-livro');
 const base = require('../../../_comum/dominio/financeiro-base');
 const { contextoDoLancamento } = require('../../financeiro-cliente/pagamentos.contexto');
-const { rotuloDaCliente } = require('../../agenda/agenda-cliente');
+const { rotuloParaPagamento } = require('./pagamento.rotulo');
 const { recusar, texto } = require('./executores.comum');
 const cfg = require('./executores.config');
 
@@ -27,7 +27,7 @@ async function montarRegistro(executor, p, agoraIso) {
   const valor = Number(p.amount);
   const em = p.paidAt || agoraIso;
   const ref = P.referenciaDePreco(valor, p.clientId, em, base.PRECOS_PADRAO, { consultations: contexto.consultations, profiles: { [p.clientId]: contexto.profile }, history: contexto.history }, null, 'PIX');
-  const nome = await rotuloDaCliente(p.clientId);
+  const nome = await rotuloParaPagamento(p.clientId);
   const entrada = {
     paidAt: p.paidAt, amount: Lc.textoDoDinheiro(valor), method: 'PIX', bank: 'Mercado Pago', payerName: texto(p.payerName) || nome,
     authorization: p.authorization || '', note: p.note || '', purchase: ref.purchase, cashUnitValue: ref.cashUnitValue,

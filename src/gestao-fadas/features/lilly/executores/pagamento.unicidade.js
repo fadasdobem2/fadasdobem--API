@@ -27,13 +27,14 @@ function referenciasDe(p) {
 
 const valoresDeReferencia = (r) => [...new Set([r.reference, r.mpPaymentId, r.externalTransactionId, r.endToEndId].filter(Boolean).map(norm))];
 
+/** Cliente e situação do pagamento já lançado. `cancelado`: estornado/anulado (o domínio chama de 'Cancelado'); esse NUNCA é relançado sozinho. */
 async function clienteDoPagamento(executor, paymentId) {
-  const [l] = await executor.execute('SELECT id_cliente FROM gf_pagamentos WHERE id = ?', [paymentId]);
-  return l[0] ? l[0].id_cliente : null;
+  const [l] = await executor.execute('SELECT id_cliente, status FROM gf_pagamentos WHERE id = ?', [paymentId]);
+  return l[0] ? { clientId: l[0].id_cliente, cancelado: l[0].status === 'Cancelado' } : { clientId: null, cancelado: false };
 }
 
 /**
- * Procura conflito. Devolve `null` ou `{ tipo, paymentId, clientId }` com tipo `referencia` | `proposta` | `autorizacao`.
+ * Procura conflito. Devolve `null` ou `{ tipo, paymentId, clientId, cancelado }` com tipo `referencia` | `proposta` | `autorizacao`.
  * `ignorar`: o próprio pagamento (retomada de uma execução que já gravou o pagamento).
  */
 async function buscarConflito(executor, { refs, proposalId, authorizedEventId, ignorar }) {
@@ -50,7 +51,7 @@ async function buscarConflito(executor, { refs, proposalId, authorizedEventId, i
   for (const [tipo, sql, valoresSql] of consultas) {
     const [linhas] = await executor.execute(sql, valoresSql);
     const achado = linhas.find((l) => l.payment_id !== ignorar);
-    if (achado) return { tipo, paymentId: achado.payment_id, clientId: await clienteDoPagamento(executor, achado.payment_id) };
+    if (achado) return { tipo, paymentId: achado.payment_id, ...(await clienteDoPagamento(executor, achado.payment_id)) };
   }
   return null;
 }

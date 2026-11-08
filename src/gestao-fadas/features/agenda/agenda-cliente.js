@@ -13,6 +13,8 @@ const SEM_NOME = 'Busque e confirme o nome da cliente.';
 
 /** Trocável nos testes, onde o legado não está configurado. Devolve o texto ou null. */
 let lerRotulo = async (clientId) => {
+  const novo = require('../clientes/cliente-novo');
+  if (novo.ehIdDaFaixaNova(`${clientId}`)) return ((await novo.lerCadastroNovo(clientId)) || {}).name || null; // cliente criada pela Lilly (banco novo)
   const extensao = require('../clientes/helpers/extensao');
   const linha = await lendo(async (m) => (await m.LegadoUsuario.findAll({ attributes: ['id', 'nome_id'], where: { nivel: 0, id: Number(clientId) }, raw: true }))[0]);
   if (!linha) return null;

@@ -22,5 +22,8 @@ module.exports = definir({
     legado_detalhe: { type: DataTypes.STRING(300), allowNull: true },
     legado_pendentes: { type: DataTypes.JSONB, allowNull: false, defaultValue: literal("'[]'::jsonb") },
     legado_atualizado_em: { type: DataTypes.DATE, allowNull: true },
+    // Lilly v708 (migração 20261211000000): situação cadastral NULL | 'dados_pendentes' | 'completo' (NÃO é o perfil Pré/Pós) e "sem e-mail" declarado.
+    situacao_cadastral: { type: DataTypes.STRING(20), allowNull: true },
+    sem_email: { type: DataTypes.BOOLEAN, allowNull: true },
   },
 });

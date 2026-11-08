@@ -12,6 +12,8 @@ const { registrarPagamento } = require('./pagamento');
 const { registrarCliente } = require('./cliente');
 const { registrarNotaHorario } = require('./nota-horario');
 const { registrarSoUmbler } = require('./so-umbler');
+const { registrarMaisTempo } = require('./mais-tempo');
+const { registrarTeamReply } = require('./team-reply');
 
 function registrarTodos() {
   registrarSchedule();
@@ -21,6 +23,8 @@ function registrarTodos() {
   registrarCliente();
   registrarNotaHorario();
   registrarSoUmbler();
+  registrarMaisTempo();
+  registrarTeamReply();
 }
 
 registrarTodos();

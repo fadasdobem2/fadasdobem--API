@@ -9,6 +9,8 @@
  * terminaram com cobertura total. Assunto que o contrato exige e a API não tem de onde ler (`morningReview` na revisão da manhã,
  * `queueDurationMetrics` no relógio com `capacityCheck`) mantém `complete:false`.
  *
+ * `tarologistReturnMetrics` (Lilly v708, `montador.retorno.js`): agregado diário de retorno ao mesmo profissional; ausente sem dado válido ou com a flag desligada.
+ *
  * Fora desta etapa (SEM FONTE, nunca enviados): handoffs, deliveryReceipts, queueDurationMetrics, morningReview, tarologistHistories, contact,
  * aliases/nameArticle/conversationId/umblerContactId dos tarólogos.
  */
@@ -26,6 +28,7 @@ const { montarAgenda } = require('./montador.agenda');
 const { montarConsultas } = require('./montador.consultas');
 const { montarPagamentos } = require('./montador.pagamentos');
 const { montarEscalas, montarNotasDoHorario } = require('./montador.horarios');
+const { montarRetorno } = require('./montador.retorno');
 const { montarConfiguracaoFinanceira, montarRestricoes, montarDivergencias, urlBaseDaFicha } = require('./montador.configuracao');
 
 const VAZIO_AGENDA = { appointments: [], clientIds: [], tarologistIds: [], tarologoDoAgendamento: new Map() };
@@ -111,6 +114,9 @@ async function montarContexto(body, deps = {}) {
   const divergences = await cob.montar('divergences', () => montarDivergencias(consultas.ids, f));
   const financialSettings = await cob.montar('financialSettings', () => montarConfiguracaoFinanceira(agora, f), undefined);
 
+  // Indicador R (retorno ao mesmo profissional). Só a leitura do agregado: sem dado válido ele sai AUSENTE (nunca 0). Falha da fonte não derruba o snapshot.
+  const tarologistReturnMetrics = await montarRetorno({ agora, hoje, semCache: deps.semCacheRetorno === true }, f).catch(() => undefined);
+
   const conversas = montarConversas(escopo, brutos);
   const profileBase = urlBaseDaFicha(deps.env);
   const snapshot = {
@@ -119,6 +125,7 @@ async function montarContexto(body, deps = {}) {
     clients, tarologists, appointments: agenda.appointments, consultations: consultas.consultations, payments, links, messages,
     schedules: escalas, scheduleNotes, notices, consultationQuotes, restrictions, divergences,
     ...(financialSettings ? { financialSettings } : {}),
+    ...(tarologistReturnMetrics ? { tarologistReturnMetrics } : {}),
     ...(phoneLookup ? { phoneLookup } : {}),
     ...(profileBase ? { clientProfileBaseUrl: profileBase } : {}),
     ...(conversas.length === 1 ? { conversation: conversas[0] } : {}),

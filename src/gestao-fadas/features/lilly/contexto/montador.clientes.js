@@ -11,9 +11,18 @@
 const { LIMITES } = require('./contexto.limites');
 const { LimiteExcedido } = require('./contexto.cobertura');
 const { comoCasa, normalizarObservado, telefonesDoCadastro, textoParaLilly, ultimos8 } = require('./contexto.telefone');
-const { comExtensao, clienteParaLilly } = require('./contexto.cadastro');
+const { comExtensao, clienteParaLilly, complementoCadastral } = require('./contexto.cadastro');
+const { ehIdDaFaixaNova } = require('../../clientes/cliente-novo');
 
 const porId = (linhas, campo) => new Map(linhas.map((l) => [`${l[campo]}`, l]));
+
+/** Cadastros pelos IDs: legado (`usuarios`, somente leitura) para a faixa antiga e `gf_clientes_novos` para a faixa nova (clientes criadas pela Lilly). */
+async function cadastrosPorIds(ids, f) {
+  const novos = ids.filter(ehIdDaFaixaNova);
+  const antigos = ids.filter((id) => !ehIdDaFaixaNova(id));
+  const [legado, criadas] = await Promise.all([antigos.length ? f.usuariosPorIds(antigos) : [], novos.length ? f.clientesNovosPorIds(novos) : []]);
+  return [...legado, ...criadas];
+}
 
 /**
  * Busca COMPLETA por telefone. Devolve `{ candidatas: Map(id -> { casamento, telefone }), linhas, phoneLookup, completa }`.
@@ -24,13 +33,13 @@ async function buscarPorTelefone(telefoneBruto, f) {
   if (!observado) return { candidatas: new Map(), linhas: [], phoneLookup: { phone: `${telefoneBruto}`.trim(), complete: false }, completa: false, motivo: 'telefone-sem-ddd' };
   const d8 = ultimos8(observado);
   const max = LIMITES.CANDIDATAS_TELEFONE;
-  const [legado, extensoes] = await Promise.all([f.usuariosPorTelefone(d8, max), f.clientesExtPorTelefone(d8, max)]);
-  if (legado.length > max || extensoes.length > max) throw new LimiteExcedido('phoneLookup');
+  const [legado, extensoes, criadas] = await Promise.all([f.usuariosPorTelefone(d8, max), f.clientesExtPorTelefone(d8, max), f.clientesNovosPorTelefone(d8, max)]);
+  if (legado.length > max || extensoes.length > max || criadas.length > max) throw new LimiteExcedido('phoneLookup');
 
   const idsExt = extensoes.map((e) => `${e.id_cliente}`);
-  const linhasExt = idsExt.length ? await f.usuariosPorIds(idsExt) : [];
+  const linhasExt = idsExt.length ? await cadastrosPorIds(idsExt, f) : [];
   const exts = porId(extensoes, 'id_cliente');
-  const todas = [...new Map([...legado, ...linhasExt].map((l) => [`${l.id}`, l])).values()].map((l) => comExtensao(l, exts.get(`${l.id}`)));
+  const todas = [...new Map([...legado, ...linhasExt, ...criadas.map((c) => comExtensao(c, null))].map((l) => [`${l.id}`, l])).values()].map((l) => comExtensao(l, exts.get(`${l.id}`)));
   if (todas.length > max) throw new LimiteExcedido('phoneLookup');
 
   const candidatas = new Map();
@@ -77,7 +86,7 @@ async function montarClientes({ focoIds, filaIds, busca, contatos, profileBase }
   const linhasDaBusca = busca ? busca.linhas : [];
   const jaTem = new Set(linhasDaBusca.map((l) => `${l.id}`));
   const faltam = todosIds.filter((id) => !jaTem.has(id));
-  const legado = faltam.length ? await f.usuariosPorIds(faltam) : [];
+  const legado = faltam.length ? await cadastrosPorIds(faltam, f) : [];
   const exts = porId(todosIds.length ? await f.clientesExt(todosIds) : [], 'id_cliente');
   const linhas = [...linhasDaBusca, ...legado.map((l) => comExtensao(l, exts.get(`${l.id}`)))];
   // Só entram os pedidos: o legado pode devolver linhas de uma busca por telefone que não casaram.
@@ -91,6 +100,7 @@ async function montarClientes({ focoIds, filaIds, busca, contatos, profileBase }
     const fin = saldos.get(id);
     const perfilExt = exts.get(id) && exts.get(id).perfil_pagamento;
     return clienteParaLilly(linha, {
+      ...complementoCadastral(linha, exts.get(id)),
       perfil: (fin && fin.paymentProfile) || perfilExt, saldo: fin ? fin.balance : undefined, ultimaConsulta: emFoco ? ultimas.get(id) : undefined,
       contactId: contatos.get(id), profileBase, casamento: cand && cand.casamento, telefoneDoCasamento: cand && cand.telefone ? textoParaLilly(cand.telefone) : undefined,
     });

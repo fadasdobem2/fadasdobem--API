@@ -59,10 +59,10 @@ async function refsDePagamentos(paymentIds) {
   const ids = unicos(paymentIds);
   if (!ids.length) return [];
   const [linhas] = await avulso.execute(
-    `SELECT payment_id, reference, mp_payment_id, external_transaction_id, end_to_end_id, source_event_id FROM gf_lilly_pagamento_refs WHERE payment_id IN (${marcas(ids.length)})`, ids,
+    `SELECT payment_id, reference, mp_payment_id, external_transaction_id, end_to_end_id, source_event_id, provider_confirmed, authorized_by FROM gf_lilly_pagamento_refs WHERE payment_id IN (${marcas(ids.length)})`, ids,
   );
   return linhas.map((l) => ({
-    paymentId: l.payment_id, reference: l.reference, mpPaymentId: l.mp_payment_id, externalTransactionId: l.external_transaction_id, endToEndId: l.end_to_end_id, sourceEventId: l.source_event_id,
+    paymentId: l.payment_id, reference: l.reference, mpPaymentId: l.mp_payment_id, externalTransactionId: l.external_transaction_id, endToEndId: l.end_to_end_id, sourceEventId: l.source_event_id, providerConfirmed: l.provider_confirmed === true, authorizedBy: l.authorized_by || undefined,
   }));
 }
 

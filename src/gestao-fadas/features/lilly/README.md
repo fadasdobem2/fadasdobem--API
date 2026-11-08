@@ -68,4 +68,19 @@ Verificação: `npm run verificar:gf-lilly-base` (sem banco), `npm run verificar
 Os serviços da equipe rodam com uma conta de serviço (`LILLY_SERVICE_USER_ID`, UUID de um usuário da A, perfil atendente; a auditoria exige usuário real), na transação deles; a guarda confirma depois. Flag nova `GF_LILLY_CADASTRO_LEGADO_ENABLED` (desligada; ligada responde 4xx "não implementado"). Nenhum executor escreve no legado: só os serviços existentes, sob as flags `GF_LEGADO_*`.
 Verificação: `npm run verificar:gf-lilly-acoes`. Integração com o código REAL da Lilly (clone da Nice, somente leitura; `LILLY_SERVER_DIR` aponta para ele): `npm run verificar:gf-lilly-integracao`.
 
+## Lilly v708/v709 da Nice (cadastro de quem pagou sem dados, Pix automático, mais tempo, equipe, R)
+
+Tudo no **banco novo** (Postgres, `gf_*`); o legado MySQL continua somente leitura (a migração 002 MySQL da Nice não se aplica). Migração `20261211000000-gestao-fadas-lilly-v708.js`; CHECKs em `novo/esquema-checks.js` (`CHECKS_LILLY_V708` para a coluna acrescentada, porque a migração do espelho aplica toda a lista de `CHECKS_ESPELHO`).
+
+| Assunto | Onde | Regra |
+|---|---|---|
+| Situação cadastral | `gf_clientes_ext.situacao_cadastral` (NULL, `dados_pendentes`, `completo`) e `sem_email` | NUNCA backfill; não é `perfil_pagamento` (Pré/Pós). A API CALCULA a situação (nome conhecido, telefone, nascimento, e-mail ou `noEmail:true`) e recusa a que não confere (`executores/cliente.campos.js`) |
+| Cliente nova | `gf_clientes_novos` + `executores/cliente.registro.js` / `cliente.atualizacao.js` / `cliente.extensao.js` | `register_client` sem ID cria no banco novo (flag `GF_LILLY_CADASTRO_NOVO_ENABLED`, desligada). Nomes vazios, nascimento NULL, ID da sequência `gf_clientes_novos_id_seq` (faixa >= 1.000.000.000, que o legado não alcança; `clientes/cliente-novo.js`), ID só depois do commit, vínculo verificado criado, telefone único, `registrationApproval` conferida (`cliente.aprovacao.js`; `GF_LILLY_CADASTRO_EXIGE_APROVACAO` a exige) |
+| Pagamento | `executores/pagamento*.js` | campos e regras em `pagamento.campos.js`; automático `authorizedBy 'lilly:mercado_pago'` com evento do comprovante (`autorizacao.js`); unicidade global da referência (app + índices únicos sem caixa); estornado/anulado não relança (`LILLY_PAYMENT_REVERSED`); lançamento lido no contexto como `confirmed` com pagador, autenticação e data |
+| Mais tempo | `gf_lilly_mais_tempo` + `executores/mais-tempo.js` | um ciclo por pedido; mesmo evento não duplica; posterior abre outro ciclo; a tabela proíbe `altera_duracao`/`encerra_consulta` verdadeiros; a consulta e os pagamentos nem são tocados |
+| Equipe | `eventos/eventos.interno.js`, `executores/team-reply.js` | `MemberDirectMessage`/`MemberGroup`/`PrivateMemberGroup` resolvem com `staffAuthorized`, `staffId`, `staffMemberId`, `messageId`; **decisão da Nice: todos os atendentes online autorizam** (`LILLY_STAFF_TODOS_AUTORIZAM`, padrão ligado; `false` volta à lista); `team_reply` só é validado, nunca gravado em `/lilly/actions` |
+| Contexto | `contexto/montador.retorno.js`, `retorno.sessoes.js`, `contexto.cadastro.js` | `tarologistReturnMetrics` (R; flag `GF_LILLY_RETORNO_METRICAS_ENABLED`, desligada, fonte só o banco novo; sem dado = omitido, nunca 0); `operationalDate` pelo calendário 06h; `situacao_cadastral` e, só para quem o fluxo tocou, nome completo, nascimento, e-mail e `noEmail` |
+
+Verificação: `npm run verificar:gf-lilly-v708` (Postgres descartável; inclui mutantes refutados).
+
 **Próximas etapas:** ligar o gancho `montarContexto` do `validate` (`executores.dependencias.js`) a `contexto/contexto.servico.js` (`montarContexto(body)` devolve `{ snapshot, cobertura }`), leitura de conversa/mensagem da Umbler no provider.

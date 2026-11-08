@@ -10,7 +10,8 @@
  */
 
 const { EventoRecusadoError, VerificacaoIndisponivelError } = require('./eventos.erros');
-const { organizacaoEsperada, equipeAutorizada, contasDaLilly } = require('./eventos.config');
+const { organizacaoEsperada, equipeAutorizada, contasDaLilly, todosAutorizam } = require('./eventos.config');
+const { escopoInterno, autoriaInterna } = require('./eventos.interno');
 const { autoriaDaMensagem, papelDoContato } = require('./eventos.autoria');
 const { buscarAtivoDaConversa } = require('../dados/vinculos.repo');
 
@@ -70,12 +71,14 @@ function metaDoProvedor(vinculo) {
 }
 
 function dadosDaMensagem(mensagem, autoria, conversa) {
-  const papel = papelDoContato(conversa);
+  const papel = autoria.escopo ? 'internal' : papelDoContato(conversa);
   const data = {
     intent: undefined, messageId: `${mensagem.id}`, staffAuthorized: autoria.staffAuthorized,
     conversationScope: papel, automated: autoria.automated,
   };
   if (autoria.staffId) data.staffId = autoria.staffId;
+  if (autoria.staffMemberId) data.staffMemberId = autoria.staffMemberId;
+  if (autoria.escopo) { data.internalScope = autoria.escopo; data.contactType = autoria.contactType; } // conversa da equipe: nunca é cadastro nem pagamento de cliente
   const mime = mensagem.file && texto(mensagem.file.contentType);
   if (['client', 'contact'].includes(autoria.actor) && !autoria.internal && mime && MIMES_COMPROVANTE.includes(mime.toLowerCase())) {
     data.intent = 'receipt_received';
@@ -105,8 +108,15 @@ async function resolverUmbler(event, { leitor = leitorPadrao(), executor }) {
   if (!objeto(mensagem) || `${mensagem.id}` !== w.messageId) throw new EventoRecusadoError('LILLY_EVENT_NOT_FOUND', 'A mensagem relida não confere com o evento.', 422);
   if (mensagem.chatId && `${mensagem.chatId}` !== w.chatId) throw new EventoRecusadoError('LILLY_EVENT_NOT_FOUND', 'A mensagem não pertence à conversa do evento.', 422);
 
-  const vinculo = await buscarAtivoDaConversa(executor, w.chatId);
-  const autoria = autoriaDaMensagem(mensagem, conversa, { equipe: equipeAutorizada(), contasLilly: contasDaLilly(), temVinculo: Boolean(vinculo && vinculo.contactId === contactId) });
+  const interno = escopoInterno(conversa);
+  const vinculo = interno ? null : await buscarAtivoDaConversa(executor, w.chatId);
+  const membro = mensagem.sentByOrganizationMember && mensagem.sentByOrganizationMember.id ? `${mensagem.sentByOrganizationMember.id}` : null;
+  // "Online": só vale se o leitor souber; sem `lerMembro` a presença não é conferida (decisão da Nice: todos os atendentes online autorizam).
+  const online = membro && typeof leitor.lerMembro === 'function' ? await comTraducao(async () => ((await leitor.lerMembro(membro)) || {}).online) : undefined;
+  const ambiente = { equipe: equipeAutorizada(), contasLilly: contasDaLilly(), todos: todosAutorizam(), online };
+  const autoria = interno
+    ? autoriaInterna(mensagem, conversa, interno, ambiente)
+    : autoriaDaMensagem(mensagem, conversa, { ...ambiente, temVinculo: Boolean(vinculo && vinculo.contactId === contactId) });
   const vinculoDoContato = vinculo && vinculo.contactId === contactId ? vinculo : null;
   const at = instante(mensagem.eventAt) || w.dataEvento;
   if (!at) throw new EventoRecusadoError('INVALID_INPUT', 'Mensagem sem instante válido.', 400);

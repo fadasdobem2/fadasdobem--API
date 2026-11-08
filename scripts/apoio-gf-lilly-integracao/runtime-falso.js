@@ -23,6 +23,9 @@ async function criarRuntime({ importar, fadas, intencao, telefone = '+5511998776
   const interpreter = { interpret: async (evento) => ({ data: { confidence: 0.99, ...(typeof intencao === 'function' ? intencao(evento) : intencao) }, usage: { input_tokens: 1, output_tokens: 1 } }) };
   const runtime = await LillyRuntime.open({ path: path.join(dir, 'state.json'), mode: 'production', fadas, umbler: umblerFalsa, interpreter, now });
   await runtime.control(true, 'Teste de integração');
+  // Lilly v707+: há expediente (`dutyHours`; o padrão fecha aos domingos e antes das 09h). A verificação não pode depender do dia nem da hora em que roda:
+  // expediente de 24h nos sete dias, sem revisão da manhã. O que se prova aqui é o contrato com a API, não o horário de atendimento.
+  await runtime.store.transact((st) => { st.config.dutyHours = { timeZone: 'America/Sao_Paulo', week: Array.from({ length: 7 }, () => [{ start: '00:00', end: '23:59' }]), review: { enabled: false, at: '08:30' }, afterHours: { onlyAds: false, topicIds: [] } }; });
   const fechar = async () => { await runtime.close(); fs.rmSync(dir, { recursive: true, force: true }); };
   return { runtime, relogio, now, enviados, fechar };
 }

@@ -50,9 +50,12 @@ let n = 0; const ok = (m) => { n += 1; console.log(`ok ${n} - ${m}`); };
   // leitura para conferir evento
   resposta = { status: 200, data: { organization: { id: 'ORG1' }, contact: { id: 'K1', tags: [{ id: 't' }], phone: '5588999990000' } } };
   const conversa = await u.lerConversa('chat 1');
-  assert.deepEqual(conversa, { organizationId: 'ORG1', contact: { id: 'K1', tags: [{ id: 't' }] } });
+  // Lilly v708: o leitor também devolve o tipo do contato, os membros e o canal (conversa interna da equipe); nunca o telefone.
+  assert.deepEqual(conversa, { organizationId: 'ORG1', contact: { id: 'K1', tags: [{ id: 't' }], contactType: null, organizationMembers: [] }, channel: null });
   assert.equal(JSON.stringify(conversa).includes('5588999990000'), false);
-  assert.equal(chamadas.at(-1).url, '/v1/chats/chat%201/'); ok('lerConversa: só organização e contato (sem telefone), id escapado');
+  resposta = { status: 200, data: { organization: { id: 'ORG1' }, channel: { id: 'CH1', _t: 'ChatMembersChannelReferenceModel' }, contact: { id: 'K2', tags: [], contactType: 'MemberDirectMessage', organizationMembers: [{ id: 'U1' }, 'U2'] } } };
+  assert.deepEqual(await u.lerConversa('chat 2'), { organizationId: 'ORG1', contact: { id: 'K2', tags: [], contactType: 'MemberDirectMessage', organizationMembers: ['U1', 'U2'] }, channel: { id: 'CH1', type: 'ChatMembersChannelReferenceModel' } });
+  assert.equal(chamadas.at(-1).url, '/v1/chats/chat%202/'); ok('lerConversa: organização, contato, tipo, membros e canal (sem telefone), id escapado');
   resposta = { status: 200, data: { id: 'M1', isPrivate: true, source: 'Member', sentByOrganizationMember: { id: 'U1' }, fromContact: false, content: 'zx', eventAtUTC: '2026-11-07T10:00:00Z', automated: false, extra: 'nao-sai' } };
   const msg = await u.lerMensagem('chat1', 'M1');
   assert.equal(msg.isPrivate, true); assert.equal(msg.eventAt, '2026-11-07T10:00:00Z'); assert.equal(msg.content, 'zx'); assert.equal('extra' in msg, false); ok('lerMensagem: campos que o resolve usa, e nada além');

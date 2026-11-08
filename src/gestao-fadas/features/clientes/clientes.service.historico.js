@@ -7,13 +7,18 @@ const { lendoNovo } = require('../../novo/leitura');
 const model = require('./clientes.model');
 const { ampliarHistorico: ampliar } = require('./helpers/ampliacao');
 const { lerHistorias } = require('./clientes.service.historias');
+const novo = require('./cliente-novo');
 
 async function existe(m, clientId) {
   return (await m.LegadoUsuario.findAll({ attributes: ['id'], where: { nivel: 0, id: Number(clientId) }, raw: true })).length > 0;
 }
 
-/** Se o ID é de uma cliente (nivel = 0). Para a ampliação do histórico, que nomeia uma e não lê mais nada (R25). */
+/**
+ * Se o ID é de uma cliente (nivel = 0). Para a ampliação do histórico, que nomeia uma e não lê mais nada (R25).
+ * ID da faixa nova (>= 1.000.000.000) é de cliente criada pela Lilly no banco novo (`gf_clientes_novos`); o legado nem é consultado.
+ */
 function clienteExiste(clientId) {
+  if (novo.ehIdDaFaixaNova(`${clientId}`)) return novo.clienteNovoExiste(clientId);
   return lendo((m) => existe(m, clientId));
 }
 

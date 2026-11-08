@@ -12,11 +12,11 @@
  *
  * - `executar` roda dentro de `emTransacao` (o `executor` é o da transação): o efeito e a marca 'confirmada' andam juntos. Se o
  *   efeito NÃO for só do banco novo, registre `transacional: false`: a guarda grava 'em_execucao' (já confirmado) antes do efeito.
- * - Kinds só-Umbler (note, public_reply, mark_attention, update_contact, knowledge_proposal) registram só `validar`: nunca executam aqui.
+ * - Kinds só-Umbler (note, public_reply, team_reply, mark_attention, update_contact, knowledge_proposal) registram só `validar`: nunca executam aqui.
  */
 
-const KINDS_GESTAO = ['register_client', 'update_client', 'schedule', 'remove_appointment', 'reschedule', 'payment', 'start_consultation', 'tarologist_schedule_note'];
-const KINDS_SO_UMBLER = ['note', 'public_reply', 'mark_attention', 'update_contact', 'knowledge_proposal'];
+const KINDS_GESTAO = ['register_client', 'update_client', 'schedule', 'remove_appointment', 'reschedule', 'payment', 'request_more_time', 'start_consultation', 'tarologist_schedule_note'];
+const KINDS_SO_UMBLER = ['note', 'public_reply', 'team_reply', 'mark_attention', 'update_contact', 'knowledge_proposal'];
 
 const executores = new Map();
 

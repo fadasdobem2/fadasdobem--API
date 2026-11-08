@@ -66,7 +66,8 @@ module.exports = async ({ adapter, importar, conferir, passo, log, r, avulso, AG
   await passo('motor REAL consome o snapshot: consultation_started da tarólogo gera start_consultation com os campos do contrato', async () => {
     const ctx = { ...s, config: { enabled: true } };
     let st = { ...motor.createInitialState(), enabled: true };
-    const e = { id: 'umbler:T1', type: 'message', actor: 'tarologist', internal: false, conversationId: 'chat-mara', tarologistId: '9001', clientId: '', at: AGORA.toISOString(), text: 'Começamos', data: { intent: 'consultation_started', explicitStart: true } };
+    // Lilly v708: o início só vale no MESMO dia de atendimento do snapshot (engine.mjs:809); o evento nasce no instante do snapshot.
+    const e = { id: 'umbler:T1', type: 'message', actor: 'tarologist', internal: false, conversationId: 'chat-mara', tarologistId: '9001', clientId: '', at: s.now, text: 'Começamos', data: { intent: 'consultation_started', explicitStart: true } };
     ctx.tarologists = ctx.tarologists.map((t) => (t.id === '9001' ? { ...t, conversationId: 'chat-mara' } : t));
     const res = motor.processEvent(st, e, ctx);
     const a = res.actions.find((x) => x.kind === 'start_consultation');

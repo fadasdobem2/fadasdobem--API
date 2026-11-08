@@ -8,7 +8,7 @@
  */
 
 const { Model, DataTypes, ValidationErrorItem } = require('sequelize');
-const { CHECKS, CHECKS_ESPELHO } = require('../esquema-checks');
+const { CHECKS, CHECKS_ESPELHO, CHECKS_LILLY_V708 } = require('../esquema-checks');
 
 /** `timestamp` SEM fuso (relógio de parede, como o DATETIME do MySQL). Fábrica, não `class extends` (ver _estrutura-pg.js). */
 function TimestampSemFuso() {
@@ -43,7 +43,7 @@ function hooks(sequelize, tabela, extras) {
     },
     afterSync: async () => {
       if (existiam.get(tabela)) return;
-      for (const [nome, expr] of [...(CHECKS[tabela] || []), ...(CHECKS_ESPELHO[tabela] || [])]) {
+      for (const [nome, expr] of [...(CHECKS[tabela] || []), ...(CHECKS_ESPELHO[tabela] || []), ...(CHECKS_LILLY_V708[tabela] || [])]) {
         await sequelize.query(`ALTER TABLE "${tabela}" ADD CONSTRAINT "${nome}" CHECK (${expr})`, { logging: false });
       }
       for (const sql of extras) await sequelize.query(sql, { logging: false });

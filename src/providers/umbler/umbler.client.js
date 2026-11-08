@@ -89,7 +89,14 @@ async function lerConversa(chatId) {
   const org = chat && (chat.organization?.id ?? chat.organizationId);
   return {
     organizationId: org == null ? '' : `${org}`,
-    contact: { id: chat?.contact?.id == null ? '' : `${chat.contact.id}`, tags: Array.isArray(chat?.contact?.tags) ? chat.contact.tags : [] },
+    contact: {
+      id: chat?.contact?.id == null ? '' : `${chat.contact.id}`, tags: Array.isArray(chat?.contact?.tags) ? chat.contact.tags : [],
+      // Conversa interna da equipe (Lilly v708): tipo do contato e membros, só para o `events/resolve` conferir quem conversa com quem.
+      contactType: typeof chat?.contact?.contactType === 'string' ? chat.contact.contactType : null,
+      organizationMembers: (Array.isArray(chat?.contact?.organizationMembers) ? chat.contact.organizationMembers : [])
+        .map((m) => (m && typeof m === 'object' ? m.id : m)).filter((id) => id != null).map(String),
+    },
+    channel: chat?.channel ? { id: chat.channel.id == null ? '' : `${chat.channel.id}`, type: chat.channel._t ?? chat.channel.Type ?? chat.channel.type ?? null } : null,
   };
 }
 

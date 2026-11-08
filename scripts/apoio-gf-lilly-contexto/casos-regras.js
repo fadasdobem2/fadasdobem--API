@@ -112,7 +112,9 @@ module.exports = async ({ r, sequelize, snap, body, legado, conferir, passo, con
     const todos = J(x.snapshot);
     for (const [campo, valor] of Object.entries(SENSIVEL)) conferir(`sem ${campo}`, !todos.includes(valor) && !todos.includes(`"${campo}"`));
     for (const marca of ['OBSERVACAO-NAO-PODE-SAIR', 'MOTIVO-PESSOAL-NAO-PODE-SAIR', 'OBS-CONSULTA-NAO-PODE-SAIR', 'MOTIVO-FOLGA-NAO-PODE-SAIR']) conferir(`sem texto livre ${marca.slice(0, 10)}`, !todos.includes(marca));
-    conferir('cliente só com os campos do contrato', x.snapshot.clients.every((c) => Object.keys(c).every((k) => ['id', 'name', 'identificationName', 'treatAs', 'phone', 'whatsapp', 'phones', 'phoneMatch', 'contactId', 'paymentType', 'postpaid', 'balance', 'lastConsultationAt', 'profileUrl'].includes(k))));
+    conferir('cliente só com os campos do contrato', x.snapshot.clients.every((c) => Object.keys(c).every((k) => ['id', 'name', 'identificationName', 'treatAs', 'phone', 'whatsapp', 'phones', 'phoneMatch', 'contactId', 'paymentType', 'postpaid', 'balance', 'lastConsultationAt', 'profileUrl',
+      // Lilly v708: só para a cliente que o fluxo de cadastro da Lilly já tocou (situação não nula); cadastro antigo continua sem eles (ver casos do v708)
+      'situacao_cadastral', 'fullName', 'birthDate', 'email', 'noEmail'].includes(k))));
   });
   await passo('registro: só tipo, complete, assuntos e contagens (nenhum telefone, nome ou texto)', async () => {
     const x = await snap(body({ conversationId: 'chat-A' }, { id: 'chat-A', contact: { id: 'ct-A', phoneNumber: '+5511998887777' } }));

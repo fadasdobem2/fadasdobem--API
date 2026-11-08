@@ -3,8 +3,9 @@
 /** `gf_lilly_pagamento_refs`: referências do provedor por pagamento lançado (duplicidade por referência, R3). Único por `payment_id`. */
 
 const { iso } = require('./executor');
+const { AcaoRecusadaError } = require('../acoes/acoes.erros');
 
-const COLUNAS = 'payment_id, reference, mp_payment_id, external_transaction_id, end_to_end_id, source_event_id, proposal_id, authorized_event_id, criado_em';
+const COLUNAS = 'payment_id, reference, mp_payment_id, external_transaction_id, end_to_end_id, source_event_id, proposal_id, authorized_event_id, provider_confirmed, authorized_by, criado_em';
 const CAMPOS_DE_BUSCA = {
   reference: 'reference', mpPaymentId: 'mp_payment_id', externalTransactionId: 'external_transaction_id', endToEndId: 'end_to_end_id', sourceEventId: 'source_event_id',
 };
@@ -18,17 +19,25 @@ const paraObjeto = (l) => l && ({
   sourceEventId: l.source_event_id,
   proposalId: l.proposal_id,
   authorizedEventId: l.authorized_event_id,
+  providerConfirmed: l.provider_confirmed === true,
+  authorizedBy: l.authorized_by || undefined,
   criadoEm: iso(l.criado_em),
 });
 
-/** Idempotente por `paymentId`. Devolve `{ ref, repetida }`. */
+/**
+ * Idempotente por `paymentId`. Devolve `{ ref, repetida }`. O banco também barra, SEM caixa e em qualquer cadastro, a repetição de `reference`,
+ * `mp_payment_id` e `end_to_end_id` (índices únicos): como `INSERT IGNORE` vira `ON CONFLICT DO NOTHING`, que engoliria essa violação, a linha
+ * que não ficou gravada é tratada como conflito de unicidade, nunca como sucesso.
+ */
 async function gravarRefs(executor, r) {
   const [res] = await executor.execute(
-    `INSERT IGNORE INTO gf_lilly_pagamento_refs (payment_id, reference, mp_payment_id, external_transaction_id, end_to_end_id, source_event_id, proposal_id, authorized_event_id)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-    [r.paymentId, r.reference ?? null, r.mpPaymentId ?? null, r.externalTransactionId ?? null, r.endToEndId ?? null, r.sourceEventId ?? null, r.proposalId ?? null, r.authorizedEventId ?? null],
+    `INSERT IGNORE INTO gf_lilly_pagamento_refs (payment_id, reference, mp_payment_id, external_transaction_id, end_to_end_id, source_event_id, proposal_id, authorized_event_id, provider_confirmed, authorized_by)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    [r.paymentId, r.reference ?? null, r.mpPaymentId ?? null, r.externalTransactionId ?? null, r.endToEndId ?? null, r.sourceEventId ?? null, r.proposalId ?? null, r.authorizedEventId ?? null, r.providerConfirmed === true, r.authorizedBy ?? null],
   );
-  return { ref: await buscarPorPagamento(executor, r.paymentId), repetida: res.affectedRows === 0 };
+  const ref = await buscarPorPagamento(executor, r.paymentId);
+  if (!ref) throw new AcaoRecusadaError('LILLY_PAYMENT_ALREADY_RECORDED', 'Este pagamento já foi lançado (a referência do provedor é única em todos os cadastros).', 409);
+  return { ref, repetida: res.affectedRows === 0 };
 }
 
 async function buscarPorPagamento(executor, paymentId) {

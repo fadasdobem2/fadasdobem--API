@@ -23,9 +23,10 @@ const iso = (v) => (v ? new Date(v).toISOString() : undefined);
 const localParaIso = (t) => (t ? `${`${t}`.replace(' ', 'T').slice(0, 19)}-03:00` : undefined);
 const SITUACAO = Object.freeze({ confirmado: 'confirmed', informado: 'informed', 'nao-localizado': 'pending', 'conferir-origem': 'pending' });
 
-function statusDoPostgres(l, i) {
+function statusDoPostgres(l, i, confirmadoPeloProvedor = false) {
   if (l.status === 'Cancelado' || i.status === 'Cancelado') return 'cancelled';
-  if (l.confirmacao === 'Confirmado' || i.confirmation === 'Confirmado') return 'confirmed';
+  // Pix conferido no provedor (Lilly v708, `providerConfirmed` guardado com a referência): a Lilly precisa ler o lançamento como confirmado.
+  if (l.confirmacao === 'Confirmado' || i.confirmation === 'Confirmado' || confirmadoPeloProvedor) return 'confirmed';
   if (l.status === 'Em conferência') return 'pending';
   return 'informed';
 }
@@ -33,16 +34,21 @@ function statusDoPostgres(l, i) {
 function pagamentoDoPostgres(l, refs, conversaDoEvento) {
   const i = item(l);
   const ref = refs.get(`${l.id}`);
+  const doProvedor = Boolean(ref && ref.providerConfirmed);
   return sem({
     id: l.id,
     clientId: l.id_cliente,
     amount: Number(l.valor_centavos) / 100,
-    status: statusDoPostgres(l, i),
+    status: statusDoPostgres(l, i, doProvedor),
     consultationId: l.id_consulta || (typeof i.linkedConsultationId === 'string' ? i.linkedConsultationId : undefined),
     conversationId: ref && ref.sourceEventId ? conversaDoEvento.get(ref.sourceEventId) : undefined,
     reference: ref && ref.reference, mpPaymentId: ref && ref.mpPaymentId, externalTransactionId: ref && ref.externalTransactionId,
     endToEndId: ref && ref.endToEndId, sourceEventId: ref && ref.sourceEventId,
     createdAt: iso(l.informado_em),
+    paidAt: typeof i.paidAt === 'string' ? i.paidAt : undefined,
+    payerName: typeof i.payerName === 'string' ? i.payerName : undefined, authorization: typeof i.authorization === 'string' ? i.authorization : undefined,
+    method: l.metodo, bank: typeof i.bank === 'string' ? i.bank : undefined,
+    ...(doProvedor ? { confirmation: 'Confirmado', providerConfirmed: true, authorizedBy: ref.authorizedBy } : {}),
     date: typeof i.paidAt === 'string' ? i.paidAt.slice(0, 10) : iso(l.informado_em).slice(0, 10),
   });
 }

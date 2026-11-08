@@ -29,6 +29,15 @@ function consultas({ clientIds, desdeIso, inicioDiaIso, consultaId, limite }) {
   return lendoNovo((m) => m.GfConsultasExt.findAll({ where: { [Op.or]: condicoes }, order: [['iniciada_em', 'ASC'], ['id', 'ASC']], limit: limite + 1 }));
 }
 
+/** Consultas para o indicador R (retorno ao mesmo profissional), com o que o agrupamento em sessões precisa. Pede `limite + 1`. */
+function consultasParaRetorno({ limite }) {
+  return lendoNovo((m) => m.GfConsultasExt.findAll({
+    attributes: ['id', 'id_tarologo', 'id_cliente', 'status', 'aguardando_inicio', 'duracao_segundos', 'iniciada_em', 'encerrada_em', 'consulta_origem_id', 'item'],
+    // Todos os status: uma origem anulada precisa estar no grafo para a continuação não virar consulta independente (como no front).
+    order: [['iniciada_em', 'ASC'], ['id', 'ASC']], limit: limite + 1, raw: true,
+  }));
+}
+
 /** Presença de todos os tarólogos (tabela pequena). */
 function presenca() {
   return lendoNovo((m) => m.GfPresencaEstado.findAll({ order: [['id_tarologo', 'ASC']] }));
@@ -76,6 +85,11 @@ function clientesExt(clientIds) {
   return lendoNovo((m) => m.GfClientesExt.findAll({ where: { id_cliente: unicos(clientIds) } }));
 }
 
+/** Clientes criadas pela Lilly no banco novo (faixa >= 1.000.000.000), no formato de `usuarios`; IDs de outra faixa são ignorados. */
+function clientesNovosPorIds(clientIds) {
+  return require('../../clientes/cliente-novo').clientesNovosPorIds(clientIds);
+}
+
 /** Clientes cujo WhatsApp editado na ficha termina nos 8 dígitos (pré-filtro; a decisão é do `comoCasa`). `digitos8` só dígitos. */
 function clientesExtPorTelefone(digitos8, limite) {
   if (!/^\d{8}$/.test(digitos8)) return Promise.resolve([]);
@@ -84,6 +98,15 @@ function clientesExtPorTelefone(digitos8, limite) {
     order: [['id_cliente', 'ASC']],
     limit: limite + 1,
   }));
+}
+
+/** Clientes NOVAS cujo telefone termina nos 8 dígitos (pré-filtro; a decisão é do `comoCasa`), no formato de `usuarios`. */
+async function clientesNovosPorTelefone(digitos8, limite) {
+  if (!/^\d{8}$/.test(digitos8)) return [];
+  const linhas = await lendoNovo((m) => m.GfClientesNovos.findAll({
+    where: literal(`regexp_replace(COALESCE(telefone, ''), '[^0-9]', '', 'g') LIKE '%${digitos8}'`), order: [['id_cliente', 'ASC']], limit: limite + 1, raw: true,
+  }));
+  return linhas.map(require('../../clientes/cliente-novo').comoLinhaDeUsuario);
 }
 
 /** Última consulta (início) de cada cliente em foco no Postgres, excluindo as canceladas/anuladas. */
@@ -98,5 +121,5 @@ function ultimaConsultaPorCliente(clientIds) {
 }
 
 module.exports = {
-  agenda, consultas, presenca, horarios, pagamentos, precosVersoes, restricoes, divergencias, clientesExt, clientesExtPorTelefone, ultimaConsultaPorCliente,
+  agenda, consultas, consultasParaRetorno, presenca, horarios, pagamentos, precosVersoes, restricoes, divergencias, clientesExt, clientesNovosPorIds, clientesNovosPorTelefone, clientesExtPorTelefone, ultimaConsultaPorCliente,
 };

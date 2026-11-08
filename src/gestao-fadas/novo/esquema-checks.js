@@ -268,6 +268,21 @@ const CHECKS = {
   gf_lilly_pagamento_refs: [
     ['chk_lilly_refs_pagamento', nv('payment_id')], ['chk_lilly_refs_reference', 'reference IS NULL OR ' + nv('reference')],
   ],
+  // Cliente criada pela Lilly NO BANCO NOVO (sem linha em `usuarios`, que é legado somente leitura). Nomes vazios enquanto desconhecidos; nascimento NULL.
+  gf_clientes_novos: [
+    ['chk_clientes_novos_id', "id_cliente ~ '^[1-9][0-9]{9}$' AND id_cliente >= '1000000000' AND id_cliente <= '2147483647'"],
+    ['chk_clientes_novos_nomes', 'nome = trim(nome) AND nome_id = trim(nome_id) AND nome2 = trim(nome2)'],
+    ['chk_clientes_novos_nascimento', "data_nascimento IS NULL OR data_nascimento >= DATE '1900-01-01'"],
+    ['chk_clientes_novos_email', 'email IS NULL OR ' + nv('email')], ['chk_clientes_novos_telefone', 'telefone IS NULL OR ' + nv('telefone')],
+    ['chk_clientes_novos_origem', "origem IN ('lilly')"], ['chk_clientes_novos_operation_key', nv('operation_key')],
+  ],
+  // Pedido de mais tempo: registro e auditoria, NUNCA minutos, cobrança nem encerramento (altera_duracao e encerra_consulta sempre falsos).
+  gf_lilly_mais_tempo: [
+    ['chk_lilly_mais_tempo_id', nv('id')], ['chk_lilly_mais_tempo_consulta', nv('consulta_id')], ['chk_lilly_mais_tempo_ciclo', 'ciclo >= 1'],
+    ['chk_lilly_mais_tempo_cliente', "id_cliente ~ '^[1-9][0-9]{0,9}$'"], ['chk_lilly_mais_tempo_tarologo', nv('id_tarologo')],
+    ['chk_lilly_mais_tempo_evento', nv('source_event_id')], ['chk_lilly_mais_tempo_rotulo', nt('rotulo')],
+    ['chk_lilly_mais_tempo_sem_efeito', 'altera_duracao = FALSE AND encerra_consulta = FALSE'],
+  ],
   gf_lilly_cotacoes: [
     ['chk_lilly_cotacoes_id', nv('id')], ['chk_lilly_cotacoes_conversa', nv('conversation_id')], ['chk_lilly_cotacoes_cliente', "id_cliente IS NULL OR id_cliente ~ '^[1-9][0-9]{0,9}$'"],
     ['chk_lilly_cotacoes_valor', 'amount_centavos >= 0'], ['chk_lilly_cotacoes_minutos', 'minutes > 0'],
@@ -359,4 +374,15 @@ const CHECKS_ESPELHO = {
   ],
 };
 
-module.exports = { CHECKS, CHECKS_ESPELHO };
+/**
+ * CHECKs de colunas acrescentadas pela migração 20261211000000 (Lilly v708). À parte de `CHECKS_ESPELHO` porque a migração do espelho (20261128) aplica
+ * TODA a lista de `CHECKS_ESPELHO` antes de a coluna existir. Situação cadastral: NULL = ainda não avaliada (NUNCA preencher o legado em massa);
+ * NÃO é o `perfil_pagamento` (Pré/Pós).
+ */
+const CHECKS_LILLY_V708 = {
+  gf_clientes_ext: [
+    ['chk_clientes_ext_situacao_cadastral', "situacao_cadastral IS NULL OR situacao_cadastral IN ('dados_pendentes', 'completo')"],
+  ],
+};
+
+module.exports = { CHECKS, CHECKS_ESPELHO, CHECKS_LILLY_V708 };

@@ -11,4 +11,10 @@ const equipeAutorizada = (env = process.env) => lista(env.LILLY_STAFF_AUTORIZADA
 /** `LILLY_UMBLER_MEMBER_IDS` (opcional): ids de membro que são a própria conta da Lilly. */
 const contasDaLilly = (env = process.env) => lista(env.LILLY_UMBLER_MEMBER_IDS);
 
-module.exports = { organizacaoEsperada, equipeAutorizada, contasDaLilly };
+/**
+ * `LILLY_STAFF_TODOS_AUTORIZAM`: DECISÃO DA NICE (v708) = TODOS os atendentes (membros nativos, online) podem autorizar comandos da Lilly. Padrão `true`.
+ * Com `false` volta a valer só a lista `LILLY_STAFF_AUTORIZADA`.
+ */
+const todosAutorizam = (env = process.env) => `${env.LILLY_STAFF_TODOS_AUTORIZAM || ''}`.trim().toLowerCase() !== 'false';
+
+module.exports = { organizacaoEsperada, equipeAutorizada, contasDaLilly, todosAutorizam };

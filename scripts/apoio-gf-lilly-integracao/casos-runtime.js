@@ -34,7 +34,7 @@ module.exports = async ({ adapter, umbler, importar, conferir, passo, log, AGORA
       relogioAvanca(rt, 3);
       await rt.runtime.dispatch();
       s = rt.runtime.store.read();
-      conferir('notas ao fim: Umbler falsa recebeu a nota de "Cadastro atualizado" com o ID real', rt.enviados.some((e) => e.kind === 'note' && /Cadastro atualizado/.test(e.payload.text) && /900104/.test(e.payload.text)), JSON.stringify(rt.enviados.map((e) => e.payload && e.payload.text && e.payload.text.slice(0, 40))));
+      conferir('notas ao fim: Umbler falsa recebeu a nota de cadastro ("Cadastro salvo"/"atualizado", v709) com o ID real', rt.enviados.some((e) => e.kind === 'note' && /Cadastro (salvo|atualizado)/.test(e.payload.text) && /900104/.test(e.payload.text)), JSON.stringify(rt.enviados.map((e) => e.payload && e.payload.text && e.payload.text.slice(0, 40))));
       conferir('nenhuma ação ficou failed/uncertain', s.outbox.every((a) => !['failed', 'uncertain'].includes(a.status)), JSON.stringify(s.outbox.map((a) => [a.kind, a.status, a.error])));
       log('   (info) notas pendentes de modalidade (cliente do legado sem perfil de pagamento):', JSON.stringify(s.outbox.filter((a) => a.kind === 'note' && /modalidade/.test(a.payload.text)).map((a) => a.status)));
     } finally { await rt.fechar(); }

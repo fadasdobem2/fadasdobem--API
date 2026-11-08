@@ -7,6 +7,10 @@
  * cliente); `proposalId`; `humanConfirmed` ou `providerConfirmed`; valor `^\d{1,12}(\.\d{1,2})?$`; referência do provedor única
  * (cruzando tipos), proposta única e autorização única. Grava as referências em `gf_lilly_pagamento_refs`.
  * Tabela `gf_lilly_pagamentos` NÃO foi criada: `gf_lilly_pagamento_refs` já guarda proposta, autorização e referências.
+ * v708 (docs/banco/21 §4 da Nice): `amount`, `reference`/`mpPaymentId`, `payerName` (separado da cliente; pode ser null), `endToEndId`, `authorization`,
+ * `paidAt`/`date`, `method`/`bank`/`confirmation`, `providerConfirmed`, `authorizedBy`, `authorizedEventId` (campos e regras em `pagamento.campos.js`).
+ * Unicidade GLOBAL da referência do provedor (também no banco, índices únicos sem caixa), em qualquer cadastro; pagamento estornado/anulado nunca é
+ * relançado; resposta incerta se concilia pelo `GET /lilly/actions/{chave}`. Lançamento automático: `authorizedBy 'lilly:mercado_pago'` (`autorizacao.js`).
  * NÃO RESPONDIDO (doc 60): pagamento sem `mpPaymentId` nem `endToEndId` (que banco registrar): RECUSADO até a Nice decidir. Exceção de compatibilidade:
  * `providerConfirmed:true` com `reference` (é como a Lilly manda o ID do Mercado Pago).
  */
@@ -18,12 +22,11 @@ const { provarAutorizacao } = require('./autorizacao');
 const { montarRegistro } = require('./pagamento.registro');
 const { referenciasDe, buscarConflito } = require('./pagamento.unicidade');
 const { conferirBaseComVinculo, permitido, nao } = require('./validacao.base');
+const { conferirProvedor, ehAutomatico } = require('./pagamento.campos');
 const { recusar, ehObjeto, texto, sha, chaveDaOperacao, pedidoDeServico, chamarServico, auditar } = require('./executores.comum');
 const { avulso } = require('../dados/executor');
 
 const VALOR = /^\d{1,12}(\.\d{1,2})?$/;
-const DATA = /^\d{4}-\d{2}-\d{2}$/;
-const INSTANTE = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2}(\.\d{1,3})?)?(Z|[+-]\d{2}:\d{2})$/;
 
 function normalizar(acao) {
   const p = ehObjeto(acao.payload) ? acao.payload : null;
@@ -39,10 +42,9 @@ function normalizar(acao) {
   // (`reference` vinda do texto) continua exigindo mpPaymentId/endToEndId (decisão 4).
   const referenciaDoProvedor = refs.mpPaymentId || refs.endToEndId || (p.providerConfirmed === true ? refs.reference : undefined);
   if (!referenciaDoProvedor) return { motivo: 'Pagamento sem referência do Mercado Pago ou Pix (mpPaymentId ou endToEndId) ainda depende de decisão.', code: 'LILLY_PAYMENT_REFERENCE_REQUIRED' };
-  const date = texto(p.date);
-  if (date && !(DATA.test(date) ? !Number.isNaN(Date.parse(`${date}T12:00:00Z`)) : INSTANTE.test(date) && !Number.isNaN(Date.parse(date)))) return { motivo: 'A data do pagamento é inválida.' };
-  if (p.payerName !== undefined && (typeof p.payerName !== 'string' || p.payerName.length > 200)) return { motivo: 'O nome do pagador é inválido.' };
-  return { pedido: { amount: bruto, refs, date: date || undefined, payerName: texto(p.payerName) || undefined, distinctAmountConfirmed: p.distinctAmountConfirmed === true, reconciliationRequired: p.reconciliationRequired === true, authorization: texto(p.reference) || texto(p.mpPaymentId) || texto(p.endToEndId) } };
+  const prov = conferirProvedor(p, refs);
+  if (prov.motivo) return { motivo: prov.motivo, code: prov.code };
+  return { pedido: { amount: bruto, refs, date: prov.paidAt, payerName: texto(p.payerName) || undefined, distinctAmountConfirmed: p.distinctAmountConfirmed === true, reconciliationRequired: p.reconciliationRequired === true, authorization: prov.authorization, providerConfirmed: prov.providerConfirmed, authorizedBy: prov.authorizedBy, automatico: ehAutomatico(p) } };
 }
 
 /** Os dados que o evento humano pode ter carregado e que devem coincidir (valor e referências). */
@@ -56,6 +58,7 @@ const MENSAGENS = {
 
 /** Conflito -> recusa 409 (referência em outra cliente tem código próprio). */
 function recusarConflito(c, clientId) {
+  if (c.cancelado) recusar('LILLY_PAYMENT_REVERSED', `Este pagamento foi estornado ou anulado (${c.paymentId}). Não lanço de novo sozinha: a equipe confere.`, 409);
   const [code, msg] = MENSAGENS[c.tipo];
   if (c.tipo === 'referencia' && c.clientId && c.clientId !== clientId) recusar('LILLY_PAYMENT_REFERENCE_OTHER_CLIENT', 'Esta referência de pagamento já está em outro cadastro. Exige revisão.', 409);
   return recusar(code, `${msg} (${c.paymentId}).`, 409);
@@ -66,7 +69,8 @@ async function conferirTudo(executor, acao, n, { ignorar, aoRecusar }) {
   if (base.recusa) return aoRecusar('LILLY_PAYMENT_NOT_ALLOWED', base.recusa.reason);
   const a = await provarAutorizacao(executor, acao, { proposto: propostoDe(n.pedido) });
   if (a.motivo) return aoRecusar('LILLY_AUTHORIZATION_MISSING', a.motivo);
-  const c = await buscarConflito(executor, { refs: n.pedido.refs, proposalId: a.dados.proposalId, authorizedEventId: a.dados.authorizedEventId, ignorar });
+  // Lançamento automático: o evento do comprovante pode ter mais de um recebimento; a unicidade que vale é a da referência do provedor e da proposta.
+  const c = await buscarConflito(executor, { refs: n.pedido.refs, proposalId: a.dados.proposalId, authorizedEventId: n.pedido.automatico ? undefined : a.dados.authorizedEventId, ignorar });
   if (c) return aoRecusar(null, null, c);
   return a.dados;
 }
@@ -75,7 +79,7 @@ function registrarPagamento() {
   registrar('payment', {
     async validar(acao) {
       const n = normalizar(acao); if (n.motivo) return nao(n.motivo);
-      const resposta = (code, motivo, conflito) => { const e = { allowed: false, reason: conflito ? `${MENSAGENS[conflito.tipo][1]} (${conflito.paymentId}).` : motivo }; return { recusa: e }; };
+      const resposta = (code, motivo, conflito) => { const e = { allowed: false, reason: conflito ? (conflito.cancelado ? `Este pagamento foi estornado ou anulado (${conflito.paymentId}); não é lançado de novo sozinho.` : `${MENSAGENS[conflito.tipo][1]} (${conflito.paymentId}).`) : motivo }; return { recusa: e }; };
       const r = await conferirTudo(avulso, acao, n, { aoRecusar: resposta });
       return r.recusa ? r.recusa : permitido(acao);
     },
@@ -93,10 +97,10 @@ function registrarPagamento() {
         const { registro } = await montarRegistro(executor, { id, clientId, amount: n.pedido.amount, paidAt: n.pedido.date, payerName: n.pedido.payerName, authorization: n.pedido.authorization, note: `Lançado pela Lilly. Autorizado por ${autorizacao.authorizedBy} (evento ${autorizacao.authorizedEventId}).`, distinctAmountConfirmed: n.pedido.distinctAmountConfirmed }, agoraIso);
         await chamarServico(() => pagamentos.lancar(pedidoDeServico({ body: { operationKey: chaveDaOperacao(chave, 'pagamento'), record: registro } })));
       }
-      await refsRepo.gravarRefs(executor, { paymentId: id, ...n.pedido.refs, proposalId: autorizacao.proposalId, authorizedEventId: autorizacao.authorizedEventId });
+      await refsRepo.gravarRefs(executor, { paymentId: id, ...n.pedido.refs, proposalId: autorizacao.proposalId, authorizedEventId: autorizacao.authorizedEventId, providerConfirmed: n.pedido.providerConfirmed, authorizedBy: autorizacao.authorizedBy });
       await auditar(executor, chave, {
         acao: 'payment', entidade: 'pagamento', entidadeId: id,
-        depois: { clientId, amount: n.pedido.amount, ...autorizacao, reconciliationRequired: n.pedido.reconciliationRequired, reference: n.pedido.refs.reference, mpPaymentId: n.pedido.refs.mpPaymentId, endToEndId: n.pedido.refs.endToEndId, sourceEventId: n.pedido.refs.sourceEventId, conversationId: acao.conversationId },
+        depois: { clientId, amount: n.pedido.amount, ...autorizacao, providerConfirmed: n.pedido.providerConfirmed, payerName: n.pedido.payerName, paidAt: n.pedido.date, reconciliationRequired: n.pedido.reconciliationRequired, reference: n.pedido.refs.reference, mpPaymentId: n.pedido.refs.mpPaymentId, endToEndId: n.pedido.refs.endToEndId, sourceEventId: n.pedido.refs.sourceEventId, conversationId: acao.conversationId },
       });
       return { id, clientId };
     },

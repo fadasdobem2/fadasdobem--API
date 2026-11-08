@@ -41,6 +41,7 @@ const fabricas = [
   require('./gf_cadastros_tarologo_links.model'),
   require('./gf_cadastros_tarologo_novos_links.model'),
   require('./gf_clientes_ext.model'),
+  require('./gf_clientes_novos.model'),
   require('./gf_precos_versoes.model'),
   require('./gf_pagamentos.model'),
   require('./gf_pagamentos_eventos.model'),
@@ -70,6 +71,7 @@ const fabricas = [
   require('./gf_ponto_turnos.model'),
   require('./gf_ponto_escalas.model'),
   require('./gf_ponto_eventos.model'),
+  require('./gf_lilly_mais_tempo.model'),
 ];
 
 function registrar(sequelize) {

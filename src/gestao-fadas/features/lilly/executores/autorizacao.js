@@ -9,16 +9,30 @@
 
 const eventos = require('../dados/eventos.repo');
 const { ehObjeto, texto } = require('./executores.comum');
+const { ehAutomatico } = require('./pagamento.campos');
 
 const iguais = (a, b) => {
   const x = `${a}`.trim().toLowerCase(); const y = `${b}`.trim().toLowerCase();
   return x === y || (x !== '' && y !== '' && Number.isFinite(Number(x)) && Number.isFinite(Number(y)) && Number(x) === Number(y)); // 67.5 == 67.50
 };
 
+/**
+ * Lançamento AUTOMÁTICO de Pix conferido no Mercado Pago (`authorizedBy: 'lilly:mercado_pago'`, v708): não há atendente por lançamento. A prova é a
+ * evidência do provedor que o serviço guardou (`providerConfirmed:true`, exigido por `pagamento.campos.js`) ligada a um evento JÁ RESOLVIDO pelo
+ * Gestão NESTA conversa (o comprovante recebido). Texto da IA nunca autoriza.
+ */
+async function provarAutomatica(executor, acao, dados) {
+  if (!dados.proposalId || !dados.authorizedEventId) return { motivo: 'A ação precisa da proposta e do evento do comprovante.', dados };
+  const evento = await eventos.buscarEvento(executor, dados.authorizedEventId);
+  if (!evento || evento.conversationId !== texto(acao.conversationId)) return { motivo: 'Não encontrei o evento do comprovante nesta conversa.', dados };
+  return { motivo: null, evento, dados };
+}
+
 /** @returns {Promise<{motivo:string|null, evento?:object, dados:{proposalId:string, authorizedBy:string, authorizedEventId:string}}>} */
 async function provarAutorizacao(executor, acao, { proposto = {} } = {}) {
   const p = ehObjeto(acao.payload) ? acao.payload : {};
   const dados = { proposalId: texto(p.proposalId), authorizedBy: texto(p.authorizedBy), authorizedEventId: texto(p.authorizedEventId) };
+  if (ehAutomatico(p)) return provarAutomatica(executor, acao, dados);
   if (!dados.proposalId || !dados.authorizedBy || !dados.authorizedEventId) return { motivo: 'A ação precisa da autorização humana (proposta, autorizador e evento).', dados };
   const evento = await eventos.buscarEventoAutorizado(executor, dados.authorizedEventId, { conversationId: texto(acao.conversationId), clientId: acao.clientId ? `${acao.clientId}` : undefined });
   if (!evento) return { motivo: 'Não encontrei a autorização da equipe para esta conversa e esta cliente.', dados };

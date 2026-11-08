@@ -43,7 +43,11 @@ module.exports = async ({ r, controller, avulso, chamar, consulta, conferir, pas
     const ok1 = (await resolver(webhook('E3'))).corpo.event;
     conferir('lista + privada = true', ok1.actor === 'staff' && ok1.internal === true && ok1.data.staffAuthorized === true && ok1.data.staffId === 'membro-autorizada');
     mensagem = msg({ isPrivate: true, source: 'Member', fromContact: null, sentByOrganizationMember: { id: 'membro-qualquer' } });
-    conferir('fora da lista = false', (await resolver(webhook('E4'))).corpo.event.data.staffAuthorized === false);
+    // DECISÃO DA NICE (v708): todos os atendentes online autorizam. Com LILLY_STAFF_TODOS_AUTORIZAM=false volta a valer só a lista do ambiente.
+    process.env.LILLY_STAFF_TODOS_AUTORIZAM = 'false';
+    conferir('fora da lista = false (modo lista)', (await resolver(webhook('E4'))).corpo.event.data.staffAuthorized === false);
+    delete process.env.LILLY_STAFF_TODOS_AUTORIZAM;
+    conferir('padrão: atendente fora da lista, em nota privada, autoriza (decisão da Nice)', (await resolver(webhook('E4b'))).corpo.event.data.staffAuthorized === true);
     mensagem = msg({ isPrivate: false, source: 'Member', fromContact: null, sentByOrganizationMember: { id: 'membro-autorizada' } });
     conferir('na lista mas mensagem pública = false', (await resolver(webhook('E5'))).corpo.event.data.staffAuthorized === false);
     mensagem = msg({ source: 'Contact', content: 'x' });
