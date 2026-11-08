@@ -17,9 +17,12 @@ const legado = require('../../legado-escrita');
 const lp = require('../../legado-escrita/legado-primeiro');
 const { MENSAGEM: REGIME_NAO_VOLTA, regimePodeMudar } = require('../../_comum/dominio/cliente-regime');
 const { SELECT_FICHA, camposDaFicha, colunasDaFicha, fichaParaPerfil } = require('./clientes.ficha');
+const { ehIdDaFaixaNova } = require('../../_comum/dominio/cliente-faixa-nova');
+const { situacaoDaNova } = require('../clientes/cliente-novo.situacao');
 
 const CAMPOS_LEGADO = ['name', 'treatAs', 'whatsapp', 'birthDate'];
 const { dadosEfetivosDoCliente } = require('../../legado-escrita/fusao');
+const { COLUNAS: COLUNAS_FICHA } = require('../../_comum/dominio/cliente-ficha-efetivo');
 
 let verificarCliente = async (id) => require('../clientes/clientes.service').clienteExiste(id);
 const definirVerificadorDeCliente = (f) => { verificarCliente = f; };
@@ -62,7 +65,7 @@ async function gravar(req) {
     escopo: 'cadastros.cliente.editar', operationKey, corpo: { id, expectedRevision, mudancas }, entidade: 'cliente-ext', entidadeId: id, acao: 'cadastros.cliente.editar',
     producao: async (ex) => {
       await ex.execute('SELECT pg_advisory_xact_lock(hashtext(?))', [`gf_clientes_ext:${id}`]);
-      const [linhas] = await ex.execute('SELECT id_cliente, perfil_pagamento, perfil_pagamento_em, dados, revisao FROM gf_clientes_ext WHERE id_cliente = ? FOR UPDATE', [id]);
+      const [linhas] = await ex.execute(`SELECT id_cliente, perfil_pagamento, perfil_pagamento_em, dados, revisao, situacao_cadastral, sem_email, ${COLUNAS_FICHA.join(', ')} FROM gf_clientes_ext WHERE id_cliente = ? FOR UPDATE`, [id]);
       const atual = linhas[0] || null;
       if ((atual ? Number(atual.revisao) : 0) !== expectedRevision) throw c.conflitoVersao('Este cadastro mudou. Feche e abra novamente para conferir.');
       // Pré/Pós: só Pós -> Pré (definitivo). Pré -> Pós, ou apagar o Pré, é recusado antes de qualquer escrita.
@@ -70,7 +73,19 @@ async function gravar(req) {
       const antes = atual ? paraDto(atual) : null;
       const ficha = colunasDaFicha(mudancas);
       const completo = aplicar(atual, mudancas, new Date().toISOString());
-      const camposLegado = lp.ativo('clientes') ? CAMPOS_LEGADO.filter((k) => mudancas[k] !== undefined) : [];
+      // Cliente NOVA (faixa >= 1.000.000.000, criada pela Lilly): não há linha em `usuarios`. A edição fica toda no complemento (nada vai ao legado, nem
+      // espelho) e a situação cadastral é recalculada aqui, na mesma transação (a API é a autoridade; o front só lê).
+      const nova = ehIdDaFaixaNova(id);
+      if (nova) {
+        const [cadastros] = await ex.execute('SELECT nome, nome_id, telefone, data_nascimento, email FROM gf_clientes_novos WHERE id_cliente = ?', [id]);
+        const cadastro = cadastros[0];
+        const colunas = { ...(atual || {}), ...Object.fromEntries(ficha.map(([col, v]) => [col, col === 'telefones' ? JSON.parse(v) : v])) };
+        if (cadastro) {
+          completo.situacao_cadastral = situacaoDaNova(cadastro, completo.dados, colunas);
+          ficha.push(['situacao_cadastral', completo.situacao_cadastral]);
+        }
+      }
+      const camposLegado = !nova && lp.ativo('clientes') ? CAMPOS_LEGADO.filter((k) => mudancas[k] !== undefined) : [];
       let escrito = null; let prox = completo;
       if (camposLegado.length) {
         // LEGADO PRIMEIRO (Maturacao/46): nome, tratar por, WhatsApp e nascimento são gravados em `usuarios` ANTES do commit; o Postgres NÃO guarda cópia.
@@ -90,14 +105,14 @@ async function gravar(req) {
         // O que sobrou de campo do legado em `dados` (edição antiga só no Postgres, ainda não enviada pela carga) segue pendente e legível como fallback.
         const sobra = CAMPOS_LEGADO.filter((k) => prox.dados[k] !== undefined);
         await espelho.clientes.marcar(ex, id, sobra.length ? 'nao_espelhada' : 'espelhada', sobra.length ? 'campos antigos só no Postgres (carga pendente)' : 'legado primeiro', sobra);
-      } else {
+      } else if (!nova) {
         // Espelho no legado (Maturacao/45, modo `copia`): INTENÇÃO na mesma transação (os campos mexidos); a escrita no legado vem depois do commit. Desligado, só anota.
         await espelho.clientes.registrar(ex, id, Object.keys(mudancas).filter((k) => k !== 'paymentProfile'));
       }
       const depois = paraDto({ ...completo, id_cliente: id, revisao: (atual ? Number(atual.revisao) : 0) + 1 });
       // A resposta traz a ficha como ficou (lida na mesma transação); a auditoria guarda só os NOMES dos campos da ficha mexidos.
       const [gravada] = await ex.execute(`SELECT ${SELECT_FICHA} FROM gf_clientes_ext WHERE id_cliente = ?`, [id]);
-      const resposta = { readAt: new Date().toISOString(), clientId: id, extension: paraDto({ ...completo, id_cliente: id, revisao: depois.revision }, fichaParaPerfil(gravada[0], q.perfil)) };
+      const resposta = { readAt: new Date().toISOString(), clientId: id, extension: paraDto({ ...completo, id_cliente: id, revisao: depois.revision, situacao_cadastral: gravada[0].situacao_cadastral, sem_email: gravada[0].sem_email }, fichaParaPerfil(gravada[0], q.perfil)) };
       const marca = camposDaFicha(mudancas).length ? { ficha: camposDaFicha(mudancas) } : {};
       if (escrito) return { antes: { ...antes, legado: escrito.antes }, depois: { ...depois, ...marca, legado: escrito.depois }, resposta };
       return { antes, depois: { ...depois, ...marca }, resposta };

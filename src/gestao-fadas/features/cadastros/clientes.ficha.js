@@ -25,7 +25,7 @@ function colunasDaFicha(m) {
 /** Os nomes (da API) dos campos da ficha que a gravação mexeu, para a auditoria (sem os valores: CPF e endereço não vão ao log). */
 const camposDaFicha = (m) => ['fullName', 'cpf', 'email', 'noEmail', 'phones', 'address'].filter((k) => m[k] !== undefined);
 
-const SELECT_FICHA = `${COLUNAS.join(', ')}, dados`;
+const SELECT_FICHA = `${COLUNAS.join(', ')}, dados, situacao_cadastral, sem_email`;
 
 /** Os dados da ficha de uma linha, recortados para o perfil. */
 const fichaParaPerfil = (linha, perfil) => recortarPorPerfil(fichaDeLinha(linha), { civil: canViewCivilIdentity(perfil), completo: canViewFullRegistration(perfil) });

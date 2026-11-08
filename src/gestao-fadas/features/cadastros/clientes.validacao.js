@@ -75,7 +75,9 @@ function aplicar(atual, mudancas, agoraIso) {
 function paraDto(l, ficha = {}) {
   const dados = typeof l.dados === 'string' ? JSON.parse(l.dados) : l.dados || {};
   const em = l.perfil_pagamento_em ? new Date(l.perfil_pagamento_em).toISOString() : null;
-  return { ...dados, ...ficha, ...(l.perfil_pagamento ? { paymentProfile: l.perfil_pagamento } : {}), ...(em && l.perfil_pagamento ? { paymentProfileUpdatedAt: em } : {}), revision: Number(l.revisao) };
+  // Situação cadastral (Lilly v708) e "não possui e-mail": só saem quando gravados (NULL = nunca avaliada; cadastro antigo não ganha chave).
+  const estado = { ...(l.situacao_cadastral ? { situacao_cadastral: l.situacao_cadastral } : {}), ...(typeof l.sem_email === 'boolean' ? { noEmail: l.sem_email } : {}) };
+  return { ...dados, ...ficha, ...estado, ...(l.perfil_pagamento ? { paymentProfile: l.perfil_pagamento } : {}), ...(em && l.perfil_pagamento ? { paymentProfileUpdatedAt: em } : {}), revision: Number(l.revisao) };
 }
 
 module.exports = { validarMudancas, traduzirErroDeTexto, aplicar, paraDto };

@@ -102,3 +102,39 @@ Migração `20261212000000-gestao-fadas-lilly-v710.js` (só `gf_tarologos_ext.na
 | Agenda | `_comum/dominio/agenda-ocorrencia.js`, `agenda-duplicidade.js`, `fila-geral-conflitos.js` | Portes de `agenda-occurrence.ts`, `agenda-duplicate.ts`, `general-queue-conflicts.ts` (c0ce39e), ligados a painel-validacao, agendamento direto, pedidos e vínculo de contato |
 
 `committed:true` só sai da guarda depois do commit; recusa conhecida = 4xx guardada e repetida igual. Limites: a Lilly precisa de `tarologists[].conversationId` (SEM FONTE na API) para as Notas de fechamento/continuação; a fila considera só o comparador portado (sem prontidão por pagamento nem reserva de continuação do `createAgendaQueueLookup`).
+
+## Clientes novas na lista, busca e ficha (itens 6, 7 e 8 da lista de integração)
+
+A cliente criada pela Lilly (`gf_clientes_novos`, IDs >= 1.000.000.000, `GF_LILLY_CADASTRO_NOVO_ENABLED`) agora aparece em Clientes. O legado continua SOMENTE LEITURA e nem é consultado para ela. Código: `clientes/cliente-novo.leitura.js` (leitura combinada), `clientes/cliente-novo.situacao.js` (situação recalculada), `_comum/dominio/cliente-faixa-nova.js` (faixa).
+
+| Onde | O que mudou |
+|---|---|
+| Lista (`GET /operations/clients`) | Busca (`q`, `id`, `name`, `phone`, `email`, `birthDate`): as novas entram pela MESMA regra da v608 (`realClientMatches`), no cadastro com a edição da ficha por cima. Recorte (Hoje, Ontem, 7 dias, período): a nova entra no dia do cadastro (o cadastro é a movimentação dela; "ao vivo" só se estiver em consulta). `dateCounts` soma as novas. Mesmo ID nunca repete. |
+| Ficha (`GET /operations/clients/:id`) | Cliente nova é lida só do banco novo (sem legado, sem catálogos de código, saldo antigo `null`). Mesmo recorte por perfil do legado. |
+| Histórico (`/consultations`, `/receipts`) | 200 e vazio para a nova (o legado não tem história dela; as consultas dela vêm das rotas do sistema novo). ID da faixa que não existe: 404. |
+| Estado e origem | Itens da lista e `client` da ficha ganham `origin: 'lilly'`, `situacao_cadastral` (`dados_pendentes` \| `completo`, só se avaliada) e `noEmail` (só se declarado). Nenhum texto novo: o front v711 já mostra "AGUARDANDO DADOS PARA CADASTRO" e "Nome de identificação pendente". |
+| Extensão (`GET/PATCH /catalog/clients`) | A extensão devolve `situacao_cadastral` e `noEmail` quando gravados. |
+| Edição pela ficha | `PATCH /catalog/clients/:id` numa cliente nova grava só em `gf_clientes_ext` (nada vai ao `usuarios`, nem espelho), com a edição valendo inteira (`fusao.js`: sem legado a espelhar). A API recalcula `situacao_cadastral` na mesma transação (`pendente -> completo` quando nome, telefone, nascimento e e-mail ou "não possui e-mail" estão preenchidos). |
+| Lead -> cliente (Agenda, contatos) | O rótulo da cliente nova no vínculo é o nome de identificação com a edição da ficha por cima. Cliente nova sem nome de identificação não vincula (mesma regra "Busque e confirme o nome da cliente" da Agenda). Vínculos e desfazer seguem iguais. |
+
+Flag: `GF_CLIENTES_NOVOS_LEITURA=false` desliga só esta leitura (padrão ligada quando os dados novos estão no Postgres; sem cliente nova a tabela está vazia e nada muda). Verificação: `npm run verificar:gf-clientes-novos` (offline + Postgres descartável com legado de mentira só de leitura).
+
+Limites conhecidos: a lista "Em consulta"/"Nunca consultou" e as colunas de última consulta/pagamento olham só o legado; as consultas da cliente nova vivem no sistema novo (a ficha do front já as lê de `/api/consultations?clientId=`). Duas clientes com o mesmo telefone (uma nova e uma do legado) aparecem as duas na busca (a criação já recusa o duplicado).
+
+## Mapear tarólogas na Umbler (itens 1 e 3): `scripts/mapear-tarologas-umbler.js`
+
+Liga cada taróloga ativa ao contato dela na Umbler, pelo telefone, para preencher `directory.umblerContact` (o campo que `montador.tarologos.js` entrega à Lilly). SOMENTE LEITURA por padrão; telefone sempre mascarado (`+55 11 *****-1234`) no log, na tabela e no JSON.
+
+```
+# 1) relatório (nada é gravado, nem na Umbler): precisa de UMBLER_API_TOKEN e UMBLER_ORGANIZATION_ID, do legado (leitura) e do banco novo
+npm run mapear:tarologas-umbler -- [--saida relatorio.json] [--pausa-ms 250] [--tarologas arquivo.json]
+# 2) a pessoa abre o JSON, põe "aprovar": true nos itens certos (em ambíguos, escolhe o contato em "proposta"; troca de vínculo existente: "sobrescrever": true)
+# 3) grava só os aprovados (GESTAO_FADAS_ESCRITA_ENABLED=true; --ator = UUID de um usuário da A; --simular só mostra)
+npm run mapear:tarologas-umbler -- --aplicar aprovado.json --ator <uuid> [--simular]
+```
+
+- Telefones procurados: WhatsApp pessoal e do avatar (diretório) e `phone`/`phone2` da ficha de cadastro; o mesmo número em duas origens é uma consulta. Para cada um: `GET /v1/contacts/phone/` com `+55DDNNNNNNNNN` e, se vazio, a forma com/sem o nono dígito.
+- Situações: `encontrado` (um contato), `ja_vinculado`, `ambiguo` (mais de um contato: a pessoa escolhe), `nao_encontrado`, `sem_telefone`, `telefone_invalido`, `erro` (só código e status). Itens trazem contato (id, nome, chat) e de qual telefone veio (mascarado).
+- `--aplicar` usa o serviço oficial do perfil (valida, confere a revisão do relatório, audita, idempotente por `mapear-umbler:<id>:<contato>:<revisão>`); não toca o legado nem a Umbler. Cadastro que mudou depois do relatório é recusado.
+- A forma exata da resposta de `/v1/contacts/phone/` e o campo do chat ainda não foram conferidos com a Umbler real: a leitura aceita as formas comuns e, sem chat, grava só o contato.
+- Relatório padrão em `scripts/saida/` (fora do git). Verificação: `npm run verificar:gf-mapeamento-umbler` (provider falso, adaptador falso do axios, Postgres descartável para o `--aplicar` real).

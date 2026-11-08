@@ -9,10 +9,7 @@
 
 const { lendoNovo } = require('../../novo/leitura');
 
-const FAIXA_INICIO = 1000000000;
-const FAIXA_FIM = 2147483647;
-
-const ehIdDaFaixaNova = (id) => typeof id === 'string' && /^[1-9]\d{9}$/.test(id) && Number(id) >= FAIXA_INICIO && Number(id) <= FAIXA_FIM;
+const { FAIXA_INICIO, FAIXA_FIM, ehIdDaFaixaNova } = require('../../_comum/dominio/cliente-faixa-nova');
 
 /** `AAAA-MM-DD` de uma coluna DATE (texto ou Date). */
 const dataCivil = (v) => (v === null || v === undefined ? null : (v instanceof Date ? v.toISOString() : `${v}`).slice(0, 10));

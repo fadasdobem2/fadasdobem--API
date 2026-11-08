@@ -13,6 +13,8 @@
  * Funções puras, sem banco.
  */
 
+const { ehIdDaFaixaNova } = require('../_comum/dominio/cliente-faixa-nova');
+
 const CAMPOS_CLIENTE = Object.freeze(['name', 'treatAs', 'whatsapp', 'birthDate']);
 const CAMPOS_TAROLOGO = Object.freeze(['nome', 'cadastro_ativo']);
 
@@ -32,6 +34,8 @@ function pendentesDe(linha) {
 /** `dados` do cliente só com o que a extensão ainda tem direito de sobrepor ao legado. */
 function dadosEfetivosDoCliente(linha) {
   const dados = json(linha && linha.dados, {}) || {};
+  // Cliente da faixa nova (criada pela Lilly, sem linha em `usuarios`): não há legado a espelhar, então tudo o que a equipe editou vale.
+  if (linha && ehIdDaFaixaNova(`${linha.id_cliente}`)) return dados;
   const pend = pendentesDe(linha);
   if (pend === null) return dados;
   return Object.fromEntries(Object.entries(dados).filter(([k]) => !CAMPOS_CLIENTE.includes(k) || pend.includes(k)));

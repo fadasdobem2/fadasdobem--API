@@ -20,3 +20,6 @@ uploads/
 public/agora-test.html
 public/intelbras-test.*
 src/documentacao-externa/
+
+# relatórios locais do mapeamento taróloga x Umbler (sem telefone completo, mas não vão ao git)
+scripts/saida/

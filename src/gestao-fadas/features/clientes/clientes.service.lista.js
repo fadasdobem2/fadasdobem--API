@@ -11,6 +11,9 @@ const { lerCatalogosReferencia } = require('./clientes.service.catalogos');
 const { lerCadastros, lerHistorias } = require('./clientes.service.historias');
 const { clientesJaConsultados, consultasDeHoje, contagensDeData, movimentosGerais, movimentosNoRecorte } = require('./clientes.service.agregados');
 const { acrescentarEditadas, candidatosDaBusca } = require('./clientes.service.busca');
+const novas = require('./cliente-novo.leitura');
+const { shiftDateKey } = require('./helpers/valores');
+const { ehIdDaFaixaNova } = require('../../_comum/dominio/cliente-faixa-nova');
 
 // --- operações públicas ----------------------------------------------------------------------------------
 
@@ -34,6 +37,9 @@ async function listar(plano) {
       if (plano.searching) linhas = await acrescentarEditadas(m, linhas, plano);
       linhas = await extensao.sobreporTodas(linhas);
     }
+    // Clientes criadas pela Lilly no banco novo: somadas ao que veio do legado, pela mesma regra (a edição da ficha já está por cima delas).
+    let somadas = { criadoAt: new Map(), novas: [] };
+    if (novas.ativa()) { somadas = await novas.somarNovas(linhas, plano, rangeAt); linhas = somadas.linhas; }
     const registros = model.recordsOf(linhas);
     const ids = [...registros.keys()];
     // A busca lê a história inteira; o recorte só precisa dela para ordenar por última consulta ou último pagamento.
@@ -42,7 +48,7 @@ async function listar(plano) {
     const latest = (id, range, kind) => {
       if (kind === 'consultation') return consultaAt.get(id) ?? null;
       if (kind === 'receipt') return recebAt.get(id) ?? null;
-      return range ? rangeAt.get(id) ?? null : maior(consultaAt.get(id), recebAt.get(id));
+      return range ? rangeAt.get(id) ?? null : maior(maior(consultaAt.get(id), recebAt.get(id)), somadas.criadoAt.get(id));
     };
     const precisaAgora = (!plano.searching && plano.scope === 'live') || plano.situation === 'consulta';
     const agora = precisaAgora ? model.consultingNow(await consultasDeHoje(m, today), plano.nowLocal) : new Set();
@@ -54,18 +60,29 @@ async function listar(plano) {
     model.realClientListPageInfo(plano, totalItems);
     const inicio = (plano.page - 1) * plano.pageSize;
     const clientIds = listados.slice(inicio, inicio + plano.pageSize).map((item) => item.record.id);
-    const contagens = clientRolePolicy(plano.role).canSeeDateCounts && !plano.searching ? await contagensDeData(m, today) : undefined;
+    const contagensLegado = clientRolePolicy(plano.role).canSeeDateCounts && !plano.searching ? await contagensDeData(m, today) : undefined;
+    const contagens = contagensLegado && somadas.novas.length ? novas.somarContagens(contagensLegado, somadas.novas, today, shiftDateKey) : contagensLegado;
 
     // O cadastro e a história inteira dos clientes da página somente (R19).
     const historia = await lerHistorias(m, clientIds, { consultas: true, recebimentos: true });
     const fontes = { clients: linhas.filter((l) => clientIds.includes(String(l.id))), ...historia };
     const selecao = model.realClientListSelection(plano, { clientIds, totalItems, ...(contagens ? { dateCounts: contagens } : {}) }, fontes);
-    return model.buildRealClientList(selecao, fontes);
+    const resultado = model.buildRealClientList(selecao, fontes);
+    if (!somadas.novas.length) return resultado;
+    const porId = new Map(linhas.map((l) => [String(l.id), l]));
+    return { ...resultado, clients: resultado.clients.map((item) => novas.marcar(item, porId.get(item.id), somadas.criadoAt)) };
   });
 }
 
 /** A ficha com a projeção do perfil, ou null quando o ID não é cliente (404 CLIENT_NOT_FOUND; conta da equipe é o mesmo 404). */
 async function obter({ role, clientId, nowLocal }) {
+  // Cliente da faixa nova: só existe no banco novo; o legado nem é consultado (sem histórico antigo, sem catálogos de código).
+  if (ehIdDaFaixaNova(`${clientId}`) && novas.ativa()) {
+    const [linha] = await novas.lerNovas([clientId]);
+    if (!linha) return null;
+    const ficha = model.buildRealClientProfile({ role, nowLocal, row: linha, catalogos: model.CATALOGOS_VAZIOS, consultations: [], receipts: { informed: [], confirmed: [], notFound: [] } });
+    return ficha ? { ...ficha, client: novas.marcar(ficha.client, linha) } : null;
+  }
   return lendo(async (m) => {
     const [linhas, historia, catalogos] = await Promise.all([
       lerCadastros(m, [clientId]), lerHistorias(m, [clientId], { consultas: true, recebimentos: true }), lerCatalogosReferencia(m),

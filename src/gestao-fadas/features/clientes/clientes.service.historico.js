@@ -8,6 +8,11 @@ const model = require('./clientes.model');
 const { ampliarHistorico: ampliar } = require('./helpers/ampliacao');
 const { lerHistorias } = require('./clientes.service.historias');
 const novo = require('./cliente-novo');
+const novas = require('./cliente-novo.leitura');
+
+const SEM_RECEBIMENTOS = { informed: [], confirmed: [], notFound: [] };
+/** Cliente da faixa nova: o legado não tem história dela (consulta nem recebimento); a leitura é a mesma regra, sobre nada. */
+const daFaixaNova = (clientId) => novas.ativa() && novo.ehIdDaFaixaNova(`${clientId}`);
 
 async function existe(m, clientId) {
   return (await m.LegadoUsuario.findAll({ attributes: ['id'], where: { nivel: 0, id: Number(clientId) }, raw: true })).length > 0;
@@ -24,6 +29,10 @@ function clienteExiste(clientId) {
 
 /** Histórico de consultas da cliente no alcance do perfil; null se o ID não é cliente. */
 async function historicoDeConsultas({ role, expanded, clientId, nowLocal, query }) {
+  if (daFaixaNova(clientId)) {
+    if (!await novo.clienteNovoExiste(clientId)) return null;
+    return model.buildRealClientConsultationHistory({ role, expanded, nowLocal, clientId, rows: [], query });
+  }
   return lendo(async (m) => {
     if (!await existe(m, clientId)) return null;
     const historia = await lerHistorias(m, [clientId], { consultas: true, recebimentos: false });
@@ -33,6 +42,10 @@ async function historicoDeConsultas({ role, expanded, clientId, nowLocal, query 
 
 /** Histórico de recebimentos da cliente (gêmeos conciliados pelo ID, R20); null se o ID não é cliente. */
 async function historicoDeRecebimentos({ role, expanded, clientId, query }) {
+  if (daFaixaNova(clientId)) {
+    if (!await novo.clienteNovoExiste(clientId)) return null;
+    return model.buildRealClientReceiptHistory({ role, expanded, clientId, sources: SEM_RECEBIMENTOS, query });
+  }
   return lendo(async (m) => {
     if (!await existe(m, clientId)) return null;
     const historia = await lerHistorias(m, [clientId], { consultas: false, recebimentos: true });
