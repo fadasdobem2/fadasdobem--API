@@ -46,17 +46,16 @@ const ENDERECO = { street: 'Rua B', number: '2', complement: '', district: 'Cent
   const contar = async (sql) => Number((await sequelize.query(sql))[0][0].n);
 
   console.log('Esquema');
-  await passo('14 colunas novas em gf_clientes_ext e a migração roda de novo sem erro', async () => {
-    const colunas = ['nome_completo', 'cpf', 'email', 'telefones', 'telefone_consulta_idx', 'telefone_whatsapp_idx', 'end_rua', 'end_numero', 'end_complemento', 'end_bairro', 'end_cep', 'end_cidade', 'end_uf', 'end_pais'];
+  await passo('16 colunas da ficha em gf_clientes_ext (as 2 de contato da migração 20261216) e as migrações rodam de novo sem erro', async () => {
+    const colunas = ['nome_completo', 'cpf', 'email', 'email2', 'telefone_comercial', 'telefones', 'telefone_consulta_idx', 'telefone_whatsapp_idx', 'end_rua', 'end_numero', 'end_complemento', 'end_bairro', 'end_cep', 'end_cidade', 'end_uf', 'end_pais'];
     const [t] = await sequelize.query("SELECT column_name AS c FROM information_schema.columns WHERE table_name = 'gf_clientes_ext'");
     for (const c of colunas) assert.ok(t.some((x) => x.c === c), c);
-    await require(r('migrations/20261213000000-gestao-fadas-ficha-dados')).up({ sequelize });
-    await require(r('migrations/20261213000000-gestao-fadas-ficha-dados')).up({ sequelize });
+    for (const m of ['20261213000000-gestao-fadas-ficha-dados', '20261216000000-gestao-fadas-ficha-contatos']) { await require(r(`migrations/${m}`)).up({ sequelize }); await require(r(`migrations/${m}`)).up({ sequelize }); }
   });
   await passo('os CHECKs do banco recusam o que a API nunca grava (CPF, e-mail, vazio, espaço nas pontas, telefones, índices, tamanho)', async () => {
     const ruins = [["cpf = '123'"], ["cpf = '111.111.111-1x'"], ["email = 'sem-arroba'"], ["email = ' a@b.com'"], ["email = ''"], ["nome_completo = ''"], ["nome_completo = ' Ana'"], [`nome_completo = '${'A'.repeat(256)}'`],
       ["telefones = '{\"a\":1}'::jsonb"], ["telefones = '[]'::jsonb, telefone_consulta_idx = 0, telefone_whatsapp_idx = 0"], ["telefones = '[\"1\"]'::jsonb"], ["telefones = '[\"1\"]'::jsonb, telefone_consulta_idx = 1, telefone_whatsapp_idx = 0"],
-      ["telefone_consulta_idx = 0"], ["end_uf = ''"], [`end_numero = '${'1'.repeat(21)}'`], ["end_cep = ' 5'"]];
+      ["telefone_consulta_idx = 0"], ["email2 = 'sem-arroba'"], ["email2 = ' a@b.com'"], ["email2 = ''"], [`email2 = '${'x'.repeat(95)}@b.com'`], ["telefone_comercial = ''"], ["telefone_comercial = ' 3333-4444'"], [`telefone_comercial = '${'1'.repeat(51)}'`], ["end_uf = ''"], [`end_numero = '${'1'.repeat(21)}'`], ["end_cep = ' 5'"]];
     await sequelize.query("INSERT INTO gf_clientes_ext (id_cliente, atualizado_por, operation_key) VALUES ('800001', 'teste', 'op-base-ficha')");
     for (const [set] of ruins) {
       await assert.rejects(() => sequelize.query(`UPDATE gf_clientes_ext SET ${set} WHERE id_cliente = '800001'`), (e) => /check constraint|too long/i.test(String(e.message)), set);
@@ -122,6 +121,21 @@ const ENDERECO = { street: 'Rua B', number: '2', complement: '', district: 'Cent
     }
     const g = await lerExt(A);
     assert.deepEqual([g.cpf, g.email, g.fullName, g.address.city, g.revision], ['529.982.247-25', 'nova@exemplo.com', 'Ana Souza Lima', 'Olinda', rev]);
+  });
+  await passo('e-mail 2 e telefone comercial: gravam pelo mesmo PATCH, voltam no GET, o resto fica; vazio é 422 e não apaga; atendente não lê', async () => {
+    const a = await patch(A, rev, { email2: ' outro@exemplo.com ', workPhone: '+55 11 3333-4444' });
+    assert.equal(a.status, 200, a.t);
+    assert.deepEqual([a.j.extension.email2, a.j.extension.workPhone, a.j.extension.email, a.j.extension.cpf, a.j.extension.revision], ['outro@exemplo.com', '+55 11 3333-4444', 'nova@exemplo.com', '529.982.247-25', rev + 1]);
+    rev += 1;
+    assert.deepEqual(await lerExt(A), a.j.extension);
+    const l = await linha(A);
+    assert.deepEqual([l.email2, l.telefone_comercial, l.sem_email], ['outro@exemplo.com', '+55 11 3333-4444', null]);
+    for (const ruim of [{ email2: '' }, { workPhone: '  ' }, { email2: 'a@b' }, { workPhone: 'x'.repeat(51) }]) assert.equal((await patch(A, rev, ruim)).status, 422, JSON.stringify(ruim));
+    assert.deepEqual([(await lerExt(A)).email2, (await lerExt(A)).workPhone, (await lerExt(A)).revision], ['outro@exemplo.com', '+55 11 3333-4444', rev]);
+    como('atendente');
+    const g = await lerExt(A);
+    assert.deepEqual([g.email2, g.workPhone], [undefined, undefined]);
+    como('administradora');
   });
   await passo('corrida: dois pedidos com a mesma revisão: um grava, o outro recebe 409 e a linha tem uma só das duas mudanças', async () => {
     const [x, y] = await Promise.all([patch(D, 0, { email: 'x@exemplo.com' }), patch(D, 0, { email: 'y@exemplo.com' })]);

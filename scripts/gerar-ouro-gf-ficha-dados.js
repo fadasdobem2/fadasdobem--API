@@ -23,6 +23,8 @@ const CPFS = ['529.982.247-25', '52998224725', ' 529.982.247-25 ', '111.111.111-
 const EMAILS = ['ana@exemplo.com', 'Ana.Silva@Exemplo.COM.BR', ' ana@exemplo.com ', 'sem-arroba', 'a@b', 'a@b.c', 'a b@c.com', '.a@b.com', 'a.@b.com', 'a..b@c.com', 'a@b..com', 'a@-b.com', 'a@b-.com', 'a@b.123', 'ana@exemplo.com.br', 'a@@b.com', '@b.com', 'a@.com',
   `${'x'.repeat(45)}@b.com`, `${'x'.repeat(40)}@ex.com`, 'ana(comentario)@b.com', 'ana,x@b.com', 'ana@exemplo.com\u0001', 'ana+etiqueta@exemplo.com', 'ana\n@b.com', 'ánna@exemplo.com'];
 const NOMES = ['Ana Souza', ' Ana Souza ', 'ANA SOUZA', 'Ana\nSouza', 'Ana\u0001Souza', 'A'.repeat(255), 'A'.repeat(256), 'Ana 😀 Souza', 'Ana\tSouza', 'Ana\u0085Souza', 'Zé'];
+const EMAILS2 = [...EMAILS, `${'x'.repeat(64)}@${'d'.repeat(30)}.com1`.replace('.com1', '.com'), `${'x'.repeat(64)}@${'d'.repeat(31)}.com`, `${'x'.repeat(64)}@${'d'.repeat(32)}.com`, 'outro@exemplo.com'];
+const COMERCIAIS = ['+55 11 3333-4444', '(11) 3333-4444', '1133334444', ' +55 11 3333-4444 ', 'abc', '1234', '3333-4444', 'x'.repeat(50), 'x'.repeat(51), '+55 11 3333-4444\n', '+55 11 3333-4444\u0001', '+55 11 3333-4444 ramal 12', '+351 21 123 4567', 'Ana 😀'];
 const FONES = [
   { phones: ['+55 11 98888-7777'] }, { phones: ['+55 11 98888-7777', '+55 21 93333-4444'], consultationPhoneIndex: 1, whatsappPhoneIndex: 0 },
   { phones: ['11988887777', '2133334444'], consultationPhoneIndex: 0, whatsappPhoneIndex: 1 }, { phones: ['(11) 98888-7777'] }, { phones: ['98888-7777'] }, { phones: ['+55 98888-7777'] },
@@ -66,19 +68,21 @@ async function main() {
         const out = editor.prepareClientRegistrationEdit({ identity, registration: { ...registration, ...mudou }, baselineIdentity: identity, baselineRegistration: registration, latestIdentity: identity, latestRegistration: registration, role: 'administradora' });
         const r = out.registration;
         const ok = {};
-        for (const k of ['fullName', 'cpf', 'email', 'phones', 'consultationPhoneIndex', 'whatsappPhoneIndex', 'address']) if (r[k] !== undefined) ok[k] = r[k];
+        for (const k of ['fullName', 'cpf', 'email', 'email2', 'workPhone', 'phones', 'consultationPhoneIndex', 'whatsappPhoneIndex', 'address']) if (r[k] !== undefined) ok[k] = r[k];
         return { ok };
       } catch (e) { return { erro: e instanceof Error ? e.message : String(e) }; }
     };
     const cpf = CPFS.map((v) => ({ v, front: editar({ cpf: v }) }));
     const email = EMAILS.map((v) => ({ v, front: editar({ email: v }) }));
+    const email2 = EMAILS2.map((v) => ({ v, front: editar({ email2: v }) }));
+    const comercial = COMERCIAIS.map((v) => ({ v, front: editar({ workPhone: v }) }));
     const nome = NOMES.map((v) => ({ v, front: editar({ fullName: v }) }));
     const fones = FONES.map((v) => ({ v, front: editar(v) }));
     const endereco = ENDERECOS.map((v) => ({ v, front: editar({ address: v }) }));
-    const regime = REGIMES.map((v) => { try { escrita.legacyIdentityChanges('1', { paymentProfile: v }); return { v, front: 'aceita' }; } catch (e) { return { v, front: e.message }; } });
+    const regime = REGIMES.map((v) => { try { escrita.legacyIdentityChanges('1', { paymentProfile: v }, v); /* v711: 3º argumento = regime anterior; igual ao novo isola a conferência da lista (o sentido é regra do verificador) */ return { v, front: 'aceita' }; } catch (e) { return { v, front: e.message }; } });
     const saida = path.join(__dirname, 'apoio-gf-ficha-dados', 'ouro.json');
-    fs.writeFileSync(saida, JSON.stringify({ geradoDe: 'client-registration-editor-model (prepareClientRegistrationEdit), legacy-client-write (legacyIdentityChanges)', identity, registration, cpf, email, nome, fones, endereco, regime }));
-    console.log(`Ouro gravado: ${cpf.length} CPFs, ${email.length} e-mails, ${nome.length} nomes, ${fones.length} telefones, ${endereco.length} endereços, ${regime.length} regimes.`);
+    fs.writeFileSync(saida, JSON.stringify({ geradoDe: 'client-registration-editor-model (prepareClientRegistrationEdit), legacy-client-write (legacyIdentityChanges)', identity, registration, cpf, email, email2, comercial, nome, fones, endereco, regime }));
+    console.log(`Ouro gravado: ${cpf.length} CPFs, ${email.length} e-mails, ${email2.length} e-mails 2, ${comercial.length} telefones comerciais, ${nome.length} nomes, ${fones.length} telefones, ${endereco.length} endereços, ${regime.length} regimes.`);
   } finally { await vite.close(); }
 }
 main().catch((e) => { console.error(e); process.exit(1); });

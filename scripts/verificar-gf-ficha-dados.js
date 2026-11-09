@@ -25,7 +25,7 @@ function passo(nome, fn) {
   try { fn(); ok += 1; console.log(`  ok  ${nome}`); } catch (e) { falhas.push(nome); console.log(`  FALHOU  ${nome}: ${String(e.message).slice(0, 300)}`); }
 }
 
-const FICHA = ['fullName', 'cpf', 'email', 'phones', 'consultationPhoneIndex', 'whatsappPhoneIndex', 'address'];
+const FICHA = ['fullName', 'cpf', 'email', 'email2', 'workPhone', 'phones', 'consultationPhoneIndex', 'whatsappPhoneIndex', 'address'];
 const so = (obj, chaves) => Object.fromEntries(Object.entries(obj).filter(([k]) => chaves.includes(k)));
 const iguais = (a, b) => { try { assert.deepStrictEqual(a, b); return true; } catch (_) { return false; } };
 const tenta = (fn) => { try { return { ok: fn() }; } catch (e) { return { erro: e.message }; } };
@@ -33,7 +33,8 @@ const tenta = (fn) => { try { return { ok: fn() }; } catch (e) { return { erro: 
 /** Confere uma implementação de validarFicha contra o ouro; devolve as divergências (vazio = igual ao front). */
 function paridade(validar) {
   const difs = [];
-  const grupos = [['cpf', ouro.cpf, ['cpf'], (v) => ({ cpf: v })], ['email', ouro.email, ['email'], (v) => ({ email: v })], ['nome', ouro.nome, ['fullName'], (v) => ({ fullName: v })],
+  const grupos = [['cpf', ouro.cpf, ['cpf'], (v) => ({ cpf: v })], ['email', ouro.email, ['email'], (v) => ({ email: v })],
+    ['email2', ouro.email2, ['email2'], (v) => ({ email2: v })], ['comercial', ouro.comercial, ['workPhone'], (v) => ({ workPhone: v })], ['nome', ouro.nome, ['fullName'], (v) => ({ fullName: v })],
     ['fones', ouro.fones, ['phones', 'consultationPhoneIndex', 'whatsappPhoneIndex'], (v) => v], ['endereco', ouro.endereco, ['address'], (v) => ({ address: v })]];
   for (const [nome, casos, chaves, bruto] of grupos) {
     for (const c of casos) {
@@ -63,6 +64,9 @@ function extras(validar) {
   quer('índice negativo', tenta(() => validar({ phones: [fone], whatsappPhoneIndex: -1 })).erro, 'Escolha o telefone de consultas e o WhatsApp entre os números informados.');
   quer('índice fracionário', tenta(() => validar({ phones: [fone], whatsappPhoneIndex: 1.5 })).erro, 'Escolha o telefone de consultas e o WhatsApp entre os números informados.');
   quer('e-mail aparado', tenta(() => validar({ email: '  a@b.com ' })).ok, { email: 'a@b.com' });
+  quer('e-mail 2 aparado', tenta(() => validar({ email2: '  o@b.com ' })).ok, { email2: 'o@b.com' });
+  quer('telefone comercial aparado', tenta(() => validar({ workPhone: ' +55 11 3333-4444 ' })).ok, { workPhone: '+55 11 3333-4444' });
+  quer('e-mail 2 e comercial juntos', tenta(() => validar({ email2: 'o@b.com', workPhone: '3333-4444' })).ok, { email2: 'o@b.com', workPhone: '3333-4444' });
   quer('nome aparado', tenta(() => validar({ fullName: '  Ana Souza ' })).ok, { fullName: 'Ana Souza' });
   quer('índices padrão 0', tenta(() => validar({ phones: [fone] })).ok, { phones: [fone], consultationPhoneIndex: 0, whatsappPhoneIndex: 0 });
   return difs;
@@ -75,7 +79,7 @@ function offline() {
   const cli = r('src/gestao-fadas/features/cadastros/clientes.validacao');
 
   console.log('Validação igual ao front (ouro: caminho real do editor)');
-  passo(`${ouro.cpf.length + ouro.email.length + ouro.nome.length + ouro.fones.length + ouro.endereco.length} casos de CPF, e-mail, nome, telefones e endereço: mesma resposta e mesma mensagem do front`, () => {
+  passo(`${ouro.cpf.length + ouro.email.length + ouro.email2.length + ouro.comercial.length + ouro.nome.length + ouro.fones.length + ouro.endereco.length} casos de CPF, e-mail, e-mail 2, telefone comercial, nome, telefones e endereço: mesma resposta e mesma mensagem do front`, () => {
     const d = paridade(val.validarFicha);
     assert.deepStrictEqual(d, [], d.join('\n'));
   });
@@ -84,7 +88,7 @@ function offline() {
     assert.deepStrictEqual(d, [], d.join('\n'));
   });
   passo('o vazio nunca apaga: a API recusa limpar nome completo, CPF, e-mail e endereço (o front deixaria) e não grava nada por omissão', () => {
-    for (const [campo, valor, msg] of [['cpf', '', /CPF não pode ser apagado/], ['email', '  ', /e-mail não pode ser apagado/], ['fullName', '', /Informe o nome completo/],
+    for (const [campo, valor, msg] of [['cpf', '', /CPF não pode ser apagado/], ['email', '  ', /e-mail não pode ser apagado/], ['fullName', '', /Informe o nome completo/], ['email2', ' ', /outro e-mail não pode ser apagado/], ['workPhone', '', /telefone comercial não pode ser apagado/],
       ['address', { street: '', number: '', complement: '', district: '', zip: '', city: '', state: '', country: '' }, /endereço não pode ser apagado/]]) {
       assert.match(tenta(() => val.validarFicha({ [campo]: valor })).erro || '', msg, campo);
     }
@@ -95,7 +99,7 @@ function offline() {
     assert.match(tenta(() => val.validarFicha({ phones: Array(21).fill('+55 11 98888-7777') })).erro, /no máximo 20/);
     assert.match(tenta(() => val.validarFicha({ phones: 'x' })).erro, /Informe um número de telefone/);
     assert.match(tenta(() => val.validarFicha({ phones: ['+55 11 98888-7777'], consultationPhoneIndex: 1 })).erro, /entre os números informados/);
-    for (const mau of [null, 7, [], {}]) assert.ok(tenta(() => val.validarFicha({ cpf: mau })).erro, `cpf ${JSON.stringify(mau)}`);
+    for (const mau of [null, 7, [], {}]) for (const campo of ['cpf', 'email2', 'workPhone']) assert.ok(tenta(() => val.validarFicha({ [campo]: mau })).erro, `${campo} ${JSON.stringify(mau)}`);
   });
   passo('validarMudancas (PATCH): junta identidade e ficha com as mensagens 422 do front; só ficha também é uma alteração', () => {
     const m = cli.validarMudancas({ email: ' a@b.com ', cpf: '529.982.247-25', name: 'Ana' });
@@ -123,20 +127,25 @@ function offline() {
     'UF não vira maiúscula': (m) => { const v = real(m); return v.address && v.address.state ? { ...v, address: { ...v.address, state: v.address.state.toLowerCase() } } : v; },
     'nome com mais de 255 aceito': (m) => (typeof m.fullName === 'string' && m.fullName.length === 256 ? { fullName: m.fullName } : real(m)),
     'texto não aparado': (m) => (typeof m.email === 'string' && m.email.startsWith(' ') ? { email: m.email } : real(m)),
+    'e-mail 2 com limite de 50': (m) => { if (typeof m.email2 === 'string' && m.email2.trim().length > 50) throw new Error('E-mail: use no máximo 50 caracteres. O texto não foi cortado.'); return real(m); },
+    'e-mail 2 aceita "a@b"': (m) => (m.email2 === 'a@b' ? { email2: 'a@b' } : real(m)),
+    'telefone comercial passa de 50': (m) => (typeof m.workPhone === 'string' && m.workPhone.length === 51 ? { workPhone: m.workPhone } : real(m)),
+    'telefone comercial vira só dígitos': (m) => { const v = real(m); return v.workPhone ? { ...v, workPhone: v.workPhone.replace(/\D/g, '') } : v; },
+    'vazio apaga o e-mail 2': (m) => (typeof m.email2 === 'string' && !m.email2.trim() ? { email2: '' } : real(m)),
     'vazio apaga o CPF': (m) => (m.cpf === '' ? { cpf: '' } : real(m)),
   };
   for (const [nome, mut] of Object.entries(mutantes)) {
     passo(`mutante refutado: ${nome}`, () => {
-      const casosCrus = [{ cpf: '' }, { email: 'a@b' }, { email: 'x'.repeat(45) + '@b.com' }];
+      const casosCrus = [{ cpf: '' }, { email: 'a@b' }, { email: 'x'.repeat(45) + '@b.com' }, { email2: '' }, { workPhone: '' }];
       const pegou = paridade(mut).length > 0 || extras(mut).length > 0 || (nome === 'vazio apaga o CPF' && !tenta(() => mut({ cpf: '' })).erro);
       assert.ok(pegou || casosCrus.some((e) => tenta(() => mut(e)).erro !== tenta(() => real(e)).erro), 'o ouro não pegou o mutante');
     });
   }
 
   console.log('Leitura combinada: complemento vence, vazio nunca apaga');
-  const linhaExt = { nome_completo: 'Ana Gravada', cpf: '529.982.247-25', email: 'g@x.com', telefones: ['+55 11 98888-7777', '+55 21 93333-4444'], telefone_consulta_idx: 1, telefone_whatsapp_idx: 0,
+  const linhaExt = { nome_completo: 'Ana Gravada', cpf: '529.982.247-25', email: 'g@x.com', email2: 'g2@x.com', telefone_comercial: '+55 11 3333-4444', telefones: ['+55 11 98888-7777', '+55 21 93333-4444'], telefone_consulta_idx: 1, telefone_whatsapp_idx: 0,
     end_rua: 'Rua B', end_numero: '2', end_complemento: null, end_bairro: null, end_cep: '50000-000', end_cidade: 'Olinda', end_uf: 'PE', end_pais: null, dados: { email: 'lilly@x.com', fullName: 'Nome Lilly' } };
-  const legado = { id: 7, nivel: 0, nome: 'Ana Antiga', nome_id: 'Ana', nome2: 'Ani', email: 'antigo@x.com', cpf: '11144477735', endereco: 'Rua A', numero: '1', complemento: 'Apto', bairro: 'Centro', cep: '40000-000', cidade: 'Recife', estado: 'PE', idPais: 1, datanascimento: '1990-05-17 00:00:00' };
+  const legado = { id: 7, nivel: 0, nome: 'Ana Antiga', nome_id: 'Ana', nome2: 'Ani', email: 'antigo@x.com', email2: 'antigo2@x.com', cpf: '11144477735', endereco: 'Rua A', numero: '1', complemento: 'Apto', bairro: 'Centro', cep: '40000-000', cidade: 'Recife', estado: 'PE', idPais: 1, datanascimento: '1990-05-17 00:00:00' };
   passo('com a ficha preenchida: nome completo, CPF, e-mail e endereço vêm do complemento; a coluna da ficha vence os dados da Lilly', () => {
     const f = efetivo.fichaDeLinha(linhaExt);
     assert.deepStrictEqual([f.fullName, f.cpf, f.email, f.consultationPhoneIndex, f.whatsappPhoneIndex], ['Ana Gravada', '529.982.247-25', 'g@x.com', 1, 0]);
@@ -145,8 +154,34 @@ function offline() {
     assert.strictEqual(l.idPais, 1, 'o país do catálogo do legado não é tocado');
     assert.strictEqual(legado.nome, 'Ana Antiga', 'o legado não é alterado (cópia)');
   });
+  passo('e-mail 2 e telefone comercial: o complemento vence o legado (e-mail 2 sobre a linha; o comercial sai na ficha), vazio ou só espaços nunca apaga', () => {
+    const f = efetivo.fichaDeLinha(linhaExt);
+    assert.deepStrictEqual([f.email2, f.workPhone], ['g2@x.com', '+55 11 3333-4444']);
+    assert.strictEqual(efetivo.sobreporFicha(legado, f).email2, 'g2@x.com');
+    assert.strictEqual(legado.email2, 'antigo2@x.com', 'o legado não é alterado (cópia)');
+    for (const vazio of [null, '', '   ']) {
+      const v = efetivo.fichaDeLinha({ email2: vazio, telefone_comercial: vazio, dados: {} });
+      assert.deepStrictEqual(v, {}, `vazio ${JSON.stringify(vazio)} não entra na ficha`);
+      assert.strictEqual(efetivo.sobreporFicha(legado, v).email2, 'antigo2@x.com', 'o e-mail 2 do legado fica');
+    }
+    assert.deepStrictEqual(efetivo.fichaDeLinha({ email2: 'so@x.com', dados: {} }), { email2: 'so@x.com' });
+  });
+  passo('colunas gravadas pelo PATCH: email2 e telefone_comercial só quando enviados; campo ausente = coluna intocada', () => {
+    const ficha = require('../src/gestao-fadas/features/cadastros/clientes.ficha');
+    assert.deepStrictEqual(ficha.colunasDaFicha({ email2: 'o@b.com', workPhone: '3333-4444' }), [['email2', 'o@b.com'], ['telefone_comercial', '3333-4444']]);
+    assert.deepStrictEqual(ficha.colunasDaFicha({ email: 'a@b.com' }), [['email', 'a@b.com']]);
+    assert.deepStrictEqual(ficha.camposDaFicha({ email2: 'o@b.com', workPhone: 'x' }), ['email2', 'workPhone']);
+    const m = cli.validarMudancas({ email2: ' o@b.com ', workPhone: ' 3333-4444 ' });
+    assert.deepStrictEqual(m, { email2: 'o@b.com', workPhone: '3333-4444' });
+    assert.ok(!('noEmail' in m), 'informar só o e-mail 2 não mexe em "não possui e-mail"');
+  });
+  passo('o nascimento já é gravado pela identidade (dados.birthDate, validação do legado-escrita do front): não ganhou coluna nova', () => {
+    assert.deepStrictEqual(cli.validarMudancas({ birthDate: '17/05/1990' }), { birthDate: '17/05/1990' });
+    assert.throws(() => cli.validarMudancas({ birthDate: '' }), (e) => /não pode ser apagada/.test(e.message));
+    assert.deepStrictEqual(cli.aplicar(null, { birthDate: '17/05/1990' }, '2026-11-09T00:00:00Z').dados, { birthDate: '17/05/1990' });
+  });
   passo('com a ficha vazia: nada do legado é apagado; só os dados da Lilly (e-mail e nome) entram, e vazio da Lilly não apaga', () => {
-    const vazia = { nome_completo: null, cpf: null, email: null, telefones: null, end_rua: null, dados: {} };
+    const vazia = { nome_completo: null, cpf: null, email: null, email2: null, telefone_comercial: null, telefones: null, end_rua: null, dados: {} };
     assert.deepStrictEqual(efetivo.fichaDeLinha(vazia), {});
     assert.deepStrictEqual(efetivo.sobreporFicha(legado, efetivo.fichaDeLinha(vazia)), legado);
     const lilly = efetivo.sobreporFicha(legado, efetivo.fichaDeLinha({ dados: { email: 'lilly@x.com', fullName: 'Nome Lilly' } }));
@@ -159,6 +194,7 @@ function offline() {
   });
   passo('recorte por perfil igual ao da ficha do legado: sem identidade civil não há nome completo nem CPF; sem cadastro completo não há telefones nem endereço', () => {
     const f = efetivo.fichaDeLinha(linhaExt);
+    assert.deepStrictEqual(Object.keys(efetivo.recortarPorPerfil(f, { civil: true, completo: false })).filter((k) => /email2|workPhone/.test(k)), [], 'o atendente não lê e-mail 2 nem telefone comercial');
     const adm = efetivo.recortarPorPerfil(f, { civil: true, completo: true });
     const aten = efetivo.recortarPorPerfil(f, { civil: true, completo: false });
     const nada = efetivo.recortarPorPerfil(f, { civil: false, completo: false });

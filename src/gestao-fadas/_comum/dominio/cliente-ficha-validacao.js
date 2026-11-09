@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * Validação dos dados da ficha que o banco novo passa a guardar (Nice, 08/11): nome completo, CPF, e-mail, telefones e endereço.
+ * Validação dos dados da ficha que o banco novo passa a guardar (Nice, 08/11; 09/11 e-mail 2 e telefone comercial): nome completo, CPF, e-mail, e-mail 2, telefone comercial, telefones e endereço.
  * Porta FIEL do código do front, que é o ouro (scripts/apoio-gf-ficha-dados/ouro.json, gerado por gerar-ouro-gf-ficha-dados.js):
  *   validateText (features/domain/input-validation.ts), validateClientRegistration/validateClientAddress/validateClientPhonePreferences
  *   (client-profile-model.ts), validDuplicateCpf (client-duplicate-model.ts), normalizeClientEmail (client-input-format.ts),
@@ -12,7 +12,7 @@
 
 const { clientePhoneComplete, normalizarTelefone } = require('./cliente-ficha-telefone');
 
-const LIMITES = { fullName: 255, cpf: 50, email: 50 };
+const LIMITES = { fullName: 255, cpf: 50, email: 50, email2: 100, workPhone: 50 };
 const MAX_TELEFONES = 20;
 
 /** validateText do front: o texto aparado, ou erro "<rótulo>: ...". */
@@ -62,12 +62,20 @@ function cpf(v) {
   return t;
 }
 
-function email(v) {
+function email(v, campo = 'email') {
   // Como o editor: primeiro o formato (normalizeClientEmail), depois o texto e a conferência de validateClientRegistration.
+  // email2 ("Outro e-mail") segue o mesmo caminho do front, com o limite de 100 (CLIENT_REGISTRATION_LIMITS.email2).
   if (typeof v === 'string' && v.trim() && !emailValido(v.trim())) throw new Error('Confira o e-mail: nome@dominio.com.');
-  const t = texto(v, 'E-mail', LIMITES.email);
-  if (!t) throw new Error('O e-mail não pode ser apagado neste cadastro. Informe o novo endereço.');
+  const t = texto(v, 'E-mail', LIMITES[campo]);
+  if (!t) throw new Error(campo === 'email2' ? 'O outro e-mail não pode ser apagado neste cadastro. Informe o novo endereço.' : 'O e-mail não pode ser apagado neste cadastro. Informe o novo endereço.');
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(t)) throw new Error('Confira o endereço de e-mail.');
+  return t;
+}
+
+/** Telefone comercial: o front só confere o texto (validateText, rótulo "Cadastro", até 50, uma linha); não impõe formato de número. */
+function telefoneComercial(v) {
+  const t = texto(v, 'Cadastro', LIMITES.workPhone);
+  if (!t) throw new Error('O telefone comercial não pode ser apagado neste cadastro. Informe o novo número.');
   return t;
 }
 
@@ -108,7 +116,7 @@ function endereco(a) {
   return saida;
 }
 
-const CHAVES = ['fullName', 'cpf', 'email', 'phones', 'consultationPhoneIndex', 'whatsappPhoneIndex', 'address'];
+const CHAVES = ['fullName', 'cpf', 'email', 'email2', 'workPhone', 'phones', 'consultationPhoneIndex', 'whatsappPhoneIndex', 'address'];
 
 /** Os campos da ficha presentes em `mudancas`, validados; `{}` se nenhum. Campo ausente = preservado. */
 function validarFicha(m) {
@@ -116,6 +124,8 @@ function validarFicha(m) {
   if (m.fullName !== undefined) s.fullName = nomeCompleto(m.fullName);
   if (m.cpf !== undefined) s.cpf = cpf(m.cpf);
   if (m.email !== undefined) s.email = email(m.email);
+  if (m.email2 !== undefined) s.email2 = email(m.email2, 'email2');
+  if (m.workPhone !== undefined) s.workPhone = telefoneComercial(m.workPhone);
   const fones = telefones(m);
   if (fones) Object.assign(s, fones);
   if (m.address !== undefined) s.address = endereco(m.address);

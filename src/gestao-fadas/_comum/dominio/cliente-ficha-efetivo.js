@@ -7,7 +7,7 @@
  * Funções puras, sem banco.
  */
 
-const COLUNAS = ['nome_completo', 'cpf', 'email', 'telefones', 'telefone_consulta_idx', 'telefone_whatsapp_idx',
+const COLUNAS = ['nome_completo', 'cpf', 'email', 'email2', 'telefone_comercial', 'telefones', 'telefone_consulta_idx', 'telefone_whatsapp_idx',
   'end_rua', 'end_numero', 'end_complemento', 'end_bairro', 'end_cep', 'end_cidade', 'end_uf', 'end_pais'];
 const ENDERECO = [['street', 'end_rua'], ['number', 'end_numero'], ['complement', 'end_complemento'], ['district', 'end_bairro'], ['zip', 'end_cep'], ['city', 'end_cidade'], ['state', 'end_uf'], ['country', 'end_pais']];
 /** Coluna de `usuarios` de cada parte do endereço (o país fica de fora: o legado guarda o código do catálogo, a ficha o texto). */
@@ -25,6 +25,8 @@ function fichaDeLinha(linha) {
   if (nome) saida.fullName = nome;
   if (cheio(linha && linha.cpf)) saida.cpf = linha.cpf;
   if (mail) saida.email = mail;
+  if (cheio(linha && linha.email2)) saida.email2 = linha.email2;
+  if (cheio(linha && linha.telefone_comercial)) saida.workPhone = linha.telefone_comercial;
   const fones = json(linha && linha.telefones);
   if (Array.isArray(fones) && fones.length) {
     saida.phones = fones;
@@ -40,7 +42,8 @@ function fichaDeLinha(linha) {
 function recortarPorPerfil(ficha, { civil, completo }) {
   const saida = { ...ficha };
   if (!civil) { delete saida.fullName; delete saida.cpf; }
-  if (!completo) { delete saida.phones; delete saida.consultationPhoneIndex; delete saida.whatsappPhoneIndex; delete saida.address; }
+  // E-mail 2 e telefone comercial são dados adicionais: só o cadastro completo lê (como telefones e endereço).
+  if (!completo) { delete saida.email2; delete saida.workPhone; delete saida.phones; delete saida.consultationPhoneIndex; delete saida.whatsappPhoneIndex; delete saida.address; }
   return saida;
 }
 
@@ -50,6 +53,7 @@ function sobreporFicha(linha, ficha) {
   if (cheio(ficha.fullName)) novo.nome = ficha.fullName;
   if (cheio(ficha.cpf)) novo.cpf = ficha.cpf;
   if (cheio(ficha.email)) novo.email = ficha.email;
+  if (cheio(ficha.email2)) novo.email2 = ficha.email2;
   if (ficha.address) for (const [chave, coluna] of Object.entries(COLUNA_LEGADO)) novo[coluna] = cheio(ficha.address[chave]) ? ficha.address[chave] : null;
   return novo;
 }

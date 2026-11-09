@@ -20,4 +20,15 @@ const CHECKS_FICHA_DADOS = {
   ],
 };
 
-module.exports = { CHECKS_FICHA_DADOS };
+/**
+ * Migração 20261216000000 (decisão da Nice, 09/11: "há cadastros antigos que usavam"): e-mail 2 (limite 100 do front) e telefone comercial
+ * (limite 50). O nascimento NÃO entra aqui: já é gravado em `dados.birthDate` (identidade, nome da API `birthDate`).
+ */
+const CHECKS_FICHA_DADOS_2 = {
+  gf_clientes_ext: [
+    ['chk_clientes_ext_email2', `email2 IS NULL OR (${preenchido('email2', 100)} AND email2 ~ '^[^[:space:]@]+@[^[:space:]@]+\\.[^[:space:]@]+$')`],
+    ['chk_clientes_ext_telefone_comercial', preenchido('telefone_comercial', 50)],
+  ],
+};
+
+module.exports = { CHECKS_FICHA_DADOS, CHECKS_FICHA_DADOS_2 };

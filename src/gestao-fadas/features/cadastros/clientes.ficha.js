@@ -14,6 +14,8 @@ function colunasDaFicha(m) {
   if (m.fullName !== undefined) pares.push(['nome_completo', m.fullName]);
   if (m.cpf !== undefined) pares.push(['cpf', m.cpf]);
   if (m.email !== undefined) pares.push(['email', m.email]);
+  if (m.email2 !== undefined) pares.push(['email2', m.email2]);
+  if (m.workPhone !== undefined) pares.push(['telefone_comercial', m.workPhone]);
   // Declarar "não possui e-mail" guarda a declaração e tira o e-mail do complemento (o legado segue só leitura).
   if (m.noEmail !== undefined) { pares.push(['sem_email', m.noEmail]); if (m.noEmail === true && m.email === undefined) pares.push(['email', null]); }
   if (m.phones !== undefined) pares.push(['telefones', JSON.stringify(m.phones)], ['telefone_consulta_idx', m.consultationPhoneIndex], ['telefone_whatsapp_idx', m.whatsappPhoneIndex]);
@@ -23,7 +25,7 @@ function colunasDaFicha(m) {
 }
 
 /** Os nomes (da API) dos campos da ficha que a gravação mexeu, para a auditoria (sem os valores: CPF e endereço não vão ao log). */
-const camposDaFicha = (m) => ['fullName', 'cpf', 'email', 'noEmail', 'phones', 'address'].filter((k) => m[k] !== undefined);
+const camposDaFicha = (m) => ['fullName', 'cpf', 'email', 'email2', 'workPhone', 'noEmail', 'phones', 'address'].filter((k) => m[k] !== undefined);
 
 const SELECT_FICHA = `${COLUNAS.join(', ')}, dados, situacao_cadastral, sem_email`;
 

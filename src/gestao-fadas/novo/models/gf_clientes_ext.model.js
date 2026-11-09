@@ -40,5 +40,8 @@ module.exports = definir({
     end_cidade: { type: DataTypes.STRING(100), allowNull: true },
     end_uf: { type: DataTypes.STRING(100), allowNull: true },
     end_pais: { type: DataTypes.STRING(100), allowNull: true },
+    // Migração 20261216000000 (Nice, 09/11): e-mail 2 e telefone comercial da ficha. NULL = sem complemento (vale o legado).
+    email2: { type: DataTypes.STRING(100), allowNull: true },
+    telefone_comercial: { type: DataTypes.STRING(50), allowNull: true },
   },
 });
