@@ -43,7 +43,7 @@ module.exports = async ({ adapter, umbler, conferir, passo, log, AGORA, r, consu
       await emTransacao((ex) => repo.reservar(ex, { chaveInterna: ch.interna, chaveOriginal: ch.original, hash: 'a'.repeat(64), kind: a.kind }));
     }
     await emTransacao((ex) => repo.marcarIncerta(ex, normalizarChave(incerta.idempotencyKey).interna, { message: 'x' }));
-    await consulta("UPDATE gf_lilly_acoes SET atualizado_em = now() - interval '10 minutes' WHERE chave_original = :c", { c: velha.idempotencyKey });
+    await consulta("UPDATE gf_lilly_acoes SET atualizado_em = :t WHERE chave_original = :c", { c: velha.idempotencyKey, t: new Date(Date.now() - 10 * 60000).toISOString() });
     const [i, p, v] = [await adapter.reconcile(incerta), await adapter.reconcile(pendente), await adapter.reconcile(velha)];
     conferir('incerta', i.committed === false && i.state === 'uncertain', JSON.stringify(i));
     conferir('em execução recente = pending', p.committed === false && p.state === 'pending', JSON.stringify(p));

@@ -108,9 +108,11 @@ test('A2: a tabela por perfil é a autoridade: quem não pode (taróloga, perfil
   for (const role of ['tarologa', 'inexistente', undefined]) { const c = model.projectProfile(registro, role); assert.deepEqual([c.fullName, c.cpf, c.birthDate], [null, null, null], String(role)); }
   const ok4 = model.projectProfile(registro, 'atendente'); assert.deepEqual([ok4.fullName, ok4.cpf, ok4.birthDate], ['Luiza Prado Souza', '01234567890', '1985-07-04']);
   assert.ok(Object.isFrozen(perfis.IDENTIDADE_CIVIL_POR_PERFIL), 'tabela congelada');
-  const fonte = fs.readFileSync(path.join(gf, base, 'clientes.model.js'), 'utf8');
-  assert.ok(/fullName: civil \? record\.fullName : null/.test(fonte) && /cpf: civil \? record\.cpf : null, birthDate: civil \? record\.birthDate : null/.test(fonte), 'ficha filtra no servidor');
-  assert.ok(/fullName: canViewCivilIdentity\(plan\.role\) \? record\.fullName : null/.test(fonte), 'lista filtra no servidor');
+  // O model foi dividido em clientes.model.ficha.js (ficha) e clientes.model.lista.js (lista): cada regra é lida no arquivo onde mora hoje.
+  const fonteFicha = fs.readFileSync(path.join(gf, base, 'clientes.model.ficha.js'), 'utf8');
+  const fonteLista = fs.readFileSync(path.join(gf, base, 'clientes.model.lista.js'), 'utf8');
+  assert.ok(/fullName: civil \? record\.fullName : null/.test(fonteFicha) && /cpf: civil \? record\.cpf : null, birthDate: civil \? record\.birthDate : null/.test(fonteFicha), 'ficha filtra no servidor');
+  assert.ok(/fullName: canViewCivilIdentity\(plan\.role\) \? record\.fullName : null/.test(fonteLista), 'lista filtra no servidor');
 });
 test('A2: lista - nome completo para os 4 perfis de equipe; a taróloga é recusada no plano da lista (403)', () => {
   for (const role of ['administradora', 'assistente', 'supervisora', 'atendente']) {

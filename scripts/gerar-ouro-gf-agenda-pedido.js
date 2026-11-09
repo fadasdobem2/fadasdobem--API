@@ -19,6 +19,8 @@ if (!arg('front') || !fs.existsSync(path.join(front, 'node_modules', 'vite'))) {
 const roda = (fn) => { try { const v = fn(); return { v: v === undefined ? null : v }; } catch (e) { return { e: e.message }; } };
 const N = (n, f) => Array.from({ length: n }, (_, i) => f(i));
 const HOJE_BASE = '2026-11-09';
+// Relógio fixo: o front e o domínio da API leem Date.now() (sameAgendaOccurrence); sem isto o ouro depende da hora em que foi gerado.
+require('./apoio-gf-agenda/relogio-fixo-pedido').fixar();
 
 (async () => {
   process.env.FADAS_MODE = 'real';

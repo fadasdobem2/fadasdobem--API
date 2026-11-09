@@ -31,6 +31,7 @@ function ordenar(v) {
   return v;
 }
 const roda = (fn) => { try { const v = fn(); return { v: v === undefined ? null : v }; } catch (e) { return { e: e.message }; } };
+require('./apoio-gf-agenda/relogio-fixo-pedido').fixar(); // mesmo relógio do gerador do ouro
 const ouro = require('./apoio-gf-agenda/ouro-agenda-pedido.json');
 
 /** Cada grupo: nome, função que monta a resposta da API para um caso (no mesmo formato do ouro). */

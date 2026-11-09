@@ -7,6 +7,8 @@
 
 const { conferir, passo, resumo } = require('../apoio-gf-banco-novo/comum');
 const { criarAmbiente } = require('./ambiente');
+const { AGORA: AGORA_SEMEADA } = require('../apoio-gf-lilly-contexto/semear');
+require('./relogio-deslocado').deslocar(AGORA_SEMEADA);
 
 const CASOS = (process.env.CASOS_INTEGRACAO || 'casos-snapshot,casos-eventos,casos-validate,casos-execute-flag,casos-execute-agenda,casos-execute-cadastro,casos-execute-consulta,casos-execute-pagamento,casos-reconcilia,casos-erros,casos-runtime').split(',');
 
