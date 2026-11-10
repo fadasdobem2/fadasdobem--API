@@ -58,6 +58,8 @@
     "verificar:gf-contas": "node scripts/verificar-gf-contas.js",
     "contas:primeira": "node scripts/criar-primeira-administradora.js",
     "contas:equipe": "node scripts/criar-contas-equipe.js",
+    "importar:equipe": "node scripts/importar-equipe.js",
+    "verificar:gf-importar-equipe": "node scripts/verificar-gf-importar-equipe.js",
     "verificar:gf-contas-equipe": "node scripts/verificar-gf-contas-equipe.js",
     "checar:implantacao": "node deploy/checar-implantacao.js",
     "verificar:gf-painel": "node scripts/verificar-gf-painel-fluxo.js && node scripts/verificar-gf-painel-pagamentos.js && node scripts/verificar-gf-painel-lancamento.js && node scripts/verificar-gf-painel-aviso.js && node scripts/verificar-gf-painel.js",
