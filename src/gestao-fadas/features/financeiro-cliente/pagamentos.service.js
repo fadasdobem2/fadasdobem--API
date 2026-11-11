@@ -168,7 +168,7 @@ async function contas(req) {
   const ids = [...new Set(`${(req.query && req.query.ids) || ''}`.split(',').map((s) => s.trim()).filter(Boolean))];
   if (!ids.length || ids.length > 30) throw f.invalido('ids');
   ids.forEach((id) => f.idCliente(id, 'ids'));
-  const vivas = await ctx.clientesNoLegado(ids);
+  const vivas = await ctx.clientesDaConta(ids);
   const saida = {};
   const agora = new Date().toISOString();
   await lendoNovo(async (m) => {

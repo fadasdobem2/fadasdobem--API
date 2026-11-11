@@ -14,10 +14,14 @@ const legado = require('../../legado-escrita');
 const lp = require('../../legado-escrita/legado-primeiro');
 const intencoes = require('../../legado-escrita/intencoes');
 const { MapeamentoError } = legado.mapeamento;
+const { ehIdDaFaixaNova } = require('../../_comum/dominio/cliente-faixa-nova');
 
 const SEM_ESPELHO = { legadoId: null, estado: 'nao_espelhada', detalhe: null };
 
 async function lancamento(ex, reg, atorNome, operationKey) {
+  // Não há usuarios correspondente a esta faixa: espelhar criaria um recebimento
+  // órfão no ASP, mesmo quando o espelho das clientes antigas estiver habilitado.
+  if (ehIdDaFaixaNova(reg.clientId)) return { ...SEM_ESPELHO, detalhe: 'Cliente cadastrada no sistema novo, sem registro no legado.' };
   if (!lp.ativo('pagamentos')) return SEM_ESPELHO;
   let colunas;
   try { colunas = legado.pagamentos.linhaDoPagamento(reg, atorNome); } catch (e) { if (e instanceof MapeamentoError) return { legadoId: null, estado: 'recusada', detalhe: e.message }; throw e; }
@@ -39,7 +43,9 @@ async function lancamento(ex, reg, atorNome, operationKey) {
 
 /** `antes` = linha de gf_pagamentos (com `legado_id`, `legado_estado`) e item anterior; `reg` = registro novo. Devolve os dados do legado ou `null` se nada muda. */
 async function revisao(ex, linhaAntes, antes, reg, operationKey) {
+  if (ehIdDaFaixaNova(antes.clientId)) return null;
   if (!lp.ativo('pagamentos') || linhaAntes.legado_estado !== 'espelhada' || !linhaAntes.legado_id) return null;
+  if (ehIdDaFaixaNova(reg.clientId)) return { legadoId: linhaAntes.legado_id, estado: 'desatualizada', detalhe: 'cliente corrigida para cadastro do sistema novo; o recebimento no legado não foi alterado' };
   const confirmou = antes.confirmation !== 'Confirmado' && reg.confirmation === 'Confirmado';
   const campos = ['amount', 'method', 'bank', 'paidAt', 'authorization', 'note', 'payerName'];
   const mudou = reg.status === 'Cancelado' || campos.some((c) => antes[c] !== reg[c]);

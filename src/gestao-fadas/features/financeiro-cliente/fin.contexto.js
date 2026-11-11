@@ -18,6 +18,8 @@ const saldo = require('../../_comum/dominio/financeiro-saldo');
 const planilha = require('../../_comum/dominio/migracao-planilha');
 const { SEM_HISTORICO } = require('../../_comum/dominio/historico-legado');
 const { historicoDoLegadoReal } = require('./fin.historico-legado');
+const { ehIdDaFaixaNova, clientesNovosPorIds } = require('../clientes/cliente-novo');
+const novas = require('../clientes/cliente-novo.leitura');
 
 const FONTE_PLANILHA = 'planilha-migracao';
 const FONTE_SEM_PLANILHA = 'sem-planilha-zero';
@@ -54,6 +56,9 @@ const definirLeitorDeHistorico = (fn) => { leitorDeHistorico = fn || null; };
  * propaga o 503: cobrar pela tabela de primeira compra sem saber seria o erro que esta leitura existe para evitar.
  */
 async function historicoNoLegado(clientId) {
+  // Esta faixa pertence exclusivamente ao Postgres. A ausência de história no ASP
+  // é conhecida pela origem do cadastro; não depende da disponibilidade do MySQL.
+  if (ehIdDaFaixaNova(String(clientId))) return SEM_HISTORICO;
   try { return ((await (leitorDeHistorico || historicoDoLegadoReal)([String(clientId)])).get(String(clientId))) || SEM_HISTORICO; } catch (e) {
     if (e && e.dados && e.dados.codigo === 'LEGADO_NAO_CONFIGURADO') return SEM_HISTORICO;
     throw e;
@@ -61,6 +66,20 @@ async function historicoNoLegado(clientId) {
 }
 const partidaNoLegado = (ids, opcoes) => (leitorDePartida || partidaNoLegadoReal)(ids, opcoes);
 const clientesNoLegado = (ids) => (leitorDePartida || clientesNoLegadoReal)(ids);
+
+/** Identidade da conta, sem saldo: cada ID é procurado somente na sua fonte. */
+async function clientesDaConta(ids) {
+  const alvo = [...new Set(ids.map(String))];
+  const antigos = alvo.filter((id) => !ehIdDaFaixaNova(id));
+  const recentes = alvo.filter(ehIdDaFaixaNova);
+  const [legadas, criadas] = await Promise.all([
+    antigos.length ? clientesNoLegado(antigos) : new Map(),
+    recentes.length && novas.ativa() ? clientesNovosPorIds(recentes) : [],
+  ]);
+  const contas = new Map(legadas);
+  for (const cliente of criadas) contas.set(String(cliente.id), { conhecido: true, nome: `${cliente.nome_id || ''}`.trim() });
+  return contas;
+}
 
 /** Fontes de dados. `executor`: dentro da transação (SQL); `modelos`: leitura pelos models do banco novo. */
 const porExecutor = (ex) => ({
@@ -125,4 +144,4 @@ function resumir(ctx, agora = new Date().toISOString()) {
   };
 }
 
-module.exports = { FONTE_PLANILHA, FONTE_SEM_PLANILHA, partidaNoLegado, clientesNoLegado, definirLeitorDePartida, definirLeitorDeHistorico, historicoNoLegado, porExecutor, porModelos, congelarPartida, carregar, resumir };
+module.exports = { FONTE_PLANILHA, FONTE_SEM_PLANILHA, partidaNoLegado, clientesNoLegado, clientesDaConta, definirLeitorDePartida, definirLeitorDeHistorico, historicoNoLegado, porExecutor, porModelos, congelarPartida, carregar, resumir };

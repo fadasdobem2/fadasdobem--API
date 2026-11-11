@@ -10,11 +10,13 @@ const { catchAsyncRoute } = require('../../../utils/catchAsync.util');
 const tarologos = require('./tarologos.service');
 const clientes = require('./clientes.service');
 const criacao = require('./clientes.criacao');
+const retorno = require('./tarologos-retorno.service');
 
 const h = (fn, msg) => catchAsyncRoute(async (req, res) => responderSucesso(res, await fn(req), msg, 200));
 
 module.exports = [
   { metodo: 'GET', caminho: '/catalog/tarologists', escrita: false, handler: h(tarologos.ler, 'Catálogo de tarólogos.') },
+  { metodo: 'GET', caminho: '/catalog/tarologists/return-metrics', escrita: false, handler: h(retorno.ler, 'Retorno das clientes por profissional.') },
   { metodo: 'GET', caminho: '/catalog/tarologists/:tarotId', escrita: false, handler: h(tarologos.obter, 'Tarólogo do catálogo.') },
   { metodo: 'PUT', caminho: '/catalog/tarologists/:tarotId/profile', escrita: true, handler: h(tarologos.gravarPerfil, 'Perfil registrado.') },
   { metodo: 'PUT', caminho: '/catalog/tarologists/:tarotId/account', escrita: true, handler: h(tarologos.vincularConta, 'Conta vinculada.') },

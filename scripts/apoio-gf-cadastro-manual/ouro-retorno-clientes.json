@@ -1,0 +1,1419 @@
+{
+  "regra": "buildSessionMetricIndex + ownSessionMetrics + mergeConsultations do front; DTO legado servido pela API",
+  "agora": "2026-11-11T13:10:00.000Z",
+  "fontes": [
+    {
+      "file": "features/tarologas/tarologist-session-metrics.ts",
+      "sha256": "f7b081048fd44167b028c88cb3af3d7df562c6be1b8fcf7b4cb149346ebd97d8"
+    },
+    {
+      "file": "features/tarologas/tarologist-metrics-model.ts",
+      "sha256": "1e3cae8f182e09d3a8c0c029df9cc65702b907ec69b84b622af582cb5ce8a213"
+    },
+    {
+      "file": "features/integration/consultation/legacy-consultation-mapping.ts",
+      "sha256": "5410f01eaca5956c1da7a1cebcbb100138688b78203fee6a7fdae94982c54a09"
+    },
+    {
+      "file": "features/domain/consultation-status.ts",
+      "sha256": "bcfde3bee393bdc4d24d33b025ffa81e92ac373ceedd42e06e5e6fc76323d4a0"
+    },
+    {
+      "file": "features/domain/operation-calendar.ts",
+      "sha256": "183053513ab3ecb5ae39f30ea95d3044ca28a260531888644ba0ea96bd4086a5"
+    }
+  ],
+  "casos": [
+    {
+      "nome": "sem sessões",
+      "esperado": {
+        "periodStart": "2026-11-11",
+        "periodEnd": "2026-11-11",
+        "rows": []
+      }
+    },
+    {
+      "nome": "retorno no mesmo dia após fim confirmado",
+      "esperado": {
+        "periodStart": "2026-11-10",
+        "periodEnd": "2026-11-11",
+        "rows": [
+          {
+            "tarologistId": "500",
+            "returnPercentage": 100,
+            "clients": 1,
+            "returningClients": 1
+          }
+        ]
+      }
+    },
+    {
+      "nome": "sobreposição não é retorno",
+      "esperado": {
+        "periodStart": "2026-11-10",
+        "periodEnd": "2026-11-11",
+        "rows": [
+          {
+            "tarologistId": "500",
+            "returnPercentage": 0,
+            "clients": 1,
+            "returningClients": 0
+          }
+        ]
+      }
+    },
+    {
+      "nome": "continuação é uma sessão",
+      "esperado": {
+        "periodStart": "2026-11-10",
+        "periodEnd": "2026-11-11",
+        "rows": [
+          {
+            "tarologistId": "500",
+            "returnPercentage": 0,
+            "clients": 1,
+            "returningClients": 0
+          }
+        ]
+      }
+    },
+    {
+      "nome": "complemento é uma sessão",
+      "esperado": {
+        "periodStart": "2026-11-10",
+        "periodEnd": "2026-11-11",
+        "rows": [
+          {
+            "tarologistId": "500",
+            "returnPercentage": 0,
+            "clients": 1,
+            "returningClients": 0
+          }
+        ]
+      }
+    },
+    {
+      "nome": "origem anulada não cria sessão autônoma",
+      "esperado": {
+        "periodStart": "2026-11-11",
+        "periodEnd": "2026-11-11",
+        "rows": []
+      }
+    },
+    {
+      "nome": "vínculo de outra cliente não agrupa",
+      "esperado": {
+        "periodStart": "2026-11-10",
+        "periodEnd": "2026-11-11",
+        "rows": [
+          {
+            "tarologistId": "500",
+            "returnPercentage": 0,
+            "clients": 2,
+            "returningClients": 0
+          }
+        ]
+      }
+    },
+    {
+      "nome": "ciclo de continuações descartado",
+      "esperado": {
+        "periodStart": "2026-11-11",
+        "periodEnd": "2026-11-11",
+        "rows": []
+      }
+    },
+    {
+      "nome": "legado voltou e está em curso",
+      "esperado": {
+        "periodStart": "2026-11-10",
+        "periodEnd": "2026-11-11",
+        "rows": [
+          {
+            "tarologistId": "500",
+            "returnPercentage": 0,
+            "clients": 1,
+            "returningClients": 0
+          }
+        ]
+      }
+    },
+    {
+      "nome": "legado futuro sem início decorrido",
+      "esperado": {
+        "periodStart": "2026-11-10",
+        "periodEnd": "2026-11-11",
+        "rows": [
+          {
+            "tarologistId": "500",
+            "returnPercentage": 0,
+            "clients": 1,
+            "returningClients": 0
+          }
+        ]
+      }
+    },
+    {
+      "nome": "espelho explícito anulado vence legado",
+      "esperado": {
+        "periodStart": "2026-11-11",
+        "periodEnd": "2026-11-11",
+        "rows": []
+      }
+    },
+    {
+      "nome": "mesmo par e minuto sem vínculo",
+      "esperado": {
+        "periodStart": "2026-11-10",
+        "periodEnd": "2026-11-11",
+        "rows": [
+          {
+            "tarologistId": "500",
+            "returnPercentage": 0,
+            "clients": 1,
+            "returningClients": 0
+          }
+        ]
+      }
+    },
+    {
+      "nome": "representação original do instante segue fallback do front",
+      "esperado": {
+        "periodStart": "2026-11-10",
+        "periodEnd": "2026-11-11",
+        "rows": [
+          {
+            "tarologistId": "500",
+            "returnPercentage": 0,
+            "clients": 1,
+            "returningClients": 0
+          }
+        ]
+      }
+    },
+    {
+      "nome": "antigo horário de verão",
+      "esperado": {
+        "periodStart": "2018-12-01",
+        "periodEnd": "2026-11-11",
+        "rows": [
+          {
+            "tarologistId": "500",
+            "returnPercentage": 100,
+            "clients": 1,
+            "returningClients": 1
+          }
+        ]
+      }
+    },
+    {
+      "nome": "virada de meia-noite e duração negativa do legado",
+      "esperado": {
+        "periodStart": "2026-11-09",
+        "periodEnd": "2026-11-11",
+        "rows": [
+          {
+            "tarologistId": "500",
+            "returnPercentage": 100,
+            "clients": 1,
+            "returningClients": 1
+          }
+        ]
+      }
+    },
+    {
+      "nome": "combinação determinística 1",
+      "esperado": {
+        "periodStart": "2026-11-10",
+        "periodEnd": "2026-11-11",
+        "rows": [
+          {
+            "tarologistId": "500",
+            "returnPercentage": 50,
+            "clients": 2,
+            "returningClients": 1
+          },
+          {
+            "tarologistId": "501",
+            "returnPercentage": 0,
+            "clients": 1,
+            "returningClients": 0
+          }
+        ]
+      }
+    },
+    {
+      "nome": "combinação determinística 2",
+      "esperado": {
+        "periodStart": "2026-11-10",
+        "periodEnd": "2026-11-11",
+        "rows": [
+          {
+            "tarologistId": "500",
+            "returnPercentage": 33.33333333333333,
+            "clients": 3,
+            "returningClients": 1
+          },
+          {
+            "tarologistId": "501",
+            "returnPercentage": 0,
+            "clients": 1,
+            "returningClients": 0
+          }
+        ]
+      }
+    },
+    {
+      "nome": "combinação determinística 3",
+      "esperado": {
+        "periodStart": "2026-11-10",
+        "periodEnd": "2026-11-11",
+        "rows": [
+          {
+            "tarologistId": "500",
+            "returnPercentage": 0,
+            "clients": 1,
+            "returningClients": 0
+          },
+          {
+            "tarologistId": "501",
+            "returnPercentage": 0,
+            "clients": 1,
+            "returningClients": 0
+          }
+        ]
+      }
+    },
+    {
+      "nome": "combinação determinística 4",
+      "esperado": {
+        "periodStart": "2026-11-10",
+        "periodEnd": "2026-11-11",
+        "rows": [
+          {
+            "tarologistId": "500",
+            "returnPercentage": 0,
+            "clients": 1,
+            "returningClients": 0
+          }
+        ]
+      }
+    },
+    {
+      "nome": "combinação determinística 5",
+      "esperado": {
+        "periodStart": "2026-11-10",
+        "periodEnd": "2026-11-11",
+        "rows": [
+          {
+            "tarologistId": "500",
+            "returnPercentage": 0,
+            "clients": 2,
+            "returningClients": 0
+          },
+          {
+            "tarologistId": "501",
+            "returnPercentage": 0,
+            "clients": 1,
+            "returningClients": 0
+          }
+        ]
+      }
+    },
+    {
+      "nome": "combinação determinística 6",
+      "esperado": {
+        "periodStart": "2026-11-10",
+        "periodEnd": "2026-11-11",
+        "rows": [
+          {
+            "tarologistId": "500",
+            "returnPercentage": 0,
+            "clients": 3,
+            "returningClients": 0
+          },
+          {
+            "tarologistId": "501",
+            "returnPercentage": 0,
+            "clients": 1,
+            "returningClients": 0
+          }
+        ]
+      }
+    },
+    {
+      "nome": "combinação determinística 7",
+      "esperado": {
+        "periodStart": "2026-11-10",
+        "periodEnd": "2026-11-11",
+        "rows": [
+          {
+            "tarologistId": "500",
+            "returnPercentage": 0,
+            "clients": 3,
+            "returningClients": 0
+          },
+          {
+            "tarologistId": "501",
+            "returnPercentage": 0,
+            "clients": 1,
+            "returningClients": 0
+          }
+        ]
+      }
+    },
+    {
+      "nome": "combinação determinística 8",
+      "esperado": {
+        "periodStart": "2026-11-10",
+        "periodEnd": "2026-11-11",
+        "rows": [
+          {
+            "tarologistId": "500",
+            "returnPercentage": 0,
+            "clients": 3,
+            "returningClients": 0
+          },
+          {
+            "tarologistId": "501",
+            "returnPercentage": 0,
+            "clients": 1,
+            "returningClients": 0
+          }
+        ]
+      }
+    },
+    {
+      "nome": "combinação determinística 9",
+      "esperado": {
+        "periodStart": "2026-11-10",
+        "periodEnd": "2026-11-11",
+        "rows": [
+          {
+            "tarologistId": "500",
+            "returnPercentage": 0,
+            "clients": 3,
+            "returningClients": 0
+          },
+          {
+            "tarologistId": "501",
+            "returnPercentage": 0,
+            "clients": 1,
+            "returningClients": 0
+          }
+        ]
+      }
+    },
+    {
+      "nome": "combinação determinística 10",
+      "esperado": {
+        "periodStart": "2026-11-10",
+        "periodEnd": "2026-11-11",
+        "rows": [
+          {
+            "tarologistId": "500",
+            "returnPercentage": 50,
+            "clients": 2,
+            "returningClients": 1
+          },
+          {
+            "tarologistId": "501",
+            "returnPercentage": 0,
+            "clients": 1,
+            "returningClients": 0
+          }
+        ]
+      }
+    },
+    {
+      "nome": "combinação determinística 11",
+      "esperado": {
+        "periodStart": "2026-11-10",
+        "periodEnd": "2026-11-11",
+        "rows": [
+          {
+            "tarologistId": "500",
+            "returnPercentage": 0,
+            "clients": 2,
+            "returningClients": 0
+          },
+          {
+            "tarologistId": "501",
+            "returnPercentage": 0,
+            "clients": 1,
+            "returningClients": 0
+          }
+        ]
+      }
+    },
+    {
+      "nome": "combinação determinística 12",
+      "esperado": {
+        "periodStart": "2026-11-10",
+        "periodEnd": "2026-11-11",
+        "rows": [
+          {
+            "tarologistId": "500",
+            "returnPercentage": 33.33333333333333,
+            "clients": 3,
+            "returningClients": 1
+          },
+          {
+            "tarologistId": "501",
+            "returnPercentage": 0,
+            "clients": 1,
+            "returningClients": 0
+          }
+        ]
+      }
+    },
+    {
+      "nome": "combinação determinística 13",
+      "esperado": {
+        "periodStart": "2026-11-10",
+        "periodEnd": "2026-11-11",
+        "rows": [
+          {
+            "tarologistId": "500",
+            "returnPercentage": 33.33333333333333,
+            "clients": 3,
+            "returningClients": 1
+          },
+          {
+            "tarologistId": "501",
+            "returnPercentage": 0,
+            "clients": 1,
+            "returningClients": 0
+          }
+        ]
+      }
+    },
+    {
+      "nome": "combinação determinística 14",
+      "esperado": {
+        "periodStart": "2026-11-10",
+        "periodEnd": "2026-11-11",
+        "rows": [
+          {
+            "tarologistId": "500",
+            "returnPercentage": 33.33333333333333,
+            "clients": 3,
+            "returningClients": 1
+          }
+        ]
+      }
+    },
+    {
+      "nome": "combinação determinística 15",
+      "esperado": {
+        "periodStart": "2026-11-10",
+        "periodEnd": "2026-11-11",
+        "rows": [
+          {
+            "tarologistId": "500",
+            "returnPercentage": 0,
+            "clients": 3,
+            "returningClients": 0
+          },
+          {
+            "tarologistId": "501",
+            "returnPercentage": 0,
+            "clients": 1,
+            "returningClients": 0
+          }
+        ]
+      }
+    },
+    {
+      "nome": "combinação determinística 16",
+      "esperado": {
+        "periodStart": "2026-11-10",
+        "periodEnd": "2026-11-11",
+        "rows": [
+          {
+            "tarologistId": "500",
+            "returnPercentage": 33.33333333333333,
+            "clients": 3,
+            "returningClients": 1
+          },
+          {
+            "tarologistId": "501",
+            "returnPercentage": 0,
+            "clients": 1,
+            "returningClients": 0
+          }
+        ]
+      }
+    },
+    {
+      "nome": "combinação determinística 17",
+      "esperado": {
+        "periodStart": "2026-11-10",
+        "periodEnd": "2026-11-11",
+        "rows": [
+          {
+            "tarologistId": "500",
+            "returnPercentage": 0,
+            "clients": 2,
+            "returningClients": 0
+          },
+          {
+            "tarologistId": "501",
+            "returnPercentage": 0,
+            "clients": 1,
+            "returningClients": 0
+          }
+        ]
+      }
+    },
+    {
+      "nome": "combinação determinística 18",
+      "esperado": {
+        "periodStart": "2026-11-10",
+        "periodEnd": "2026-11-11",
+        "rows": [
+          {
+            "tarologistId": "500",
+            "returnPercentage": 33.33333333333333,
+            "clients": 3,
+            "returningClients": 1
+          },
+          {
+            "tarologistId": "501",
+            "returnPercentage": 0,
+            "clients": 1,
+            "returningClients": 0
+          }
+        ]
+      }
+    },
+    {
+      "nome": "combinação determinística 19",
+      "esperado": {
+        "periodStart": "2026-11-10",
+        "periodEnd": "2026-11-11",
+        "rows": [
+          {
+            "tarologistId": "500",
+            "returnPercentage": 0,
+            "clients": 2,
+            "returningClients": 0
+          },
+          {
+            "tarologistId": "501",
+            "returnPercentage": 0,
+            "clients": 1,
+            "returningClients": 0
+          }
+        ]
+      }
+    },
+    {
+      "nome": "combinação determinística 20",
+      "esperado": {
+        "periodStart": "2026-11-10",
+        "periodEnd": "2026-11-11",
+        "rows": [
+          {
+            "tarologistId": "500",
+            "returnPercentage": 33.33333333333333,
+            "clients": 3,
+            "returningClients": 1
+          }
+        ]
+      }
+    },
+    {
+      "nome": "combinação determinística 21",
+      "esperado": {
+        "periodStart": "2026-11-10",
+        "periodEnd": "2026-11-11",
+        "rows": [
+          {
+            "tarologistId": "500",
+            "returnPercentage": 0,
+            "clients": 2,
+            "returningClients": 0
+          },
+          {
+            "tarologistId": "501",
+            "returnPercentage": 0,
+            "clients": 1,
+            "returningClients": 0
+          }
+        ]
+      }
+    },
+    {
+      "nome": "combinação determinística 22",
+      "esperado": {
+        "periodStart": "2026-11-10",
+        "periodEnd": "2026-11-11",
+        "rows": [
+          {
+            "tarologistId": "500",
+            "returnPercentage": 0,
+            "clients": 3,
+            "returningClients": 0
+          },
+          {
+            "tarologistId": "501",
+            "returnPercentage": 0,
+            "clients": 1,
+            "returningClients": 0
+          }
+        ]
+      }
+    },
+    {
+      "nome": "combinação determinística 23",
+      "esperado": {
+        "periodStart": "2026-11-10",
+        "periodEnd": "2026-11-11",
+        "rows": [
+          {
+            "tarologistId": "500",
+            "returnPercentage": 0,
+            "clients": 3,
+            "returningClients": 0
+          },
+          {
+            "tarologistId": "501",
+            "returnPercentage": 0,
+            "clients": 1,
+            "returningClients": 0
+          }
+        ]
+      }
+    },
+    {
+      "nome": "combinação determinística 24",
+      "esperado": {
+        "periodStart": "2026-11-10",
+        "periodEnd": "2026-11-11",
+        "rows": [
+          {
+            "tarologistId": "500",
+            "returnPercentage": 0,
+            "clients": 3,
+            "returningClients": 0
+          },
+          {
+            "tarologistId": "501",
+            "returnPercentage": 0,
+            "clients": 1,
+            "returningClients": 0
+          }
+        ]
+      }
+    },
+    {
+      "nome": "combinação determinística 25",
+      "esperado": {
+        "periodStart": "2026-11-10",
+        "periodEnd": "2026-11-11",
+        "rows": [
+          {
+            "tarologistId": "500",
+            "returnPercentage": 0,
+            "clients": 1,
+            "returningClients": 0
+          },
+          {
+            "tarologistId": "501",
+            "returnPercentage": 0,
+            "clients": 1,
+            "returningClients": 0
+          }
+        ]
+      }
+    },
+    {
+      "nome": "combinação determinística 26",
+      "esperado": {
+        "periodStart": "2026-11-10",
+        "periodEnd": "2026-11-11",
+        "rows": [
+          {
+            "tarologistId": "500",
+            "returnPercentage": 0,
+            "clients": 3,
+            "returningClients": 0
+          },
+          {
+            "tarologistId": "501",
+            "returnPercentage": 0,
+            "clients": 1,
+            "returningClients": 0
+          }
+        ]
+      }
+    },
+    {
+      "nome": "combinação determinística 27",
+      "esperado": {
+        "periodStart": "2026-11-10",
+        "periodEnd": "2026-11-11",
+        "rows": [
+          {
+            "tarologistId": "500",
+            "returnPercentage": 33.33333333333333,
+            "clients": 3,
+            "returningClients": 1
+          },
+          {
+            "tarologistId": "501",
+            "returnPercentage": 0,
+            "clients": 1,
+            "returningClients": 0
+          }
+        ]
+      }
+    },
+    {
+      "nome": "combinação determinística 28",
+      "esperado": {
+        "periodStart": "2026-11-10",
+        "periodEnd": "2026-11-11",
+        "rows": [
+          {
+            "tarologistId": "500",
+            "returnPercentage": 33.33333333333333,
+            "clients": 3,
+            "returningClients": 1
+          },
+          {
+            "tarologistId": "501",
+            "returnPercentage": 0,
+            "clients": 1,
+            "returningClients": 0
+          }
+        ]
+      }
+    },
+    {
+      "nome": "combinação determinística 29",
+      "esperado": {
+        "periodStart": "2026-11-10",
+        "periodEnd": "2026-11-11",
+        "rows": [
+          {
+            "tarologistId": "500",
+            "returnPercentage": 0,
+            "clients": 2,
+            "returningClients": 0
+          },
+          {
+            "tarologistId": "501",
+            "returnPercentage": 0,
+            "clients": 1,
+            "returningClients": 0
+          }
+        ]
+      }
+    },
+    {
+      "nome": "combinação determinística 30",
+      "esperado": {
+        "periodStart": "2026-11-10",
+        "periodEnd": "2026-11-11",
+        "rows": [
+          {
+            "tarologistId": "500",
+            "returnPercentage": 0,
+            "clients": 3,
+            "returningClients": 0
+          }
+        ]
+      }
+    },
+    {
+      "nome": "combinação determinística 31",
+      "esperado": {
+        "periodStart": "2026-11-10",
+        "periodEnd": "2026-11-11",
+        "rows": [
+          {
+            "tarologistId": "500",
+            "returnPercentage": 33.33333333333333,
+            "clients": 3,
+            "returningClients": 1
+          },
+          {
+            "tarologistId": "501",
+            "returnPercentage": 0,
+            "clients": 1,
+            "returningClients": 0
+          }
+        ]
+      }
+    },
+    {
+      "nome": "combinação determinística 32",
+      "esperado": {
+        "periodStart": "2026-11-10",
+        "periodEnd": "2026-11-11",
+        "rows": [
+          {
+            "tarologistId": "500",
+            "returnPercentage": 0,
+            "clients": 3,
+            "returningClients": 0
+          }
+        ]
+      }
+    },
+    {
+      "nome": "combinação determinística 33",
+      "esperado": {
+        "periodStart": "2026-11-10",
+        "periodEnd": "2026-11-11",
+        "rows": [
+          {
+            "tarologistId": "500",
+            "returnPercentage": 50,
+            "clients": 2,
+            "returningClients": 1
+          },
+          {
+            "tarologistId": "501",
+            "returnPercentage": 0,
+            "clients": 1,
+            "returningClients": 0
+          }
+        ]
+      }
+    },
+    {
+      "nome": "combinação determinística 34",
+      "esperado": {
+        "periodStart": "2026-11-10",
+        "periodEnd": "2026-11-11",
+        "rows": [
+          {
+            "tarologistId": "500",
+            "returnPercentage": 0,
+            "clients": 2,
+            "returningClients": 0
+          }
+        ]
+      }
+    },
+    {
+      "nome": "combinação determinística 35",
+      "esperado": {
+        "periodStart": "2026-11-10",
+        "periodEnd": "2026-11-11",
+        "rows": [
+          {
+            "tarologistId": "500",
+            "returnPercentage": 50,
+            "clients": 2,
+            "returningClients": 1
+          },
+          {
+            "tarologistId": "501",
+            "returnPercentage": 0,
+            "clients": 1,
+            "returningClients": 0
+          }
+        ]
+      }
+    },
+    {
+      "nome": "combinação determinística 36",
+      "esperado": {
+        "periodStart": "2026-11-10",
+        "periodEnd": "2026-11-11",
+        "rows": [
+          {
+            "tarologistId": "500",
+            "returnPercentage": 50,
+            "clients": 2,
+            "returningClients": 1
+          },
+          {
+            "tarologistId": "501",
+            "returnPercentage": 0,
+            "clients": 1,
+            "returningClients": 0
+          }
+        ]
+      }
+    },
+    {
+      "nome": "combinação determinística 37",
+      "esperado": {
+        "periodStart": "2026-11-10",
+        "periodEnd": "2026-11-11",
+        "rows": [
+          {
+            "tarologistId": "500",
+            "returnPercentage": 0,
+            "clients": 3,
+            "returningClients": 0
+          },
+          {
+            "tarologistId": "501",
+            "returnPercentage": 0,
+            "clients": 1,
+            "returningClients": 0
+          }
+        ]
+      }
+    },
+    {
+      "nome": "combinação determinística 38",
+      "esperado": {
+        "periodStart": "2026-11-10",
+        "periodEnd": "2026-11-11",
+        "rows": [
+          {
+            "tarologistId": "500",
+            "returnPercentage": 50,
+            "clients": 2,
+            "returningClients": 1
+          },
+          {
+            "tarologistId": "501",
+            "returnPercentage": 0,
+            "clients": 1,
+            "returningClients": 0
+          }
+        ]
+      }
+    },
+    {
+      "nome": "combinação determinística 39",
+      "esperado": {
+        "periodStart": "2026-11-10",
+        "periodEnd": "2026-11-11",
+        "rows": [
+          {
+            "tarologistId": "500",
+            "returnPercentage": 0,
+            "clients": 3,
+            "returningClients": 0
+          },
+          {
+            "tarologistId": "501",
+            "returnPercentage": 0,
+            "clients": 1,
+            "returningClients": 0
+          }
+        ]
+      }
+    },
+    {
+      "nome": "combinação determinística 40",
+      "esperado": {
+        "periodStart": "2026-11-10",
+        "periodEnd": "2026-11-11",
+        "rows": [
+          {
+            "tarologistId": "500",
+            "returnPercentage": 50,
+            "clients": 2,
+            "returningClients": 1
+          }
+        ]
+      }
+    },
+    {
+      "nome": "combinação determinística 41",
+      "esperado": {
+        "periodStart": "2026-11-10",
+        "periodEnd": "2026-11-11",
+        "rows": [
+          {
+            "tarologistId": "500",
+            "returnPercentage": 50,
+            "clients": 2,
+            "returningClients": 1
+          },
+          {
+            "tarologistId": "501",
+            "returnPercentage": 0,
+            "clients": 1,
+            "returningClients": 0
+          }
+        ]
+      }
+    },
+    {
+      "nome": "combinação determinística 42",
+      "esperado": {
+        "periodStart": "2026-11-10",
+        "periodEnd": "2026-11-11",
+        "rows": [
+          {
+            "tarologistId": "500",
+            "returnPercentage": 50,
+            "clients": 2,
+            "returningClients": 1
+          }
+        ]
+      }
+    },
+    {
+      "nome": "combinação determinística 43",
+      "esperado": {
+        "periodStart": "2026-11-10",
+        "periodEnd": "2026-11-11",
+        "rows": [
+          {
+            "tarologistId": "500",
+            "returnPercentage": 0,
+            "clients": 2,
+            "returningClients": 0
+          },
+          {
+            "tarologistId": "501",
+            "returnPercentage": 0,
+            "clients": 1,
+            "returningClients": 0
+          }
+        ]
+      }
+    },
+    {
+      "nome": "combinação determinística 44",
+      "esperado": {
+        "periodStart": "2026-11-10",
+        "periodEnd": "2026-11-11",
+        "rows": [
+          {
+            "tarologistId": "500",
+            "returnPercentage": 33.33333333333333,
+            "clients": 3,
+            "returningClients": 1
+          },
+          {
+            "tarologistId": "501",
+            "returnPercentage": 0,
+            "clients": 1,
+            "returningClients": 0
+          }
+        ]
+      }
+    },
+    {
+      "nome": "combinação determinística 45",
+      "esperado": {
+        "periodStart": "2026-11-10",
+        "periodEnd": "2026-11-11",
+        "rows": [
+          {
+            "tarologistId": "500",
+            "returnPercentage": 0,
+            "clients": 2,
+            "returningClients": 0
+          },
+          {
+            "tarologistId": "501",
+            "returnPercentage": 0,
+            "clients": 1,
+            "returningClients": 0
+          }
+        ]
+      }
+    },
+    {
+      "nome": "combinação determinística 46",
+      "esperado": {
+        "periodStart": "2026-11-10",
+        "periodEnd": "2026-11-11",
+        "rows": [
+          {
+            "tarologistId": "500",
+            "returnPercentage": 33.33333333333333,
+            "clients": 3,
+            "returningClients": 1
+          }
+        ]
+      }
+    },
+    {
+      "nome": "combinação determinística 47",
+      "esperado": {
+        "periodStart": "2026-11-10",
+        "periodEnd": "2026-11-11",
+        "rows": [
+          {
+            "tarologistId": "500",
+            "returnPercentage": 0,
+            "clients": 2,
+            "returningClients": 0
+          },
+          {
+            "tarologistId": "501",
+            "returnPercentage": 0,
+            "clients": 1,
+            "returningClients": 0
+          }
+        ]
+      }
+    },
+    {
+      "nome": "combinação determinística 48",
+      "esperado": {
+        "periodStart": "2026-11-10",
+        "periodEnd": "2026-11-11",
+        "rows": [
+          {
+            "tarologistId": "500",
+            "returnPercentage": 33.33333333333333,
+            "clients": 3,
+            "returningClients": 1
+          },
+          {
+            "tarologistId": "501",
+            "returnPercentage": 0,
+            "clients": 1,
+            "returningClients": 0
+          }
+        ]
+      }
+    },
+    {
+      "nome": "combinação determinística 49",
+      "esperado": {
+        "periodStart": "2026-11-10",
+        "periodEnd": "2026-11-11",
+        "rows": [
+          {
+            "tarologistId": "500",
+            "returnPercentage": 0,
+            "clients": 1,
+            "returningClients": 0
+          },
+          {
+            "tarologistId": "501",
+            "returnPercentage": 0,
+            "clients": 1,
+            "returningClients": 0
+          }
+        ]
+      }
+    },
+    {
+      "nome": "combinação determinística 50",
+      "esperado": {
+        "periodStart": "2026-11-10",
+        "periodEnd": "2026-11-11",
+        "rows": [
+          {
+            "tarologistId": "500",
+            "returnPercentage": 0,
+            "clients": 3,
+            "returningClients": 0
+          },
+          {
+            "tarologistId": "501",
+            "returnPercentage": 0,
+            "clients": 1,
+            "returningClients": 0
+          }
+        ]
+      }
+    },
+    {
+      "nome": "combinação determinística 51",
+      "esperado": {
+        "periodStart": "2026-11-10",
+        "periodEnd": "2026-11-11",
+        "rows": [
+          {
+            "tarologistId": "500",
+            "returnPercentage": 50,
+            "clients": 2,
+            "returningClients": 1
+          },
+          {
+            "tarologistId": "501",
+            "returnPercentage": 0,
+            "clients": 1,
+            "returningClients": 0
+          }
+        ]
+      }
+    },
+    {
+      "nome": "combinação determinística 52",
+      "esperado": {
+        "periodStart": "2026-11-10",
+        "periodEnd": "2026-11-11",
+        "rows": [
+          {
+            "tarologistId": "500",
+            "returnPercentage": 33.33333333333333,
+            "clients": 3,
+            "returningClients": 1
+          },
+          {
+            "tarologistId": "501",
+            "returnPercentage": 0,
+            "clients": 1,
+            "returningClients": 0
+          }
+        ]
+      }
+    },
+    {
+      "nome": "combinação determinística 53",
+      "esperado": {
+        "periodStart": "2026-11-10",
+        "periodEnd": "2026-11-11",
+        "rows": [
+          {
+            "tarologistId": "500",
+            "returnPercentage": 0,
+            "clients": 1,
+            "returningClients": 0
+          },
+          {
+            "tarologistId": "501",
+            "returnPercentage": 0,
+            "clients": 1,
+            "returningClients": 0
+          }
+        ]
+      }
+    },
+    {
+      "nome": "combinação determinística 54",
+      "esperado": {
+        "periodStart": "2026-11-10",
+        "periodEnd": "2026-11-11",
+        "rows": [
+          {
+            "tarologistId": "500",
+            "returnPercentage": 0,
+            "clients": 3,
+            "returningClients": 0
+          },
+          {
+            "tarologistId": "501",
+            "returnPercentage": 0,
+            "clients": 1,
+            "returningClients": 0
+          }
+        ]
+      }
+    },
+    {
+      "nome": "combinação determinística 55",
+      "esperado": {
+        "periodStart": "2026-11-10",
+        "periodEnd": "2026-11-11",
+        "rows": [
+          {
+            "tarologistId": "500",
+            "returnPercentage": 0,
+            "clients": 2,
+            "returningClients": 0
+          },
+          {
+            "tarologistId": "501",
+            "returnPercentage": 0,
+            "clients": 1,
+            "returningClients": 0
+          }
+        ]
+      }
+    },
+    {
+      "nome": "combinação determinística 56",
+      "esperado": {
+        "periodStart": "2026-11-10",
+        "periodEnd": "2026-11-11",
+        "rows": [
+          {
+            "tarologistId": "500",
+            "returnPercentage": 0,
+            "clients": 3,
+            "returningClients": 0
+          }
+        ]
+      }
+    },
+    {
+      "nome": "combinação determinística 57",
+      "esperado": {
+        "periodStart": "2026-11-10",
+        "periodEnd": "2026-11-11",
+        "rows": [
+          {
+            "tarologistId": "500",
+            "returnPercentage": 0,
+            "clients": 3,
+            "returningClients": 0
+          },
+          {
+            "tarologistId": "501",
+            "returnPercentage": 0,
+            "clients": 1,
+            "returningClients": 0
+          }
+        ]
+      }
+    },
+    {
+      "nome": "combinação determinística 58",
+      "esperado": {
+        "periodStart": "2026-11-10",
+        "periodEnd": "2026-11-11",
+        "rows": [
+          {
+            "tarologistId": "500",
+            "returnPercentage": 50,
+            "clients": 2,
+            "returningClients": 1
+          },
+          {
+            "tarologistId": "501",
+            "returnPercentage": 0,
+            "clients": 1,
+            "returningClients": 0
+          }
+        ]
+      }
+    },
+    {
+      "nome": "combinação determinística 59",
+      "esperado": {
+        "periodStart": "2026-11-10",
+        "periodEnd": "2026-11-11",
+        "rows": [
+          {
+            "tarologistId": "500",
+            "returnPercentage": 33.33333333333333,
+            "clients": 3,
+            "returningClients": 1
+          },
+          {
+            "tarologistId": "501",
+            "returnPercentage": 0,
+            "clients": 1,
+            "returningClients": 0
+          }
+        ]
+      }
+    },
+    {
+      "nome": "combinação determinística 60",
+      "esperado": {
+        "periodStart": "2026-11-10",
+        "periodEnd": "2026-11-11",
+        "rows": [
+          {
+            "tarologistId": "500",
+            "returnPercentage": 33.33333333333333,
+            "clients": 3,
+            "returningClients": 1
+          }
+        ]
+      }
+    }
+  ]
+}

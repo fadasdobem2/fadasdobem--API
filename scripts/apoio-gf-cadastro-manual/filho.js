@@ -185,6 +185,8 @@ function status(resposta, codigo, erro) {
       }
     });
     await require('./duplicidade-nota')(a, { passo, status });
+    await require('./conta-financeira')(a, { passo, status });
+    await require('./retorno-tarologos')(a, { passo, status });
     await passo('todo o roteiro mantém o legado sem gravação', async () => { assert.equal(a.chamadas.escritas, 0); });
   } finally { await a.fechar(); }
   const { ok, falhas } = resumo();

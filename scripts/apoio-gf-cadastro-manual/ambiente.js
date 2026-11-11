@@ -17,7 +17,12 @@ Object.assign(process.env, {
 for (const flag of ['GF_FATIA_FICHA', 'GF_CLIENTES_NOVOS_LEITURA', 'FADAS_ORIGIN']) delete process.env[flag];
 const r = (p) => require(path.join(raiz, p));
 
-const chamadas = { leituras: 0, escritas: 0 };
+const chamadas = { leituras: 0, escritas: 0, ids: [], falharLeitura: false };
+const registrarLeitura = (ids = []) => {
+  chamadas.leituras += 1;
+  chamadas.ids.push(...ids.map(String));
+  if (chamadas.falharLeitura) throw Object.assign(new Error('Legado indisponível no teste'), { code: 'ECONNREFUSED' });
+};
 const linhasLegadas = [{
   id: 900014, nivel: 0, nome_id: 'Legada Revisão', nome2: '', nome: 'Cliente Legada Revisão',
   ddd: '11', telresidencial: '', telcomercial: '', cel: '', whats: '+55 11 97777-9999', email: 'legada.revisao@example.invalid', email2: '', cpf: '', status_cpf_id: 0,
@@ -26,17 +31,23 @@ const linhasLegadas = [{
   data_cadastro: '2020-01-01 10:00:00', saldo: '0.00', valorAPagar: '0.00', id_cliente_valido: 0,
 }];
 const legado = {};
+const consultasLegadas = [];
 for (const nome of ['LegadoUsuario', 'LegadoConsulta', 'LegadoPagamentoInformado', 'LegadoPagamentoConfirmado', 'LegadoPagamentoNaoLocalizado', 'LegadoFormaConsulta', 'LegadoOpcaoPagamento', 'LegadoBanco', 'LegadoTarologo']) {
-  legado[nome] = { findAll: async () => { chamadas.leituras += 1; return []; } };
+  legado[nome] = { findAll: async () => { registrarLeitura(); return []; } };
   for (const metodo of ['create', 'update', 'destroy', 'bulkCreate', 'upsert', 'increment', 'decrement']) {
     legado[nome][metodo] = async () => { chamadas.escritas += 1; throw new Error('ESCRITA NO LEGADO RECUSADA PELO TESTE'); };
   }
 }
 legado.LegadoUsuario.findAll = async (opcoes = {}) => {
-  chamadas.leituras += 1;
   const id = opcoes.where && opcoes.where.id;
+  registrarLeitura(id === undefined ? [] : [].concat(id));
   return id === undefined ? linhasLegadas : linhasLegadas.filter((l) => [].concat(id).map(Number).includes(l.id));
 };
+legado.LegadoUsuario.sequelize = { query: async (_sql, { replacements }) => {
+  registrarLeitura(replacements.ids);
+  return replacements.ids.includes(900014) ? [{ tipo: 'C', cliente: 900014, n: 1, primeira: '2020-04-05 12:00:00' }] : [];
+} };
+legado.LegadoConsulta.findAll = async (opcoes = {}) => { registrarLeitura(); return consultasLegadas.slice(0, opcoes.limit); };
 r('src/models/legado').iniciarLegado = () => ({ models: legado });
 
 async function abrir({ offline = false } = {}) {
@@ -71,7 +82,7 @@ async function abrir({ offline = false } = {}) {
   const sql = async (texto, replacements = []) => (await sequelize.query(texto, { replacements }))[0];
   const contagem = async () => Number((await sql('SELECT COUNT(*) AS n FROM gf_clientes_novos'))[0].n);
   return {
-    sequelize, usuario, origem, como, sessao: (valor) => { estado = valor; }, chamar, chave, criar, sql, contagem, chamadas, bancoOffline: () => bancoOffline,
+    sequelize, usuario, origem, como, sessao: (valor) => { estado = valor; }, chamar, chave, criar, sql, contagem, chamadas, consultasLegadas, bancoOffline: () => bancoOffline,
     fechar: async () => { servidor.closeAllConnections?.(); await new Promise((resolve) => servidor.close(resolve)); await sequelize.close(); },
   };
 }
