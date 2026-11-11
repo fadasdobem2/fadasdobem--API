@@ -29,7 +29,10 @@ function recordsOf(rows, catalogos) {
   const records = new Map();
   for (const row of rows) {
     const record = readRealClientRow(row, catalogos);
-    if (record) records.set(record.id, record);
+    if (record) {
+      if (Array.isArray(row._telefones)) Object.defineProperty(record, '_telefones', { value: row._telefones });
+      records.set(record.id, record);
+    }
   }
   return records;
 }
@@ -91,7 +94,7 @@ function filterAndSortClients(plan, records, latest, now, consulted) {
     // A busca ignora o recorte e lê a última movimentação da história inteira; "Em consulta agora" só estreita o
     // recorte, como na v608.
     const latestActivityLocal = plan.searching ? latest(record.id) : latest(record.id, plan.range);
-    if (plan.searching ? !matchesSearch(record, plan.search, plan.role) : latestActivityLocal === null || (plan.scope === 'live' && !now.has(record.id))) continue;
+    if (plan.searching ? !matchesSearch(record, plan.search, plan.role, record._telefones || []) : latestActivityLocal === null || (plan.scope === 'live' && !now.has(record.id))) continue;
     const inConsultationNow = now.has(record.id);
     if ((plan.situation === 'consulta' && !inConsultationNow) || (plan.situation === 'nunca' && consulted.has(record.id))) continue;
     if (!balanceMatches(record.balanceCents, plan.balance)) continue;

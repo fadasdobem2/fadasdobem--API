@@ -44,7 +44,7 @@ const ehObjeto = (v) => typeof v === 'object' && v !== null && !Array.isArray(v)
 const traduzir = (e) => (e instanceof CadastroInvalidoError ? regra(e.message) : e);
 
 /** Gravação idempotente: efeito + auditoria + gf_operacoes numa transação. `producao(ex)` devolve `{ antes, depois, resposta }`. */
-async function gravar(req, { escopo, operationKey, corpo, entidade, entidadeId, acao, producao, semAuditoria = false, comContas = false }) {
+async function gravar(req, { escopo, operationKey, corpo, entidade, entidadeId, acao, producao, semAuditoria = false, comContas = false, travarOperacao = false }) {
   if (!escritaHabilitada()) throw new AppError('Gravação desligada neste ambiente.', 503, { codigo: 'WRITE_DISABLED' }, true);
   const conta = contaDaRequisicao(req);
   const perfil = resolverPerfil(req);
@@ -56,17 +56,20 @@ async function gravar(req, { escopo, operationKey, corpo, entidade, entidadeId, 
   try {
     // `comContas`: a mesma conexão também dá a transação das tabelas da A (`users`, `refresh_tokens`), como em Contas (contas.banco.js).
     const rodar = comContas ? require('../contas/contas.banco').emTransacaoContas : (fn) => emTransacao((ex) => fn(ex));
-    const r = await rodar(async (ex, t) => umaVez(ex, { escopo, chave: operationKey, corpo: { ...corpo, usuario: conta } }, async () => {
-      ex.posCommit = posteriores; ex.compensacoes = compensacoes;
-      const feito = await producao(ex, t);
-      if (!semAuditoria) {
-        await ex.execute(AUDIT_INSERT, linhaDeAuditoria(
-          { actorUserId: conta, actorRole: perfil, action: acao, entity: entidade, entityId: entidadeId, before: feito.antes, after: feito.depois },
-          { id: randomUUID(), agora: Date.now(), chave: chaveAuditoria(escopo, operationKey) },
-        ));
-      }
-      return feito.resposta;
-    }));
+    const r = await rodar(async (ex, t) => {
+      if (travarOperacao) await ex.execute('SELECT pg_advisory_xact_lock(hashtext(?))', [`gf_operacoes:${escopo}:${operationKey}`]);
+      return umaVez(ex, { escopo, chave: operationKey, corpo: { ...corpo, usuario: conta } }, async () => {
+        ex.posCommit = posteriores; ex.compensacoes = compensacoes;
+        const feito = await producao(ex, t);
+        if (!semAuditoria) {
+          await ex.execute(AUDIT_INSERT, linhaDeAuditoria(
+            { actorUserId: conta, actorRole: perfil, action: acao, entity: entidade, entityId: feito.entidadeId ?? entidadeId, before: feito.antes, after: feito.depois },
+            { id: randomUUID(), agora: Date.now(), chave: chaveAuditoria(escopo, operationKey) },
+          ));
+        }
+        return feito.resposta;
+      });
+    });
     if (!r.repetida) for (const tarefa of posteriores) { try { await tarefa(); } catch (e) { console.error('[gf-cadastros] tarefa posterior falhou:', (e && e.message) || e); } }
     return r.resposta;
   } catch (erro) {

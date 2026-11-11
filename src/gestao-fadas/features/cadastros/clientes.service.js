@@ -1,10 +1,8 @@
 'use strict';
 
 /**
- * Extensão do cadastro do cliente (Maturacao/29 seção 9): o que a equipe edita (nome de identificação, "tratar por", WhatsApp, nascimento,
- * Pré/Pós e, desde 08/11, nome completo, CPF, e-mail, telefones e endereço, em colunas próprias) fica em `gf_clientes_ext` (Postgres novo), sobreposto à leitura do legado. NADA é escrito em `usuarios` (nem aqui, nem por
- * adaptador). As regras de texto são as de `integration/legacy-client-write.ts` do front (limites das colunas do legado, sem caractere de
- * 4 bytes). O cliente tem de existir no legado (`clienteExiste`): a CRIAÇÃO de cliente não é feita aqui (o id nasce no legado).
+ * Leitura e edição do complemento cadastral. IDs novos vivem em gf_clientes_novos; seus dados nunca seguem ao legado.
+ * IDs legados mantêm o espelho opcional existente, conforme GF_LEGADO_*. A criação manual está em clientes.criacao.js.
  */
 
 const { traduzirErroDeTexto } = require('./clientes.validacao');
@@ -60,6 +58,7 @@ async function gravar(req) {
   const expectedRevision = c.revisao(b.expectedRevision);
   let mudancas;
   try { mudancas = validarMudancas(b.changes); } catch (e) { throw traduzirErroDeTexto(e); }
+  const solicitadas = mudancas;
   if (!(await verificarCliente(id))) throw new (require('../../../utils/AppError'))('Cadastro de cliente não encontrado.', 404, { codigo: 'CLIENT_NOT_FOUND' }, true);
   return c.gravar(req, {
     escopo: 'cadastros.cliente.editar', operationKey, corpo: { id, expectedRevision, mudancas }, entidade: 'cliente-ext', entidadeId: id, acao: 'cadastros.cliente.editar',
@@ -67,6 +66,25 @@ async function gravar(req) {
       await ex.execute('SELECT pg_advisory_xact_lock(hashtext(?))', [`gf_clientes_ext:${id}`]);
       const [linhas] = await ex.execute(`SELECT id_cliente, perfil_pagamento, perfil_pagamento_em, dados, revisao, situacao_cadastral, sem_email, ${COLUNAS_FICHA.join(', ')} FROM gf_clientes_ext WHERE id_cliente = ? FOR UPDATE`, [id]);
       const atual = linhas[0] || null;
+      const mudancas = { ...solicitadas };
+      // Na faixa nova, a identidade e a lista de contatos descrevem o MESMO WhatsApp.
+      if (ehIdDaFaixaNova(id)) {
+        if (mudancas.phones) {
+          const escolhido = mudancas.phones[mudancas.whatsappPhoneIndex];
+          if (mudancas.whatsapp !== undefined && mudancas.whatsapp.replace(/\D/g, '') !== escolhido.replace(/\D/g, '')) throw c.regra('Confira o número escolhido para WhatsApp.');
+          mudancas.whatsapp = escolhido;
+        } else if (mudancas.whatsapp !== undefined && atual && atual.telefones) {
+          const phones = typeof atual.telefones === 'string' ? JSON.parse(atual.telefones) : atual.telefones;
+          if (Array.isArray(phones) && phones.length) {
+            const whatsappPhoneIndex = Number(atual.telefone_whatsapp_idx ?? 0);
+            const atualizados = [...phones];
+            if (mudancas.whatsapp.trim()) atualizados[whatsappPhoneIndex] = mudancas.whatsapp;
+            else mudancas.whatsapp = atualizados[whatsappPhoneIndex]; // vazio não apaga o contato existente
+            try { Object.assign(mudancas, validarMudancas({ phones: atualizados, whatsappPhoneIndex, consultationPhoneIndex: Number(atual.telefone_consulta_idx ?? 0) })); }
+            catch (e) { throw traduzirErroDeTexto(e); }
+          }
+        }
+      }
       if ((atual ? Number(atual.revisao) : 0) !== expectedRevision) throw c.conflitoVersao('Este cadastro mudou. Feche e abra novamente para conferir.');
       // Pré/Pós: só Pós -> Pré (definitivo). Pré -> Pós, ou apagar o Pré, é recusado antes de qualquer escrita.
       if (mudancas.paymentProfile !== undefined && !regimePodeMudar(atual ? atual.perfil_pagamento : null, mudancas.paymentProfile)) throw c.regra(REGIME_NAO_VOLTA);

@@ -10,7 +10,7 @@ module.exports = definir({
   tabela: 'gf_clientes_novos',
   atributos: {
     id_cliente: { type: DataTypes.STRING(10), allowNull: false, primaryKey: true },
-    nome: { type: DataTypes.STRING(120), allowNull: false, defaultValue: '' },
+    nome: { type: DataTypes.STRING(255), allowNull: false, defaultValue: '' },
     nome_id: { type: DataTypes.STRING(50), allowNull: false, defaultValue: '' },
     nome2: { type: DataTypes.STRING(50), allowNull: false, defaultValue: '' },
     data_nascimento: { type: DataTypes.DATEONLY, allowNull: true },

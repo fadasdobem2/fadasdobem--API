@@ -15,7 +15,7 @@ const { Router } = require('express');
 const { exigirCapacidade } = require('../_comum/politica-acesso');
 const rotas = require('../features/cadastros/cadastros.routes');
 const cadastro = require('../features/cadastros/cadastro-tarologo.service');
-const { enviarErro, enviarJson, responderFalha } = require('./http');
+const { enviarErro, enviarJson, responderFalha, metodoNaoPermitido } = require('./http');
 const { registrar, autenticar } = require('./rotas-operacoes');
 const { aplicarContexto } = require('./contexto');
 
@@ -113,12 +113,25 @@ function criarRotasCadastros(provedor) {
   router.use('/catalog', (req, res, next) => (cadastrosLigado() ? next() : enviarErro(res, 'NOT_FOUND')));
   const json = express.json({ limit: '2mb' });
   const leitura = (req, res, next) => (req.perfilGate === 'tarologa' ? next() : exigirCapacidade('canViewTarologists')(req, res, next));
-  for (const def of rotas) {
-    const cliente = def.caminho.startsWith('/catalog/clients');
-    registrar(router, provedor, {
-      metodo: def.metodo, caminho: def.caminho, escrita: def.escrita,
-      handler: [(req, res, next) => (def.escrita || cliente ? next() : leitura(req, res, next)), json, def.handler],
-    });
+  const porCaminho = new Map();
+  for (const def of rotas) porCaminho.set(def.caminho, [...(porCaminho.get(def.caminho) || []), def]);
+  for (const [caminho, defs] of porCaminho) {
+    for (const def of defs) {
+      const cliente = def.caminho.startsWith('/catalog/clients');
+      registrar(router, provedor, {
+        metodo: def.metodo, caminho, porMetodo: true, escrita: def.escrita,
+        handler: [
+          (req, res, next) => {
+            if (def.metodo !== 'POST' || caminho !== '/catalog/clients') return next();
+            if (req.headers.origin !== origemDoGate(req) || req.headers['sec-fetch-site'] === 'cross-site') return enviarErro(res, 'ORIGIN_NOT_ALLOWED');
+            if (!`${req.headers['content-type'] || ''}`.toLowerCase().startsWith('application/json')) return enviarErro(res, 'UNSUPPORTED_MEDIA_TYPE');
+            return next();
+          },
+          (req, res, next) => (def.escrita || cliente ? next() : leitura(req, res, next)), json, def.handler,
+        ],
+      });
+    }
+    router.all(caminho, (req, res) => metodoNaoPermitido(res, defs.map((d) => d.metodo).join(', ')));
   }
   router.use('/catalog', (err, req, res, next) => {
     if (res.headersSent) return next(err);

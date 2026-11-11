@@ -18,7 +18,6 @@ const { saoPauloTimestamp, localOperationalDateKey } = require('./helpers/valore
 const extensao = require('./helpers/extensao');
 const model = require('./clientes.model');
 
-const LIMITE = 5000;
 const ativa = () => `${process.env.GF_CLIENTES_NOVOS_LEITURA || ''}`.trim().toLowerCase() !== 'false' && novosDadosNoPostgres();
 
 const dataCivil = (v) => (v === null || v === undefined ? null : (v instanceof Date ? v.toISOString() : `${v}`).slice(0, 10));
@@ -34,7 +33,7 @@ function linhaDeCadastro(l) {
     datanascimento: nasc ? `${nasc} 00:00:00` : null, horanascimento: null, cidadeNascimento: null, ufNascimento: null, IDpaisNascimento: null,
     endereco: null, numero: null, complemento: null, bairro: null, cep: null, cidade: null, estado: null, idPais: null,
     data_cadastro: textoUtc(l.criado_em), saldo: null, valorAPagar: null, id_cliente_valido: 0,
-    _novo: true,
+    _novo: true, _origem: l.origem === 'manual' ? 'manual' : 'lilly',
   };
 }
 
@@ -51,11 +50,19 @@ async function lerExtensoes(ids) {
 async function lerNovas(ids) {
   const alvo = ids ? [...new Set(ids.map(String).filter(ehIdDaFaixaNova))] : null;
   if (alvo && !alvo.length) return [];
-  const novas = await lendoNovo((m) => m.GfClientesNovos.findAll({ ...(alvo ? { where: { id_cliente: alvo } } : { limit: LIMITE }), order: [['id_cliente', 'ASC']], raw: true }));
+  const novas = await lendoNovo((m) => m.GfClientesNovos.findAll({ ...(alvo ? { where: { id_cliente: alvo } } : {}), order: [['id_cliente', 'ASC']], raw: true }));
   const exts = await lerExtensoes(novas.map((l) => String(l.id_cliente)));
   return novas.map((l) => {
     const ext = exts.get(String(l.id_cliente));
-    const linha = ext ? extensao.sobrepor(linhaDeCadastro(l), dadosEditados(ext)) : linhaDeCadastro(l);
+    const dados = ext ? dadosEditados(ext) : {};
+    const linha = extensao.sobrepor(linhaDeCadastro(l), dados);
+    if (dados.phones?.length) {
+      linha._telefones = dados.phones;
+      const consulta = dados.phones[dados.consultationPhoneIndex];
+      const whatsapp = dados.phones[dados.whatsappPhoneIndex];
+      if (consulta) linha.telresidencial = consulta;
+      if (whatsapp) linha.whats = whatsapp;
+    }
     return { ...linha, _situacao: ext && ext.situacao_cadastral ? ext.situacao_cadastral : null, _semEmail: ext ? ext.sem_email : null };
   });
 }
@@ -92,7 +99,7 @@ function marcar(item, linha, criadoAt) {
   if (!linha || !linha._novo) return item;
   // Sem consulta nem pagamento no legado, a última movimentação da cliente nova é o próprio cadastro.
   const movimento = item.latestActivityLocal === null && criadoAt && criadoAt.get(String(linha.id)) ? { latestActivityLocal: criadoAt.get(String(linha.id)) } : {};
-  return { ...item, ...movimento, origin: 'lilly', ...(linha._situacao ? { situacao_cadastral: linha._situacao } : {}), ...(linha._semEmail === true || linha._semEmail === false ? { noEmail: linha._semEmail } : {}) };
+  return { ...item, ...movimento, origin: linha._origem === 'manual' ? 'manual' : 'lilly', ...(linha._situacao ? { situacao_cadastral: linha._situacao } : {}), ...(linha._semEmail === true || linha._semEmail === false ? { noEmail: linha._semEmail } : {}) };
 }
 
 module.exports = { ativa, linhaDeCadastro, lerNovas, somarNovas, somarContagens, marcar, diaDaCriacao };

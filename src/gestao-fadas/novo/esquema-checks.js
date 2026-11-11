@@ -272,9 +272,9 @@ const CHECKS = {
   gf_clientes_novos: [
     ['chk_clientes_novos_id', "id_cliente ~ '^[1-9][0-9]{9}$' AND id_cliente >= '1000000000' AND id_cliente <= '2147483647'"],
     ['chk_clientes_novos_nomes', 'nome = trim(nome) AND nome_id = trim(nome_id) AND nome2 = trim(nome2)'],
-    ['chk_clientes_novos_nascimento', "data_nascimento IS NULL OR data_nascimento >= DATE '1900-01-01'"],
+    ['chk_clientes_novos_nascimento', "data_nascimento IS NULL OR data_nascimento >= DATE '1000-01-01'"],
     ['chk_clientes_novos_email', 'email IS NULL OR ' + nv('email')], ['chk_clientes_novos_telefone', 'telefone IS NULL OR ' + nv('telefone')],
-    ['chk_clientes_novos_origem', "origem IN ('lilly')"], ['chk_clientes_novos_operation_key', nv('operation_key')],
+    ['chk_clientes_novos_origem', "origem IN ('lilly', 'manual')"], ['chk_clientes_novos_operation_key', nv('operation_key')],
   ],
   // Pedido de mais tempo: registro e auditoria, NUNCA minutos, cobrança nem encerramento (altera_duracao e encerra_consulta sempre falsos).
   gf_lilly_mais_tempo: [

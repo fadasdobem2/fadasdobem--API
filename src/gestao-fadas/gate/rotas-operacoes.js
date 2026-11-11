@@ -43,15 +43,15 @@ function autenticar(provedor) {
  * Registra uma rota com a cadeia da B. `capacidade` (opcional) é a de `permissions.ts`; `escrita` troca as mensagens de
  * recusa; `preparar(req)` ajusta o request ao controller (nomes de parâmetro) antes da leitura.
  */
-function registrar(router, provedor, { metodo = 'GET', caminho, capacidade, escrita = false, preparar, handler }) {
+function registrar(router, provedor, { metodo = 'GET', caminho, capacidade, escrita = false, preparar, handler, porMetodo = false }) {
   const cadeia = [
-    (req, res, next) => (req.method === metodo ? next() : metodoNaoPermitido(res, metodo)),
+    (req, res, next) => (req.method === metodo ? next() : porMetodo ? next('route') : metodoNaoPermitido(res, metodo)),
     autenticar(provedor),
     ...(capacidade ? [exigirCapacidade(capacidade, { escrita })] : []),
     (req, res, next) => { res.locals.gateEscrita = escrita; desembrulhar(res); if (preparar) preparar(req); next(); },
     handler,
   ];
-  router.all(caminho, ...cadeia);
+  router[porMetodo ? metodo.toLowerCase() : 'all'](caminho, ...cadeia);
 }
 
 /** `canReadRealOperations` (consultas, recebimentos, tarólogos) e `canManagePayouts` (repasse) valem os mesmos perfis. */

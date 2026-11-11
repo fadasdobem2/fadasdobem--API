@@ -90,6 +90,7 @@ function metodoNaoPermitido(res, permitido) {
  */
 function responderFalha(res, err, { escrita = false } = {}) {
   const codigo = err instanceof AppError && err.dados && typeof err.dados === 'object' ? err.dados.codigo : null;
+  if (codigo === 'CLIENT_DUPLICATE_REVIEW') return enviarJson(res, 409, { error: { code: codigo, message: err.message }, duplicateReview: err.dados.duplicateReview });
   if (codigo === 'NOT_FOUND') return enviarErro(res, 'NOT_FOUND');
   // `operationKeyConflict` da B (real-access.server.ts): mesma chave de operação com outro corpo.
   if (codigo === 'OPERATION_KEY_CONFLICT') {

@@ -49,7 +49,7 @@ async function ler(req) {
   const espelhadas = new Set(linhas.filter((l) => l.legado_id !== null && l.legado_id !== undefined).map((l) => `${l.legado_id}`));
   let antigo = { items: [], hasMore: false, nextBefore: null };
   let disponivel = true;
-  try { antigo = await legado.doLegado(so, { limit, before, espelhadas }); } catch (e) { disponivel = false; console.warn('[gf] observações do sistema antigo indisponíveis:', (e && ((e.dados && e.dados.codigo) || e.name)) || 'erro'); }
+  try { if (!require('../../_comum/dominio/cliente-faixa-nova').ehIdDaFaixaNova(so)) antigo = await legado.doLegado(so, { limit, before, espelhadas }); } catch (e) { disponivel = false; console.warn('[gf] observações do sistema antigo indisponíveis:', (e && ((e.dados && e.dados.codigo) || e.name)) || 'erro'); }
   const novas = linhas.map((l) => f.textoDe(l));
   const items = before ? antigo.items : [...novas, ...antigo.items].sort((a, b) => Date.parse(a.createdAt) - Date.parse(b.createdAt));
   return {
